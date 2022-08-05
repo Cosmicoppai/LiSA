@@ -7,6 +7,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from typing import Dict, List, Tuple
+from scripts import blank_script
 
 
 class Anime(ABC):
@@ -195,6 +196,7 @@ class Animepahe(Anime):
 
         driver = uc.Chrome(options=options, use_subprocess=True, driver_executable_path=self.chrome_driver_path)
         driver.get(kwik_f_url)
+        driver.execute_script(blank_script)
         WebDriverWait(driver, 15).until(lambda _driver: 'animepahe' in _driver.title.lower())
         self.cookies = driver.get_cookies()
         page_source = driver.page_source  # return page html
