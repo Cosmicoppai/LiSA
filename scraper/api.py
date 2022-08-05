@@ -11,6 +11,7 @@ from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
+from urllib import parse
 
 
 async def index(request: Request):
@@ -258,14 +259,15 @@ async def download(request: Request):
 
         jb = await request.json()
 
-        pahewin = jb["pahewin_url"]
-        parsed_url = urlparse(pahewin)
-        if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:  # if url is invalid
-            return await bad_request_400(request, msg="Invalid pahewin url")
-        try:
-            video_url, file_name = get_video_url_and_name(pahewin)
-        except TypeError:
-            return await not_found_404(request, msg="Invalid url")
+        video_url = jb["pahewin_url"]
+        file_name = parse.parse_qs(parse.urlsplit(video_url).query)["file"][0]
+        # parsed_url = urlparse(pahewin)
+        # if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:  # if url is invalid
+        #     return await bad_request_400(request, msg="Invalid pahewin url")
+        # try:
+        #     video_url, file_name = get_video_url_and_name(pahewin)
+        # except TypeError:
+        #     return await not_found_404(request, msg="Invalid url")
 
         await Download().start_download(url=video_url, file_name=file_name)
         return JSONResponse({"filename": file_name})

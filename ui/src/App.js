@@ -6,6 +6,10 @@ import SettingScreen from "./screens/settingScreen";
 import { HomeScreen } from "./screens/homeScreen";
 import Navbar from "./components/navbar";
 import DownloadScreen from "./screens/downloadsScreen";
+import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
+
+const { app } = window.require('@electron/remote')
+
 
 function App() {
   return (
@@ -17,8 +21,9 @@ function App() {
         <Route path="anime-details" element={<AnimeDetailsScreen />} />
         <Route path="setting" element={<SettingScreen />} />
         <Route path="download" element={<DownloadScreen />} />
+        <Route path="play" element={<InbuiltPlayerScreen />} />
       </Routes>
-    </BrowserRouter>
+    </BrowserRouter> 
   );
 }
 
