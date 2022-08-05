@@ -16,7 +16,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor } from "react-icons/fi";
 import EpPopover from "../components/ep-popover";
-import { getStreamDetails } from "../actions/animeActions";
+import { addEpisode, addEpisodeDetails, getStreamDetails } from "../actions/animeActions";
+import { router } from "websocket";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
@@ -36,7 +37,8 @@ export default function AnimeDetailsScreen() {
   const episodeClickHandler = (item) => {
     console.log(item);
     dispatch(getStreamDetails(data.session, item.ep_session));
-    onOpen();
+    dispatch(addEpisodeDetails(item));
+    navigate("/play");
   };
 
   return (
@@ -121,7 +123,7 @@ export default function AnimeDetailsScreen() {
                   );
                 })}
               </Flex>
-              <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+              {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
             </Box>
           </Stack>
         </Stack>

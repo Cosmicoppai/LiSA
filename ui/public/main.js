@@ -1,8 +1,8 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
-const isDev = require('electron-is-dev');
+const isDev = require("electron-is-dev");
 
-require('@electron/remote/main').initialize()
+require("@electron/remote/main").initialize();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,21 +12,23 @@ function createWindow() {
     icon: path.join(__dirname, "assests/loader_logo.png"),
     webPreferences: {
       nodeIntegration: true,
+      enableRemoteModule: true,
+
       preload: path.join(__dirname, "preload.js"),
     },
-  })
+  });
+
+  // win.setMenu(null) 
 
   win.loadURL(
     isDev
-      ? 'http://localhost:3000'
-      : `file://${path.join(__dirname, '../build/index.html')}`
-  )
-
+      ? "http://localhost:3000"
+      : `file://${path.join(__dirname, "../build/index.html")}`
+  );
 
   if (isDev) {
     win.webContents.openDevTools();
   }
-
 
   var splash = new BrowserWindow({
     width: 500,
@@ -36,7 +38,11 @@ function createWindow() {
     alwaysOnTop: true,
   });
 
-  splash.loadURL(isDev ? "http://localhost:3000/loader.html" : `file://${path.join(__dirname, '../build/loader.html')}`);
+  splash.loadURL(
+    isDev
+      ? "http://localhost:3000/loader.html"
+      : `file://${path.join(__dirname, "../build/loader.html")}`
+  );
   splash.center();
   setTimeout(function () {
     splash.close();
@@ -45,14 +51,14 @@ function createWindow() {
   }, 5000);
 }
 
-app.on('ready', createWindow)
+app.on("ready", createWindow);
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
-    app.quit()
+app.on("window-all-closed", function () {
+  if (process.platform !== "darwin") {
+    app.quit();
   }
-})
+});
 
-app.on('activate', function () {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow()
-})
+app.on("activate", function () {
+  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});

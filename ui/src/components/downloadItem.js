@@ -1,9 +1,9 @@
-import { Box, Flex, Heading, Progress, Text } from "@chakra-ui/react";
+import { Flex,  Progress, Text } from "@chakra-ui/react";
 import React from "react";
 import { formatBytes } from "../utils";
 
 const DownloadItem = ({ file_name, data }) => {
-  console.log(data)
+  console.log(data);
   return (
     <Flex
       pt={1}
@@ -22,11 +22,11 @@ const DownloadItem = ({ file_name, data }) => {
         value={(data.downloaded / data.file_size) * 100}
       />
 
-      <Flex gap={6} alignItems={"center"} justifyContent={"center"}>
-        <Text fontWeight={600} flex={0.5} color={"gray.300"} size="sm">
-          {data.speed ? data.speed : 0}
+      <Flex gap={6} alignItems={"center"} justifyContent={"center"}  pr={5} flex={1}>
+        <Text fontWeight={600} flex={1} color={"gray.300"} size="sm" pr={5}>
+          {data.speed ? `${formatBytes(data.speed)}/ sec`: 0}
         </Text>
-        <Text fontWeight={600} flex={0.5} color={"gray.300"} size="sm">
+        <Text fontWeight={600} flex={1} color={"gray.300"} size="sm"  pr={5}>
           {formatBytes(data.file_size)}
         </Text>
       </Flex>
