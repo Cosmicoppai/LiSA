@@ -223,6 +223,7 @@ async def get_video_url(request: Request):
             except TypeError:
                 return await not_found_404(request, msg="Invalid url")
             return JSONResponse({"video_url": video_url}, status_code=200)
+        return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
