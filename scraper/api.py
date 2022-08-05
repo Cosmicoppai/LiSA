@@ -11,7 +11,6 @@ from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
-from urllib import parse
 
 
 async def index(request: Request):
@@ -212,19 +211,19 @@ async def get_video_url(request: Request):
         jb = await request.json()
 
         pahewin_url = jb.get("pahewin_url", None)
-        if pahewin_url:
-            parsed_url = urlparse(pahewin_url)
+        if not pahewin_url:
+            return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
 
-            # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
-            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
-                return await bad_request_400(request, msg="Invalid pahewin url")
+        parsed_url = urlparse(pahewin_url)
+        # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
+        if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
+            return await bad_request_400(request, msg="Invalid pahewin url")
 
-            try:
-                video_url, _ = get_video_url_and_name(pahewin_url)
-            except TypeError:
-                return await not_found_404(request, msg="Invalid url")
-            return JSONResponse({"video_url": video_url}, status_code=200)
-        return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
+        try:
+            video_url, file_name = get_video_url_and_name(pahewin_url)
+            return JSONResponse({"video_url": video_url, "file_name": file_name}, status_code=200)
+        except TypeError:
+            return await not_found_404(request, msg="Invalid url")
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
@@ -256,21 +255,19 @@ async def download(request: Request):
 
         jb = await request.json()
 
-        video_url = jb["pahewin_url"]
-        file_name = parse.parse_qs(parse.urlsplit(video_url).query)["file"][0]
-        # parsed_url = urlparse(pahewin)
-        # if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:  # if url is invalid
-        #     return await bad_request_400(request, msg="Invalid pahewin url")
-        # try:
-        #     video_url, file_name = get_video_url_and_name(pahewin)
-        # except TypeError:
-        #     return await not_found_404(request, msg="Invalid url")
+        video_url = jb.get("video_url", None)
+        if not video_url:
+            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
+
+        file_name = jb.get("file_name", None)
+        if not file_name:
+            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
 
         await Download().start_download(url=video_url, file_name=file_name)
-        return JSONResponse({"filename": file_name})
+        return JSONResponse({"status": "started"})
 
-    except JSONDecodeError or KeyError:
-        return await not_found_404(request, msg="Malformed body: pass valid Pahewin url")
+    except JSONDecodeError:
+        return await not_found_400(request, msg="Malformed body: Invalid JSON")
 
 
 def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
