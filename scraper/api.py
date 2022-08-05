@@ -7,7 +7,6 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse
 from typing import Tuple, Dict
 from urllib.parse import urlparse
-
 from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
@@ -282,7 +281,7 @@ async def top_anime(request: Request):
         request (Request): accessing the app instance
     
     Query Params:
-        type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'bypopularity', 'favorite']
+        type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
         limit (str): 
 
     Returns:
