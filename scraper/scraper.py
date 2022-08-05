@@ -248,14 +248,14 @@ class MyAL:
         "ova": "ova",
         "ona": "ona",
         "special": "special",
-        "by_popularity": "by_popularity",
+        "by_popularity": "bypopularity",
         "favorite": "favorite",
     }
 
     def get_top_anime(self, anime_type: str, limit: str):
         """request to scrape top anime from MAL website
         Args:
-            anime_type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'bypopularity', 'favorite']
+            anime_type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
             limit (str): page number (number of tops in a page)
         Returns:
             Dict[str, Dict[str, str]]: {
@@ -291,10 +291,17 @@ class MyAL:
         for i in rank:
             ranks.append(i.text)
 
-        img = bs_top.find_all("img")
+        img = bs_top.find_all("img", {"width":"50", "height":"70"})
         imgs = []
         for x in img:
-            imgs.append(x.get("data-src"))
+            src = x.get("data-src")
+            start, end = 0, 0
+            for i in range(len(src)):
+                if src[i] == '/' and src[i+1] == 'r':
+                    start = i
+                if src[i] == '/' and src[i+1] == 'i':
+                    end = i
+            imgs.append(src.replace(src[start:end], ""))
 
         title = bs_top.find_all("h3", {"class": "anime_ranking_h3"})
 
@@ -317,25 +324,29 @@ class MyAL:
             "score-1", "score-na"
         ]})
 
-        top_anime = {}
+        top_anime = []
 
         for i in range(len(ranks)):
             rank = ranks[i]
             if ranks[i] == "-":
-                rank = "{}-NoRank".format(i + 1)
-            top_anime[rank] = {"img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
-                               "episodes": episodes[i], "score": score[i].text}
+                rank = "na"
+            top_anime.append({"rank":rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
+                                "episodes": episodes[i], "score": score[i].text})
+        
+        top_anime_response = {}
+
+        top_anime_response["data"] = top_anime
 
         try:
             next_top = bs_top.find("a", {"class": "next"}).get("href")
-            top_anime["next_top"] = "http://localhost:6969/top_anime{}".format(next_top)
+            top_anime_response["next_top"] = "http://localhost:6969/top_anime{}".format(next_top)
         except AttributeError:
-            top_anime["next_top"] = None
+            top_anime_response["next_top"] = None
 
         try:
             prev_top = bs_top.find("a", {"class": "prev"}).get("href")
-            top_anime["prev_top"] = "http://localhost:6969/top_anime{}".format(prev_top)
+            top_anime_response["prev_top"] = "http://localhost:6969/top_anime{}".format(prev_top)
         except AttributeError:
-            top_anime["prev_top"] = None
+            top_anime_response["prev_top"] = None
 
-        return top_anime
+        return top_anime_response
