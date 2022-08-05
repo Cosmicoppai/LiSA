@@ -43,7 +43,7 @@ async def search(request: Request):
                         "ep_session":str, "snapshot":str(url)
                     }, ...
                 }]
-                "next_page": str(url) or None, 
+                "next_page": str(url) or None,
                 "previous_page": str(url) or None,
             }
         }
@@ -81,7 +81,7 @@ async def search(request: Request):
                     list(_dict.items())[:pos] + list(obj.items()) + list(_dict.items())[pos:]
             )
         }
-    
+
     if "eng_anime_name" in anime_details["description"]:
         eng_name = anime_details["description"]["eng_anime_name"]
         del anime_details["description"]["eng_anime_name"]
@@ -108,7 +108,7 @@ async def get_ep_details(request: Request):
             "ep_details": [{
                 "episode_number": {"ep_session":str, "snapshot":str}, ...,
             }]
-            "next_page": str(url) or None, 
+            "next_page": str(url) or None,
             "previous_page": str(url) or None,
         }
     """
@@ -279,20 +279,22 @@ async def top_anime(request: Request):
 
     Args:
         request (Request): accessing the app instance
-    
+
     Query Params:
         type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
-        limit (str): 
+        limit (str):
+        type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
+        limit (str):
 
     Returns:
         JSONResponse: top_response {
             "<rank>" : {
                 "img_url" : (str)url,
-                "title" : (str), 
+                "title" : (str),
                 "anime_type" : (str),
-                "episodes" : (str), 
-                "score" : (str), 
-            }, 
+                "episodes" : (str),
+                "score" : (str),
+            },
             ...
             "next_top":"http://localhost:6969/top_anime?type=anime_type&limit=limit"
         }
@@ -301,7 +303,7 @@ async def top_anime(request: Request):
     limit = request.query_params.get("limit", "0")
 
     if not anime_type or anime_type.lower() not in MyAL.anime_types_dict:
-        return await bad_request_400(request, msg="Pass valid anime type")  
+        return await bad_request_400(request, msg="Pass valid anime type")
 
     top_anime_response = MyAL().get_top_anime(anime_type=anime_type, limit=limit)
 

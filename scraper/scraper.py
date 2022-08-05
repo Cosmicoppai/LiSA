@@ -175,15 +175,15 @@ class Animepahe(Anime):
 
 class MyAL:
     anime_types_dict = {
-        "airing":"airing", 
-        "upcoming":"upcoming", 
-        "tv":"tv", 
-        "movie":"movie", 
-        "ova":"ova", 
-        "ona":"ona", 
-        "special":"special", 
-        "by_popularity":"bypopularity", 
-        "favorite":"favorite",   
+        "airing": "airing",
+        "upcoming": "upcoming",
+        "tv": "tv",
+        "movie": "movie",
+        "ova": "ova",
+        "ona": "ona",
+        "special": "special",
+        "by_popularity": "by_popularity",
+        "favorite": "favorite",
     }
 
     def get_top_anime(self, anime_type: str, limit: str):
@@ -198,11 +198,12 @@ class MyAL:
             'limit': limit,
         }
 
-        top_anime_response = requests.get('https://myanimelist.net/topanime.php', params=top_anime_params, headers=top_anime_headers)
+        top_anime_response = requests.get('https://myanimelist.net/topanime.php', params=top_anime_params,
+                                          headers=top_anime_headers)
 
         bs_top = BeautifulSoup(top_anime_response.text, 'html.parser')
 
-        rank = bs_top.find_all("span", {"class":['rank1', 'rank2', 'rank3', 'rank4']})
+        rank = bs_top.find_all("span", {"class": ['rank1', 'rank2', 'rank3', 'rank4']})
         ranks = []
         for i in rank:
             ranks.append(i.text)
@@ -211,44 +212,45 @@ class MyAL:
         imgs = []
         for x in img:
             imgs.append(x.get("data-src"))
-        
-        title = bs_top.find_all("h3", {"class":"anime_ranking_h3"})
 
-        info = bs_top.find_all("div", {"class":"information"})
+        title = bs_top.find_all("h3", {"class": "anime_ranking_h3"})
+
+        info = bs_top.find_all("div", {"class": "information"})
         episodes = []
         a_type = []
         for x in info:
-            val = x.text.replace('\n', ''). replace(' ', '')
+            val = x.text.replace('\n', '').replace(' ', '')
             start, end = 0, 0
             for i in range(len(val)):
                 if val[i] == '(':
                     start = i
                 if val[i] == ')':
                     end = i
-            episodes.append(val[start+1:end])
+            episodes.append(val[start + 1:end])
             a_type.append(val[:start])
-            
 
-        score = bs_top.find_all("span", {"class":[
-            "score-10", "score-9", "score-8", "score-7", "score-6", "score-5", "score-4", "score-3", "score-2", "score-1", "score-na"
+        score = bs_top.find_all("span", {"class": [
+            "score-10", "score-9", "score-8", "score-7", "score-6", "score-5", "score-4", "score-3", "score-2",
+            "score-1", "score-na"
         ]})
-        
+
         top_anime = {}
 
         for i in range(len(ranks)):
             rank = ranks[i]
             if ranks[i] == "-":
-                rank = "{}-NoRank".format(i+1)
-            top_anime[rank] = {"img_url":imgs[i], "title":title[i].text, "anime_type":a_type[i], "episodes":episodes[i], "score":score[i].text}
-        
-        try: 
-            next_top = bs_top.find("a", {"class":"next"}).get("href")
+                rank = "{}-NoRank".format(i + 1)
+            top_anime[rank] = {"img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
+                               "episodes": episodes[i], "score": score[i].text}
+
+        try:
+            next_top = bs_top.find("a", {"class": "next"}).get("href")
             top_anime["next_top"] = "http://localhost:6969/top_anime{}".format(next_top)
         except AttributeError:
             top_anime["next_top"] = None
-        
+
         try:
-            prev_top = bs_top.find("a", {"class":"prev"}).get("href")
+            prev_top = bs_top.find("a", {"class": "prev"}).get("href")
             top_anime["prev_top"] = "http://localhost:6969/top_anime{}".format(prev_top)
         except AttributeError:
             top_anime["prev_top"] = None
