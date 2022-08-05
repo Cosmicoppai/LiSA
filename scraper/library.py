@@ -13,6 +13,7 @@ import json
 
 class Library(ABC):
     data: List[Dict[str, Dict[str, Any]]] = []
+    data_changed: bool = False  # to  track addition of data
 
     @classmethod
     @abstractmethod
@@ -44,18 +45,21 @@ class JsonLibrary(Library):
 
     @classmethod
     def save(cls) -> bool:
-        if cls.data:
+        if cls.data_changed:  # if new data has been added
             print("saving data")
             with open(cls.file_location, 'w') as j_file:
                 j_file.write(json.dumps(cls.data, indent=4))
             print("Data successfully saved")
 
             cls.data = []  # reset the in-memory data
+            cls.data_changed = False
         return True
 
     @classmethod
     def add(cls, _data: Dict[str, Dict[str, Any]]) -> None:
         cls.data.append(_data)
+        if not cls.data_changed:
+            cls.data_changed = True
 
     @classmethod
     def load_data(cls):
