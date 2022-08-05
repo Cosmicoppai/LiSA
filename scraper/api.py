@@ -204,7 +204,7 @@ async def get_stream_details(request: Request):
         return await not_found_404(request, msg="Pass valid anime and episode sessions")
 
 
-async def stream_url(request: Request):
+async def get_video_url(request: Request):
     try:
         if request.headers.get("content-type", None) != "application/json":
             return await bad_request_400(request, msg="Invalid content type")
@@ -212,14 +212,17 @@ async def stream_url(request: Request):
 
         pahewin_url = jb.get("pahewin_url", None)
         if pahewin_url:
-            parsed_url = urlparse(pahewin)
+            parsed_url = urlparse(pahewin_url)
+
             # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
-            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:
-                try:
-                    video_url, _ = get_video_url_and_name(pahewin)
-                except TypeError:
-                    return await not_found_404(request, msg="Invalid url")
-                return JSONResponse({"video_url": video_url})
+            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
+                return await bad_request_400(request, msg="Invalid pahewin url")
+
+            try:
+                video_url, _ = get_video_url_and_name(pahewin_url)
+            except TypeError:
+                return await not_found_404(request, msg="Invalid url")
+            return JSONResponse({"video_url": video_url}, status_code=200)
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
@@ -276,7 +279,7 @@ async def download(request: Request):
 
 def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
     animepahe = Animepahe()
-    f_link = animepahe.get_kwik_f_link(pahewin_uri=pahewin)
+    f_link = animepahe.get_kwik_f_link(pahewin_url=pahewin)
     return animepahe.extract_download_details(animepahe.get_kwik_f_page(f_link), f_link)
 
 
@@ -337,7 +340,7 @@ routes = [
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
     Route("/stream_details", endpoint=get_stream_details, methods=["GET"]),
-    Route("/get_video_url", endpoint=get_video_url, methods=["GET"]),
+    Route("/get_video_url", endpoint=get_video_url, methods=["POST"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),

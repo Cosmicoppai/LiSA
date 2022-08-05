@@ -1,4 +1,5 @@
 import asyncio
+import time
 import aiohttp
 from typing import List, Dict
 from string import ascii_letters
@@ -9,7 +10,7 @@ from sys import exc_info, stdout
 import os
 from msg_system import MsgSystem
 from pathlib import Path
-from download_progress import IN_PROGRESS
+from download_progress import IN_PROGRESS, LAST_PACKET_DATA
 from library import JsonLibrary
 from datetime import datetime as dt
 
@@ -51,14 +52,27 @@ class Download:
                         raise Exception("Bad Status: " + str(resp.status))
 
                     # add file_name in Dict to track download status
-                    IN_PROGRESS[file_name] = {"file_size": resp.content_length, "downloaded": 0}
+                    IN_PROGRESS[file_name] = {"file_size": resp.content_length, "downloaded": 0, "speed": 0}
+                    # set size_of_last_downloaded_chunk and time at which packet was downloaded
+                    LAST_PACKET_DATA[file_name] = time.time()
+
                     asyncio.run_coroutine_threadsafe(self.send_download_status(file_name, IN_PROGRESS[file_name], "new_file"), self.msg_system.event_loop)
 
                     # create file
                     file_location = self.download_location.joinpath(file_name).absolute()
                     with open(file_location, "wb") as file:
                         async for chunk in resp.content.iter_chunked(self.chunk_size):
-                            IN_PROGRESS[file_name]["downloaded"] += file.write(chunk)
+                            downloaded_chunk_size = file.write(chunk)
+
+                            if time.time() == LAST_PACKET_DATA[file_name]:
+                                time_delta = 1
+                            else:
+                                time_delta = time.time() - LAST_PACKET_DATA[file_name]
+                            download_speed = downloaded_chunk_size // time_delta
+                            LAST_PACKET_DATA[file_name] = time.time()
+                            IN_PROGRESS[file_name]["downloaded"] += downloaded_chunk_size
+                            IN_PROGRESS[file_name]["speed"] = download_speed
+
                             asyncio.run_coroutine_threadsafe(self.send_download_status(file_name, IN_PROGRESS[file_name]), self.msg_system.event_loop)
             JsonLibrary().add({file_name: {"total_size": resp.content_length, "location": file_location.__str__(), "created_on": dt.now().__str__()}})
             del IN_PROGRESS[file_name]  # delete the download status
