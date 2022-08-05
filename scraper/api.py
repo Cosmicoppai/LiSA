@@ -204,6 +204,27 @@ async def get_stream_details(request: Request):
         return await not_found_404(request, msg="Pass valid anime and episode sessions")
 
 
+async def stream_url(request: Request):
+    try:
+        if request.headers.get("content-type", None) != "application/json":
+            return await bad_request_400(request, msg="Invalid content type")
+        jb = await request.json()
+
+        pahewin_url = jb.get("pahewin_url", None)
+        if pahewin_url:
+            parsed_url = urlparse(pahewin)
+            # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
+            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:
+                try:
+                    video_url, _ = get_video_url_and_name(pahewin)
+                except TypeError:
+                    return await not_found_404(request, msg="Invalid url")
+                return JSONResponse({"video_url": video_url})
+
+    except JSONDecodeError:
+        return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
+
+
 async def stream(request: Request):
     try:
         if request.headers.get("content-type", None) != "application/json":
@@ -215,11 +236,8 @@ async def stream(request: Request):
         if not player_name:
             return await bad_request_400(request, msg="pass video player_name")
 
-        pahewin = jb.get("pahewin_url", None)
-        if pahewin:  # if stream is requested from remote server
-            parsed_url = urlparse(pahewin)
-            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:  # if url is invalid
-                return await bad_request_400(request, msg="Invalid pahewin url")
+        video_url = jb.get("video_url", None)
+        if video_url:
             try:
                 video_url, _ = get_video_url_and_name(pahewin)
             except TypeError:
@@ -229,7 +247,7 @@ async def stream(request: Request):
         msg, status_code = play(player_name.lower(), video_url)
         return JSONResponse({"error": msg}, status_code=status_code)
     except JSONDecodeError or KeyError:
-        return await bad_request_400(request, msg="Malformed body: Pass an either valid pahewin or local url")
+        return await bad_request_400(request, msg="Malformed body: Pass an either valid video_url or local url")
 
 
 async def download(request: Request):
@@ -319,6 +337,7 @@ routes = [
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
     Route("/stream_details", endpoint=get_stream_details, methods=["GET"]),
+    Route("/get_video_url", endpoint=get_video_url, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
