@@ -11,6 +11,7 @@ from msg_system import MsgSystem
 from pathlib import Path
 from download_progress import IN_PROGRESS
 from library import JsonLibrary
+from datetime import datetime as dt
 
 CHUNK_SIZE: int = 26214400  # chunk size of 25 mb
 
@@ -59,7 +60,7 @@ class Download:
                         async for chunk in resp.content.iter_chunked(self.chunk_size):
                             IN_PROGRESS[file_name]["downloaded"] += file.write(chunk)
                             asyncio.run_coroutine_threadsafe(self.send_download_status(file_name, IN_PROGRESS[file_name]), self.msg_system.event_loop)
-            JsonLibrary().add({file_name: {"total_size": resp.content_length, "location": file_location.__str__()}})
+            JsonLibrary().add({file_name: {"total_size": resp.content_length, "location": file_location.__str__(), "created_on": dt.now().__str__()}})
             del IN_PROGRESS[file_name]  # delete the download status
             return True
 
