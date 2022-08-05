@@ -241,14 +241,11 @@ async def stream(request: Request):
         if not player_name:
             return await bad_request_400(request, msg="pass video player_name")
 
-        video_url = jb.get("video_url", None)
-        if not video_url:
-            # if stream is requested from local system
-            video_url = jb["local_url"]  # extract path of video from request body
+        video_url = jb["video_url"]
         msg, status_code = play(player_name.lower(), video_url)
         return JSONResponse({"error": msg}, status_code=status_code)
     except JSONDecodeError or KeyError:
-        return await bad_request_400(request, msg="Malformed body: Pass an either valid video_url or local url")
+        return await bad_request_400(request, msg="Malformed body: Pass a valid video_url")
 
 
 async def download(request: Request):
