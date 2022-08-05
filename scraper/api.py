@@ -240,12 +240,8 @@ async def stream(request: Request):
             return await bad_request_400(request, msg="pass video player_name")
 
         video_url = jb.get("video_url", None)
-        if video_url:
-            try:
-                video_url, _ = get_video_url_and_name(pahewin)
-            except TypeError:
-                return await not_found_404(request, msg="Invalid url")
-        else:  # if stream is requested from local system
+        if not video_url:
+            # if stream is requested from local system
             video_url = jb["local_url"]  # extract path of video from request body
         msg, status_code = play(player_name.lower(), video_url)
         return JSONResponse({"error": msg}, status_code=status_code)
