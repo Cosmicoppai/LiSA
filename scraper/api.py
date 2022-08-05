@@ -11,6 +11,7 @@ from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
+from selenium.common.exceptions import TimeoutException
 
 
 async def index(request: Request):
@@ -224,6 +225,8 @@ async def get_video_url(request: Request):
             return JSONResponse({"video_url": video_url, "file_name": file_name}, status_code=200)
         except TypeError:
             return await not_found_404(request, msg="Invalid url")
+        except TimeoutException:
+            return await internal_server_500(request, msg="Try again after sometime")
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
