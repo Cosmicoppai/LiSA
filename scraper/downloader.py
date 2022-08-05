@@ -74,7 +74,7 @@ class Download:
                             IN_PROGRESS[file_name]["speed"] = download_speed
 
                             asyncio.run_coroutine_threadsafe(self.send_download_status(file_name, IN_PROGRESS[file_name]), self.msg_system.event_loop)
-            JsonLibrary().add({file_name: {"total_size": resp.content_length, "location": file_location.__str__(), "created_on": dt.now().__str__()}})
+            JsonLibrary().add({"file_name": file_name, "total_size": resp.content_length, "location": file_location.__str__(), "created_on": dt.now().__str__()})
             del IN_PROGRESS[file_name]  # delete the download status
             return True
 
