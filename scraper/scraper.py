@@ -333,7 +333,7 @@ class MyAL:
             if ranks[i] == "-":
                 rank = "na"
             top_anime.append({"rank":rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
-                                "episodes": episodes[i], "score": score[i].text})
+                                "episodes": episodes[i].replace('eps', ''), "score": score[i].text})
         
         top_anime_response = {}
 
