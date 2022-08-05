@@ -55,7 +55,7 @@ export const playVideo = (url) => async (dispatch) => {
       `/stream`,
       {
         pahewin_url: url,
-        player: "mpv"
+        player: "mpv",
       },
       {
         "Content-Type": "application/json",
@@ -66,5 +66,39 @@ export const playVideo = (url) => async (dispatch) => {
     dispatch({ type: ANIME_STREAM_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: ANIME_STREAM_FAIL, payload: error });
+  }
+};
+
+export const downloadVideo = (url) => async (dispatch) => {
+  try {
+    dispatch({ type: ANIME_STREAM_REQUEST });
+    const { data } = await axios.post(
+      `/download`,
+      {
+        pahewin_url: url,
+      },
+      {
+        "Content-Type": "application/json",
+      }
+    );
+
+    console.log(data);
+    dispatch({ type: ANIME_STREAM_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({ type: ANIME_STREAM_FAIL, payload: error });
+  }
+};
+
+
+
+export const getDownloadHistory = () => async (dispatch) => {
+  try {
+    dispatch({ type: ANIME_SEARCH_REQUEST });
+
+    const { data } = await axios.get(`/library`);
+
+    dispatch({ type: ANIME_SEARCH_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({ type: ANIME_SEARCH_FAIL, payload: error });
   }
 };

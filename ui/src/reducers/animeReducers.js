@@ -1,4 +1,7 @@
 import {
+  ANIME_DOWNLOAD_FAIL,
+  ANIME_DOWNLOAD_REQUEST,
+  ANIME_DOWNLOAD_SUCCESS,
   ANIME_SEARCH_CLEAR,
   ANIME_SEARCH_FAIL,
   ANIME_SEARCH_REQUEST,
@@ -57,10 +60,7 @@ export const animeStreamDetailsReducer = (
       return state;
   }
 };
-export const animeStreamReducer = (
-  state = { details: null },
-  action
-) => {
+export const animeStreamReducer = (state = { details: null }, action) => {
   switch (action.type) {
     case ANIME_STREAM_REQUEST:
       return {
@@ -75,6 +75,24 @@ export const animeStreamReducer = (
       return { loading: false, error: action.payload };
     case ANIME_STREAM_CLEAR:
       return { loading: false, details: null };
+
+    default:
+      return state;
+  }
+};
+export const animeDownloadReducer = (state = { details: null }, action) => {
+  switch (action.type) {
+    case ANIME_DOWNLOAD_REQUEST:
+      return {
+        loading: true,
+        details: null,
+      };
+
+    case ANIME_DOWNLOAD_SUCCESS:
+      return { loading: false, details: action.payload };
+
+    case ANIME_DOWNLOAD_FAIL:
+      return { loading: false, error: action.payload };
 
     default:
       return state;

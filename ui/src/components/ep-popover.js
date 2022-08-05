@@ -14,7 +14,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 
 import React, { useState } from "react";
-import { playVideo } from "../actions/animeActions";
+import { downloadVideo, playVideo } from "../actions/animeActions";
 
 const EpPopover = ({ isOpen, onOpen, onClose }) => {
   const dispatch = useDispatch();
@@ -26,6 +26,13 @@ const EpPopover = ({ isOpen, onOpen, onClose }) => {
     if (Object.values(Object.values(details[language])[0])[0]) {
       dispatch(
         playVideo(Object.values(Object.values(details[language])[0])[0])
+      );
+    }
+  };
+  const downloadHandler = () => {
+    if (Object.values(Object.values(details[language])[0])[0]) {
+      dispatch(
+        downloadVideo(Object.values(Object.values(details[language])[0])[0])
       );
     }
   };
@@ -74,7 +81,7 @@ const EpPopover = ({ isOpen, onOpen, onClose }) => {
               <Button colorScheme="blue" mr={3} onClick={playHandler}>
                 Play
               </Button>
-              <Button colorScheme="blue" mr={3} onClick={onClose}>
+              <Button colorScheme="blue" mr={3} onClick={downloadHandler}>
                 Download
               </Button>
             </ModalFooter>

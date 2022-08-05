@@ -1,11 +1,12 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { animeSearchListReducer, animeStreamDetailsReducer } from './reducers/animeReducers';
+import { animeDownloadReducer, animeSearchListReducer, animeStreamDetailsReducer } from './reducers/animeReducers';
 
 const reducer = combineReducers({
   animeSearchList: animeSearchListReducer,
-  animeStreamDetails: animeStreamDetailsReducer
+  animeStreamDetails: animeStreamDetailsReducer,
+  animeDownloadDetails: animeDownloadReducer
 });
 
 
