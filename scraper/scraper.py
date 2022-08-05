@@ -6,8 +6,8 @@ from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from typing import Dict, List, Tuple
-from scripts import blank_script
+from typing import Dict, List, Tuple, Any
+import config
 
 
 class Anime(ABC):
@@ -34,8 +34,9 @@ class Anime(ABC):
 
 
 class Animepahe(Anime):
-    site_url = "https://animepahe.com"
-    file_name: str = None
+    site_url: str = "https://animepahe.com"
+    api_url: str = "https://animepahe.com/api?"
+    file_name: str = None  # variable will be assign while scraping for kwik f link
 
     def __init__(self):
         self.chrome_driver_path = Path("./chromedriver.exe").parent.absolute().joinpath("chromedriver.exe").__str__()
@@ -196,7 +197,6 @@ class Animepahe(Anime):
 
         driver = uc.Chrome(options=options, use_subprocess=True, driver_executable_path=self.chrome_driver_path)
         driver.get(kwik_f_url)
-        driver.execute_script(blank_script)
         WebDriverWait(driver, 15).until(lambda _driver: 'animepahe' in _driver.title.lower())
         self.cookies = driver.get_cookies()
         page_source = driver.page_source  # return page html
@@ -269,7 +269,7 @@ class MyAL:
                     "score" : (str), 
                 }, 
                 ...
-                "next_top":"http://localhost:6969/top_anime?type=anime_type&limit=limit"
+                "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
             }
         """
         top_anime_headers = {
@@ -293,15 +293,15 @@ class MyAL:
         for i in rank:
             ranks.append(i.text)
 
-        img = bs_top.find_all("img", {"width":"50", "height":"70"})
+        img = bs_top.find_all("img", {"width": "50", "height": "70"})
         imgs = []
         for x in img:
             src = x.get("data-src")
             start, end = 0, 0
             for i in range(len(src)):
-                if src[i] == '/' and src[i+1] == 'r':
+                if src[i] == '/' and src[i + 1] == 'r':
                     start = i
-                if src[i] == '/' and src[i+1] == 'i':
+                if src[i] == '/' and src[i + 1] == 'i':
                     end = i
             imgs.append(src.replace(src[start:end], ""))
 
@@ -332,23 +332,21 @@ class MyAL:
             rank = ranks[i]
             if ranks[i] == "-":
                 rank = "na"
-            top_anime.append({"rank":rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
-                                "episodes": episodes[i].replace('eps', ''), "score": score[i].text})
-        
-        top_anime_response = {}
+            top_anime.append({"rank": rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
+                              "episodes": episodes[i], "score": score[i].text})
 
-        top_anime_response["data"] = top_anime
+        response: Dict[str, Any] = {"data": top_anime}
 
         try:
             next_top = bs_top.find("a", {"class": "next"}).get("href")
-            top_anime_response["next_top"] = "http://localhost:6969/top_anime{}".format(next_top)
+            response["next_top"] = f"{config.API_SERVER_ADDRESS}/top_anime{next_top}"
         except AttributeError:
-            top_anime_response["next_top"] = None
+            response["next_top"] = None
 
         try:
             prev_top = bs_top.find("a", {"class": "prev"}).get("href")
-            top_anime_response["prev_top"] = "http://localhost:6969/top_anime{}".format(prev_top)
+            response["prev_top"] = f"{config.API_SERVER_ADDRESS}/top_anime{prev_top}"
         except AttributeError:
-            top_anime_response["prev_top"] = None
+            response["prev_top"] = None
 
-        return top_anime_response
+        return response

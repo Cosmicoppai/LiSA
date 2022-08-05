@@ -12,6 +12,7 @@ from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
 from selenium.common.exceptions import TimeoutException
+import config
 
 
 async def index(request: Request):
@@ -114,13 +115,10 @@ async def get_ep_details(request: Request):
         }
     """
     anime_session = request.query_params.get("anime_session", None)
-    page = request.query_params.get("page", None)
+    page = request.query_params.get("page", 1)
 
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
-
-    if not page:
-        page = 1
 
     try:
         return JSONResponse(_episode_details(anime_session=anime_session, page_no=page))
@@ -132,24 +130,23 @@ def _episode_details(anime_session: str, page_no: str) -> Dict[str, str] | TypeE
     episodes = {"ep_details": []}
 
     try:
-        episode_data = Animepahe().get_episode_sessions(anime_session=anime_session, page_no=page_no)
+        site_scraper = Animepahe()
+        episode_data = site_scraper.get_episode_sessions(anime_session=anime_session, page_no=page_no)
 
         episodes["total_page"] = episode_data.get("last_page")
         if episode_data.get("current_page") <= episode_data.get("last_page"):
             next_page_url = episode_data.get("next_page_url", None)
             if next_page_url:
-                next_page_url = next_page_url.replace("https://animepahe.com/api?",
-                                                      "http://localhost:6969/ep_details?anime_session={}&".format(
-                                                          anime_session))
+                next_page_url = next_page_url.replace(site_scraper.api_url,
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
                 episodes["next_page_url"] = next_page_url
             else:
                 episodes["next_page_url"] = next_page_url
 
             prev_page_url = episode_data.get("prev_page_url", None)
             if prev_page_url:
-                prev_page_url = prev_page_url.replace("https://animepahe.com/api?",
-                                                      "http://localhost:6969/ep_details?anime_session={}&".format(
-                                                          anime_session))
+                prev_page_url = prev_page_url.replace(site_scraper.api_url,
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
                 episodes["prev_page_url"] = prev_page_url
             else:
                 episodes["prev_page_url"] = prev_page_url
@@ -161,9 +158,7 @@ def _episode_details(anime_session: str, page_no: str) -> Dict[str, str] | TypeE
             return episodes
         else:
             episodes["next_page"] = episode_data.get("next_page_url")
-            episodes["previous_page"] = "localhost:6969/ep_details?anime_session={}&page={}".format(anime_session,
-                                                                                                    episode_data.get(
-                                                                                                        "last_page"))
+            episodes["previous_page"] = f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&page={episode_data['last_page']}"
             return episodes
     except TypeError:
         raise TypeError
@@ -313,7 +308,7 @@ async def top_anime(request: Request):
                 "score" : (str),
             },
             ...
-            "next_top":"http://localhost:6969/top_anime?type=anime_type&limit=limit"
+            "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
         }
     """
     anime_type = request.query_params.get("type", None)

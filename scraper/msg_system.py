@@ -6,6 +6,7 @@ from typing import Dict
 from download_progress import IN_PROGRESS
 from websockets.exceptions import ConnectionClosed
 from json import JSONDecodeError
+import config
 
 
 class MsgSystemMeta(type):
@@ -23,6 +24,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
     event_loop: asyncio.ProactorEventLoop
 
     def __init__(self, port: int = 9000):
+        config.SOCKET_SERVER_ADDRESS = f"ws://localhost:{port}"
         self.ws_port = port
 
     async def run_server(self):
