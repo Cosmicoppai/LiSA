@@ -192,10 +192,13 @@ class Animepahe(Anime):
         options.add_argument("--disable-gpu")
         # options.add_experimental_option("excludeSwitches", ["enable-automation"])
         # options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument("--window-size=1,1")
         options.add_argument(
             'user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36')
 
         driver = uc.Chrome(options=options, use_subprocess=True, driver_executable_path=self.chrome_driver_path)
+        driver.set_window_size(1, 1)
+        driver.set_window_position(999, 999)
         driver.get(kwik_f_url)
         WebDriverWait(driver, 20).until(lambda _driver: 'animepahe' in _driver.title.lower())
         self.cookies = driver.get_cookies()
