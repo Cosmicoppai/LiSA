@@ -15,7 +15,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor } from "react-icons/fi";
-import { addEpisode, addEpisodeDetails, getStreamDetails } from "../actions/animeActions";
+import { addEpisode, addEpisodeDetails, clearEp, getStreamDetails } from "../actions/animeActions";
 
 
 export default function AnimeDetailsScreen() {
@@ -34,6 +34,8 @@ export default function AnimeDetailsScreen() {
   }, [data]);
 
   const episodeClickHandler = (item) => {
+    dispatch(clearEp());
+
     dispatch(getStreamDetails(data.session, item.ep_session));
     dispatch(addEpisodeDetails(item));
     navigate("/play");
