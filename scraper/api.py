@@ -348,5 +348,4 @@ app = Starlette(
     routes=routes,
     exception_handlers=exception_handlers,
     on_startup=[JsonLibrary().load_data],
-    # on_shutdown=[JsonLibrary().save]
 )

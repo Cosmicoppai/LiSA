@@ -9,9 +9,10 @@ import config
 
 
 def run_api_server(port: int = 8000):
+    config.API_SERVER_ADDRESS = f"http://localhost:{port}"
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
-    print(f"server started on port: {port}")
+    print(f"server started on port: {port} \n You can access API SERVER on {config.API_SERVER_ADDRESS}")
     uvicorn.run("api:app",  port=port)
 
 

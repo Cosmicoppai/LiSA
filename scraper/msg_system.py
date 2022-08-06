@@ -29,7 +29,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
 
     async def run_server(self):
         async with websockets.serve(MsgSystem._server_handler, "", self.ws_port):
-            print(f"Socket server started on port: {self.ws_port}")
+            print(f"Socket server started on port: {self.ws_port}\n You can access SOCKET SERVER on {config.SOCKET_SERVER_ADDRESS}")
             await asyncio.Future()  # run forever
 
     @classmethod
