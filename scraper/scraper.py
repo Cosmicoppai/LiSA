@@ -14,11 +14,11 @@ class Anime(ABC):
     site_url: str
 
     @abstractmethod
-    def search_anime(self, anime_name: str):
+    def search_anime(self, session, anime_name: str):
         ...
 
     @abstractmethod
-    def get_episode_sessions(self, anime_session: str):
+    async def get_episode_sessions(self, session, anime_session: str):
         ...
 
     @abstractmethod
@@ -42,10 +42,11 @@ class Animepahe(Anime):
         self.chrome_driver_path = Path("./chromedriver.exe").parent.absolute().joinpath("chromedriver.exe").__str__()
         self.cookies: Dict[str, str] = {}
 
-    def search_anime(self, input_anime):
+    def search_anime(self, session, input_anime):
         """A scraper for searching an anime user requested
 
         Args:
+            session: request session object
             input_anime (str): name of the anime user entered
 
         Returns:
@@ -58,12 +59,13 @@ class Animepahe(Anime):
             'q': input_anime,
         }
 
-        return requests.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"][0]
+        return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"][0]
 
-    def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
+    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
 
         Args:
+            session: request session object
             anime_session (str): session of an anime (changes after each interval)
             page_no (str, optional): Page number when the episode number is greater than 30. Defaults to "1".
 
@@ -79,12 +81,13 @@ class Animepahe(Anime):
             'page': page_no,
         }
 
-        return requests.get(f"{self.site_url}/api", params=episodes_params, headers=episodes_headers).json()
+        return session.get(f"{self.site_url}/api", params=episodes_params, headers=episodes_headers).json()
 
-    def get_anime_description(self, anime_session: str) -> Dict[str, str]:
+    async def get_anime_description(self, session, anime_session: str) -> Dict[str, str]:
         """scraping the anime description
 
         Args:
+            session: request session object
             anime_session (str): session of an anime (changes after each interval)
 
         Returns:
@@ -100,7 +103,7 @@ class Animepahe(Anime):
             }
         """
         description_header = self.get_headers(extra=anime_session)
-        description_response = requests.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
+        description_response = session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
 
         description_bs = BeautifulSoup(description_response.text, 'html.parser')
 

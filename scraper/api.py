@@ -1,5 +1,6 @@
 from collections import defaultdict
 from json import JSONDecodeError
+import requests
 from library import JsonLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -55,26 +56,26 @@ async def search(request: Request):
     if not anime:
         return await bad_request_400(request, msg="Pass an anime name")
 
-    try:
-        anime_details = Animepahe().search_anime(input_anime=anime)
-        anime_details = {
-            "jp_name": anime_details.get("title"),
-            "no_of_episodes": anime_details.get("episodes"),
-            "session": anime_details.get("session"),
-            "poster": anime_details.get("poster"),
-        }
-    except KeyError:
-        return await not_found_404(request, msg="anime not found")
+    with requests.Session() as session:
+        try:
+            anime_details = Animepahe().search_anime(session, input_anime=anime)
+            anime_details = {
+                "jp_name": anime_details.get("title"),
+                "no_of_episodes": anime_details.get("episodes"),
+                "session": anime_details.get("session"),
+                "poster": anime_details.get("poster"),
+            }
+        except KeyError:
+            return await not_found_404(request, msg="anime not found")
 
-    try:
-        episodes = _episode_details(anime_details.get("session"), "1")
-    except TypeError:
-        return await not_found_404(request, msg="Anime {}, Not Yet Aired...".format(anime))
+        try:
+            episodes = _episode_details(session, anime_details.get("session"), "1")
+            anime_description = Animepahe().get_anime_description(session, anime_session=anime_details["session"])
 
-    anime_description = Animepahe().get_anime_description(anime_session=anime_details["session"])
-
-    anime_details["description"] = anime_description
-    anime_details["episode_details"] = episodes
+            anime_details["episode_details"] = await episodes
+            anime_details["description"] = await anime_description
+        except TypeError:
+            return await not_found_404(request, msg="Anime {}, Not Yet Aired...".format(anime))
 
     # a function to insert the eng_name at position(index)=1
     def insert(_dict, obj, pos):
@@ -120,18 +121,19 @@ async def get_ep_details(request: Request):
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
 
-    try:
-        return JSONResponse(_episode_details(anime_session=anime_session, page_no=page))
-    except TypeError:
-        return await not_found_404(request, msg="Anime, Not yet Aired...")
+    with requests.Session() as session:
+        try:
+            return JSONResponse(await _episode_details(session, anime_session=anime_session, page_no=page))
+        except TypeError:
+            return await not_found_404(request, msg="Anime, Not yet Aired...")
 
 
-def _episode_details(anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
+async def _episode_details(session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
     episodes = {"ep_details": []}
 
     try:
         site_scraper = Animepahe()
-        episode_data = site_scraper.get_episode_sessions(anime_session=anime_session, page_no=page_no)
+        episode_data = site_scraper.get_episode_sessions(session, anime_session=anime_session, page_no=page_no)
 
         episodes["total_page"] = episode_data.get("last_page")
         if episode_data.get("current_page") <= episode_data.get("last_page"):
@@ -275,6 +277,14 @@ def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
 
 
 async def library(request: Request):
+    """
+
+    Args:
+        request: Request object consist of client request data
+
+    Returns: JSONResponse Consist of all the files in the library
+
+    """
     return JSONResponse(JsonLibrary().get_all())
 
 
@@ -282,7 +292,7 @@ def play(player_name: str, video_url: str) -> Tuple[str, int]:
     try:
         Stream.play(player_name, video_url)
         return None, 200
-    except OSError as error:
+    except Exception as error:
         return error.__str__(), 500
 
 
