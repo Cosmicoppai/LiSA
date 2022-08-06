@@ -4,6 +4,7 @@ import { getDownloadHistory } from "../actions/animeActions";
 import DownloadItem from "../components/downloadItem";
 import { useSelector, useDispatch } from "react-redux";
 import { TbMoodSad } from "react-icons/tb";
+import { FaPlay } from "react-icons/fa";
 import { AiOutlineFolderOpen } from "react-icons/ai";
 import { formatBytes } from "../utils";
 
@@ -152,60 +153,63 @@ const DownloadScreen = () => {
             </Box>
           </Stack>
         </Stack>
-        <Stack flex={1} flexDirection="column" pt={2} >
-            <Heading fontSize={"xl"} fontFamily={"body"}>
-              History
-            </Heading>
-            <Stack
-              flex={1}
-              flexDirection="column"
-              alignItems="flex-start"
-              p={1}
-              pt={2}
-              bg={"gray.900"}
-              minWidth={"400px"}
-            >
-              {historyDetails?.details &&
-              historyDetails?.details?.length !== 0 ? (
-                historyDetails.details.map((history_item) => {
-                  return (
-                    <Flex
-                      pt={1}
-                      p={3}
-                      width={"100%"}
-                      flex={1}
-                      gap={6}
-                      alignItems={"center"}
-                      justifyContent={"space-between"}
-                      mb={4}
+        <Stack flex={1} flexDirection="column" pt={2}>
+          <Heading fontSize={"xl"} fontFamily={"body"}>
+            History
+          </Heading>
+          <Stack
+            flex={1}
+            flexDirection="column"
+            alignItems="flex-start"
+            p={1}
+            pt={2}
+            bg={"gray.900"}
+            minWidth={"400px"}
+          >
+            {historyDetails?.details &&
+            historyDetails?.details?.length !== 0 ? (
+              historyDetails.details.map((history_item) => {
+                return (
+                  <Flex
+                    pt={1}
+                    p={3}
+                    width={"100%"}
+                    flex={1}
+                    gap={6}
+                    alignItems={"center"}
+                    justifyContent={"space-between"}
+                    mb={4}
+                  >
+                    <Box sx={{cursor: "pointer"}}>
+                      <FaPlay />
+                    </Box>
+                    <Text
+                      fontWeight={500}
+                      flex={1.5}
+                      color={"gray.300"}
+                      size="sm"
                     >
+                      {history_item.file_name}
+                    </Text>
+
+                    <Flex gap={3}>
+                      <Text
+                        fontWeight={300}
+                        flex={1.5}
+                        color={"gray.200"}
+                        size="sm"
+                      >
+                        Completed
+                      </Text>
                       <Text
                         fontWeight={500}
                         flex={1.5}
                         color={"gray.300"}
                         size="sm"
                       >
-                        {history_item.file_name}
+                        {formatBytes(history_item.total_size)}
                       </Text>
-
-                      <Flex gap={3}>
-                        <Text
-                          fontWeight={300}
-                          flex={1.5}
-                          color={"gray.200"}
-                          size="sm"
-                        >
-                          Completed
-                        </Text>
-                        <Text
-                          fontWeight={500}
-                          flex={1.5}
-                          color={"gray.300"}
-                          size="sm"
-                        >
-                          {formatBytes(history_item.total_size)}
-                        </Text>
-                        {/* <Text
+                      {/* <Text
                           fontWeight={500}
                           flex={1.5}
                           color={"gray.300"}
@@ -213,38 +217,39 @@ const DownloadScreen = () => {
                         >
                           {history_item.created_on}
                         </Text> */}
-                      </Flex>
-                      <Box
-                        onClick={() => openFileExplorer(history_item.location)}
-                      >
-                        <AiOutlineFolderOpen size={22} />
-                      </Box>
                     </Flex>
-                  );
-                })
-              ) : (
-                <Flex
-                  alignItems={"center"}
-                  justifyContent="center"
-                  p={3}
-                  pt={2}
-                  width={"100%"}
+                    <Box
+                      onClick={() => openFileExplorer(history_item.location)}
+                      sx={{cursor: "pointer"}}
+                    >
+                      <AiOutlineFolderOpen size={22} /> 
+                    </Box>
+                  </Flex>
+                );
+              })
+            ) : (
+              <Flex
+                alignItems={"center"}
+                justifyContent="center"
+                p={3}
+                pt={2}
+                width={"100%"}
+              >
+                <Text
+                  fontWeight={600}
+                  color={"gray.500"}
+                  size="lg"
+                  textAlign={"center"}
                 >
-                  <Text
-                    fontWeight={600}
-                    color={"gray.500"}
-                    size="lg"
-                    textAlign={"center"}
-                  >
-                    No Previous Downloads
-                  </Text>
+                  No Previous Downloads
+                </Text>
 
-                  <Box color="gray.500" ml="2">
-                    <TbMoodSad size={24} />
-                  </Box>
-                </Flex>
-              )}
-            </Stack>{" "}
+                <Box color="gray.500" ml="2">
+                  <TbMoodSad size={24} />
+                </Box>
+              </Flex>
+            )}
+          </Stack>{" "}
         </Stack>
       </Stack>
     </Center>
