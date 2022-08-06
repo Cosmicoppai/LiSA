@@ -197,7 +197,7 @@ class Animepahe(Anime):
 
         driver = uc.Chrome(options=options, use_subprocess=True, driver_executable_path=self.chrome_driver_path)
         driver.get(kwik_f_url)
-        WebDriverWait(driver, 15).until(lambda _driver: 'animepahe' in _driver.title.lower())
+        WebDriverWait(driver, 20).until(lambda _driver: 'animepahe' in _driver.title.lower())
         self.cookies = driver.get_cookies()
         page_source = driver.page_source  # return page html
         driver.close()
