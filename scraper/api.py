@@ -11,7 +11,8 @@ from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
-from urllib import parse
+from selenium.common.exceptions import TimeoutException
+import config
 
 
 async def index(request: Request):
@@ -114,13 +115,10 @@ async def get_ep_details(request: Request):
         }
     """
     anime_session = request.query_params.get("anime_session", None)
-    page = request.query_params.get("page", None)
+    page = request.query_params.get("page", 1)
 
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
-
-    if not page:
-        page = 1
 
     try:
         return JSONResponse(_episode_details(anime_session=anime_session, page_no=page))
@@ -132,24 +130,23 @@ def _episode_details(anime_session: str, page_no: str) -> Dict[str, str] | TypeE
     episodes = {"ep_details": []}
 
     try:
-        episode_data = Animepahe().get_episode_sessions(anime_session=anime_session, page_no=page_no)
+        site_scraper = Animepahe()
+        episode_data = site_scraper.get_episode_sessions(anime_session=anime_session, page_no=page_no)
 
         episodes["total_page"] = episode_data.get("last_page")
         if episode_data.get("current_page") <= episode_data.get("last_page"):
             next_page_url = episode_data.get("next_page_url", None)
             if next_page_url:
-                next_page_url = next_page_url.replace("https://animepahe.com/api?",
-                                                      "http://localhost:6969/ep_details?anime_session={}&".format(
-                                                          anime_session))
+                next_page_url = next_page_url.replace(site_scraper.api_url,
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
                 episodes["next_page_url"] = next_page_url
             else:
                 episodes["next_page_url"] = next_page_url
 
             prev_page_url = episode_data.get("prev_page_url", None)
             if prev_page_url:
-                prev_page_url = prev_page_url.replace("https://animepahe.com/api?",
-                                                      "http://localhost:6969/ep_details?anime_session={}&".format(
-                                                          anime_session))
+                prev_page_url = prev_page_url.replace(site_scraper.api_url,
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
                 episodes["prev_page_url"] = prev_page_url
             else:
                 episodes["prev_page_url"] = prev_page_url
@@ -161,9 +158,7 @@ def _episode_details(anime_session: str, page_no: str) -> Dict[str, str] | TypeE
             return episodes
         else:
             episodes["next_page"] = episode_data.get("next_page_url")
-            episodes["previous_page"] = "localhost:6969/ep_details?anime_session={}&page={}".format(anime_session,
-                                                                                                    episode_data.get(
-                                                                                                        "last_page"))
+            episodes["previous_page"] = f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&page={episode_data['last_page']}"
             return episodes
     except TypeError:
         raise TypeError
@@ -212,19 +207,21 @@ async def get_video_url(request: Request):
         jb = await request.json()
 
         pahewin_url = jb.get("pahewin_url", None)
-        if pahewin_url:
-            parsed_url = urlparse(pahewin_url)
+        if not pahewin_url:
+            return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
 
-            # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
-            if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
-                return await bad_request_400(request, msg="Invalid pahewin url")
+        parsed_url = urlparse(pahewin_url)
+        # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
+        if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
+            return await bad_request_400(request, msg="Invalid pahewin url")
 
-            try:
-                video_url, _ = get_video_url_and_name(pahewin_url)
-            except TypeError:
-                return await not_found_404(request, msg="Invalid url")
-            return JSONResponse({"video_url": video_url}, status_code=200)
-        return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
+        try:
+            video_url, file_name = get_video_url_and_name(pahewin_url)
+            return JSONResponse({"video_url": video_url, "file_name": file_name}, status_code=200)
+        except TypeError:
+            return await not_found_404(request, msg="Invalid url")
+        except TimeoutException:
+            return await internal_server_500(request, msg="Try again after sometime")
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
@@ -256,21 +253,19 @@ async def download(request: Request):
 
         jb = await request.json()
 
-        video_url = jb["pahewin_url"]
-        file_name = parse.parse_qs(parse.urlsplit(video_url).query)["file"][0]
-        # parsed_url = urlparse(pahewin)
-        # if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin:  # if url is invalid
-        #     return await bad_request_400(request, msg="Invalid pahewin url")
-        # try:
-        #     video_url, file_name = get_video_url_and_name(pahewin)
-        # except TypeError:
-        #     return await not_found_404(request, msg="Invalid url")
+        video_url = jb.get("video_url", None)
+        if not video_url:
+            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
+
+        file_name = jb.get("file_name", None)
+        if not file_name:
+            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
 
         await Download().start_download(url=video_url, file_name=file_name)
-        return JSONResponse({"filename": file_name})
+        return JSONResponse({"status": "started"})
 
-    except JSONDecodeError or KeyError:
-        return await not_found_404(request, msg="Malformed body: pass valid Pahewin url")
+    except JSONDecodeError:
+        return await not_found_400(request, msg="Malformed body: Invalid JSON")
 
 
 def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
@@ -313,7 +308,7 @@ async def top_anime(request: Request):
                 "score" : (str),
             },
             ...
-            "next_top":"http://localhost:6969/top_anime?type=anime_type&limit=limit"
+            "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
         }
     """
     anime_type = request.query_params.get("type", None)
@@ -353,5 +348,4 @@ app = Starlette(
     routes=routes,
     exception_handlers=exception_handlers,
     on_startup=[JsonLibrary().load_data],
-    # on_shutdown=[JsonLibrary().save]
 )
