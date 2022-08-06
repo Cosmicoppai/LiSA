@@ -140,7 +140,7 @@ async def _episode_details(session, anime_session: str, page_no: str) -> Dict[st
             next_page_url = episode_data.get("next_page_url", None)
             if next_page_url:
                 next_page_url = next_page_url.replace(site_scraper.api_url,
-                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&")
                 episodes["next_page_url"] = next_page_url
             else:
                 episodes["next_page_url"] = next_page_url
@@ -148,7 +148,7 @@ async def _episode_details(session, anime_session: str, page_no: str) -> Dict[st
             prev_page_url = episode_data.get("prev_page_url", None)
             if prev_page_url:
                 prev_page_url = prev_page_url.replace(site_scraper.api_url,
-                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}")
+                                                      f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&")
                 episodes["prev_page_url"] = prev_page_url
             else:
                 episodes["prev_page_url"] = prev_page_url
