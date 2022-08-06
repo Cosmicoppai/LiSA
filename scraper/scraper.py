@@ -126,7 +126,7 @@ class Animepahe(Anime):
             if 'Status' in details[i]:
                 description['Status'] = details[i][7:]
             if 'Aired' in details[i]:
-                description['Aired'] = details[i][6:]
+                description['Aired'] = details[i][6:].replace('to', ' to')
             if 'Season' in details[i]:
                 description['Season'] = details[i][8:]
             if 'Duration' in details[i]:
