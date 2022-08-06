@@ -20,10 +20,16 @@ const InbuiltPlayerScreen = () => {
   const [quality, setQuality] = useState(null);
 
   const qualityChangeHandler = (value) => {
+    let templink = "";
+    details[language].map((qualityLink) => {
+      if (Object.keys(qualityLink)[0] === value) {
+        templink = Object.values(qualityLink)[0];
+      }
+    });
+
+    console.log(templink);
     setQuality(value);
-    dispatch(
-      getVideoUrl(Object.values(Object.values(details[language])[0])[0])
-    );
+    dispatch(getVideoUrl(templink));
   };
 
   const playHandler = () => {
@@ -84,7 +90,10 @@ const InbuiltPlayerScreen = () => {
                 placeholder="Quality"
                 size="lg"
                 disabled={!language}
-                onChange={(e) => qualityChangeHandler(e.target.value)}
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  qualityChangeHandler(e.target.value);
+                }}
               >
                 {details[language]?.map((quality, idx) => {
                   return (

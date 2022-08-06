@@ -6,6 +6,9 @@ import {
   ANIME_EPISODE_ADD_FAIL,
   ANIME_EPISODE_ADD_REQUEST,
   ANIME_EPISODE_ADD_SUCCESS,
+  ANIME_EXPLORE_DETAILS_FAIL,
+  ANIME_EXPLORE_DETAILS_REQUEST,
+  ANIME_EXPLORE_DETAILS_SUCCESS,
   ANIME_SEARCH_CLEAR,
   ANIME_SEARCH_FAIL,
   ANIME_SEARCH_REQUEST,
@@ -17,9 +20,7 @@ import {
   ANIME_STREAM_EXTERNAL_FAIL,
   ANIME_STREAM_EXTERNAL_REQUEST,
   ANIME_STREAM_EXTERNAL_SUCCESS,
-  
   ANIME_STREAM_URL_CLEAR,
-  
   ANIME_STREAM_URL_FAIL,
   ANIME_STREAM_URL_REQUEST,
   ANIME_STREAM_URL_SUCCESS,
@@ -75,6 +76,18 @@ export const getStreamDetails =
       dispatch({ type: ANIME_STREAM_DETAILS_FAIL, payload: error });
     }
   };
+
+export const getExploreDetails = (query) => async (dispatch) => {
+  try {
+    dispatch({ type: ANIME_EXPLORE_DETAILS_REQUEST });
+    const { data } = await axios.get(`top_anime?type=${query}&limit=0`);
+
+    console.log(data);
+    dispatch({ type: ANIME_EXPLORE_DETAILS_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({ type: ANIME_EXPLORE_DETAILS_FAIL, payload: error });
+  }
+};
 
 export const playVideoExternal = (url) => async (dispatch) => {
   try {

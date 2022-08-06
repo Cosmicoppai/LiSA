@@ -38,7 +38,7 @@ const Navbar = () => {
         {" "}
         <Icon as={AiOutlineSearch} w={8} h={8} mb={"-3"} />
       </Link>
-      <Link to="/trending" >
+      <Link to="/explore" >
         {" "}
         <Icon as={AiOutlineCompass} w={8} h={8} mb={"-3"} />
       </Link>

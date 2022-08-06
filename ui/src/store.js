@@ -5,6 +5,7 @@ import {
   animeDownloadReducer,
   animeEpisodeReducer,
   animeEpUrlReducer,
+  animeExploreDetailsReducer,
   animeSearchListReducer,
   animeStreamDetailsReducer,
 } from "./reducers/animeReducers";
@@ -15,6 +16,7 @@ const reducer = combineReducers({
   animeDownloadDetails: animeDownloadReducer,
   animeEpisodeDetails: animeEpisodeReducer,
   animeEpUrl: animeEpUrlReducer,
+  animeExploreDetails: animeExploreDetailsReducer,
 });
 
 const middleware = [thunk];

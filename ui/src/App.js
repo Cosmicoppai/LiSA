@@ -8,6 +8,7 @@ import Navbar from "./components/navbar";
 import DownloadScreen from "./screens/downloadsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
+import ExploreScreen from "./screens/exploreScreen";
 
 const { app } = window.require("@electron/remote");
 
@@ -46,6 +47,7 @@ function App() {
               <Route path="setting" element={<SettingScreen />} />
               <Route path="download" element={<DownloadScreen />} />
               <Route path="play" element={<InbuiltPlayerScreen />} />
+              <Route path="explore" element={<ExploreScreen />} />
             </Routes>
           </Box>
         </GridItem>

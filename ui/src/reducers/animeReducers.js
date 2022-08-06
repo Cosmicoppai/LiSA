@@ -5,6 +5,9 @@ import {
   ANIME_EPISODE_ADD_FAIL,
   ANIME_EPISODE_ADD_REQUEST,
   ANIME_EPISODE_ADD_SUCCESS,
+  ANIME_EXPLORE_DETAILS_FAIL,
+  ANIME_EXPLORE_DETAILS_REQUEST,
+  ANIME_EXPLORE_DETAILS_SUCCESS,
   ANIME_SEARCH_CLEAR,
   ANIME_SEARCH_FAIL,
   ANIME_SEARCH_REQUEST,
@@ -102,6 +105,30 @@ export const animeStreamDetailsReducer = (
       return { loading: false, details: action.payload };
 
     case ANIME_STREAM_DETAILS_FAIL:
+      return { loading: false, error: action.payload };
+    case ANIME_STREAM_DETAILS_CLEAR:
+      return { loading: false, details: null };
+
+    default:
+      return state;
+  }
+};
+//StreamDetails
+export const animeExploreDetailsReducer = (
+  state = { details: null },
+  action
+) => {
+  switch (action.type) {
+    case ANIME_EXPLORE_DETAILS_REQUEST:
+      return {
+        loading: true,
+        details: null,
+      };
+
+    case ANIME_EXPLORE_DETAILS_SUCCESS:
+      return { loading: false, details: action.payload };
+
+    case ANIME_EXPLORE_DETAILS_FAIL:
       return { loading: false, error: action.payload };
     case ANIME_STREAM_DETAILS_CLEAR:
       return { loading: false, details: null };
