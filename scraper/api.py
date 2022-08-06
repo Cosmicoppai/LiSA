@@ -255,17 +255,17 @@ async def download(request: Request):
 
         video_url = jb.get("video_url", None)
         if not video_url:
-            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
+            return await bad_request_400(request, msg="Malformed body: pass valid Pahewin url")
 
         file_name = jb.get("file_name", None)
         if not file_name:
-            return await not_found_400(request, msg="Malformed body: pass valid Pahewin url")
+            return await bad_request_400(request, msg="Malformed body: pass valid Pahewin url")
 
         await Download().start_download(url=video_url, file_name=file_name)
         return JSONResponse({"status": "started"})
 
     except JSONDecodeError:
-        return await not_found_400(request, msg="Malformed body: Invalid JSON")
+        return await bad_request_400(request, msg="Malformed body: Invalid JSON")
 
 
 def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
@@ -293,8 +293,6 @@ async def top_anime(request: Request):
         request (Request): accessing the app instance
 
     Query Params:
-        type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
-        limit (str):
         type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
         limit (str):
 
