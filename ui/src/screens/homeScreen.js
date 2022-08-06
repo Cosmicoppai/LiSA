@@ -22,9 +22,10 @@ import {
   SearchIcon,
   SettingsIcon,
 } from "@chakra-ui/icons";
-import { clearSearch, searchAnimeList } from "../actions/animeActions";
+import { clearEp, clearSearch, searchAnimeList } from "../actions/animeActions";
 import { useDispatch, useSelector } from "react-redux";
 import SearchResultCard from "../components/search-result-card";
+
 export const HomeScreen = () => {
   const dispatch = useDispatch();
   const [query, setQuery] = React.useState("");
@@ -37,6 +38,7 @@ export const HomeScreen = () => {
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && query) {
       dispatch(searchAnimeList(query));
+      dispatch(clearEp());
     }
     if (!query) {
       dispatch(clearSearch());
@@ -44,7 +46,7 @@ export const HomeScreen = () => {
   };
 
   return (
-    <Flex w="100vw" h="100%" direction="column">
+    <Flex w="100%" h="100%" direction="column">
       
       <Flex
         align="center"

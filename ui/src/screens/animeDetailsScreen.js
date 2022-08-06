@@ -15,9 +15,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor } from "react-icons/fi";
-import EpPopover from "../components/ep-popover";
 import { addEpisode, addEpisodeDetails, getStreamDetails } from "../actions/animeActions";
-import { router } from "websocket";
+
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
@@ -35,7 +34,6 @@ export default function AnimeDetailsScreen() {
   }, [data]);
 
   const episodeClickHandler = (item) => {
-    console.log(item);
     dispatch(getStreamDetails(data.session, item.ep_session));
     dispatch(addEpisodeDetails(item));
     navigate("/play");
@@ -102,7 +100,6 @@ export default function AnimeDetailsScreen() {
             <Box mt={5}>
               <Flex direction={"row"} flexWrap="wrap">
                 {data.episode_details.ep_details.map((item, key) => {
-                  console.log(item);
                   return (
                     <Flex
                       cursor={"pointer"}

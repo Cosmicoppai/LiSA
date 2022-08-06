@@ -16,6 +16,7 @@
     "axios": "^0.27.2",
     "electron-is-dev": "^1.2.0",
     "framer-motion": "4.1.17",
+    "jol-player": "^3.5.0",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",

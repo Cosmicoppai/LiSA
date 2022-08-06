@@ -1,49 +1,56 @@
-import { DownloadIcon, HamburgerIcon, SettingsIcon } from "@chakra-ui/icons";
+import {
+  DownloadIcon,
+  HamburgerIcon,
+  SearchIcon,
+  SettingsIcon,
+} from "@chakra-ui/icons";
 import {
   Box,
   Flex,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  VStack,
 } from "@chakra-ui/react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { BiTrendingUp } from "react-icons/bi";
+import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch, AiOutlineSetting } from "react-icons/ai";
+
 const Navbar = () => {
   return (
-    <Flex justifyContent="flex-end">
-      <Box mt={2} mr={2}>
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<HamburgerIcon />}
-          />
-          <MenuList>
-            <Link to="/ ">
-              {" "}
-              <MenuItem icon={<DownloadIcon />} command="⌘T">
-                Search
-              </MenuItem>
-            </Link>
-
-            <Link to="/download">
-              {" "}
-              <MenuItem icon={<DownloadIcon />} command="⌘T">
-                Download
-              </MenuItem>
-            </Link>
-
-            <Link to="/setting">
-              {" "}
-              <MenuItem icon={<SettingsIcon />} command="⌘N">
-                Setting
-              </MenuItem>
-            </Link>
-          </MenuList>
-        </Menu>
-      </Box>
+    <Flex
+      pt="8"
+      alignItems={"center"}
+      justifyContent={"flex-start"}
+      flexDirection="column"
+      gap={10}
+      bg={"gray.900"}
+      height={"100%"}
+      minWidth={"70px"}
+      maxWidth={"70px"}
+    >
+      
+      <Link to="/" >
+        {" "}
+        <Icon as={AiOutlineSearch} w={8} h={8} mb={"-3"} />
+      </Link>
+      <Link to="/trending" >
+        {" "}
+        <Icon as={AiOutlineCompass} w={8} h={8} mb={"-3"} />
+      </Link>
+      <Link to="/download" >
+        {" "}
+        <Icon as={AiOutlineDownload} w={8} h={8} mb={"-3"} />
+      </Link>
+      <Link to="/setting" >
+        {" "}
+        <Icon as={AiOutlineSetting} w={8} h={8} mb={"-3"} />
+      </Link>
+   
     </Flex>
   );
 };

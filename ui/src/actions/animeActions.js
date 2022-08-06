@@ -13,9 +13,12 @@ import {
   ANIME_STREAM_DETAILS_FAIL,
   ANIME_STREAM_DETAILS_REQUEST,
   ANIME_STREAM_DETAILS_SUCCESS,
+  ANIME_STREAM_EXTERNAL_CLEAR,
   ANIME_STREAM_EXTERNAL_FAIL,
   ANIME_STREAM_EXTERNAL_REQUEST,
   ANIME_STREAM_EXTERNAL_SUCCESS,
+  
+  ANIME_STREAM_URL_CLEAR,
   
   ANIME_STREAM_URL_FAIL,
   ANIME_STREAM_URL_REQUEST,
@@ -49,6 +52,9 @@ export const addEpisodeDetails = (data) => async (dispatch) => {
 };
 export const clearSearch = () => async (dispatch) => {
   dispatch({ type: ANIME_SEARCH_CLEAR });
+};
+export const clearEp = () => async (dispatch) => {
+  dispatch({ type: ANIME_STREAM_URL_CLEAR });
 };
 
 export const getStreamDetails =

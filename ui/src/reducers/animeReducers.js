@@ -18,6 +18,7 @@ import {
   ANIME_STREAM_EXTERNAL_FAIL,
   ANIME_STREAM_EXTERNAL_REQUEST,
   ANIME_STREAM_EXTERNAL_SUCCESS,
+  ANIME_STREAM_URL_CLEAR,
   ANIME_STREAM_URL_FAIL,
   ANIME_STREAM_URL_REQUEST,
   ANIME_STREAM_URL_SUCCESS,
@@ -77,6 +78,8 @@ export const animeEpUrlReducer = (
 
     case ANIME_STREAM_URL_FAIL:
       return { loading: false, url: action.payload };
+    case ANIME_STREAM_URL_CLEAR:
+      return { loading: false, url: "" };
 
     default:
       return state;

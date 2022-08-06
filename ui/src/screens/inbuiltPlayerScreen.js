@@ -6,6 +6,7 @@ import {
   getVideoUrl,
   playVideoExternal,
 } from "../actions/animeActions";
+import VideoPlayer from "../components/video-player";
 
 const InbuiltPlayerScreen = () => {
   const dispatch = useDispatch();
@@ -33,92 +34,85 @@ const InbuiltPlayerScreen = () => {
 
   const downloadHandler = () => {
     if (urlDetails?.url?.video_url) {
-      dispatch(
-        downloadVideo(urlDetails?.url?.video_url)
-      );
+      dispatch(downloadVideo(urlDetails?.url?.video_url));
     }
   };
 
   return (
     <Center py={6} w="100%">
       {epDetails && details && (
-        <Stack
-          borderWidth="1px"
-          borderRadius="lg"
-          w={{ sm: "100%", md: "80%" }}
-          justifyContent="space-between"
-          direction={"column"}
-          bg={"gray.900"}
-          boxShadow={"2xl"}
-          padding={4}
-        >
-          <Flex flex={1} bg="blue.200">
-            <Image
-              objectFit="contain"
-              boxSize="100%"
-              maxHeight={"500px"}
-              src={epDetails?.details?.snapshot}
-            />
-          </Flex>
-          <Flex
-            flex={1}
-            justifyContent={"space-evenly"}
-            alignItems={"center"}
-            p={1}
-            pt={2}
-            gap={6}
+        <Flex flexDirection={"column"}>
+          <VideoPlayer url={urlDetails?.url?.video_url} epDetails={epDetails} />
+
+          <Stack
+            borderWidth="1px"
+            borderRadius="lg"
+            justifyContent="space-between"
+            direction={"column"}
+            bg={"gray.900"}
+            boxShadow={"2xl"}
+            padding={3}
           >
-            <Select
+            <Flex
               flex={1}
-              placeholder="Language"
-              size="lg"
-              onChange={(e) => setLanguage(e.target.value)}
+              justifyContent={"space-evenly"}
+              alignItems={"center"}
+              p={1}
+              pt={2}
+              gap={6}
             >
-              {Object.keys(details).map((language, idx) => {
-                return (
-                  <option key={idx} value={language}>
-                    {language === "jpn"
-                      ? "Japanese"
-                      : language === "eng"
-                      ? "English"
-                      : language}
-                  </option>
-                );
-              })}
-            </Select>
-            <Select
-              flex={1}
-              placeholder="Quality"
-              size="lg"
-              disabled={!language}
-              onChange={(e) => qualityChangeHandler(e.target.value)}
-            >
-              {details[language]?.map((quality, idx) => {
-                return (
-                  <option key={idx} value={Object.keys(quality)[0]}>
-                    {Object.keys(quality)[0]}p
-                  </option>
-                );
-              })}
-            </Select>
-            <Button
-              flex={1}
-              onClick={playHandler}
-              isLoading={urlDetails?.loading}
-              disabled={!quality || !language}
-            >
-              Play in external player
-            </Button>
-            <Button
-              flex={0.5}
-              isLoading={urlDetails?.loading}
-              onClick={downloadHandler}
-              disabled={!quality || !language}
-            >
-              Download
-            </Button>
-          </Flex>
-        </Stack>
+              <Select
+                flex={1}
+                placeholder="Language"
+                size="lg"
+                onChange={(e) => setLanguage(e.target.value)}
+              >
+                {Object.keys(details).map((language, idx) => {
+                  return (
+                    <option key={idx} value={language}>
+                      {language === "jpn"
+                        ? "Japanese"
+                        : language === "eng"
+                        ? "English"
+                        : language}
+                    </option>
+                  );
+                })}
+              </Select>
+              <Select
+                flex={1}
+                placeholder="Quality"
+                size="lg"
+                disabled={!language}
+                onChange={(e) => qualityChangeHandler(e.target.value)}
+              >
+                {details[language]?.map((quality, idx) => {
+                  return (
+                    <option key={idx} value={Object.keys(quality)[0]}>
+                      {Object.keys(quality)[0]}p
+                    </option>
+                  );
+                })}
+              </Select>
+              <Button
+                flex={1}
+                onClick={playHandler}
+                isLoading={urlDetails?.loading}
+                disabled={!quality || !language}
+              >
+                Play in external player
+              </Button>
+              <Button
+                flex={0.5}
+                isLoading={urlDetails?.loading}
+                onClick={downloadHandler}
+                disabled={!quality || !language}
+              >
+                Download
+              </Button>
+            </Flex>
+          </Stack>
+        </Flex>
       )}
     </Center>
   );
