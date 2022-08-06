@@ -1,4 +1,4 @@
-import { Button, Center, Flex, Image, Select, Stack } from "@chakra-ui/react";
+import { Button, Center, Flex, Image, Select, Stack, useToast } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -9,6 +9,8 @@ import {
 import VideoPlayer from "../components/video-player";
 
 const InbuiltPlayerScreen = () => {
+  const toast = useToast()
+
   const dispatch = useDispatch();
   const { details, loading } = useSelector((state) => state.animeStreamDetails);
 
@@ -40,7 +42,19 @@ const InbuiltPlayerScreen = () => {
 
   const downloadHandler = () => {
     if (urlDetails?.url?.video_url) {
-      dispatch(downloadVideo(urlDetails?.url?.video_url));
+      try {
+        dispatch(downloadVideo(urlDetails?.url?.video_url));
+
+        toast({
+          title: 'Download Started',
+          description: "Download has bee started. You can check in downloads sections",
+          status: 'success',
+          duration: 6000,
+          isClosable: true,
+        })
+      } catch (error) {
+        console.log(error)
+      }
     }
   };
 

@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/react";
 import axios from "axios";
 import {
   ANIME_DOWNLOAD_FAIL,
@@ -146,6 +147,7 @@ export const downloadVideo = (url) => async (dispatch) => {
 
     console.log(data);
     dispatch({ type: ANIME_DOWNLOAD_SUCCESS, payload: data });
+
   } catch (error) {
     dispatch({ type: ANIME_DOWNLOAD_FAIL, payload: error });
   }
