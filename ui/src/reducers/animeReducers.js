@@ -42,7 +42,7 @@ export const animeSearchListReducer = (state = { animes: null }, action) => {
       return { loading: false, animes: action.payload };
 
     case ANIME_SEARCH_FAIL:
-      return { loading: false, error: action.payload };
+      return { loading: false, animes: null, error: action.payload };
     case ANIME_SEARCH_CLEAR:
       return { loading: false, animes: null };
 

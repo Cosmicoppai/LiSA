@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import {
   Box,
   Flex,
+  Heading,
   IconButton,
   Input,
   InputGroup,
@@ -14,6 +15,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Text,
 } from "@chakra-ui/react";
 import { Image } from "@chakra-ui/react";
 import {
@@ -33,7 +35,11 @@ export const HomeScreen = () => {
     setQuery(event.target.value);
   };
 
-  const { animes, loading } = useSelector((state) => state.animeSearchList);
+  const { animes, loading, error } = useSelector(
+    (state) => state.animeSearchList
+  );
+  console.log(error);
+  console.log(animes);
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && query) {
@@ -47,7 +53,6 @@ export const HomeScreen = () => {
 
   return (
     <Flex w="100%" h="100%" direction="column">
-      
       <Flex
         align="center"
         justify="center"
@@ -84,6 +89,25 @@ export const HomeScreen = () => {
           </InputGroup>
         </Box>
         {!loading && animes && <SearchResultCard data={animes} />}
+        {!loading && error && (
+          <Box textAlign="center" py={10} px={6}>
+            <Heading
+              display="inline-block"
+              as="h2"
+              size="2xl"
+              bgGradient="linear(to-r, gray.400, gray.600)"
+              backgroundClip="text"
+            >
+              404
+            </Heading>
+            <Text fontSize="18px" mt={3} mb={2}>
+              Anime Not Found
+            </Text>
+            <Text color={"gray.500"} mb={6}>
+              The result you're looking for does not seem to exist
+            </Text>
+          </Box>
+        )}
         {loading && (
           <Image src="/images/loader-serch.gif" alt="loader" boxSize="150px" />
         )}

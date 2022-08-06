@@ -39,7 +39,7 @@ export const searchAnimeList = (query) => async (dispatch) => {
     console.log(data);
     dispatch({ type: ANIME_SEARCH_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: ANIME_SEARCH_FAIL, payload: error });
+    dispatch({ type: ANIME_SEARCH_FAIL, payload: error.response.data });
   }
 };
 export const addEpisodeDetails = (data) => async (dispatch) => {
@@ -90,7 +90,7 @@ export const getExploreDetails = (query) => async (dispatch) => {
   }
 };
 
-export const playVideoExternal = (url) => async (dispatch) => {
+export const playVideoExternal = (url, player) => async (dispatch) => {
   try {
     dispatch({ type: ANIME_STREAM_EXTERNAL_REQUEST });
     // console.log(anime_session, ep_session);
@@ -98,7 +98,7 @@ export const playVideoExternal = (url) => async (dispatch) => {
       `/stream`,
       {
         video_url: url,
-        player: "mpv",
+        player: "vlc",
       },
       {
         "Content-Type": "application/json",
@@ -132,13 +132,14 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
   }
 };
 
-export const downloadVideo = (url) => async (dispatch) => {
+export const downloadVideo = (url, file_name) => async (dispatch) => {
   try {
     dispatch({ type: ANIME_DOWNLOAD_REQUEST });
     const { data } = await axios.post(
       `/download`,
       {
-        pahewin_url: url,
+        video_url: url,
+        file_name,
       },
       {
         "Content-Type": "application/json",
@@ -147,7 +148,6 @@ export const downloadVideo = (url) => async (dispatch) => {
 
     console.log(data);
     dispatch({ type: ANIME_DOWNLOAD_SUCCESS, payload: data });
-
   } catch (error) {
     dispatch({ type: ANIME_DOWNLOAD_FAIL, payload: error });
   }

@@ -1,4 +1,20 @@
-import { Button, Center, Flex, Image, Select, Stack, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Image,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Select,
+  Stack,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -9,7 +25,8 @@ import {
 import VideoPlayer from "../components/video-player";
 
 const InbuiltPlayerScreen = () => {
-  const toast = useToast()
+  const toast = useToast();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const dispatch = useDispatch();
   const { details, loading } = useSelector((state) => state.animeStreamDetails);
@@ -34,26 +51,29 @@ const InbuiltPlayerScreen = () => {
     dispatch(getVideoUrl(templink));
   };
 
-  const playHandler = () => {
+  const playHandler = (player) => {
     if (urlDetails?.url?.video_url) {
-      dispatch(playVideoExternal(urlDetails?.url?.video_url));
+      dispatch(playVideoExternal(urlDetails?.url?.video_url, player));
     }
   };
 
   const downloadHandler = () => {
     if (urlDetails?.url?.video_url) {
       try {
-        dispatch(downloadVideo(urlDetails?.url?.video_url));
+        dispatch(
+          downloadVideo(urlDetails?.url?.video_url, urlDetails?.url?.file_name)
+        );
 
         toast({
-          title: 'Download Started',
-          description: "Download has bee started. You can check in downloads sections",
-          status: 'success',
+          title: "Download Started",
+          description:
+            "Download has bee started. You can check in downloads sections",
+          status: "success",
           duration: 6000,
           isClosable: true,
-        })
+        });
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
     }
   };
@@ -119,12 +139,20 @@ const InbuiltPlayerScreen = () => {
               </Select>
               <Button
                 flex={1}
+                isLoading={urlDetails?.loading}
+                disabled={!quality || !language}
+                onClick={onOpen}
+              >
+                Play in external player
+              </Button>
+              {/* <Button
+                flex={1}
                 onClick={playHandler}
                 isLoading={urlDetails?.loading}
                 disabled={!quality || !language}
               >
                 Play in external player
-              </Button>
+              </Button> */}
               <Button
                 flex={0.5}
                 isLoading={urlDetails?.loading}
@@ -135,6 +163,35 @@ const InbuiltPlayerScreen = () => {
               </Button>
             </Flex>
           </Stack>
+          <Modal isOpen={isOpen} onClose={onClose} isCentered>
+            <ModalOverlay />
+            <ModalContent>
+              <ModalHeader>Choose your favourite video player </ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <Flex
+                  display={"flex"}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                >
+                  <Box
+                    p={4}
+                    onClick={() => playHandler("mpv")}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <Image src="/assests/mpv.png" />
+                  </Box>
+                  <Box
+                    p={4}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => playHandler("vlc")}
+                  >
+                    <Image src="/assests/vlc.png" />
+                  </Box>
+                </Flex>
+              </ModalBody>
+            </ModalContent>
+          </Modal>
         </Flex>
       )}
     </Center>
