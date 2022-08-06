@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from os import system
 from typing import Dict
+import subprocess
 
 
 class Stream(ABC):
@@ -29,7 +30,7 @@ class MpvStream(Stream):
     def play_video(file_location: str):
         try:
             system(f'mpv "{file_location}" --fs=yes --ontop')
-        except OSError as error:
+        except subprocess.CalledProcessError as err:
             raise error
 
 
@@ -40,7 +41,7 @@ class VlcStream(Stream):
     def play_video(file_location: str):
         try:
             system(f'vlc "{file_location}" --fullscreen')
-        except OSError as error:
+        except subprocess.CalledProcessError:
             raise error
 
 
