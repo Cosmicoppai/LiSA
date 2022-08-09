@@ -12,6 +12,9 @@ import config
 
 class Anime(ABC):
     site_url: str
+    api_url: str
+    file_name: str
+    video_extension: str = "mp4"
 
     @abstractmethod
     def search_anime(self, session, anime_name: str):
