@@ -240,11 +240,13 @@ async def stream(request: Request):
         if not player_name:
             return await bad_request_400(request, msg="pass video player_name")
 
-        video_url = jb["video_url"]
+        video_url = jb.get("video_url", None)
+        if not video_url:
+            return await bad_request_400(request, msg="pass valid video url")
         msg, status_code = play(player_name.lower(), video_url)
         return JSONResponse({"error": msg}, status_code=status_code)
-    except JSONDecodeError or KeyError:
-        return await bad_request_400(request, msg="Malformed body: Pass a valid video_url")
+    except JSONDecodeError:
+        return await bad_request_400(request, msg="Malformed body: Invalid JSON")
 
 
 async def download(request: Request):
@@ -260,8 +262,8 @@ async def download(request: Request):
             return await bad_request_400(request, msg="Malformed body: pass valid Pahewin url")
 
         file_name = jb.get("file_name", None)
-        if not file_name:
-            return await bad_request_400(request, msg="Malformed body: pass valid Pahewin url")
+        if not file_name or file_name[-3:] != Animepahe.video_extension:
+            return await bad_request_400(request, msg="Malformed body: pass valid filename")
 
         await Download().start_download(url=video_url, file_name=file_name)
         return JSONResponse({"status": "started"})
