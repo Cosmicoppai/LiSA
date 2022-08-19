@@ -5,7 +5,7 @@ from library import JsonLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, JSONResponse
+from starlette.responses import PlainTextResponse, JSONResponse, Response
 from typing import Tuple, Dict
 from urllib.parse import urlparse
 from errors import not_found_404, bad_request_400, internal_server_500
@@ -14,10 +14,8 @@ from scraper import Animepahe, MyAL
 from stream import Stream
 from selenium.common.exceptions import TimeoutException
 import config
-
-
-async def index(request: Request):
-    return PlainTextResponse(content="Welcome to LiSA")
+from bs4 import BeautifulSoup
+import re
 
 
 async def search(request: Request):
@@ -195,7 +193,7 @@ async def get_stream_details(request: Request):
                 """
                     stream_dt (dict): {'quality': stream url (str)}
                 """
-                aud, stream_dt = val["audio"], {key: val["kwik_pahewin"]}
+                aud, stream_dt = val["audio"], {key: val["kwik"]}
                 resp[aud].append(stream_dt)
         return JSONResponse(resp)
     except JSONDecodeError:
@@ -335,8 +333,59 @@ async def top_anime(request: Request):
     return JSONResponse(top_anime_response)
 
 
+async def get_manifest(request: Request):
+    kwik_url = request.query_params.get("kwik_url", None)
+    if not kwik_url:
+        return await bad_request_400(request, msg="kwik url not present")
+
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6',
+        'origin': 'https://kwik.cx',
+        'referer': 'https://kwik.cx/',
+    }
+
+    stream_headers = headers.copy()
+    stream_headers['referer'] = "https://animepahe.com/"
+
+    stream_response = requests.get(kwik_url, headers=stream_headers)
+    bs = BeautifulSoup(stream_response.text, 'html.parser')
+
+    all_scripts = bs.find_all('script')
+    pattern = r'\|\|\|.*\'\.'
+    pattern_list = (re.findall(pattern, str(all_scripts[6]))[0]).split('|')[88:98]
+
+    uwu_url = 'https://{}-{}.files.nextcdn.org/stream/{}/{}/uwu.m3u8'.format(pattern_list[9], pattern_list[8],
+                                                                             pattern_list[3], pattern_list[2])
+
+    response = requests.get(
+        uwu_url,
+        headers=headers)
+
+    content = response.text
+
+    start_idx, end_idx = content.index("URI="), content.index(".key")
+    return PlainTextResponse(content.replace(content[start_idx + 5:end_idx + 4], f"'{config.API_SERVER_ADDRESS}/key/{content[start_idx + 5:end_idx + 4]}'"))
+
+
+async def get_mon_key(request: Request):
+    key_url = request.query_params.get("key", None)
+    print(key_url)
+    if not key_url:
+        await bad_request_400(request, msg="key not present")
+
+    headers = {
+        'accept': '*/*',
+        'accept-language': 'en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6',
+        'origin': 'https://kwik.cx',
+        'referer': 'https://kwik.cx/',
+    }
+
+    resp = requests.get(key_url, headers=headers)
+    return Response(resp.content, media_type="application/octet-stream")
+
+
 routes = [
-    Route("/", endpoint=index, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
@@ -345,6 +394,8 @@ routes = [
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
+    Route("/get_manifest", endpoint=get_manifest, methods=["GET"]),
+    Route('/get_key', endpoint=get_mon_key, methods=["GET"])
 ]
 
 exception_handlers = {
