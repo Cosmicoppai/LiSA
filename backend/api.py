@@ -365,7 +365,7 @@ async def get_manifest(request: Request):
     content = response.text
 
     start_idx, end_idx = content.index("URI="), content.index(".key")
-    return PlainTextResponse(content.replace(content[start_idx + 5:end_idx + 4], f"'{config.API_SERVER_ADDRESS}/key/{content[start_idx + 5:end_idx + 4]}'"))
+    return PlainTextResponse(content.replace(content[start_idx + 5:end_idx + 4], f"{config.API_SERVER_ADDRESS}/get_key?key={content[start_idx + 5:end_idx + 4]}"))
 
 
 async def get_mon_key(request: Request):
