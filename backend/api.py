@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 from json import JSONDecodeError
 import requests
@@ -5,7 +6,7 @@ from library import JsonLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, JSONResponse, Response
+from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict
 from urllib.parse import urlparse
 from errors import not_found_404, bad_request_400, internal_server_500
@@ -16,6 +17,9 @@ from selenium.common.exceptions import TimeoutException
 import config
 from bs4 import BeautifulSoup
 import re
+from io import StringIO
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 
 
 async def search(request: Request):
@@ -360,9 +364,13 @@ async def get_manifest(request: Request):
     uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
                                          pattern_list[2], pattern_list[1], pattern_list[0])
 
-    response = requests.get(uwu_url,headers=headers)
+    response = requests.get(uwu_url, headers=headers)
 
-    return PlainTextResponse(response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
+    response.headers['Content-Disposition'] = 'attachment; filename="uwu.m3u8"'
+
+    body = response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}")
+
+    return Response(body, media_type=response.headers.get("content-type", "application/vnd.apple.mpegurl"))
 
 
 async def proxy(request: Request):
@@ -400,9 +408,15 @@ exception_handlers = {
     500: internal_server_500
 }
 
+middleware = [
+    Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"])
+
+]
+
 app = Starlette(
     debug=True,
     routes=routes,
     exception_handlers=exception_handlers,
+    middleware=middleware,
     on_startup=[JsonLibrary().load_data],
 )
