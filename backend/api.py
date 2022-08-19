@@ -355,24 +355,20 @@ async def get_manifest(request: Request):
     pattern = r'\|\|\|.*\'\.'
     pattern_list = (re.findall(pattern, str(all_scripts[6]))[0]).split('|')[88:98]
 
-    uwu_url = 'https://{}-{}.files.nextcdn.org/stream/{}/{}/uwu.m3u8'.format(pattern_list[9], pattern_list[8],
-                                                                             pattern_list[3], pattern_list[2])
+    uwu_root_domain = f"https://{pattern_list[9]}-{pattern_list[8]}.{pattern_list[7]}.{pattern_list[6]}.{pattern_list[5]}"
 
-    response = requests.get(
-        uwu_url,
-        headers=headers)
+    uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
+                                         pattern_list[2], pattern_list[1], pattern_list[0])
 
-    content = response.text
+    response = requests.get(uwu_url,headers=headers)
 
-    start_idx, end_idx = content.index("URI="), content.index(".key")
-    return PlainTextResponse(content.replace(content[start_idx + 5:end_idx + 4], f"{config.API_SERVER_ADDRESS}/get_key?key={content[start_idx + 5:end_idx + 4]}"))
+    return PlainTextResponse(response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
 
 
-async def get_mon_key(request: Request):
-    key_url = request.query_params.get("key", None)
-    print(key_url)
+async def proxy(request: Request):
+    key_url = request.query_params.get("url", None)
     if not key_url:
-        await bad_request_400(request, msg="key not present")
+        await bad_request_400(request, msg="url not present")
 
     headers = {
         'accept': '*/*',
@@ -382,7 +378,7 @@ async def get_mon_key(request: Request):
     }
 
     resp = requests.get(key_url, headers=headers)
-    return Response(resp.content, media_type="application/octet-stream")
+    return Response(resp.content, headers=resp.headers)
 
 
 routes = [
@@ -395,7 +391,7 @@ routes = [
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
     Route("/get_manifest", endpoint=get_manifest, methods=["GET"]),
-    Route('/get_key', endpoint=get_mon_key, methods=["GET"])
+    Route('/proxy', endpoint=proxy, methods=["GET"])
 ]
 
 exception_handlers = {
