@@ -9,6 +9,7 @@ import DownloadScreen from "./screens/downloadsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import ExploreScreen from "./screens/exploreScreen";
+import VideoPlayer from "./components/video-player";
 
 const { app } = window.require("@electron/remote");
 
@@ -42,7 +43,7 @@ function App() {
         >
           <Box sx={{ width: "100%", height: "100%" }}>
             <Routes>
-              <Route path="/" element={<HomeScreen />} />
+              <Route path="/" element={<VideoPlayer />} />
               <Route path="anime-details" element={<AnimeDetailsScreen />} />
               <Route path="setting" element={<SettingScreen />} />
               <Route path="download" element={<DownloadScreen />} />

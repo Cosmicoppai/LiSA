@@ -166,7 +166,7 @@ const DownloadScreen = () => {
             bg={"gray.900"}
             minWidth={"400px"}
           >
-            {historyDetails?.details &&
+            { historyDetails?.details &&
             historyDetails?.details?.length !== 0 ? (
               historyDetails.details.map((history_item) => {
                 return (

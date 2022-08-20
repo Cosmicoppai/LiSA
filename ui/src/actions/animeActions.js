@@ -85,6 +85,7 @@ export const getExploreDetails = (query) => async (dispatch) => {
 
     console.log(data);
     dispatch({ type: ANIME_EXPLORE_DETAILS_SUCCESS, payload: data });
+    // dispatch({ type: ANIME_EXPLORE_QUERY, payload: query });
   } catch (error) {
     dispatch({ type: ANIME_EXPLORE_DETAILS_FAIL, payload: error });
   }

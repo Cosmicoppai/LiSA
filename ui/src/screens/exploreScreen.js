@@ -3,11 +3,9 @@ import {
   Center,
   Flex,
   Heading,
-  Image,
+  Skeleton,
   Spacer,
   Stack,
-  Text,
-  VStack,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { Select } from "@chakra-ui/react";
@@ -15,19 +13,24 @@ import { AiFillFilter } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { getExploreDetails } from "../actions/animeActions";
 import Card from "../components/card";
+// import { useNavigate } from "react-router-dom";
 
 const ExploreScreen = () => {
   const [query, setQuery] = useState("airing");
-  const { loading, details } = useSelector(
-    (state) => state.animeExploreDetails
-  );
-  console.log(details);
+  const { loading, details } = useSelector((state) => {
+    console.log(state);
+    return state.animeExploreDetails;
+  });
   const filterChangeHandler = (e) => {
     setQuery(e.target.value);
   };
+  console.log(query);
+
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(getExploreDetails(query));
+    if (!details) {
+      dispatch(getExploreDetails(query));
+    }
   }, [query]);
 
   return (

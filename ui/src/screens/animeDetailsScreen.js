@@ -15,12 +15,16 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor } from "react-icons/fi";
-import { addEpisode, addEpisodeDetails, clearEp, getStreamDetails } from "../actions/animeActions";
-
+import {
+  addEpisodeDetails,
+  clearEp,
+  getStreamDetails,
+  searchAnimeList,
+} from "../actions/animeActions";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
-  const { animes: data, loading } = useSelector(
+  const { animes: data } = useSelector(
     (state) => state.animeSearchList
   );
 
@@ -39,6 +43,14 @@ export default function AnimeDetailsScreen() {
     dispatch(getStreamDetails(data.session, item.ep_session));
     dispatch(addEpisodeDetails(item));
     navigate("/play");
+  };
+
+  console.log(data);
+  console.log(data?.episode_details?.next_page_url);
+  console.log(data?.episode_details);
+  const pageChangeHandler = (url) => {
+    console.log(url);
+    dispatch(searchAnimeList(null, url));
   };
 
   return (
@@ -124,6 +136,38 @@ export default function AnimeDetailsScreen() {
               </Flex>
               {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
             </Box>
+            <Flex
+              mt={4}
+              width={"100%"}
+              display={"flex"}
+              justifyContent={"space-between"}
+            >
+              {data?.episode_details?.prev_page_url && (
+                <Button
+                  onClick={() => dispatch(data?.episode_details?.prev_page_url)}
+                >
+                  Previous
+                </Button>
+              )}
+              {data?.episodes_details?.prev_page_url && (
+                <Button
+                  onClick={() =>
+                    pageChangeHandler(data?.episode_details?.prev_page_url)
+                  }
+                >
+                  Previous
+                </Button>
+              )}
+              {data?.episode_details?.next_page_url && (
+                <Button
+                  onClick={() =>
+                    pageChangeHandler(data?.episode_details?.next_page_url)
+                  }
+                >
+                  Next
+                </Button>
+              )}
+            </Flex>
           </Stack>
         </Stack>
       )}
