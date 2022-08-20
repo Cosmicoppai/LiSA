@@ -17,7 +17,6 @@ from selenium.common.exceptions import TimeoutException
 import config
 from bs4 import BeautifulSoup
 import re
-from io import StringIO
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 
@@ -365,12 +364,15 @@ async def get_manifest(request: Request):
                                          pattern_list[2], pattern_list[1], pattern_list[0])
 
     response = requests.get(uwu_url, headers=headers)
+    
+    with open("uwu.m3u8", "w+") as f:
+        f.write(response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
 
-    response.headers['Content-Disposition'] = 'attachment; filename="uwu.m3u8"'
+    # response.headers['Content-Disposition'] = 'attachment; filename="uwu.m3u8"'
 
-    body = response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}")
+    # body = response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}")
 
-    return Response(body, media_type=response.headers.get("content-type", "application/vnd.apple.mpegurl"))
+    return FileResponse("./uwu.m3u8", media_type=response.headers.get("content-type", "application/vnd.apple.mpegurl"), filename="uwu.m3u8")
 
 
 async def proxy(request: Request):
@@ -409,7 +411,7 @@ exception_handlers = {
 }
 
 middleware = [
-    Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"])
+    Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"], allow_credentials=True)
 
 ]
 
