@@ -2,5 +2,6 @@ __pycache__/
 *.mp4
 ./env
 run_server.sh
+*.m3u8
 
 ui/node_modules
