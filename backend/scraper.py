@@ -1,11 +1,7 @@
 import requests
-import undetected_chromedriver as uc
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from pathlib import Path
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from typing import Dict, List, Tuple, Any
 import config
 from headers import get_headers
