@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from typing import Dict, List, Tuple, Any
 import config
+from headers import get_headers
 
 
 class Anime(ABC):
@@ -27,13 +28,6 @@ class Anime(ABC):
     @abstractmethod
     def get_episode_stream_data(self, episode_session: str):
         ...
-
-    def get_headers(self, extra: str = "") -> Dict[str, str]:
-        return {
-            "referer": "{}/{}".format(self.site_url, extra),
-            "accept-language": "en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
-        }
 
 
 class Animepahe(Anime):
@@ -55,7 +49,7 @@ class Animepahe(Anime):
         Returns:
             json: response with the most significant match
         """
-        search_headers = self.get_headers()
+        search_headers = get_headers()
 
         search_params = {
             'm': 'search',
@@ -75,7 +69,7 @@ class Animepahe(Anime):
         Returns:
             List[Dict[str, str | int]] | None: Json with episode details
         """
-        episodes_headers = self.get_headers(extra=anime_session)
+        episodes_headers = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
 
         episodes_params = {
             'm': 'release',
@@ -105,7 +99,7 @@ class Animepahe(Anime):
                 'Duration': str,
             }
         """
-        description_header = self.get_headers(extra=anime_session)
+        description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
         description_response = session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
 
         description_bs = BeautifulSoup(description_response.text, 'html.parser')
@@ -149,7 +143,7 @@ class Animepahe(Anime):
             }
         """
         # episode_session = self.episode_session_dict[episode_no]
-        # ep_headers = self.get_headers(extra='play/{}/{}'.format(anime_session, episode_session))
+        # ep_headers = get_headers(extra='play/{}/{}'.format(anime_session, episode_session))
 
         ep_params = {
             'm': 'links',
@@ -157,7 +151,7 @@ class Animepahe(Anime):
             'p': 'kwik',
         }
 
-        ep_headers = self.get_headers()
+        ep_headers = get_headers()
 
         return requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()["data"]
 
