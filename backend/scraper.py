@@ -25,7 +25,7 @@ class Anime(ABC):
         ...
 
     @abstractmethod
-    def get_episode_stream_data(self, episode_session: str, anime_session: str):
+    def get_episode_stream_data(self, episode_session: str):
         ...
 
     def get_headers(self, extra: str = "") -> Dict[str, str]:
@@ -137,12 +137,11 @@ class Animepahe(Anime):
 
         return description
 
-    def get_episode_stream_data(self, episode_session: str, anime_session: str) -> Dict[str, List[Dict[str, str]]]:
+    def get_episode_stream_data(self, episode_session: str) -> Dict[str, List[Dict[str, str]]]:
         """getting the streaming details
 
         Args:
             episode_session (str): session of an episode (changes after each interval)
-            anime_session (str): session of an anime (changes after each interval)
 
         Returns:
             Dict[str, List[Dict[str, str]]]: stream_data {
@@ -150,7 +149,7 @@ class Animepahe(Anime):
             }
         """
         # episode_session = self.episode_session_dict[episode_no]
-        ep_headers = self.get_headers(extra='play/{}/{}'.format(anime_session, episode_session))
+        # ep_headers = self.get_headers(extra='play/{}/{}'.format(anime_session, episode_session))
 
         ep_params = {
             'm': 'links',
@@ -158,96 +157,12 @@ class Animepahe(Anime):
             'p': 'kwik',
         }
 
-        stream_data = requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()
-        return stream_data["data"]
+        ep_headers = self.get_headers()
 
-    def get_kwik_f_link(self, pahewin_url: str) -> str:
-        """scraping the f link from the pahewin url
+        return requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()["data"]
 
-        Args:
-            pahewin_url (str): https://pahe.win/*****
-
-        Returns:
-            str (url): The f link format: https://kwik.cx/f/*******
-        """
-        kwik_f_headers = self.get_headers()
-
-        kwik_f_response = requests.get(pahewin_url, headers=kwik_f_headers)
-
-        bs_f = BeautifulSoup(kwik_f_response.text, 'html.parser')
-
-        kwik_f_link = bs_f.find('a', {'class': 'redirect'})['href']
-
-        return kwik_f_link
-
-    def get_kwik_f_page(self, kwik_f_url: str) -> str:
-        """
-
-        Args:
-            kwik_f_url (str): from get_kwik_f_link()
-
-        Returns:
-            str: page source of f link
-        """
-        options = webdriver.ChromeOptions()
-        # options.headless = True
-        options.add_argument('--log-level=1')
-        options.add_argument("--disable-blink-features=AutomationControlled")
-        # options.add_argument("start-maximized")
-        options.add_argument("--disable-extensions")
-        options.add_argument("--disable-gpu")
-        # options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        # options.add_experimental_option('useAutomationExtension', False)
-        options.add_argument("--window-size=1,1")
-        options.add_argument(
-            'user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36')
-
-        driver = uc.Chrome(options=options, use_subprocess=True, driver_executable_path=self.chrome_driver_path)
-        driver.set_window_size(1, 1)
-        driver.set_window_position(999, 999)
-        driver.get(kwik_f_url)
-        WebDriverWait(driver, 20).until(lambda _driver: 'animepahe' in _driver.title.lower())
-        self.cookies = driver.get_cookies()
-        page_source = driver.page_source  # return page html
-        driver.close()
-        self.file_name = BeautifulSoup(page_source, 'html.parser').find('h1', {"class": "title"}).text.replace(" ",
-                                                                                                               "").strip()
-        return page_source
-
-    def extract_download_details(self, kwik_f_page: str, kwik_f_url: str) -> Tuple[str, str]:
-        """Extract download details
-
-        Args:
-            kwik_f_page (str): from get_kwik_f_page()
-            kwik_f_url (str): https://kwik.cx/f/******
-
-        Returns:
-            Tuple[str, str]: response url and a file_name
-        """
-        bs_d = BeautifulSoup(kwik_f_page, 'html.parser')
-
-        form_tag = bs_d.find_all('form', {'method': 'POST'})
-        token = bs_d.find_all('input', {'name': '_token'})
-
-        kwik_d_link = form_tag[0]["action"]
-        data = f"_token={token[0]['value']}"
-        headers = self.get_headers()
-        headers["referer"] = kwik_f_url
-        headers["Content-Type"] = "application/x-www-form-urlencoded"
-        headers[
-            "accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
-        headers["cookie"] = self._get_cookies()
-        resp = requests.post(kwik_d_link, headers=headers, data=data, stream=True)
-        if self.file_name[-4:] != ".mp4":
-            self.file_name += ".mp4"
-        # return video_url and page title without spaces
-        return resp.url, self.file_name
-
-    def _get_cookies(self) -> str:
-        cookies = ""
-        for cookie in self.cookies:
-            cookies += f"{cookie['name']}={cookie['value']};"
-        return cookies
+    async def get_manifest_file(self, kwik_link: str):
+        ...
 
 
 class MyAL:

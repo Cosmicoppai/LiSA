@@ -19,6 +19,8 @@ from bs4 import BeautifulSoup
 import re
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
+from headers import get_headers
+from master_m3u8 import build_master_manifest
 
 
 async def search(request: Request):
@@ -182,22 +184,22 @@ async def get_stream_details(request: Request):
             "quality_audio":{"kwik_pahewin":str(url)}, ...
         }
     """
-    anime_session = request.query_params.get("anime_session", None)
+    # anime_session = request.query_params.get("anime_session", None)
     episode_session = request.query_params.get("ep_session", None)
 
-    if anime_session is None or episode_session is None:
-        return await bad_request_400(request, msg="Pass Anime and Episode sessions")
+    if not episode_session:  # or episode_session is None:
+        return await bad_request_400(request, msg="Pass Episode sessions")
 
     try:
-        stream_data = Animepahe().get_episode_stream_data(episode_session=episode_session, anime_session=anime_session)
-        resp = defaultdict(list)
+        stream_data = Animepahe().get_episode_stream_data(episode_session=episode_session)
+        resp: Dict[str, str] = {}
         for data in stream_data:
             for key, val in data.items():
                 """
                     stream_dt (dict): {'quality': stream url (str)}
                 """
-                aud, stream_dt = val["audio"], {key: val["kwik"]}
-                resp[aud].append(stream_dt)
+                aud, kwik_url = val["audio"], val["kwik"]
+                resp[aud] = resp.get(aud, f"{config.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{config.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{key}" + ","
         return JSONResponse(resp)
     except JSONDecodeError:
         return await not_found_404(request, msg="Pass valid anime and episode sessions")
@@ -336,20 +338,26 @@ async def top_anime(request: Request):
     return JSONResponse(top_anime_response)
 
 
+async def get_master_manifest(request: Request):
+    kwik_urls = request.query_params.get("kwik_url", None)
+    if not kwik_urls:
+        return await bad_request_400(request, msg="kwik url not present")
+
+    kwik_urls = kwik_urls.split(",")
+    kwik_urls.pop()
+
+    with open("master.m3u8", "w+") as f:
+        f.write(build_master_manifest(kwik_urls))
+
+    return FileResponse("master.m3u8", media_type="application/vnd.apple.mpegurl", filename="master.m3u8")
+
+
 async def get_manifest(request: Request):
     kwik_url = request.query_params.get("kwik_url", None)
     if not kwik_url:
         return await bad_request_400(request, msg="kwik url not present")
 
-    headers = {
-        'accept': '*/*',
-        'accept-language': 'en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6',
-        'origin': 'https://kwik.cx',
-        'referer': 'https://kwik.cx/',
-    }
-
-    stream_headers = headers.copy()
-    stream_headers['referer'] = "https://animepahe.com/"
+    stream_headers = get_headers(extra={"referer": "https://animepahe.com/"})
 
     stream_response = requests.get(kwik_url, headers=stream_headers)
     bs = BeautifulSoup(stream_response.text, 'html.parser')
@@ -363,31 +371,24 @@ async def get_manifest(request: Request):
     uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
                                          pattern_list[2], pattern_list[1], pattern_list[0])
 
-    response = requests.get(uwu_url, headers=headers)
+    response = requests.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"}))
     
     with open("uwu.m3u8", "w+") as f:
         f.write(response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
-
-    # response.headers['Content-Disposition'] = 'attachment; filename="uwu.m3u8"'
-
-    # body = response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}")
 
     return FileResponse("./uwu.m3u8", media_type=response.headers.get("content-type", "application/vnd.apple.mpegurl"), filename="uwu.m3u8")
 
 
 async def proxy(request: Request):
-    key_url = request.query_params.get("url", None)
-    if not key_url:
+    """
+    This function will proxy request for manifest files, encryption key and video(ts) frames
+
+    """
+    actual_url = request.query_params.get("url", None)
+    if not actual_url:
         await bad_request_400(request, msg="url not present")
 
-    headers = {
-        'accept': '*/*',
-        'accept-language': 'en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6',
-        'origin': 'https://kwik.cx',
-        'referer': 'https://kwik.cx/',
-    }
-
-    resp = requests.get(key_url, headers=headers)
+    resp = requests.get(actual_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/", "accept": "*/*"}))
     return Response(resp.content, headers=resp.headers)
 
 
@@ -400,7 +401,8 @@ routes = [
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
-    Route("/get_manifest", endpoint=get_manifest, methods=["GET"]),
+    Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
+    Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route('/proxy', endpoint=proxy, methods=["GET"])
 ]
 
