@@ -29,10 +29,7 @@ class MpvStream(Stream):
 
     @staticmethod
     def play_video(file_location: str):
-        try:
-            subprocess.Popen(shlex.split(f'mpv "{file_location}" --fs=yes --ontop'))
-        except subprocess.CalledProcessError as error:
-            raise error
+        subprocess.Popen(shlex.split(f'mpv "{file_location}" --fs=yes --ontop'))
 
 
 class VlcStream(Stream):
@@ -40,11 +37,6 @@ class VlcStream(Stream):
 
     @staticmethod
     def play_video(file_location: str):
-        try:
-            subprocess.Popen(shlex.split(f'vlc "{file_location}" --fs=yes --ontop'))
-        except subprocess.CalledProcessError as error:
-            raise error
+        subprocess.Popen(shlex.split(f'vlc "{file_location}" --fullscreen'))
 
 
-if __name__ == "__main__":
-    MpvStream().play("T:\\gg\\GG\\downloads\\AnimePahe_Rainbow_-_Nisha_Rokubou_no_Shichinin_-_01_FroZen.mp4")
