@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from os import system
 from typing import Dict
 import subprocess
+import shlex
 
 
 class Stream(ABC):
@@ -29,8 +30,8 @@ class MpvStream(Stream):
     @staticmethod
     def play_video(file_location: str):
         try:
-            system(f'mpv "{file_location}" --fs=yes --ontop')
-        except subprocess.CalledProcessError as err:
+            subprocess.Popen(shlex.split(f'mpv "{file_location}" --fs=yes --ontop'))
+        except subprocess.CalledProcessError as error:
             raise error
 
 
@@ -40,8 +41,8 @@ class VlcStream(Stream):
     @staticmethod
     def play_video(file_location: str):
         try:
-            system(f'vlc "{file_location}" --fullscreen')
-        except subprocess.CalledProcessError:
+            subprocess.Popen(shlex.split(f'vlc "{file_location}" --fs=yes --ontop'))
+        except subprocess.CalledProcessError as error:
             raise error
 
 

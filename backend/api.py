@@ -1,5 +1,4 @@
 import os
-from collections import defaultdict
 from json import JSONDecodeError
 import requests
 from library import JsonLibrary
@@ -8,12 +7,10 @@ from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict
-from urllib.parse import urlparse
 from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
-from selenium.common.exceptions import TimeoutException
 import config
 from bs4 import BeautifulSoup
 import re
@@ -205,33 +202,6 @@ async def get_stream_details(request: Request):
         return await not_found_404(request, msg="Pass valid anime and episode sessions")
 
 
-async def get_video_url(request: Request):
-    try:
-        if request.headers.get("content-type", None) != "application/json":
-            return await bad_request_400(request, msg="Invalid content type")
-        jb = await request.json()
-
-        pahewin_url = jb.get("pahewin_url", None)
-        if not pahewin_url:
-            return await bad_request_400(request, msg="Invalid JSON body: pass valid pahewin url")
-
-        parsed_url = urlparse(pahewin_url)
-        # if url is invalid return await bad_request_400(request, msg="Invalid pahewin url")
-        if not all([parsed_url.scheme, parsed_url.netloc]) or "https://pahe.win" not in pahewin_url:
-            return await bad_request_400(request, msg="Invalid pahewin url")
-
-        try:
-            video_url, file_name = get_video_url_and_name(pahewin_url)
-            return JSONResponse({"video_url": video_url, "file_name": file_name}, status_code=200)
-        except TypeError:
-            return await not_found_404(request, msg="Invalid url")
-        except TimeoutException:
-            return await internal_server_500(request, msg="Try again after sometime")
-
-    except JSONDecodeError:
-        return await bad_request_400(request, msg="Malformed JSON body: pass valid pahewin url")
-
-
 async def stream(request: Request):
     try:
         if request.headers.get("content-type", None) != "application/json":
@@ -243,10 +213,10 @@ async def stream(request: Request):
         if not player_name:
             return await bad_request_400(request, msg="pass video player_name")
 
-        video_url = jb.get("video_url", None)
-        if not video_url:
-            return await bad_request_400(request, msg="pass valid video url")
-        msg, status_code = play(player_name.lower(), video_url)
+        manifest_url = jb.get("manifest_url", None)
+        if not manifest_url:
+            return await bad_request_400(request, msg="pass valid manifest url")
+        msg, status_code = play(player_name.lower(), manifest_url)
         return JSONResponse({"error": msg}, status_code=status_code)
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed body: Invalid JSON")
@@ -293,9 +263,9 @@ async def library(request: Request):
     return JSONResponse(JsonLibrary().get_all())
 
 
-def play(player_name: str, video_url: str) -> Tuple[str, int]:
+def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
     try:
-        Stream.play(player_name, video_url)
+        Stream.play(player_name, manifest_url)
         return None, 200
     except Exception as error:
         return error.__str__(), 500
@@ -344,10 +314,14 @@ async def get_master_manifest(request: Request):
         return await bad_request_400(request, msg="kwik url not present")
 
     kwik_urls = kwik_urls.split(",")
-    kwik_urls.pop()
+    if kwik_urls[-1] == "":
+        kwik_urls.pop()
 
     with open("master.m3u8", "w+") as f:
-        f.write(build_master_manifest(kwik_urls))
+        try:
+            f.write(build_master_manifest(kwik_urls))
+        except ValueError as err_msg:
+            return await bad_request_400(request, msg=str(err_msg))
 
     return FileResponse("master.m3u8", media_type="application/vnd.apple.mpegurl", filename="master.m3u8")
 
@@ -397,7 +371,6 @@ routes = [
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
     Route("/stream_details", endpoint=get_stream_details, methods=["GET"]),
-    Route("/get_video_url", endpoint=get_video_url, methods=["POST"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
