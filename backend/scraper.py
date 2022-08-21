@@ -9,13 +9,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from typing import Dict, List, Tuple, Any
 import config
 from headers import get_headers
+import re
 
 
 class Anime(ABC):
     site_url: str
     api_url: str
-    file_name: str
-    video_extension: str = "mp4"
+    video_file_name: str
+    video_extension: str = ".mp4"
 
     @abstractmethod
     def search_anime(self, session, anime_name: str):
@@ -33,11 +34,11 @@ class Anime(ABC):
 class Animepahe(Anime):
     site_url: str = "https://animepahe.com"
     api_url: str = "https://animepahe.com/api?"
-    file_name: str = None  # variable will be assign while scraping for kwik f link
-
-    def __init__(self):
-        self.chrome_driver_path = Path("./chromedriver.exe").parent.absolute().joinpath("chromedriver.exe").__str__()
-        self.cookies: Dict[str, str] = {}
+    video_file_name: str = None  # variable will be assign while scraping for kwik f link
+    manifest_location = "./uwu.m3u8"
+    manifest_filename = "uwu.m3u8"
+    master_manifest_location = "./master.m3u8"
+    master_manifest_filename = "uwu.m3u8"
 
     def search_anime(self, session, input_anime):
         """A scraper for searching an anime user requested
@@ -56,7 +57,7 @@ class Animepahe(Anime):
             'q': input_anime,
         }
 
-        return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"][0]
+        return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"]
 
     def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
@@ -115,7 +116,7 @@ class Animepahe(Anime):
             details.append(x.text.replace('\n', ''))
         for i in range(len(details)):
             if 'English' in details[i]:
-                description['eng_anime_name'] = details[i][9:]
+                description['eng_name'] = details[i][9:]
             if 'Type' in details[i]:
                 description['Type'] = details[i][6:]
             if 'Episodes' in details[i]:
@@ -155,8 +156,22 @@ class Animepahe(Anime):
 
         return requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()["data"]
 
-    async def get_manifest_file(self, kwik_link: str):
-        ...
+    async def get_manifest_file(self, kwik_url: str) -> (str, str):
+        stream_headers = get_headers(extra={"referer": self.site_url})
+
+        stream_response = requests.get(kwik_url, headers=stream_headers)
+        bs = BeautifulSoup(stream_response.text, 'html.parser')
+
+        all_scripts = bs.find_all('script')
+        pattern = r'\|\|\|.*\'\.'
+        pattern_list = (re.findall(pattern, str(all_scripts[6]))[0]).split('|')[88:98]
+
+        uwu_root_domain = f"https://{pattern_list[9]}-{pattern_list[8]}.{pattern_list[7]}.{pattern_list[6]}.{pattern_list[5]}"
+
+        uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
+                                             pattern_list[2], pattern_list[1], pattern_list[0])
+
+        return requests.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_root_domain
 
 
 class MyAL:

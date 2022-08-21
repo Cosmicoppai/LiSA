@@ -1,4 +1,4 @@
-import os
+import asyncio
 from json import JSONDecodeError
 import requests
 from library import JsonLibrary
@@ -6,14 +6,13 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 from errors import not_found_404, bad_request_400, internal_server_500
 from downloader import Download
 from scraper import Animepahe, MyAL
 from stream import Stream
 import config
 from bs4 import BeautifulSoup
-import re
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from headers import get_headers
@@ -24,7 +23,7 @@ async def search(request: Request):
     """searches for anime
 
     Args:
-        request (Request): accessing the app instance
+        request (Request): request object
 
     Query Params:
         anime (str): name of anime to search
@@ -40,15 +39,7 @@ async def search(request: Request):
             "description": {
                 "Type": str, "Episodes": str, "Status": str, "Aired":str, "Season":str, "Duration":str,
             },
-            "episode_details": {
-                ep_details : [{
-                    episode_no (str) : {
-                        "ep_session":str, "snapshot":str(url)
-                    }, ...
-                }]
-                "next_page": str(url) or None,
-                "previous_page": str(url) or None,
-            }
+            "ep_details": str
         }
     """
     anime = request.query_params.get("anime", None)
@@ -58,42 +49,30 @@ async def search(request: Request):
 
     with requests.Session() as session:
         try:
+            loop = asyncio.get_event_loop()
+            desc_rq_list = []
+
             anime_details = Animepahe().search_anime(session, input_anime=anime)
-            anime_details = {
-                "jp_name": anime_details.get("title"),
-                "no_of_episodes": anime_details.get("episodes"),
-                "session": anime_details.get("session"),
-                "poster": anime_details.get("poster"),
-            }
+            search_response: List[Dict[str, str | int]] = []
+
+            for anime_detail in anime_details:
+
+                search_response.append({
+                    "jp_name": anime_detail.get("title"),
+                    "no_of_episodes": anime_detail.get("episodes"),
+                    "session": anime_detail.get("session"),
+                    "poster": anime_detail.get("poster"),
+                    "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
+                })
+                desc_rq_list.append(loop.create_task(Animepahe().get_anime_description(session, anime_detail["session"])))
+
+            for idx, description in enumerate(await asyncio.gather(*desc_rq_list)):
+                search_response[idx]["description"] = description
+
+            return JSONResponse(search_response)
+
         except KeyError:
             return await not_found_404(request, msg="anime not found")
-
-        try:
-            episodes = _episode_details(session, anime_details.get("session"), "1")
-            anime_description = Animepahe().get_anime_description(session, anime_session=anime_details["session"])
-
-            anime_details["episode_details"] = await episodes
-            anime_details["description"] = await anime_description
-        except TypeError:
-            return await not_found_404(request, msg="Anime {}, Not Yet Aired...".format(anime))
-
-    # a function to insert the eng_name at position(index)=1
-    def insert(_dict, obj, pos):
-        return {
-            k: v for k, v in (
-                    list(_dict.items())[:pos] + list(obj.items()) + list(_dict.items())[pos:]
-            )
-        }
-
-    if "eng_anime_name" in anime_details["description"]:
-        eng_name = anime_details["description"]["eng_anime_name"]
-        del anime_details["description"]["eng_anime_name"]
-
-        anime_details = insert(anime_details, {"eng_name": eng_name}, 1)
-    else:
-        anime_details = insert(anime_details, {"eng_name": anime_details.get("jp_name")}, 1)
-
-    return JSONResponse(anime_details)
 
 
 async def get_ep_details(request: Request):
@@ -128,7 +107,7 @@ async def get_ep_details(request: Request):
             return await not_found_404(request, msg="Anime, Not yet Aired...")
 
 
-async def _episode_details(session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
+async def _episode_details(session: requests.Session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
     episodes = {"ep_details": []}
 
     try:
@@ -268,7 +247,7 @@ def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
         Stream.play(player_name, manifest_url)
         return None, 200
     except Exception as error:
-        return error.__str__(), 500
+        return str(error), 400
 
 
 async def top_anime(request: Request):
@@ -323,7 +302,7 @@ async def get_master_manifest(request: Request):
         except ValueError as err_msg:
             return await bad_request_400(request, msg=str(err_msg))
 
-    return FileResponse("master.m3u8", media_type="application/vnd.apple.mpegurl", filename="master.m3u8")
+    return FileResponse(Animepahe.master_manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.master_manifest_filename)
 
 
 async def get_manifest(request: Request):
@@ -331,26 +310,12 @@ async def get_manifest(request: Request):
     if not kwik_url:
         return await bad_request_400(request, msg="kwik url not present")
 
-    stream_headers = get_headers(extra={"referer": "https://animepahe.com/"})
+    response, uwu_root_domain = await Animepahe().get_manifest_file(kwik_url)
 
-    stream_response = requests.get(kwik_url, headers=stream_headers)
-    bs = BeautifulSoup(stream_response.text, 'html.parser')
+    with open(Animepahe.manifest_location, "w+") as f:
+        f.write(response.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
 
-    all_scripts = bs.find_all('script')
-    pattern = r'\|\|\|.*\'\.'
-    pattern_list = (re.findall(pattern, str(all_scripts[6]))[0]).split('|')[88:98]
-
-    uwu_root_domain = f"https://{pattern_list[9]}-{pattern_list[8]}.{pattern_list[7]}.{pattern_list[6]}.{pattern_list[5]}"
-
-    uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
-                                         pattern_list[2], pattern_list[1], pattern_list[0])
-
-    response = requests.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"}))
-    
-    with open("uwu.m3u8", "w+") as f:
-        f.write(response.text.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
-
-    return FileResponse("./uwu.m3u8", media_type=response.headers.get("content-type", "application/vnd.apple.mpegurl"), filename="uwu.m3u8")
+    return FileResponse(Animepahe.manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.manifest_filename)
 
 
 async def proxy(request: Request):
