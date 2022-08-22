@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
 import config
-from headers import get_headers
+from utils.headers import get_headers
 import re
 
 

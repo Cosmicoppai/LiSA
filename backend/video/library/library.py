@@ -9,6 +9,7 @@ Example: {file_name: {total_size: int, location: str}}
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 import json
+from pathlib import Path
 
 
 class Library(ABC):
@@ -37,7 +38,7 @@ class Library(ABC):
 
 
 class JsonLibrary(Library):
-    file_location: str = "library.json"
+    file_location: str = Path(__file__).resolve().parent.joinpath("./library.json").__str__()
 
     @classmethod
     def get_all(cls) -> List[Dict[str, Dict[str, Any]]]:

@@ -1,22 +1,23 @@
 import asyncio
 from json import JSONDecodeError
 import requests
-from library import JsonLibrary
+from video.library import JsonLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict, List
-from errors import not_found_404, bad_request_400, internal_server_500
-from downloader import Download
+from errors.http_error import not_found_404, bad_request_400, internal_server_500
+from video.downloader import Download
 from scraper import Animepahe, MyAL
-from stream import Stream
+from video.streamer import Stream
 import config
 from bs4 import BeautifulSoup
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
-from headers import get_headers
-from master_m3u8 import build_master_manifest
+from utils.headers import get_headers
+from utils.master_m3u8 import build_master_manifest
+from middleware.ErrorHandlerMiddleware import ErrorHandlerMiddleware
 
 
 async def search(request: Request):
@@ -72,9 +73,6 @@ async def search(request: Request):
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
-
-        except requests.ConnectionError:
-            return await internal_server_500(request, msg="Remote server unreachable, please check your internet connection or try again after sometime")
 
 
 async def get_ep_details(request: Request):
@@ -360,8 +358,8 @@ exception_handlers = {
 }
 
 middleware = [
+    Middleware(ErrorHandlerMiddleware),
     Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"], allow_credentials=True)
-
 ]
 
 app = Starlette(

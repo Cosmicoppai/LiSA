@@ -1,10 +1,10 @@
 import logging
-from msg_system import MsgSystem
+from video.downloader.msg_system import MsgSystem
 from threading import Thread
 import uvicorn
 from sys import stdout
 import asyncio
-from library import JsonLibrary
+from video.library import JsonLibrary
 import config
 
 

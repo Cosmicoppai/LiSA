@@ -3,7 +3,7 @@ import websockets
 import json
 from websockets.legacy.server import WebSocketServerProtocol
 from typing import Dict
-from download_progress import IN_PROGRESS
+from .download_progress import IN_PROGRESS
 from websockets.exceptions import ConnectionClosed
 from json import JSONDecodeError
 import config

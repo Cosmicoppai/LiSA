@@ -8,10 +8,10 @@ import logging
 import traceback
 from sys import exc_info, stdout
 import os
-from msg_system import MsgSystem
+from .msg_system import MsgSystem
 from pathlib import Path
-from download_progress import IN_PROGRESS, LAST_PACKET_DATA
-from library import JsonLibrary
+from .download_progress import IN_PROGRESS, LAST_PACKET_DATA
+from video.library import JsonLibrary
 from datetime import datetime as dt
 
 CHUNK_SIZE: int = 26214400  # chunk size of 25 mb

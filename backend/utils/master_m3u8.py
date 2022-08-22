@@ -1,4 +1,4 @@
-from video_metadata import get_metadata
+from .video_metadata import get_metadata
 from typing import List
 
 master_m3u8 = """#EXTM3U\n#EXT-X-VERSION:3\n"""
