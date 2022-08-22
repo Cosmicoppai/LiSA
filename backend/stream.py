@@ -1,7 +1,9 @@
+import io
 from abc import ABC, abstractmethod
 from os import system
-from typing import Dict
+from typing import Dict, List
 import subprocess
+import asyncio
 import shlex
 
 
@@ -18,25 +20,36 @@ class Stream(ABC):
             raise ValueError("Bad player type {}".format(player_name))
         return cls.players[player_name].play_video(file_location)
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def play_video(file_location: str):
+    async def play_video(cls, file_location: str):
         ...
+
+    @staticmethod
+    async def _play_video(cmd: List[str]) -> Exception:
+        video_player_process = await asyncio.create_subprocess_exec(*cmd)
+        _, stderr = await video_player_process.communicate()
+
+        if stderr:
+            stderr = io.TextIOWrapper(io.BytesIO(stderr).read())
+
+        if video_player_process.returncode != 0:
+            raise subprocess.CalledProcessError(video_player_process.returncode, stderr)
 
 
 class MpvStream(Stream):
     _PLAYER_NAME: str = "mpv"
 
-    @staticmethod
-    def play_video(file_location: str):
-        subprocess.Popen(shlex.split(f'mpv "{file_location}" --fs=yes --ontop'))
+    @classmethod
+    async def play_video(cls, file_location: str):
+        await cls._play_video(shlex.split(f'mpv "{file_location}" --fs=yes --ontop'))
 
 
 class VlcStream(Stream):
     _PLAYER_NAME: str = "vlc"
 
-    @staticmethod
-    def play_video(file_location: str):
-        subprocess.Popen(shlex.split(f'vlc "{file_location}" --fullscreen'))
+    @classmethod
+    async def play_video(cls, file_location: str):
+        await cls._play_video(shlex.split(f'vlc "{file_location}" --fullscreen'))
 
 
