@@ -101,30 +101,27 @@ class Animepahe(Anime):
 
         description_bs = BeautifulSoup(description_response.text, 'html.parser')
 
-        description = {}
+        description: Dict[str, Any] = {"external_links": {}}
 
         synopsis = description_bs.find('div', {'class': 'anime-synopsis'}).text.replace('\"', '')
         description['Synopsis'] = synopsis
 
-        anime_info = description_bs.find('div', {'class': 'anime-info'}).find_all('p')
-        details = []
-        for x in anime_info:
-            details.append(x.text.replace('\n', ''))
-        for i in range(len(details)):
-            if 'English' in details[i]:
-                description['eng_name'] = details[i][9:]
-            if 'Type' in details[i]:
-                description['Type'] = details[i][6:]
-            if 'Episodes' in details[i]:
-                description['Episodes'] = details[i][10:]
-            if 'Status' in details[i]:
-                description['Status'] = details[i][7:]
-            if 'Aired' in details[i]:
-                description['Aired'] = details[i][6:].replace('to', ' to')
-            if 'Season' in details[i]:
-                description['Season'] = details[i][8:]
-            if 'Duration' in details[i]:
-                description['Duration'] = details[i][10:]
+        details: Dict[str, Any] = {}
+
+        for info in description_bs.find('div', {'class': 'anime-info'}).find_all('p'):
+
+            if info.has_attr("class"):
+                if info["class"][0] == 'external-links':
+                    for link in info.find_all("a", href=True):
+                        description["external_links"][link.text] = f'https:{link["href"]}'
+                    continue
+
+            key, value = info.text.replace("\n", "").split(":")
+            details[key.lower()] = value
+
+        description['eng_name'] = details.get("english", "-")
+        description['duration'] = details.get("duration", "-")
+        description["studio"] = details.get("studio", "-")
 
         return description
 
@@ -156,6 +153,9 @@ class Animepahe(Anime):
         stream_headers = get_headers(extra={"referer": self.site_url})
 
         stream_response = requests.get(kwik_url, headers=stream_headers)
+        if stream_response.status_code != 200:
+            raise ValueError("Invalid Kwik URL")
+
         bs = BeautifulSoup(stream_response.text, 'html.parser')
 
         all_scripts = bs.find_all('script')
@@ -171,6 +171,8 @@ class Animepahe(Anime):
 
 
 class MyAL:
+    site_url: str = "https://myanimelist.net"
+
     anime_types_dict = {
         "airing": "airing",
         "upcoming": "upcoming",
@@ -201,19 +203,14 @@ class MyAL:
                 "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
             }
         """
-        top_anime_headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-language': 'en-GB,en;q=0.9,ja-JP;q=0.8,ja;q=0.7,en-US;q=0.6',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-        }
+        top_anime_headers = get_headers()
 
         top_anime_params = {
             'type': self.anime_types_dict[anime_type],
             'limit': limit,
         }
 
-        top_anime_response = requests.get('https://myanimelist.net/topanime.php', params=top_anime_params,
-                                          headers=top_anime_headers)
+        top_anime_response = requests.get(f'{self.site_url}/topanime.php', params=top_anime_params, headers=top_anime_headers)
 
         bs_top = BeautifulSoup(top_anime_response.text, 'html.parser')
 
