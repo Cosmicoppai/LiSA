@@ -49,8 +49,6 @@ async def search(request: Request):
 
     with requests.Session() as session:
         try:
-            loop = asyncio.get_event_loop()
-            desc_rq_list = []
 
             anime_details = Animepahe().search_anime(session, input_anime=anime)
             search_response: List[Dict[str, str | int]] = []
@@ -58,21 +56,25 @@ async def search(request: Request):
             for anime_detail in anime_details:
 
                 search_response.append({
-                    "jp_name": anime_detail.get("title"),
-                    "no_of_episodes": anime_detail.get("episodes"),
-                    "session": anime_detail.get("session"),
-                    "poster": anime_detail.get("poster"),
+                    "jp_name": anime_detail.get("title", None),
+                    "no_of_episodes": anime_detail.get("episodes", 0),
+                    "type": anime_detail.get("type", None),
+                    "status": anime_detail.get("status", None),
+                    "season": anime_detail.get("season", None),
+                    "year": anime_detail.get("year", None),
+                    "score": anime_detail.get("score", 0),
+                    "session": anime_detail.get("session", None),
+                    "poster": anime_detail.get("poster", "https://www.pinterest.com/pin/762163936933748159/"),
                     "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
                 })
-                desc_rq_list.append(loop.create_task(Animepahe().get_anime_description(session, anime_detail["session"])))
-
-            for idx, description in enumerate(await asyncio.gather(*desc_rq_list)):
-                search_response[idx]["description"] = description
 
             return JSONResponse(search_response)
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
+
+        except requests.ConnectionError:
+            return await internal_server_500(request, msg="Remote server unreachable, please check your internet connection or try again after sometime")
 
 
 async def get_ep_details(request: Request):
@@ -95,7 +97,7 @@ async def get_ep_details(request: Request):
         }
     """
     anime_session = request.query_params.get("anime_session", None)
-    page = request.query_params.get("page", 1)
+    page = request.query_params.get("page", "1")
 
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
@@ -113,6 +115,9 @@ async def _episode_details(session: requests.Session, anime_session: str, page_n
     try:
         site_scraper = Animepahe()
         episode_data = site_scraper.get_episode_sessions(session, anime_session=anime_session, page_no=page_no)
+
+        if page_no == "1":
+            episodes["description"] = await Animepahe().get_anime_description(session, anime_session)
 
         episodes["total_page"] = episode_data.get("last_page")
         if episode_data.get("current_page") <= episode_data.get("last_page"):
@@ -195,7 +200,7 @@ async def stream(request: Request):
         manifest_url = jb.get("manifest_url", None)
         if not manifest_url:
             return await bad_request_400(request, msg="pass valid manifest url")
-        msg, status_code = play(player_name.lower(), manifest_url)
+        msg, status_code = await play(player_name.lower(), manifest_url)
         return JSONResponse({"error": msg}, status_code=status_code)
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed body: Invalid JSON")
@@ -242,9 +247,9 @@ async def library(request: Request):
     return JSONResponse(JsonLibrary().get_all())
 
 
-def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
+async def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
     try:
-        Stream.play(player_name, manifest_url)
+        await Stream.play(player_name, manifest_url)
         return None, 200
     except Exception as error:
         return str(error), 400
@@ -310,12 +315,16 @@ async def get_manifest(request: Request):
     if not kwik_url:
         return await bad_request_400(request, msg="kwik url not present")
 
-    response, uwu_root_domain = await Animepahe().get_manifest_file(kwik_url)
+    try:
 
-    with open(Animepahe.manifest_location, "w+") as f:
-        f.write(response.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
+        response, uwu_root_domain = await Animepahe().get_manifest_file(kwik_url)
 
-    return FileResponse(Animepahe.manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.manifest_filename)
+        with open(Animepahe.manifest_location, "w+") as f:
+            f.write(response.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
+
+        return FileResponse(Animepahe.manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.manifest_filename)
+    except ValueError as err_msg:
+        return await bad_request_400(request, msg=str(err_msg))
 
 
 async def proxy(request: Request):
