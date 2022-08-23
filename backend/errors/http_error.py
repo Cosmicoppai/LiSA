@@ -11,6 +11,9 @@ async def not_found_404(request: Request, exc: HTTPException = HTTPException(404
     return HTMLResponse(content=msg, status_code=exc.status_code)
 
 
-async def internal_server_500(request: Request, exc: HTTPException = HTTPException(500),
-                              msg: str = "500 Internal Server"):
+async def internal_server_500(request: Request, exc: HTTPException = HTTPException(500), msg: str = "500 Internal Server"):
+    return HTMLResponse(content=msg, status_code=exc.status_code)
+
+
+async def service_unavailable_503(request: Request, exc: HTTPException = HTTPException(503), msg: str = "Service Unavailable"):
     return HTMLResponse(content=msg, status_code=exc.status_code)
