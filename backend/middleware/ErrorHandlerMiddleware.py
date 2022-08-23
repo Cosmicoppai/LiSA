@@ -3,7 +3,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 from starlette.middleware.base import RequestResponseEndpoint
 from requests import ConnectionError
-from errors.http_error import internal_server_500
+from errors.http_error import service_unavailable_503
 
 
 class ErrorHandlerMiddleware(BaseHTTPMiddleware):
@@ -11,4 +11,4 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
         try:
             return await call_next(request)
         except ConnectionError:
-            return await internal_server_500(request, msg="Remote server unreachable, please check your internet connection or try again after sometime")
+            return await service_unavailable_503(request, msg="Remote server unreachable, please check your internet connection or try again after sometime")
