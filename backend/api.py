@@ -138,7 +138,8 @@ async def _episode_details(session: requests.Session, anime_session: str, page_n
             episode_session = episode_data.get("data", None)
             for ep in episode_session:
                 episodes["ep_details"].append(
-                    {ep["episode"]: {"ep_session": ep["session"], "snapshot": ep["snapshot"]}})
+                    {ep["episode"]: {"stream_detail": f'{config.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
+                                     "snapshot": ep["snapshot"], "duration": ep["duration"]}})
             return episodes
         else:
             episodes["next_page"] = episode_data.get("next_page_url")
@@ -342,7 +343,7 @@ routes = [
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
-    Route("/stream_details", endpoint=get_stream_details, methods=["GET"]),
+    Route("/stream_detail", endpoint=get_stream_details, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
