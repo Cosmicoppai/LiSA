@@ -116,10 +116,10 @@ class Animepahe(Anime):
                         description["external_links"][link.text] = f'https:{link["href"]}'
                     continue
 
-            key, value = info.text.replace("\n", "").split(":")
+            key, value = info.text.replace("\n", "").split(":", 1)
             details[key.lower()] = value
 
-        description['eng_name'] = details.get("english", "-")
+        description['eng_name'] = details.get("english", details.get("synonyms", "-"))
         description['duration'] = details.get("duration", "-")
         description["studio"] = details.get("studio", "-")
 
