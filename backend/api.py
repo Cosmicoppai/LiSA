@@ -68,11 +68,16 @@ async def search(request: Request):
                     "poster": anime_detail.get("poster", "https://www.pinterest.com/pin/762163936933748159/"),
                     "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
                 })
-
+            res_no = int(request.query_params.get("res", None))
+            if res_no and 0 < res_no < 9:
+                return JSONResponse(search_response[res_no-1])
             return JSONResponse(search_response)
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
+
+        except ValueError:
+            return await bad_request_400(request, msg="invalid res_no")
 
 
 async def get_ep_details(request: Request):
