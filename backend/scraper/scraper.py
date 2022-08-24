@@ -260,7 +260,7 @@ class MyAL:
                 rank = "na"
             top_anime.append({"rank": rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
                               "episodes": episodes[i].replace('eps', ''), "score": score[i].text,
-                              "anime_detail": f'{config.API_SERVER_ADDRESS}/search?anime={title[i].text}&res=1'})
+                              "anime_detail": f'{config.API_SERVER_ADDRESS}/search?anime={title[i].text}&total_res=1'})
 
         response: Dict[str, Any] = {"data": top_anime}
 

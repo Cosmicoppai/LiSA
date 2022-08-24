@@ -48,13 +48,19 @@ async def search(request: Request):
     if not anime:
         return await bad_request_400(request, msg="Pass an anime name")
 
+    total_res = int(request.query_params.get("total_res", 9))
+    if total_res <= 0:
+        total_res = 1
+    elif total_res > 9:
+        total_res = 9
+
     with requests.Session() as session:
         try:
 
             anime_details = Animepahe().search_anime(session, input_anime=anime)
             search_response: List[Dict[str, str | int]] = []
 
-            for anime_detail in anime_details:
+            for anime_detail in anime_details[:total_res]:
 
                 search_response.append({
                     "jp_name": anime_detail.get("title", None),
@@ -68,16 +74,13 @@ async def search(request: Request):
                     "poster": anime_detail.get("poster", "https://www.pinterest.com/pin/762163936933748159/"),
                     "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
                 })
-            res_no = int(request.query_params.get("res", None))
-            if res_no and 0 < res_no < 9:
-                return JSONResponse(search_response[res_no-1])
             return JSONResponse(search_response)
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
 
         except ValueError:
-            return await bad_request_400(request, msg="invalid res_no")
+            return await bad_request_400(request, msg="invalid query parameter: total_res should be type int")
 
 
 async def get_ep_details(request: Request):
