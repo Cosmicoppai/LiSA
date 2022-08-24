@@ -7,7 +7,7 @@ from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict, List
-from errors.http_error import not_found_404, bad_request_400, internal_server_500
+from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import Download
 from scraper import Animepahe, MyAL
 from video.streamer import Stream
@@ -58,23 +58,8 @@ async def search(request: Request):
         try:
 
             anime_details = Animepahe().search_anime(session, input_anime=anime)
-            search_response: List[Dict[str, str | int]] = []
 
-            for anime_detail in anime_details[:total_res]:
-
-                search_response.append({
-                    "jp_name": anime_detail.get("title", None),
-                    "no_of_episodes": anime_detail.get("episodes", 0),
-                    "type": anime_detail.get("type", None),
-                    "status": anime_detail.get("status", None),
-                    "season": anime_detail.get("season", None),
-                    "year": anime_detail.get("year", None),
-                    "score": anime_detail.get("score", 0),
-                    "session": anime_detail.get("session", None),
-                    "poster": anime_detail.get("poster", "https://www.pinterest.com/pin/762163936933748159/"),
-                    "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
-                })
-            return JSONResponse(search_response)
+            return JSONResponse(Animepahe().build_search_resp(anime_details[:total_res]))
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
@@ -124,6 +109,7 @@ async def _episode_details(session: requests.Session, anime_session: str, page_n
 
         if page_no == "1":
             episodes["description"] = await Animepahe().get_anime_description(session, anime_session)
+            episodes["recommendation"] = f"{config.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
 
         episodes["total_page"] = episode_data.get("last_page")
         if episode_data.get("current_page") <= episode_data.get("last_page"):
@@ -347,10 +333,26 @@ async def proxy(request: Request):
     return Response(resp.content, headers=resp.headers)
 
 
+async def get_recommendation(request: Request):
+    anime_session = request.query_params.get("anime_session", None)
+    if not anime_session:
+        return await bad_request_400(request, msg="Pass Anime session")
+
+    try:
+        return JSONResponse(await Animepahe().get_recommendation(anime_session))
+
+    except ValueError as err_msg:
+        return bad_request_400(request, msg=err_msg)
+
+    except AttributeError or IndexError:
+        return service_unavailable_503(request, msg="Try Again After Sometime")
+
+
 routes = [
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
+    Route("/recommendation", endpoint=get_recommendation, methods=["GET"]),
     Route("/stream_detail", endpoint=get_stream_details, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),

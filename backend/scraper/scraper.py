@@ -13,6 +13,7 @@ class Anime(ABC):
     api_url: str
     video_file_name: str
     video_extension: str = ".mp4"
+    default_poster: str = "https://www.pinterest.com/pin/762163936933748159/"
 
     @abstractmethod
     def search_anime(self, session, anime_name: str):
@@ -24,6 +25,10 @@ class Anime(ABC):
 
     @abstractmethod
     def get_episode_stream_data(self, episode_session: str):
+        ...
+
+    @abstractmethod
+    def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
         ...
 
 
@@ -55,7 +60,8 @@ class Animepahe(Anime):
 
         return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"]
 
-    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
+    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[
+                                                                                           Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
 
         Args:
@@ -167,7 +173,78 @@ class Animepahe(Anime):
         uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
                                              pattern_list[2], pattern_list[1], pattern_list[0])
 
-        return requests.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_root_domain
+        return requests.get(uwu_url, headers=get_headers(
+            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_root_domain
+
+    async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
+
+        resp = requests.get(f"{self.site_url}/anime/{anime_session}", params=anime_session,
+                            headers=get_headers(extra={"referer": self.site_url}))
+
+        if resp.status_code != 200:
+            raise ValueError("Invalid anime session")
+
+        rec_bs = BeautifulSoup(resp.text, 'html.parser')
+
+        col_2s = rec_bs.find_all("div", {"class": 'col-2'})
+        col_9s = rec_bs.find_all("div", {"class": 'col-9'})
+
+        if len(col_2s) > 10:
+            col_2s, col_9s = col_2s[:10], col_9s[:10]
+
+        rec_list = []
+
+        for idx, col_2 in enumerate(col_2s):
+            col_9 = col_9s[idx]
+
+            data = col_9.text.strip().split("\n")
+            title = data[0]
+            m_data = self._strip_split(data[1], split_chr="-")
+            typ = m_data[0].strip()
+            m_data = self._strip_split(m_data[1])
+            ep = m_data[0]
+            status = self._strip_split(m_data[2], strip_chr="(")[0]
+            season, year = self._strip_split(data[2])
+
+            session = self._strip_split(col_2.find("a", href=True)["href"], strip_chr="/", split_chr="/")[1]
+
+            rec_list.append({"jp_name": title,
+                             "no_of_episodes": ep,
+                             "type": typ,
+                             "status": status,
+                             "season": season,
+                             "year": year,
+                             "score": 0,
+                             "session": session,
+                             "poster": col_2.find("img").get("data-src", self.default_poster),
+                             "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={session}"
+                             })
+
+        return rec_list
+
+    @staticmethod
+    def _strip_split(_data: str, strip_chr: str = " ", split_chr: str = " ") -> List[str]:
+        return _data.strip(strip_chr).split(split_chr)
+
+    def build_search_resp(self, anime_details: List[Dict]) -> List[Dict]:
+
+        search_response: List[Dict[str, str | int]] = []
+
+        for anime_detail in anime_details:
+            search_response.append({
+                "jp_name": anime_detail.get("title", None),
+                "no_of_episodes": anime_detail.get("episodes", 0),
+                "type": anime_detail.get("type", None),
+                "status": anime_detail.get("status", None),
+                "season": anime_detail.get("season", None),
+                "year": anime_detail.get("year", None),
+                "score": anime_detail.get("score", 0),
+                "session": anime_detail.get("session", None),
+                "poster": anime_detail.get("poster", self.default_poster),
+                "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
+            })
+
+        return search_response
 
 
 class MyAL:
