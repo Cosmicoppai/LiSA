@@ -82,6 +82,54 @@ class Animepahe(Anime):
 
         return session.get(f"{self.site_url}/api", params=episodes_params, headers=episodes_headers).json()
 
+    async def get_episode_details(self, session: requests.Session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
+        episodes = {"ep_details": [], "description": {}}
+
+        try:
+            episode_data = self.get_episode_sessions(session, anime_session=anime_session, page_no=page_no)
+
+            if page_no == "1":
+                description = self.get_anime_description(session, anime_session)
+                episodes["recommendation"] = f"{config.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
+
+            episodes["total_page"] = episode_data.get("last_page", -1)
+            if episode_data.get("current_page") <= episode_data.get("last_page", -1):
+                next_page_url = episode_data.get("next_page_url", None)
+                if next_page_url:
+                    next_page_url = next_page_url.replace(self.api_url,
+                                                          f"/ep_details?anime_session={anime_session}&")
+                    episodes["next_page_url"] = next_page_url
+                else:
+                    episodes["next_page_url"] = next_page_url
+
+                prev_page_url = episode_data.get("prev_page_url", None)
+                if prev_page_url:
+                    prev_page_url = prev_page_url.replace(self.api_url,
+                                                          f"/ep_details?anime_session={anime_session}&")
+                    episodes["prev_page_url"] = prev_page_url
+                else:
+                    episodes["prev_page_url"] = prev_page_url
+
+                episode_session = episode_data.get("data", None)
+                for ep in episode_session:
+                    episodes["ep_details"].append(
+                        {ep["episode"]: {
+                            "stream_detail": f'{config.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
+                            "snapshot": ep["snapshot"], "duration": ep["duration"]}})
+
+                if page_no == "1":
+                    episodes["description"] = await description
+                else:
+                    del episodes["description"]
+                return episodes
+            else:
+                episodes["next_page"] = episode_data.get("next_page_url")
+                episodes[
+                    "previous_page"] = f"/ep_details?anime_session={anime_session}&page={episode_data['last_page']}"
+                return episodes
+        except TypeError:
+            raise TypeError
+
     async def get_anime_description(self, session, anime_session: str) -> Dict[str, str]:
         """scraping the anime description
 
