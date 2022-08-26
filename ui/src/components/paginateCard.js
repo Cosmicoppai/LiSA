@@ -28,7 +28,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
     dispatch(addEpisodesDetails(data));
   };
 
-  console.log(currentEp)
+  console.log(currentEp);
 
   return (
     <>
@@ -51,9 +51,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
                   width={"100%"}
                   maxWidth={"50px"}
                   justifyContent="center"
-                  bg={
-                    currentEp == key + 1 ? "#10495F" : "brand.900"
-                  }
+                  bg={currentEp == key + 1 ? "#10495F" : "brand.900"}
                   onClick={() =>
                     episodeClickHandler(
                       Object.values(item)[0],
@@ -104,9 +102,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
         {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
       </Box>
       {data && (
-        <Flex
-          sx={{ marginTop: "20px !important" }}
-        >
+        <Flex sx={{ marginTop: "20px !important" }}>
           {ep_details?.prev_page_url && (
             <Button
               onClick={() => pageChangeHandler(ep_details?.prev_page_url)}
@@ -115,7 +111,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
               Previous Page
             </Button>
           )}
-  <Spacer />
+          <Spacer />
 
           {ep_details?.next_page_url && (
             <Button

@@ -150,13 +150,14 @@ export default function AnimeDetailsScreen() {
             <Text color={"gray.400"} px={3}>
               {details?.description?.Synopsis}
             </Text>
-
-            <PaginateCard
-              data={data}
-              ep_details={details}
-              loading={ep_loading}
-              redirect
-            />
+            <div>
+              <PaginateCard
+                data={data}
+                ep_details={details}
+                loading={ep_loading}
+                redirect
+              />
+            </div>
           </Stack>
         </Stack>
       )}
