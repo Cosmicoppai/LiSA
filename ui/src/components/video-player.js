@@ -23,12 +23,10 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
   const videoRef = useRef();
   const [callFinishVideoAPI, setCallFinishVideoAPI] = useState(false);
   const [vidDuration, setVidDuration] = useState(50000);
-
   const videoId = url;
   // console.log(epDetails);
   // console.log(language);
-  const thumbnailURL = epDetails?.poster;
-  // console.log(thumbnailURL);
+  const thumbnailURL = epDetails?.details?.snapshot;
   const liveURL = url;
   // console.log(url);
   useEffect(() => {
@@ -37,6 +35,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
         src: liveURL,
         type: "application/x-mpegURL",
         withCredentials: false,
+        
       });
       player.poster("");
       setCallFinishVideoAPI(false);
@@ -72,7 +71,10 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
       playbackRates: [0.5, 1, 1.5, 2],
 
       controls: true,
-      poster: "",
+      poster: thumbnailURL,
+      controlBar: {
+        pictureInPictureToggle: false
+      },
       fluid: true,
       sources: [
         {

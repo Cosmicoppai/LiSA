@@ -17,6 +17,7 @@ import {
   Text,
   Heading,
   Progress,
+  Skeleton,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -62,7 +63,7 @@ const InbuiltPlayerScreen = () => {
   const [player, setPlayer] = useState(undefined);
 
   const languageChangeHandler = (e) => {
-    setPrevTime(player.currentTime())
+    setPrevTime(player.currentTime());
     setLanguage(e.target.value);
   };
 
@@ -86,7 +87,7 @@ const InbuiltPlayerScreen = () => {
               {`Episode ${epDetails?.details?.current_ep}`}
             </Text>
 
-            {details && language && epDetails && (
+            {details && language && epDetails ? (
               <VideoPlayer
                 url={details[language]}
                 epDetails={epDetails}
@@ -94,6 +95,8 @@ const InbuiltPlayerScreen = () => {
                 setPlayer={setPlayer}
                 prevTime={prevTime}
               />
+            ) : (
+              <Skeleton width={"100%"} height={"660px"} />
             )}
           </Box>
         )}
@@ -157,6 +160,7 @@ const InbuiltPlayerScreen = () => {
             data={data}
             ep_details={eps_details}
             loading={eps_loading}
+            currentEp={epDetails?.details?.current_ep}
           />
         </Stack>
       </Flex>
