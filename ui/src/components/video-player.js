@@ -4,6 +4,7 @@ import videojs from "video.js";
 import "videojs-contrib-quality-levels";
 import qualitySelector from "videojs-hls-quality-selector";
 import "video.js/dist/video-js.css";
+import "videojs-hotkeys";
 import ExternalPlayerPopup from "./externalPopup";
 import { useDispatch, useSelector } from "react-redux";
 // function getWindowSize() {
@@ -35,7 +36,6 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
         src: liveURL,
         type: "application/x-mpegURL",
         withCredentials: false,
-        
       });
       player.poster("");
       setCallFinishVideoAPI(false);
@@ -46,12 +46,11 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
         player?.currentTime(prevTime);
         player?.play();
       } else {
-        console.log("kokoko")
+        console.log("kokoko");
         player?.currentTime(0);
       }
     }
 
-    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId, liveURL, thumbnailURL]);
 
@@ -73,7 +72,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
       controls: true,
       poster: thumbnailURL,
       controlBar: {
-        pictureInPictureToggle: false
+        pictureInPictureToggle: false,
       },
       fluid: true,
       sources: [
@@ -94,7 +93,12 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
       videoRef.current,
       videoJsOptions,
       function onPlayerReady() {
-        // console.log('onPlayerReady');
+        console.log(this.hotkeys)
+        this.hotkeys({
+          volumeStep: 0.1,
+          seekStep: 5,
+          enableModifiersForNumbers: false,
+        });
       }
     );
     console.log(plyer.controlBar);
@@ -204,7 +208,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
   }, [player]);
 
   // useEffect(() => {
-    
+
   //   if (player && prevTime) {
   //     if (prevTime) {
   //       player?.currentTime(prevTime);
