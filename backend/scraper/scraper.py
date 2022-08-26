@@ -215,6 +215,19 @@ class Animepahe(Anime):
 
         return requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()["data"]
 
+    def get_stream_data(self, episode_session: str):
+        resp: Dict[str, str] = {}
+
+        for data in self.get_episode_stream_data(episode_session=episode_session):
+            for quality, quality_data in data.items():
+                """
+                    stream_dt (dict): {'quality': stream url (str)}
+                """
+                aud, kwik_url = quality_data["audio"], quality_data["kwik"]
+                resp[aud] = resp.get(aud, f"{config.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{config.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{quality}" + ","
+
+        return resp
+
     async def get_manifest_file(self, kwik_url: str) -> (str, str):
         stream_headers = get_headers(extra={"referer": self.site_url})
 
