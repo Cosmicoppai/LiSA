@@ -10,48 +10,44 @@ import {
   Text,
   Icon,
   Box,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FiMonitor } from "react-icons/fi";
 import {
-  addEpisodeDetails,
+  addEpisodesDetails,
   clearEp,
   getStreamDetails,
   searchAnimeList,
 } from "../actions/animeActions";
+import PaginateCard from "../components/paginateCard";
+import { AiFillStar } from "react-icons/ai";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
-  const { animes: data } = useSelector(
-    (state) => state.animeSearchList
+  const { details: data, loading } = useSelector((state) => state.animeDetails);
+  const { details, loading: ep_loading } = useSelector(
+    (state) => state.animeEpisodesDetails
   );
-
+  console.log(details);
+  console.log("data", data);
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  useEffect(() => {
-    if (!data) {
-      navigate("/");
-    }
-  }, [data]);
+  // const nextPage = (item) => {
+  //   // dispatch(clearEp());
 
-  const episodeClickHandler = (item) => {
-    dispatch(clearEp());
+  //   dispatch(getStreamDetails(data.session, item.ep_session));
+  //   dispatch(addEpisodesDetails(item));
+  //   if (redirect) {
+  //     navigate("/play");
+  //   }
+  // };
 
-    dispatch(getStreamDetails(data.session, item.ep_session));
-    dispatch(addEpisodeDetails(item));
-    navigate("/play");
-  };
-
-  console.log(data);
-  console.log(data?.episode_details?.next_page_url);
-  console.log(data?.episode_details);
-  const pageChangeHandler = (url) => {
-    console.log(url);
-    dispatch(searchAnimeList(null, url));
-  };
+  // useEffect(() => {
+  //   if (!data && !loading) {
+  //     navigate("/");
+  //   }
+  // }, [data]);
 
   return (
     <Center py={6} w="100%">
@@ -66,9 +62,46 @@ export default function AnimeDetailsScreen() {
           boxShadow={"2xl"}
           padding={4}
         >
-          <Flex flex={1} bg="blue.200" maxW={"30%"} maxHeight={"500px"}>
-            <Image objectFit="contain" boxSize="100%" src={data.poster} />
-          </Flex>
+          <Box
+            rounded={"lg"}
+            flex={1}
+            maxW={"30%"}
+            maxHeight={"500px"}
+            mt={0}
+            pos={"relative"}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            _after={{
+              transition: "all .3s ease",
+              content: '""',
+              w: "full",
+              h: "full",
+              pos: "absolute",
+
+              top: 5,
+              left: 0,
+              backgroundImage: `url(${data.poster})`,
+              filter: "blur(15px)",
+              zIndex: 1,
+            }}
+            _groupHover={{
+              _after: {
+                filter: "blur(20px)",
+              },
+            }}
+          >
+            <Image
+              rounded={"lg"}
+              objectFit="contain"
+              boxSize="100%"
+              src={data.poster}
+              zIndex={2}
+            />
+          </Box>
+
           <Stack
             maxW={"65%"}
             flex={1}
@@ -78,8 +111,8 @@ export default function AnimeDetailsScreen() {
             pt={2}
           >
             <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {`${data.eng_name}`}
-              {data.jp_name ? ` | ${data.jp_name}` : ""}
+              {data.jp_name ? `${data.jp_name}` : ""}{" "}
+              {data.eng_name ? ` | ${data.eng_name}` : ""}
             </Heading>
 
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
@@ -98,76 +131,32 @@ export default function AnimeDetailsScreen() {
                 }}
               >
                 <Icon as={FiMonitor} />
-                <Text ml="1">{data.description.Type}</Text>
+                <Text ml="1">{data.type}</Text>
               </Badge>
               <Badge px={2} py={1} fontWeight={"400"}>
-                {data.description.Aired}
+                {data.status}
               </Badge>
               <Badge px={2} py={1} fontWeight={"400"}>
-                {data.description.Status}
+                <Box
+                  display={"flex"}
+                  alignItems="center"
+                  justifyContent={"center"}
+                >
+                  <AiFillStar color="#FDCC0D" />
+                  <Text ml={"5px"}>{data.score}</Text>
+                </Box>
               </Badge>
             </Stack>
             <Text color={"gray.400"} px={3}>
-              {data.description.Synopsis}
+              {details?.description?.Synopsis}
             </Text>
 
-            <Box mt={5}>
-              <Flex direction={"row"} flexWrap="wrap">
-                {data.episode_details.ep_details.map((item, key) => {
-                  return (
-                    <Flex
-                      cursor={"pointer"}
-                      key={key}
-                      p={2}
-                      mr={2}
-                      mt={2}
-                      bg="brand.900"
-                      width={"100%"}
-                      maxWidth={"50px"}
-                      justifyContent="center"
-                      onClick={() =>
-                        episodeClickHandler(Object.values(item)[0])
-                      }
-                    >
-                      <Text textAlign={"center"}>{Object.keys(item)[0]}</Text>
-                    </Flex>
-                  );
-                })}
-              </Flex>
-              {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
-            </Box>
-            <Flex
-              mt={4}
-              width={"100%"}
-              display={"flex"}
-              justifyContent={"space-between"}
-            >
-              {data?.episode_details?.prev_page_url && (
-                <Button
-                  onClick={() => dispatch(data?.episode_details?.prev_page_url)}
-                >
-                  Previous
-                </Button>
-              )}
-              {data?.episodes_details?.prev_page_url && (
-                <Button
-                  onClick={() =>
-                    pageChangeHandler(data?.episode_details?.prev_page_url)
-                  }
-                >
-                  Previous
-                </Button>
-              )}
-              {data?.episode_details?.next_page_url && (
-                <Button
-                  onClick={() =>
-                    pageChangeHandler(data?.episode_details?.next_page_url)
-                  }
-                >
-                  Next
-                </Button>
-              )}
-            </Flex>
+            <PaginateCard
+              data={data}
+              ep_details={details}
+              loading={ep_loading}
+              redirect
+            />
           </Stack>
         </Stack>
       )}

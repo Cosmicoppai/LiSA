@@ -59,13 +59,14 @@ export const HomeScreen = () => {
         direction="column"
         w="100%"
         h="100%"
+        pt={"20px"}
       >
         <Image
           objectFit="cover"
           src="/images/home_screen_logo.png"
           alt="logo"
         />{" "}
-        <Box w="50%">
+        <Box w="50%" sx={{ position: "relative" }} >
           <InputGroup>
             <InputRightElement
               pointerEvents="none"
@@ -80,6 +81,7 @@ export const HomeScreen = () => {
               children={<SearchIcon color="gray.300" />}
             />
             <Input
+            sx={{position: "relative"}}
               color={"font.main"}
               placeholder="Search Anime"
               onKeyDown={handleKeyDown}
@@ -88,7 +90,42 @@ export const HomeScreen = () => {
             />
           </InputGroup>
         </Box>
-        {!loading && animes && <SearchResultCard data={animes} />}
+        {/* {!loading && animes && 
+        
+        } />} */}
+        {!loading && animes && (
+          <Box
+            sx={{
+              // position: "absolute",
+              // top: 0,
+              marginTop: "10px",
+              maxWidth: "50%",
+              maxHeight: "100%",
+              height: "100%",
+              width: "100%",
+              overflowX: "auto",
+              "&::-webkit-scrollbar": {
+                width: "8px",
+                borderRadius: "8px",
+                backgroundColor: `rgba(255, 255, 255, 0.2)`,
+              },
+              "&::-webkit-scrollbar-thumb": {
+                backgroundColor: `rgba(255, 255, 255, 0.2)`,
+              },              display: "flex",
+              // justifyContent: "center",
+              alignItems: "center",
+              flexWrap: "wrap",
+              flexDirection: "row",
+              justifyContent: "space-around",
+
+              
+            }}
+          >
+            {animes.map((anime) => {
+              return <SearchResultCard data={anime} />;
+            })}
+          </Box>
+        )}
         {!loading && error && (
           <Box textAlign="center" py={10} px={6}>
             <Heading

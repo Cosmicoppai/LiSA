@@ -9,33 +9,41 @@ import {
   Flex,
   Badge,
 } from "@chakra-ui/react";
+import { AiFillStar } from "react-icons/ai";
 
 export default function Card({ data }) {
-  console.log(data.img_url);
   return (
-    <Center py={12}>
+    <Box sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}>
       <Box
         role={"group"}
         p={6}
-        maxW={"330px"}
-        w={"full"}
+        maxW={"270px"}
+        w={"270px"}
         bg={"gray.800"}
         boxShadow={"2xl"}
         rounded={"lg"}
         pos={"relative"}
         zIndex={1}
       >
+        {/* <div class="card_image">
+          <img src={data.img_url} />
+        </div> */}
         <Box
           rounded={"lg"}
           mt={-12}
           pos={"relative"}
-          height={"230px"}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
           _after={{
             transition: "all .3s ease",
             content: '""',
             w: "full",
             h: "full",
             pos: "absolute",
+
             top: 5,
             left: 0,
             backgroundImage: `url(${data.img_url})`,
@@ -50,28 +58,32 @@ export default function Card({ data }) {
         >
           <Image
             rounded={"lg"}
-            height={230}
-            width={282}
-            objectFit={"cover"}
+            // height={230}
+            // width={282}
+            objectFit={"contain"}
             src={data.img_url}
           />
         </Box>
-        <Stack pt={10} align={"center"}>
+        <Stack pt={5} align={"center"}>
           <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
             {data.anime_type}
           </Text>
-          <Heading fontSize={"2xl"} fontFamily={"body"} fontWeight={500}>
+          <Heading fontSize={"xl"} fontFamily={"body"} fontWeight={500}>
             {data.title}
           </Heading>
           <Flex
+            pt={2}
             direction={"row"}
             justifyContent={"space-between"}
             flex={1}
             width={"100%"}
           >
-            <Text fontWeight={800} fontSize={"xl"}>
-              {data.score}
-            </Text>
+            <Box display={"flex"} alignItems="center" justifyContent={"center"}>
+              <AiFillStar  color="#FDCC0D" fontSize={"20px"} />
+              <Text ml={"5px"} fontWeight={800} fontSize={"sm"} mt={0}>
+                {data.score}
+              </Text>
+            </Box>
             <Badge
               sx={{
                 display: "flex",
@@ -82,12 +94,60 @@ export default function Card({ data }) {
               }}
             >
               <Text color={"gray.300"}>
-                {data.episodes !== "?eps" ? data.episodes : "Running"}
+                {data.episodes !== "?" ? "Ep " + data.episodes : "Running"}
               </Text>
             </Badge>
           </Flex>
         </Stack>
       </Box>
-    </Center>
+    </Box>
   );
+}
+
+{
+  // <Center py={12}>
+  //   <Box
+  //     role={"group"}
+  //     p={6}
+  //     // maxW={"330px"}
+  //     w={"330px"}
+  //     bg={"gray.800"}
+  //     boxShadow={"2xl"}
+  //     rounded={"lg"}
+  //     pos={"relative"}
+  //     zIndex={1}
+  //   >
+  //     <Box
+  //       rounded={"lg"}
+  //       mt={-12}
+  //       pos={"relative"}
+  //       height={"230px"}
+  //       _after={{
+  //         transition: "all .3s ease",
+  //         content: '""',
+  //         w: "full",
+  //         h: "full",
+  //         pos: "absolute",
+  //         top: 5,
+  //         left: 0,
+  //         backgroundImage: `url(${data.img_url})`,
+  //         filter: "blur(15px)",
+  //         zIndex: -1,
+  //       }}
+  //       _groupHover={{
+  //         _after: {
+  //           filter: "blur(20px)",
+  //         },
+  //       }}
+  //     >
+  //       <Image
+  //         rounded={"lg"}
+  //         height={230}
+  //         width={282}
+  //         objectFit={"contain"}
+  //         src={data.img_url}
+  //       />
+  //     </Box>
+  //   </Box>
+  // </Center>
 }

@@ -65,12 +65,24 @@ const ExploreScreen = () => {
           </Select>
         </Flex>
 
-        <Flex gap={6} flexWrap="wrap">
+        <div style={{ maxWidth: "1200px", margin: " 0 auto" }}></div>
+        <ul
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            listStyle: "none",
+            margin: 0,
+            padding: 0,
+            marginTop: "20px"
+          }}
+        >
           {details &&
             details?.data?.map((anime) => {
               return <Card data={anime} />;
             })}
-        </Flex>
+        </ul>
+
+        <Flex gap={6} flexWrap="wrap"></Flex>
       </Stack>
     </Center>
   );

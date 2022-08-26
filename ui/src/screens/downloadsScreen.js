@@ -10,23 +10,31 @@ import { formatBytes } from "../utils";
 
 var W3CWebSocket = require("websocket").w3cwebsocket;
 
-const client = new W3CWebSocket("ws://localhost:9000");
-const { shell } = window.require("electron");
+let openFileExplorer;
+// if (typeof window !== "undefined") {
+//   const { shell } = window.require("electron");
+//   openFileExplorer = (file_location) => {
+//     // Show a folder in the file manager
+//     // Or a file
+//     shell.showItemInFolder(file_location);
+//   };
+// } else {
+//   openFileExplorer = (file_location) => {
+//     // Show a folder in the file manager
+//     // Or a file
+//     // shell.showItemInFolder(file_location);
+//   };
+// }
 
 const DownloadScreen = () => {
-  const openFileExplorer = (file_location) => {
-    // Show a folder in the file manager
-    // Or a file
-    shell.showItemInFolder(file_location);
-  };
-
   const dispatch = useDispatch();
   const [filesStatus, setFilesStatus] = useState({});
   const historyDetails = useSelector((state) => state.animeDownloadDetails);
 
-  console.log(historyDetails);
-
   useEffect(() => {
+    const client = new W3CWebSocket("ws://localhost:9000");
+
+    console.log("runnnn");
     dispatch(getDownloadHistory());
 
     client.onopen = () => {
@@ -37,7 +45,7 @@ const DownloadScreen = () => {
       let packet = JSON.parse(message.data);
       let { data, type } = packet;
 
-      console.log(packet);
+      // console.log("packet", packet);
 
       if (type === "new_file") {
         setFilesStatus((prev) => {
@@ -166,11 +174,12 @@ const DownloadScreen = () => {
             bg={"gray.900"}
             minWidth={"400px"}
           >
-            { historyDetails?.details &&
+            {historyDetails?.details &&
             historyDetails?.details?.length !== 0 ? (
-              historyDetails.details.map((history_item) => {
+              historyDetails.details.map((history_item, idx) => {
                 return (
                   <Flex
+                    key={idx}
                     pt={1}
                     p={3}
                     width={"100%"}
@@ -180,8 +189,10 @@ const DownloadScreen = () => {
                     justifyContent={"space-between"}
                     mb={4}
                   >
-                    <Box sx={{cursor: "pointer"}}>
-                      <FaPlay />
+                    <Box sx={{ cursor: "pointer" }}>
+                      <FaPlay
+                        onClick={() => openFileExplorer(history_item.location)}
+                      />
                     </Box>
                     <Text
                       fontWeight={500}
@@ -220,9 +231,9 @@ const DownloadScreen = () => {
                     </Flex>
                     <Box
                       onClick={() => openFileExplorer(history_item.location)}
-                      sx={{cursor: "pointer"}}
+                      sx={{ cursor: "pointer" }}
                     >
-                      <AiOutlineFolderOpen size={22} /> 
+                      <AiOutlineFolderOpen size={22} />
                     </Box>
                   </Flex>
                 );

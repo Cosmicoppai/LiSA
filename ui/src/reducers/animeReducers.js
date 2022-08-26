@@ -1,10 +1,16 @@
 import {
+  ANIME_CURRENT_EP_FAIL,
+  ANIME_CURRENT_EP_REQUEST,
+  ANIME_CURRENT_EP_SUCCESS,
+  ANIME_DETAILS_FAIL,
+  ANIME_DETAILS_REQUEST,
+  ANIME_DETAILS_SUCCESS,
   ANIME_DOWNLOAD_FAIL,
   ANIME_DOWNLOAD_REQUEST,
   ANIME_DOWNLOAD_SUCCESS,
-  ANIME_EPISODE_ADD_FAIL,
-  ANIME_EPISODE_ADD_REQUEST,
-  ANIME_EPISODE_ADD_SUCCESS,
+  ANIME_EPISODES_ADD_FAIL,
+  ANIME_EPISODES_ADD_REQUEST,
+  ANIME_EPISODES_ADD_SUCCESS,
   ANIME_EXPLORE_DETAILS_FAIL,
   ANIME_EXPLORE_DETAILS_REQUEST,
   ANIME_EXPLORE_DETAILS_SUCCESS,
@@ -35,7 +41,7 @@ export const animeSearchListReducer = (state = { animes: null }, action) => {
     case ANIME_SEARCH_REQUEST:
       return {
         loading: true,
-        animes: [],
+        animes: action.payload,
       };
 
     case ANIME_SEARCH_SUCCESS:
@@ -51,15 +57,45 @@ export const animeSearchListReducer = (state = { animes: null }, action) => {
   }
 };
 
-export const animeEpisodeReducer = (state = {}, action) => {
+export const animeEpisodesReducer = (state = {}, action) => {
   switch (action.type) {
-    case ANIME_EPISODE_ADD_REQUEST:
+    case ANIME_EPISODES_ADD_REQUEST:
       return { loading: false, details: action.payload };
 
-    case ANIME_EPISODE_ADD_SUCCESS:
+    case ANIME_EPISODES_ADD_SUCCESS:
       return { loading: false, details: action.payload };
 
-    case ANIME_EPISODE_ADD_FAIL:
+    case ANIME_EPISODES_ADD_FAIL:
+      return { loading: false, details: action.payload };
+
+    default:
+      return state;
+  }
+};
+export const animeCurrentEpReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ANIME_CURRENT_EP_REQUEST:
+      return { loading: false, details: action.payload };
+
+    case ANIME_CURRENT_EP_SUCCESS:
+      return { loading: false, details: action.payload };
+
+    case ANIME_CURRENT_EP_FAIL:
+      return { loading: false, details: action.payload };
+
+    default:
+      return state;
+  }
+};
+export const animeDetailsReducer = (state = {}, action) => {
+  switch (action.type) {
+    case ANIME_DETAILS_REQUEST:
+      return { loading: false, details: action.payload };
+
+    case ANIME_DETAILS_SUCCESS:
+      return { loading: false, details: action.payload };
+
+    case ANIME_DETAILS_FAIL:
       return { loading: false, details: action.payload };
 
     default:
@@ -139,7 +175,7 @@ export const animeExploreDetailsReducer = (
 };
 
 //Stream
-export const animeStreamReducer = (state = { details: null }, action) => {
+export const animeStreamExternalReducer = (state = { details: null }, action) => {
   switch (action.type) {
     case ANIME_STREAM_EXTERNAL_REQUEST:
       return {

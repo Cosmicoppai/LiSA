@@ -15,8 +15,6 @@
     "axios": "^0.27.2",
     "electron-is-dev": "^1.2.0",
     "framer-motion": "4.1.17",
-    "http-proxy-middleware": "^2.0.6",
-    "jol-player": "^3.5.0",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
@@ -26,17 +24,21 @@
     "redux": "^4.2.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.4.1",
+    "video.js": "^7.20.2",
+    "videojs-contrib-quality-levels": "^2.1.0",
+    "videojs-hls-quality-selector": "^1.1.4",
     "web-vitals": "^0.2.4",
     "websocket": "^1.0.34"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "set PORT=3005 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron:serve": "concurrently -k \"cross-env BROWSER=none yarn start\" \"yarn electron:start\"",
     "electron:build": "yarn build && electron-builder -c.extraMetadata.main=build/main.js",
-    "electron:start": "wait-on tcp:3000 && electron ."
+    "electron:start": "wait-on tcp:3005 && electron .",
+    "extraResources": "python_scripts"
   },
   "build": {
     "extends": null,
@@ -74,6 +76,8 @@
     "cross-env": "^7.0.3",
     "electron": "^11.2.1",
     "electron-builder": "^22.9.1",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-reload": "^2.0.0-alpha.1",
     "prettier": "^2.2.1",
     "wait-on": "^5.2.1"
   }

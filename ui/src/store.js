@@ -2,21 +2,27 @@ import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
 import {
+  animeCurrentEpReducer,
+  animeDetailsReducer,
   animeDownloadReducer,
-  animeEpisodeReducer,
+  animeEpisodesReducer,
   animeEpUrlReducer,
   animeExploreDetailsReducer,
   animeSearchListReducer,
   animeStreamDetailsReducer,
+  animeStreamExternalReducer,
 } from "./reducers/animeReducers";
 
 const reducer = combineReducers({
   animeSearchList: animeSearchListReducer,
   animeStreamDetails: animeStreamDetailsReducer,
+  animeStreamExternal: animeStreamExternalReducer,
   animeDownloadDetails: animeDownloadReducer,
-  animeEpisodeDetails: animeEpisodeReducer,
+  animeEpisodesDetails: animeEpisodesReducer,
+  animeCurrentEp: animeCurrentEpReducer,
   animeEpUrl: animeEpUrlReducer,
   animeExploreDetails: animeExploreDetailsReducer,
+  animeDetails: animeDetailsReducer,
 });
 
 const middleware = [thunk];

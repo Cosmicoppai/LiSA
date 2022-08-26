@@ -1,6 +1,7 @@
 import React from "react";
 import {
   Badge,
+  Box,
   Button,
   Center,
   Flex,
@@ -11,27 +12,54 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import { addAnimeDetails } from "../actions/animeActions";
+import { useDispatch } from "react-redux";
+import { AiFillStar } from 'react-icons/ai';
 
 const SearchResultCard = ({ data }) => {
+  const dispatch = useDispatch();
+
+  const detailsClickHandler = () => {
+    dispatch(addAnimeDetails(data));
+  };
+
   return (
-    <Center py={6} w="100%" h="100%">
+    <Link
+      to="anime-details"
+      style={{
+        textDecoration: "none",
+        maxWidth: "600px",
+        width: "45%",
+        display: "flex",
+        justifyContent: "center",
+      }}
+      onClick={detailsClickHandler}
+    >
       <Stack
+        mt={5}
         borderWidth="1px"
         borderRadius="lg"
-        w={{ sm: "100%", md: "50%" }}
-        height={{ sm: "476px", md: "100%" }}
-        maxH="20rem"
-        direction={{ base: "column", md: "row" }}
+        w={{ sm: "100%", md: "100%" }}
+        // height={{ sm: "200px", md: "2000px" }}
+        // maxH="200px"
+        // direction={{ base: "column", md: "row" }}
         bg={useColorModeValue("white", "gray.900")}
         boxShadow={"2xl"}
-        padding={4}
+        padding={1}
+        flexDirection="row"
+        justifyContent="space-between"
       >
-        <Flex flex={1} bg="blue.200">
+        <Flex width={"100%"} height="100%">
           <Link
             to="anime-details"
             style={{ textDecoration: "none", width: "100%" }}
           >
-            <Image objectFit="contain" boxSize="100%" src={data.poster} />
+            <Image
+              objectFit="contain"
+              boxSize="90%"
+              src={data.poster}
+              // maxWidth="150px"
+            />
           </Link>
         </Flex>
         <Stack
@@ -40,30 +68,32 @@ const SearchResultCard = ({ data }) => {
           justifyContent="center"
           alignItems="flex-start"
           p={1}
-          pt={2}
         >
-          <Link
-            to="anime-details"
-            style={{ textDecoration: "none", width: "100%" }}
-          >
-            <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {`${data.eng_name}`}
-              {data.jp_name ? ` | ${data.jp_name}` : ""}
-            </Heading>
-          </Link>
+          <Heading fontSize={"l"} fontFamily={"body"}>
+            {data.jp_name ? `${data.jp_name}` : ""}
+            {data.eng_name ? ` | ${data.eng_name}` : ""}
+          </Heading>
 
-          <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
+          <Text fontWeight={600} color={"gray.500"} size="sm" mb={1}>
             No of episodes {data.no_of_episodes}
           </Text>
 
-          <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
+          <Box display={"flex"} alignItems="center" justifyContent={"center"}>
+            <AiFillStar color="#FDCC0D" />
+            <Text ml={"5px"}>
+
+            {data.score}
+            </Text>
+          </Box>
+
+          <Stack align={"center"} justify={"center"} direction={"row"}>
             <Badge
               px={2}
               py={1}
               bg={useColorModeValue("gray.50", "gray.800")}
               fontWeight={"400"}
             >
-              {data.description.Type}
+              {data.type}
             </Badge>
             <Badge
               px={2}
@@ -71,12 +101,12 @@ const SearchResultCard = ({ data }) => {
               bg={useColorModeValue("gray.50", "gray.800")}
               fontWeight={"400"}
             >
-              {data.description.Aired}
+              {data.status}
             </Badge>
           </Stack>
         </Stack>
       </Stack>
-    </Center>
+    </Link>
   );
 };
 

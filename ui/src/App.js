@@ -11,7 +11,7 @@ import { Box, Grid, GridItem } from "@chakra-ui/react";
 import ExploreScreen from "./screens/exploreScreen";
 import VideoPlayer from "./components/video-player";
 
-const { app } = window.require("@electron/remote");
+// const { app } = window.require("@electron/remote");
 
 function App() {
   return (
@@ -43,7 +43,7 @@ function App() {
         >
           <Box sx={{ width: "100%", height: "100%" }}>
             <Routes>
-              <Route path="/" element={<VideoPlayer />} />
+              <Route path="/" element={<HomeScreen />} />
               <Route path="anime-details" element={<AnimeDetailsScreen />} />
               <Route path="setting" element={<SettingScreen />} />
               <Route path="download" element={<DownloadScreen />} />

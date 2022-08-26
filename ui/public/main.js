@@ -1,9 +1,30 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
+const { spawn } = require("child_process");
+// var python = require("python-shell");
 
+// var options = {
+//   scriptPath: path.join(__dirname, "/../../scraper"),
+// };
 require("@electron/remote/main").initialize();
+require("electron-reload")(__dirname);
 
+// const child = spawn(" cd ../scraper ;  python main.py", [], {
+//   shell: true,
+// });
+
+// child.stdout.on("data", (data) => {
+//   console.log(`stdout: ${data}`);
+// });
+
+// child.stderr.on("data", (data) => {
+//   console.error(`stderr: ${data}`);
+// });
+
+// child.on("close", (code) => {
+//   console.log(`child process exited with code ${code}`);
+// });
 function createWindow() {
   const win = new BrowserWindow({
     width: 800,
@@ -13,16 +34,15 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
 
       preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  // win.setMenu(null) 
-
   win.loadURL(
     isDev
-      ? "http://localhost:3000"
+      ? "http://localhost:3005"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
 
@@ -40,7 +60,7 @@ function createWindow() {
 
   splash.loadURL(
     isDev
-      ? "http://localhost:3000/loader.html"
+      ? "http://localhost:3005/loader.html"
       : `file://${path.join(__dirname, "../build/loader.html")}`
   );
   splash.center();

@@ -14,186 +14,152 @@ import {
   Stack,
   useDisclosure,
   useToast,
+  Text,
+  Heading,
+  Progress,
 } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  addEpisodesDetails,
+  clearEp,
   downloadVideo,
+  getStreamDetails,
   getVideoUrl,
   playVideoExternal,
+  searchAnimeList,
 } from "../actions/animeActions";
 import VideoPlayer from "../components/video-player";
+import { Link, useNavigate } from "react-router-dom";
+import PaginateCard from "../components/paginateCard";
 
 const InbuiltPlayerScreen = () => {
+  const navigate = useNavigate();
+
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   const dispatch = useDispatch();
-  const { details, loading } = useSelector((state) => state.animeStreamDetails);
+  const { details } = useSelector((state) => state.animeStreamDetails);
+  const { error: externalError, loading: externalLoading } = useSelector(
+    (state) => state.animeStreamExternal
+  );
 
-  const epDetails = useSelector((state) => state.animeEpisodeDetails);
+  console.log(externalError);
+  const { animes: data, loading } = useSelector(
+    (state) => state.animeSearchList
+  );
+  const epDetails = useSelector((state) => state.animeCurrentEp);
   const urlDetails = useSelector((state) => state.animeEpUrl);
+  const { details: anime } = useSelector((state) => state.animeDetails);
+  const { details: eps_details, loading: eps_loading } = useSelector(
+    (state) => state.animeEpisodesDetails
+  );
 
   console.log(urlDetails);
-  const [language, setLanguage] = useState(null);
-  const [quality, setQuality] = useState(null);
+  const [language, setLanguage] = useState("jpn");
+  const [prevTime, setPrevTime] = useState(null);
+  const [player, setPlayer] = useState(undefined);
 
-  const qualityChangeHandler = (value) => {
-    let templink = "";
-    details[language].map((qualityLink) => {
-      if (Object.keys(qualityLink)[0] === value) {
-        templink = Object.values(qualityLink)[0];
-      }
-    });
-
-    console.log(templink);
-    setQuality(value);
-    dispatch(getVideoUrl(templink));
-  };
-
-  const playHandler = (player) => {
-    if (urlDetails?.url?.video_url) {
-      dispatch(playVideoExternal(urlDetails?.url?.video_url, player));
-    }
-  };
-
-  const downloadHandler = () => {
-    if (urlDetails?.url?.video_url) {
-      try {
-        dispatch(
-          downloadVideo(urlDetails?.url?.video_url, urlDetails?.url?.file_name)
-        );
-
-        toast({
-          title: "Download Started",
-          description:
-            "Download has bee started. You can check in downloads sections",
-          status: "success",
-          duration: 6000,
-          isClosable: true,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    }
+  const languageChangeHandler = (e) => {
+    setPrevTime(player.currentTime())
+    setLanguage(e.target.value);
   };
 
   return (
     <Center py={6} w="100%">
-      {epDetails && details && (
-        <Flex flexDirection={"column"}>
-          <VideoPlayer url={urlDetails?.url?.video_url} epDetails={epDetails} />
+      <Flex
+        flexDirection={"column"}
+        justifyContent="center"
+        alignItems={"center"}
+        w="100%"
+        maxWidth={"1200px"}
+      >
+        {epDetails && anime && (
+          <Box w="100%">
+            <Heading fontSize={"2xl"} fontFamily={"body"}>
+              {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
+              {anime.eng_name ? ` | ${anime.eng_name}` : ""}
+            </Heading>
 
-          <Stack
-            borderWidth="1px"
-            borderRadius="lg"
-            justifyContent="space-between"
-            direction={"column"}
-            bg={"gray.900"}
-            boxShadow={"2xl"}
-            padding={3}
+            <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
+              {`Episode ${epDetails?.details?.current_ep}`}
+            </Text>
+
+            {details && language && epDetails && (
+              <VideoPlayer
+                url={details[language]}
+                epDetails={epDetails}
+                player={player}
+                setPlayer={setPlayer}
+                prevTime={prevTime}
+              />
+            )}
+          </Box>
+        )}
+
+        <Stack
+          borderWidth="1px"
+          borderRadius="lg"
+          justifyContent="space-between"
+          direction={"column"}
+          bg={"gray.900"}
+          boxShadow={"2xl"}
+          padding={3}
+          w="100%"
+        >
+          {/* <Flex
+            flex={1}
+            justifyContent={"space-evenly"}
+            alignItems={"center"}
+            p={1}
+            pt={2}
+            gap={6}
           >
-            <Flex
-              flex={1}
-              justifyContent={"space-evenly"}
-              alignItems={"center"}
-              p={1}
-              pt={2}
-              gap={6}
+            <Button flex={1} disabled={!quality || !language}>
+              Previous
+            </Button>
+
+          
+
+            <Button
+              flex={0.5}
+              isLoading={urlDetails?.loading}
+              onClick={downloadHandler}
+              disabled={!quality || !language}
             >
-              <Select
-                flex={1}
-                placeholder="Language"
-                size="lg"
-                onChange={(e) => setLanguage(e.target.value)}
-              >
-                {Object.keys(details).map((language, idx) => {
-                  return (
-                    <option key={idx} value={language}>
-                      {language === "jpn"
-                        ? "Japanese"
-                        : language === "eng"
-                        ? "English"
-                        : language}
-                    </option>
-                  );
-                })}
-              </Select>
-              <Select
-                flex={1}
-                placeholder="Quality"
-                size="lg"
-                disabled={!language}
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  qualityChangeHandler(e.target.value);
-                }}
-              >
-                {details[language]?.map((quality, idx) => {
-                  return (
-                    <option key={idx} value={Object.keys(quality)[0]}>
-                      {Object.keys(quality)[0]}p
-                    </option>
-                  );
-                })}
-              </Select>
-              <Button
-                flex={1}
-                isLoading={urlDetails?.loading}
-                disabled={!quality || !language}
-                onClick={onOpen}
-              >
-                Play in external player
-              </Button>
-              {/* <Button
-                flex={1}
-                onClick={playHandler}
-                isLoading={urlDetails?.loading}
-                disabled={!quality || !language}
-              >
-                Play in external player
-              </Button> */}
-              <Button
-                flex={0.5}
-                isLoading={urlDetails?.loading}
-                onClick={downloadHandler}
-                disabled={!quality || !language}
-              >
-                Download
-              </Button>
-            </Flex>
-          </Stack>
-          <Modal isOpen={isOpen} onClose={onClose} isCentered>
-            <ModalOverlay />
-            <ModalContent>
-              <ModalHeader>Choose your favourite video player </ModalHeader>
-              <ModalCloseButton />
-              <ModalBody>
-                <Flex
-                  display={"flex"}
-                  alignItems={"center"}
-                  justifyContent={"center"}
-                >
-                  <Box
-                    p={4}
-                    onClick={() => playHandler("mpv")}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <Image src="/assests/mpv.png" />
-                  </Box>
-                  <Box
-                    p={4}
-                    sx={{ cursor: "pointer" }}
-                    onClick={() => playHandler("vlc")}
-                  >
-                    <Image src="/assests/vlc.png" />
-                  </Box>
-                </Flex>
-              </ModalBody>
-            </ModalContent>
-          </Modal>
-        </Flex>
-      )}
+              Download
+            </Button>
+            <Button flex={1} disabled={!quality || !language}>
+              Next
+            </Button>
+          </Flex> */}
+          <Select
+            placeholder="Language"
+            size="md"
+            width={"max-content"}
+            value={language}
+            onChange={languageChangeHandler}
+          >
+            {Object.keys(details || {}).map((language, idx) => {
+              return (
+                <option key={idx} value={language}>
+                  {language === "jpn"
+                    ? "Japanese"
+                    : language === "eng"
+                    ? "English"
+                    : ""}
+                </option>
+              );
+            })}
+          </Select>
+          <PaginateCard
+            data={data}
+            ep_details={eps_details}
+            loading={eps_loading}
+          />
+        </Stack>
+      </Flex>
     </Center>
   );
 };
