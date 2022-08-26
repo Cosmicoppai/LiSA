@@ -95,52 +95,9 @@ async def get_ep_details(request: Request):
 
     with requests.Session() as session:
         try:
-            return JSONResponse(await _episode_details(session, anime_session=anime_session, page_no=page))
+            return JSONResponse(await Animepahe().get_episode_details(session, anime_session=anime_session, page_no=page))
         except TypeError:
             return await not_found_404(request, msg="Anime, Not yet Aired...")
-
-
-async def _episode_details(session: requests.Session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
-    episodes = {"ep_details": []}
-
-    try:
-        site_scraper = Animepahe()
-        episode_data = site_scraper.get_episode_sessions(session, anime_session=anime_session, page_no=page_no)
-
-        if page_no == "1":
-            episodes["description"] = await Animepahe().get_anime_description(session, anime_session)
-            episodes["recommendation"] = f"{config.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
-
-        episodes["total_page"] = episode_data.get("last_page")
-        if episode_data.get("current_page") <= episode_data.get("last_page"):
-            next_page_url = episode_data.get("next_page_url", None)
-            if next_page_url:
-                next_page_url = next_page_url.replace(site_scraper.api_url,
-                                                      f"/ep_details?anime_session={anime_session}&")
-                episodes["next_page_url"] = next_page_url
-            else:
-                episodes["next_page_url"] = next_page_url
-
-            prev_page_url = episode_data.get("prev_page_url", None)
-            if prev_page_url:
-                prev_page_url = prev_page_url.replace(site_scraper.api_url,
-                                                      f"/ep_details?anime_session={anime_session}&")
-                episodes["prev_page_url"] = prev_page_url
-            else:
-                episodes["prev_page_url"] = prev_page_url
-
-            episode_session = episode_data.get("data", None)
-            for ep in episode_session:
-                episodes["ep_details"].append(
-                    {ep["episode"]: {"stream_detail": f'{config.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
-                                     "snapshot": ep["snapshot"], "duration": ep["duration"]}})
-            return episodes
-        else:
-            episodes["next_page"] = episode_data.get("next_page_url")
-            episodes["previous_page"] = f"/ep_details?anime_session={anime_session}&page={episode_data['last_page']}"
-            return episodes
-    except TypeError:
-        raise TypeError
 
 
 async def get_stream_details(request: Request):
@@ -165,16 +122,7 @@ async def get_stream_details(request: Request):
         return await bad_request_400(request, msg="Pass Episode sessions")
 
     try:
-        stream_data = Animepahe().get_episode_stream_data(episode_session=episode_session)
-        resp: Dict[str, str] = {}
-        for data in stream_data:
-            for key, val in data.items():
-                """
-                    stream_dt (dict): {'quality': stream url (str)}
-                """
-                aud, kwik_url = val["audio"], val["kwik"]
-                resp[aud] = resp.get(aud, f"{config.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{config.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{key}" + ","
-        return JSONResponse(resp)
+        return JSONResponse(Animepahe().get_stream_data(episode_session=episode_session))
     except JSONDecodeError:
         return await not_found_404(request, msg="Pass valid anime and episode sessions")
 
@@ -200,7 +148,7 @@ async def stream(request: Request):
 
 
 async def download(request: Request):
-    # pahewin = request.query_params.get("pw")  # get pahewin url from query parameter
+
     try:
         if request.headers.get("content-type", None) != "application/json":
             return await bad_request_400(request, msg="Invalid content type")
