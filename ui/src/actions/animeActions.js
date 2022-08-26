@@ -61,12 +61,18 @@ export const addAnimeDetails = (data) => async (dispatch) => {
   }
 };
 
-export const addEpisodesDetails = (data) => async (dispatch) => {
-  console.log(data);
+export const addEpisodesDetails = (data) => async (dispatch, getState) => {
+  let { details } = getState().animeEpisodesDetails;
+  let allDetails;
+  if (details) {
+    allDetails = { ...details, ...data };
+  } else {
+    allDetails = data;
+  }
   try {
     dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
 
-    dispatch({ type: ANIME_EPISODES_ADD_SUCCESS, payload: data });
+    dispatch({ type: ANIME_EPISODES_ADD_SUCCESS, payload: allDetails });
   } catch (error) {
     dispatch({ type: ANIME_EPISODES_ADD_FAIL, payload: error });
   }
