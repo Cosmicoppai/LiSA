@@ -8,10 +8,12 @@ import {
   Image,
   Flex,
   Badge,
+  Spacer,
 } from "@chakra-ui/react";
 import { AiFillStar } from "react-icons/ai";
 
 export default function Card({ data }) {
+  console.log(data);
   return (
     <Box sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}>
       <Box
@@ -65,10 +67,42 @@ export default function Card({ data }) {
           />
         </Box>
         <Stack pt={5} align={"center"}>
-          <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
-            {data.anime_type}
-          </Text>
-          <Heading fontSize={"xl"} fontFamily={"body"} fontWeight={500}>
+          <Flex flex={1} width={"100%"}>
+            <Text
+              color={"gray.500"}
+              fontSize={"sm"}
+              textTransform={"uppercase"}
+            >
+              {data.anime_type}
+            </Text>
+            <Spacer />
+            <Box sx={{ display: "flex" }}>
+              <Text
+                color={"gray.500"}
+                fontSize={"sm"}
+                textTransform={"uppercase"}
+              >
+                Rank
+              </Text>
+              <Text
+                fontWeight={500}
+                ml={1}
+                // color={"gray.500"}
+                fontSize={"sm"}
+                textTransform={"uppercase"}
+              >
+                #{data.rank}
+              </Text>
+            </Box>
+          </Flex>
+
+          <Heading
+            fontSize={"xl"}
+            fontFamily={"body"}
+            fontWeight={500}
+            textAlign={"left"}
+            alignSelf={"flex-start"}
+          >
             {data.title}
           </Heading>
           <Flex
@@ -79,7 +113,7 @@ export default function Card({ data }) {
             width={"100%"}
           >
             <Box display={"flex"} alignItems="center" justifyContent={"center"}>
-              <AiFillStar  color="#FDCC0D" fontSize={"20px"} />
+              <AiFillStar color="#FDCC0D" fontSize={"20px"} />
               <Text ml={"5px"} fontWeight={800} fontSize={"sm"} mt={0}>
                 {data.score}
               </Text>
