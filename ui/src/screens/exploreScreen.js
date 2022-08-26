@@ -28,9 +28,7 @@ const ExploreScreen = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    if (!details) {
-      dispatch(getExploreDetails(query));
-    }
+    dispatch(getExploreDetails(query));
   }, [query]);
 
   return (
@@ -73,13 +71,23 @@ const ExploreScreen = () => {
             listStyle: "none",
             margin: 0,
             padding: 0,
-            marginTop: "20px"
+            marginTop: "20px",
           }}
         >
-          {details &&
-            details?.data?.map((anime) => {
-              return <Card data={anime} />;
-            })}
+          {details
+            ? details?.data?.map((anime) => {
+                return <Card data={anime} />;
+              })
+            : Array(30)
+                .fill(0)
+                .map(() => (
+                  <Skeleton
+                    width={"300px"}
+                    height={"450px"}
+                    sx={{ padding: "1rem", margin: "10px auto" }}
+                    padding={6}
+                  />
+                ))}
         </ul>
 
         <Flex gap={6} flexWrap="wrap"></Flex>
