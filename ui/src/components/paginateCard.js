@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Skeleton, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Skeleton, Spacer, Text } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -10,23 +10,25 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import server from "../axios";
 
-const PaginateCard = ({ data, loading, ep_details, redirect }) => {
+const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const episodeClickHandler = (item, ep_no) => {
     // dispatch(clearEp());
-console.log(item)
+    console.log(item);
     dispatch(getStreamDetails(item.stream_detail));
     dispatch(addCurrentEp({ ...item, current_ep: ep_no }));
     if (redirect) {
       navigate("/play");
     }
   };
-  const pageChangeHandler = async(url) => {
+  const pageChangeHandler = async (url) => {
     const { data } = await server.get(url);
     dispatch(addEpisodesDetails(data));
   };
+
+  console.log(currentEp)
 
   return (
     <>
@@ -46,10 +48,12 @@ console.log(item)
                   p={2}
                   mr={2}
                   mt={2}
-                  bg="brand.900"
                   width={"100%"}
                   maxWidth={"50px"}
                   justifyContent="center"
+                  bg={
+                    currentEp == key + 1 ? "#10495F" : "brand.900"
+                  }
                   onClick={() =>
                     episodeClickHandler(
                       Object.values(item)[0],
@@ -85,6 +89,9 @@ console.log(item)
                     <Flex
                       width={"100%"}
                       maxWidth={"50px"}
+                      backgroundColor={
+                        currentEp === key + 1 ? "while" : "inherit"
+                      }
                       justifyContent="center"
                     >
                       <Text textAlign={"center"}>{key + 1}</Text>
@@ -99,8 +106,6 @@ console.log(item)
       {data && (
         <Flex
           sx={{ marginTop: "20px !important" }}
-          width={"100%"}
-          justifyContent={"space-between"}
         >
           {ep_details?.prev_page_url && (
             <Button
@@ -110,6 +115,7 @@ console.log(item)
               Previous Page
             </Button>
           )}
+  <Spacer />
 
           {ep_details?.next_page_url && (
             <Button
