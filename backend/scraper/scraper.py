@@ -60,8 +60,7 @@ class Animepahe(Anime):
 
         return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"]
 
-    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[
-                                                                                           Dict[str, str | int]] | None:
+    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
 
         Args:
@@ -102,15 +101,29 @@ class Animepahe(Anime):
                 'Duration': str,
             }
         """
+
+        description: Dict[str, Any] = {
+            "synopsis": "", "eng_name": "", "studio": "-", "youtube_url": "", "external_links": {},
+        }
+
         description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
         description_response = session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
+        if description_response.status_code != 200:
+            return description
 
         description_bs = BeautifulSoup(description_response.text, 'html.parser')
 
-        description: Dict[str, Any] = {"external_links": {}}
+        synopsis = description_bs.find('div', {'class': 'anime-synopsis'})
+        if synopsis:
+            description['synopsis'] = synopsis.text.replace('\"', '')
 
-        synopsis = description_bs.find('div', {'class': 'anime-synopsis'}).text.replace('\"', '')
-        description['Synopsis'] = synopsis
+        scripts = description_bs.find_all("script", src=False)[0].text.split(";")
+
+        for var in scripts:
+            _var = var.strip("\n\tlet ")
+            if _var[:7] == "preview":
+                description["youtube_url"] = _var[_var.index("=")+1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
+                break
 
         details: Dict[str, Any] = {}
 
@@ -126,7 +139,6 @@ class Animepahe(Anime):
             details[key.lower()] = value
 
         description['eng_name'] = details.get("english", details.get("synonyms", "-"))
-        description['duration'] = details.get("duration", "-")
         description["studio"] = details.get("studio", "-")
 
         return description
