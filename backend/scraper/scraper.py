@@ -324,6 +324,7 @@ class MyAL:
     site_url: str = "https://myanimelist.net"
 
     anime_types_dict = {
+        "all_anime": "",
         "airing": "airing",
         "upcoming": "upcoming",
         "tv": "tv",
@@ -344,11 +345,11 @@ class MyAL:
             Dict[str, Dict[str, str]]: {
                 "<rank>" : {
                     "img_url" : (str)url,
-                    "title" : (str), 
+                    "title" : (str),
                     "anime_type" : (str),
-                    "episodes" : (str), 
-                    "score" : (str), 
-                }, 
+                    "episodes" : (str),
+                    "score" : (str),
+                },
                 ...
                 "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
             }
@@ -404,13 +405,12 @@ class MyAL:
 
         top_anime = []
 
-        for i in range(len(ranks)):
-            rank = ranks[i]
-            if ranks[i] == "-":
+        for idx, rank in enumerate(ranks):
+            if rank == "-":
                 rank = "na"
-            top_anime.append({"rank": rank, "img_url": imgs[i], "title": title[i].text, "anime_type": a_type[i],
-                              "episodes": episodes[i].replace('eps', ''), "score": score[i].text,
-                              "anime_detail": f'{config.API_SERVER_ADDRESS}/search?anime={title[i].text}&total_res=1'})
+            top_anime.append({"rank": rank, "img_url": imgs[idx], "title": title[idx].text, "anime_type": a_type[idx],
+                              "episodes": episodes[idx].replace('eps', ''), "score": score[idx * 2].text,
+                              "anime_detail": f'{config.API_SERVER_ADDRESS}/search?anime={title[idx].text}&total_res=1'})
 
         response: Dict[str, Any] = {"data": top_anime}
 
