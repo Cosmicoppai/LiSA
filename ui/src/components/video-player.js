@@ -25,11 +25,9 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
   const [callFinishVideoAPI, setCallFinishVideoAPI] = useState(false);
   const [vidDuration, setVidDuration] = useState(50000);
   const videoId = url;
-  // console.log(epDetails);
-  // console.log(language);
+
   const thumbnailURL = epDetails?.details?.snapshot;
   const liveURL = url;
-  // console.log(url);
   useEffect(() => {
     if (player && url) {
       player.src({
@@ -46,7 +44,6 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
         player?.currentTime(prevTime);
         player?.play();
       } else {
-        console.log("kokoko");
         player?.currentTime(0);
       }
     }
@@ -93,7 +90,6 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
       videoRef.current,
       videoJsOptions,
       function onPlayerReady() {
-        console.log(this.hotkeys)
         this.hotkeys({
           volumeStep: 0.1,
           seekStep: 5,
@@ -101,7 +97,6 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
         });
       }
     );
-    console.log(plyer.controlBar);
     var fullscreen = plyer.controlBar.getChild("FullscreenToggle");
     var index = plyer.controlBar.children().indexOf(fullscreen);
     var externalPlayerButton = plyer.controlBar.addChild("button", {}, index);
@@ -111,6 +106,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
       externalPlayerButtonDom.innerHTML = "external";
 
       externalPlayerButtonDom.onclick = function () {
+        fullscreen.handleClick();
         onOpen();
       };
     }
@@ -231,9 +227,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
           ref={videoRef}
           lan
           onLoadedMetadata={(e, px) => {
-            // console.log(e.target.duration);
-            console.log(e);
-            console.log(px);
+
             setVidDuration(e.target.duration);
           }}
           onTimeUpdate={(e) => {
