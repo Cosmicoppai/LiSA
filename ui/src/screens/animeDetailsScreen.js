@@ -148,7 +148,7 @@ export default function AnimeDetailsScreen() {
               </Badge>
             </Stack>
             <Text color={"gray.400"} px={3}>
-              {details?.description?.Synopsis}
+              {details?.description?.synopsis}
             </Text>
             <div>
               <PaginateCard
