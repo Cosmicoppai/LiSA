@@ -11,6 +11,7 @@ import {
   animeSearchListReducer,
   animeStreamDetailsReducer,
   animeStreamExternalReducer,
+  recommendationsReducer,
 } from "./reducers/animeReducers";
 
 const reducer = combineReducers({
@@ -23,6 +24,7 @@ const reducer = combineReducers({
   animeEpUrl: animeEpUrlReducer,
   animeExploreDetails: animeExploreDetailsReducer,
   animeDetails: animeDetailsReducer,
+  animeRecommendations: recommendationsReducer,
 });
 
 const middleware = [thunk];

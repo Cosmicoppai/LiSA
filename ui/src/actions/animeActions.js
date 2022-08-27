@@ -17,6 +17,9 @@ import {
   ANIME_EXPLORE_DETAILS_FAIL,
   ANIME_EXPLORE_DETAILS_REQUEST,
   ANIME_EXPLORE_DETAILS_SUCCESS,
+  ANIME_RECOMMENDATION_FAIL,
+  ANIME_RECOMMENDATION_REQUEST,
+  ANIME_RECOMMENDATION_SUCCESS,
   ANIME_SEARCH_CLEAR,
   ANIME_SEARCH_FAIL,
   ANIME_SEARCH_REQUEST,
@@ -205,5 +208,16 @@ export const getDownloadHistory = () => async (dispatch) => {
     dispatch({ type: DOWNLOAD_LIBRARY_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: DOWNLOAD_LIBRARY_FAIL, payload: error });
+  }
+};
+export const getRecommendations = (url) => async (dispatch) => {
+  try {
+    dispatch({ type: ANIME_RECOMMENDATION_REQUEST });
+
+    const { data } = await server.get(url);
+
+    dispatch({ type: ANIME_RECOMMENDATION_SUCCESS, payload: data });
+  } catch (error) {
+    dispatch({ type: ANIME_RECOMMENDATION_FAIL, payload: error });
   }
 };

@@ -14,6 +14,9 @@ import {
   ANIME_EXPLORE_DETAILS_FAIL,
   ANIME_EXPLORE_DETAILS_REQUEST,
   ANIME_EXPLORE_DETAILS_SUCCESS,
+  ANIME_RECOMMENDATION_FAIL,
+  ANIME_RECOMMENDATION_REQUEST,
+  ANIME_RECOMMENDATION_SUCCESS,
   ANIME_SEARCH_CLEAR,
   ANIME_SEARCH_FAIL,
   ANIME_SEARCH_REQUEST,
@@ -207,6 +210,24 @@ export const animeDownloadReducer = (state = { details: null }, action) => {
       return { loading: false, details: action.payload };
 
     case DOWNLOAD_LIBRARY_FAIL:
+      return { loading: false, error: action.payload };
+
+    default:
+      return state;
+  }
+};
+export const recommendationsReducer = (state = { details: null }, action) => {
+  switch (action.type) {
+    case ANIME_RECOMMENDATION_REQUEST:
+      return {
+        loading: true,
+        details: null,
+      };
+
+    case ANIME_RECOMMENDATION_SUCCESS:
+      return { loading: false, details: action.payload };
+
+    case ANIME_RECOMMENDATION_FAIL:
       return { loading: false, error: action.payload };
 
     default:
