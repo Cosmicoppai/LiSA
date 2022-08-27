@@ -15,6 +15,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Stack,
   Text,
 } from "@chakra-ui/react";
 import { Image } from "@chakra-ui/react";
@@ -52,7 +53,7 @@ export const HomeScreen = () => {
   };
 
   return (
-    <Flex w="100%" h="100%" direction="column">
+    <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
       <Flex
         align="center"
         justify="center"
@@ -80,6 +81,7 @@ export const HomeScreen = () => {
               pointerEvents="none"
               children={<SearchIcon color="gray.300" />}
             />
+            z
             <Input
               sx={{ position: "relative" }}
               color={"font.main"}
@@ -96,11 +98,10 @@ export const HomeScreen = () => {
         {!loading && animes && (
           <Box
             sx={{
-              // position: "absolute",
-              // top: 0,
               marginTop: "10px",
               maxWidth: "100%",
               maxHeight: "100%",
+
               height: "100%",
               width: "100%",
               overflowX: "auto",
@@ -115,25 +116,22 @@ export const HomeScreen = () => {
               justifyContent: "center",
               display: "flex",
               flexWrap: "wrap",
-             
             }}
           >
             {animes.map((anime) => {
-              return <SearchResultCard data={anime} />;
+              return (
+                <SearchResultCard
+                  data={anime}
+                  cardWidth={"250px"}
+                  cardMargin={"10px 30px"}
+                  maxImgWidth={"180px"}
+                />
+              );
             })}
           </Box>
         )}
         {!loading && error && (
           <Box textAlign="center" py={10} px={6}>
-            {/* <Heading
-              display="inline-block"
-              as="h2"
-              size="2xl"
-              bgGradient="linear(to-r, gray.400, gray.600)"
-              backgroundClip="text"
-            >
-              404
-            </Heading> */}
             <Image
               src="/images/not-found.png"
               alt="not-found"

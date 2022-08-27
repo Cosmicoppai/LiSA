@@ -58,7 +58,6 @@ export default function AnimeDetailsScreen() {
           w={{ sm: "100%", md: "80%" }}
           justifyContent="space-between"
           direction={{ base: "column", md: "row" }}
-          bg={"gray.900"}
           boxShadow={"2xl"}
           padding={4}
         >

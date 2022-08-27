@@ -62,8 +62,10 @@ export default function Card({ data }) {
             rounded={"lg"}
             // height={230}
             // width={282}
-            objectFit={"contain"}
+            objectFit={"fill"}
             src={data.img_url}
+            minWidth={"222px"}
+            minHeight={"316px"}
           />
         </Box>
         <Stack pt={5} align={"center"}>

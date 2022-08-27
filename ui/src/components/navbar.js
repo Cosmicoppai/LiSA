@@ -28,7 +28,6 @@ const Navbar = () => {
       justifyContent={"flex-start"}
       flexDirection="column"
       gap={10}
-      bg={"gray.900"}
       height={"100%"}
       minWidth={"70px"}
       maxWidth={"70px"}

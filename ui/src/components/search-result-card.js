@@ -17,7 +17,7 @@ import { addAnimeDetails } from "../actions/animeActions";
 import { useDispatch } from "react-redux";
 import { AiFillStar } from "react-icons/ai";
 
-const SearchResultCard = ({ data }) => {
+const SearchResultCard = ({ data, cardWidth, cardMargin, maxImgWidth }) => {
   const dispatch = useDispatch();
 
   const detailsClickHandler = () => {
@@ -29,8 +29,9 @@ const SearchResultCard = ({ data }) => {
       to="anime-details"
       style={{
         textDecoration: "none",
-        maxWidth: "270px",
-        width: "45%",
+        maxWidth: "200px",
+        // width: "45%",
+        margin: cardMargin ? cardMargin : "10px 20px",
         display: "flex",
         justifyContent: "center",
       }}
@@ -40,8 +41,8 @@ const SearchResultCard = ({ data }) => {
         <Box
           role={"group"}
           p={6}
-          maxW={"270px"}
-          w={"270px"}
+          // maxW={cardWidth ? cardWidth : "200px"}
+          // w={cardWidth ? cardWidth : "200px"}
           bg={"gray.800"}
           boxShadow={"2xl"}
           rounded={"lg"}
@@ -83,6 +84,8 @@ const SearchResultCard = ({ data }) => {
               rounded={"lg"}
               // height={230}
               // width={282}
+              minWidth={maxImgWidth ? maxImgWidth : "222px"}
+              minHeight={"222px"}
               objectFit={"contain"}
               src={data.poster}
             />

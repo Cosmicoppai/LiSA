@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import {
   addCurrentEp,
   addEpisodesDetails,
+  getRecommendations,
   getStreamDetails,
   searchAnimeList,
 } from "../actions/animeActions";
@@ -12,13 +13,14 @@ import server from "../axios";
 
 const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
   const navigate = useNavigate();
-
+  console.log(ep_details);
   const dispatch = useDispatch();
   const episodeClickHandler = (item, ep_no) => {
     // dispatch(clearEp());
     console.log(item);
     dispatch(getStreamDetails(item.stream_detail));
     dispatch(addCurrentEp({ ...item, current_ep: ep_no }));
+    dispatch(getRecommendations(ep_details.recommendation));
     if (redirect) {
       navigate("/play");
     }
@@ -45,12 +47,16 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
                 <Flex
                   cursor={"pointer"}
                   key={key}
-                  p={2}
+                  p={1}
                   mr={2}
                   mt={2}
                   width={"100%"}
-                  maxWidth={"50px"}
+                  maxWidth={"45px"}
+                  minWidth={"45px"}
+                  maxHeight={"45px"}
+                  minHeight={"45px"}
                   justifyContent="center"
+                  alignItems="center"
                   bg={currentEp == key + 1 ? "#10495F" : "brand.900"}
                   onClick={() =>
                     episodeClickHandler(
