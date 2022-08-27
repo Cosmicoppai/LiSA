@@ -66,7 +66,7 @@ export const HomeScreen = () => {
           src="/images/home_screen_logo.png"
           alt="logo"
         />{" "}
-        <Box w="50%" sx={{ position: "relative" }} >
+        <Box w="50%" sx={{ position: "relative" }}>
           <InputGroup>
             <InputRightElement
               pointerEvents="none"
@@ -81,7 +81,7 @@ export const HomeScreen = () => {
               children={<SearchIcon color="gray.300" />}
             />
             <Input
-            sx={{position: "relative"}}
+              sx={{ position: "relative" }}
               color={"font.main"}
               placeholder="Search Anime"
               onKeyDown={handleKeyDown}
@@ -111,14 +111,13 @@ export const HomeScreen = () => {
               },
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: `rgba(255, 255, 255, 0.2)`,
-              },              display: "flex",
+              },
+              display: "flex",
               // justifyContent: "center",
               alignItems: "center",
               flexWrap: "wrap",
               flexDirection: "row",
               justifyContent: "space-around",
-
-              
             }}
           >
             {animes.map((anime) => {
@@ -128,7 +127,7 @@ export const HomeScreen = () => {
         )}
         {!loading && error && (
           <Box textAlign="center" py={10} px={6}>
-            <Heading
+            {/* <Heading
               display="inline-block"
               as="h2"
               size="2xl"
@@ -136,7 +135,15 @@ export const HomeScreen = () => {
               backgroundClip="text"
             >
               404
-            </Heading>
+            </Heading> */}
+            <Image
+              src="/images/not-found.png"
+              alt="not-found"
+              height={200}
+              display={"flex"}
+              justifyContent={"center"}
+              margin={"0 auto"}
+            />
             <Text fontSize="18px" mt={3} mb={2}>
               Anime Not Found
             </Text>
