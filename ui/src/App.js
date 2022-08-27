@@ -20,18 +20,17 @@ function App() {
         templateColumns="repeat(1, 0.05fr 1fr)"
         gap={2}
         w={"100%"}
-
         h={"100%"}
         overflow={"hidden"}
+
       >
-        <GridItem w="100%" h={"100vh"}>
+        <GridItem w="100%" h={"100vh"} maxWidth={"70px"} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
           <Navbar />
         </GridItem>
         <GridItem
           w="100%"
           h={"100vh"}
           bg={"gray.900"}
-
           sx={{
             overflowY: "auto",
             "&::-webkit-scrollbar": {

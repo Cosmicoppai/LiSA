@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Skeleton, Spacer, Text } from "@chakra-ui/react";
 import React from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   addCurrentEp,
   addEpisodesDetails,
@@ -11,15 +11,25 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import server from "../axios";
 
-const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
+const PaginateCard = ({ data, loading, ep_details, redirect }) => {
+  const epDetails = useSelector((state) => state.animeCurrentEp);
+
+  let currentEp = parseInt(epDetails?.details?.current_ep);
   const navigate = useNavigate();
-  console.log(ep_details);
   const dispatch = useDispatch();
   const episodeClickHandler = (item, ep_no) => {
     // dispatch(clearEp());
     console.log(item);
+    console.log();
+
+    console.log(ep_no);
     dispatch(getStreamDetails(item.stream_detail));
-    dispatch(addCurrentEp({ ...item, current_ep: ep_no }));
+    dispatch(
+      addCurrentEp({
+        ...item,
+        current_ep: ep_no,
+      })
+    );
     dispatch(getRecommendations(ep_details.recommendation));
     if (redirect) {
       navigate("/play");
@@ -30,7 +40,14 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
     dispatch(addEpisodesDetails(data));
   };
 
+  let coloredIdx;
+  let current_page_eps = ep_details.ep_details;
   console.log(currentEp);
+  current_page_eps.map((single_ep, idx) => {
+    if (Object.keys(single_ep)[0] == currentEp) {
+      coloredIdx = idx;
+    }
+  });
 
   return (
     <>
@@ -57,7 +74,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect, currentEp }) => {
                   minHeight={"45px"}
                   justifyContent="center"
                   alignItems="center"
-                  bg={currentEp == key + 1 ? "#10495F" : "brand.900"}
+                  bg={coloredIdx == key  ? "#10495F" : "brand.900"}
                   onClick={() =>
                     episodeClickHandler(
                       Object.values(item)[0],

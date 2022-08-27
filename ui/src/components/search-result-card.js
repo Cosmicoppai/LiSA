@@ -26,10 +26,11 @@ const SearchResultCard = ({ data, cardWidth, cardMargin, maxImgWidth }) => {
 
   return (
     <Link
-      to="anime-details"
+      to="/anime-details"
       style={{
         textDecoration: "none",
         maxWidth: "200px",
+        height: "max-content",
         // width: "45%",
         margin: cardMargin ? cardMargin : "10px 20px",
         display: "flex",

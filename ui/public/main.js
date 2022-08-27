@@ -35,20 +35,23 @@ function createWindow() {
       nodeIntegration: true,
       enableRemoteModule: true,
       contextIsolation: false,
+      autoHideMenuBar: true,
 
       preload: path.join(__dirname, "preload.js"),
     },
   });
 
+
+  win.removeMenu(true)
   win.loadURL(
     isDev
       ? "http://localhost:3005"
       : `file://${path.join(__dirname, "../build/index.html")}`
   );
 
-  if (isDev) {
-    win.webContents.openDevTools();
-  }
+  // if (isDev) {
+  //   win.webContents.openDevTools();
+  // }
 
   var splash = new BrowserWindow({
     width: 500,

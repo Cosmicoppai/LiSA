@@ -22,9 +22,11 @@ import {
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  addCurrentEp,
   addEpisodesDetails,
   clearEp,
   downloadVideo,
+  getRecommendations,
   getStreamDetails,
   getVideoUrl,
   playVideoExternal,
@@ -34,26 +36,28 @@ import VideoPlayer from "../components/video-player";
 import { Link, useNavigate } from "react-router-dom";
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
+import server from "../axios";
 
 const InbuiltPlayerScreen = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
-  const toast = useToast();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const toast = useToast();
+  // const { isOpen, onOpen, onClose } = useDisclosure();
 
   const dispatch = useDispatch();
   const { details } = useSelector((state) => state.animeStreamDetails);
-  const { error: externalError, loading: externalLoading } = useSelector(
-    (state) => state.animeStreamExternal
-  );
+  // const { error: externalError, loading: externalLoading } = useSelector(
+  //   (state) => state.animeStreamExternal
+  // );
 
-  console.log(externalError);
   const { animes: data, loading } = useSelector(
     (state) => state.animeSearchList
   );
+
   const epDetails = useSelector((state) => state.animeCurrentEp);
   const urlDetails = useSelector((state) => state.animeEpUrl);
   const { details: anime } = useSelector((state) => state.animeDetails);
+
   const { details: recommendations } = useSelector(
     (state) => state.animeRecommendations
   );
@@ -61,7 +65,6 @@ const InbuiltPlayerScreen = () => {
     (state) => state.animeEpisodesDetails
   );
 
-  console.log(urlDetails);
   const [language, setLanguage] = useState("jpn");
   const [prevTime, setPrevTime] = useState(null);
   const [player, setPlayer] = useState(undefined);
@@ -69,6 +72,73 @@ const InbuiltPlayerScreen = () => {
   const languageChangeHandler = (e) => {
     setPrevTime(player.currentTime());
     setLanguage(e.target.value);
+  };
+  let ep_no = parseInt(epDetails?.details?.current_ep);
+
+  const pageChangeHandler = async (url) => {
+    if (url) {
+      const { data } = await server.get(url);
+      dispatch(addEpisodesDetails({ ...data, current_ep: ep_no + 1 }));
+    }
+  };
+  let current_page_eps = eps_details.ep_details;
+
+  const nextEpHandler = () => {
+    if (
+      ep_no == Object.keys(current_page_eps[current_page_eps.length - 1])[0]
+    ) {
+      if (eps_details.next_page_url) {
+        pageChangeHandler(eps_details.next_page_url);
+      } else {
+        return;
+      }
+    }
+
+    let item;
+
+    current_page_eps.map((single_ep) => {
+      if (Object.keys(single_ep)[0] == ep_no) {
+        item = Object.values(single_ep)[0];
+      }
+    });
+
+    if (item) {
+      dispatch(getStreamDetails(item.stream_detail));
+      dispatch(
+        addCurrentEp({
+          ...item,
+          current_ep: ep_no + 1,
+        })
+      );
+      console.log(item)
+    }
+  };
+  const prevEpHandler = () => {
+    if (ep_no == Object.keys(current_page_eps[0])[0]) {
+      if (eps_details.prev_page_url) {
+        pageChangeHandler(eps_details.prev_page_url);
+      } else {
+        return;
+      }
+    }
+
+    let item;
+
+    current_page_eps.map((single_ep) => {
+      if (Object.keys(single_ep)[0] == ep_no) {
+        item = Object.values(single_ep)[0];
+      }
+    });
+
+    if (item) {
+      dispatch(getStreamDetails(item.stream_detail));
+      dispatch(
+        addCurrentEp({
+          ...item,
+          current_ep: ep_no - 1,
+        })
+      );
+    }
   };
 
   return (
@@ -84,14 +154,12 @@ const InbuiltPlayerScreen = () => {
           <Box w="100%">
             <Heading fontSize={"2xl"} fontFamily={"body"}>
               {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
-              {anime.eng_name ? ` | ${anime.eng_name}` : ""} 
+              {anime.eng_name ? ` | ${anime.eng_name}` : ""}
               <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-              {`Episode ${epDetails?.details?.current_ep}`}
-            </Text>
-
+                {`Episode ${epDetails?.details?.current_ep}`}
+              </Text>
             </Heading>
 
-            
             {details && language && epDetails ? (
               <VideoPlayer
                 url={details[language]}
@@ -116,7 +184,7 @@ const InbuiltPlayerScreen = () => {
           padding={3}
           w="100%"
         >
-          {/* <Flex
+          <Flex
             flex={1}
             justifyContent={"space-evenly"}
             alignItems={"center"}
@@ -124,24 +192,14 @@ const InbuiltPlayerScreen = () => {
             pt={2}
             gap={6}
           >
-            <Button flex={1} disabled={!quality || !language}>
+            <Button flex={1} onClick={prevEpHandler}>
               Previous
             </Button>
 
-          
-
-            <Button
-              flex={0.5}
-              isLoading={urlDetails?.loading}
-              onClick={downloadHandler}
-              disabled={!quality || !language}
-            >
-              Download
-            </Button>
-            <Button flex={1} disabled={!quality || !language}>
+            <Button flex={1} onClick={nextEpHandler}>
               Next
             </Button>
-          </Flex> */}
+          </Flex>
           <Select
             placeholder="Language"
             size="md"
@@ -210,9 +268,26 @@ const InbuiltPlayerScreen = () => {
                 flexWrap: "wrap",
               }}
             >
-              {recommendations.map((anime) => {
-                return <SearchResultCard data={anime} cardWidth={"270px"} cardMargin={"10px 40px"}/>;
-              })}
+              {recommendations
+                ? recommendations.map((anime) => {
+                    return (
+                      <SearchResultCard
+                        data={anime}
+                        cardWidth={"270px"}
+                        cardMargin={"10px 40px"}
+                      />
+                    );
+                  })
+                : Array(30)
+                    .fill(0)
+                    .map(() => (
+                      <Skeleton
+                        width={"200px"}
+                        height={"300px"}
+                        sx={{ padding: "1rem", margin: "10px auto" }}
+                        padding={6}
+                      />
+                    ))}
             </Box>
           )}
         </Stack>
