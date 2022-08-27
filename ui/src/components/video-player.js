@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import hlsQualitySelector from "videojs-hls-quality-selector";
 import { downloadVideo } from "../actions/animeActions";
 
-const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
+const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime, nextEpHandler }) => {
   const toast = useToast();
 
   const { details } = useSelector((state) => state.animeStreamDetails);
@@ -53,7 +53,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime }) => {
 
   useEffect(() => {
     if (callFinishVideoAPI) {
-      //finishesVideo()
+      nextEpHandler()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callFinishVideoAPI]);

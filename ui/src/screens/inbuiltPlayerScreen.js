@@ -167,6 +167,7 @@ const InbuiltPlayerScreen = () => {
                 player={player}
                 setPlayer={setPlayer}
                 prevTime={prevTime}
+                nextEpHandler={nextEpHandler}
               />
             ) : (
               <Skeleton width={"100%"} height={"660px"} />
