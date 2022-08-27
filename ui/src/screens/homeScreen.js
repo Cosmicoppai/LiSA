@@ -99,7 +99,7 @@ export const HomeScreen = () => {
               // position: "absolute",
               // top: 0,
               marginTop: "10px",
-              maxWidth: "50%",
+              maxWidth: "100%",
               maxHeight: "100%",
               height: "100%",
               width: "100%",
@@ -112,12 +112,10 @@ export const HomeScreen = () => {
               "&::-webkit-scrollbar-thumb": {
                 backgroundColor: `rgba(255, 255, 255, 0.2)`,
               },
+              justifyContent: "center",
               display: "flex",
-              // justifyContent: "center",
-              alignItems: "center",
               flexWrap: "wrap",
-              flexDirection: "row",
-              justifyContent: "space-around",
+             
             }}
           >
             {animes.map((anime) => {

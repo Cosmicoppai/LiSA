@@ -7,6 +7,7 @@ import {
   Flex,
   Heading,
   Image,
+  Spacer,
   Stack,
   Text,
   useColorModeValue,
@@ -14,7 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { addAnimeDetails } from "../actions/animeActions";
 import { useDispatch } from "react-redux";
-import { AiFillStar } from 'react-icons/ai';
+import { AiFillStar } from "react-icons/ai";
 
 const SearchResultCard = ({ data }) => {
   const dispatch = useDispatch();
@@ -28,84 +29,140 @@ const SearchResultCard = ({ data }) => {
       to="anime-details"
       style={{
         textDecoration: "none",
-        maxWidth: "600px",
+        maxWidth: "270px",
         width: "45%",
         display: "flex",
         justifyContent: "center",
       }}
       onClick={detailsClickHandler}
     >
-      <Stack
-        mt={5}
-        borderWidth="1px"
-        borderRadius="lg"
-        w={{ sm: "100%", md: "100%" }}
-        // height={{ sm: "200px", md: "2000px" }}
-        // maxH="200px"
-        // direction={{ base: "column", md: "row" }}
-        bg={useColorModeValue("white", "gray.900")}
-        boxShadow={"2xl"}
-        padding={1}
-        flexDirection="row"
-        justifyContent="space-between"
-      >
-        <Flex width={"100%"} height="100%">
-          <Link
-            to="anime-details"
-            style={{ textDecoration: "none", width: "100%" }}
+      <Box sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}>
+        <Box
+          role={"group"}
+          p={6}
+          maxW={"270px"}
+          w={"270px"}
+          bg={"gray.800"}
+          boxShadow={"2xl"}
+          rounded={"lg"}
+          pos={"relative"}
+          zIndex={1}
+        >
+          {/* <div class="card_image">
+        <img src={data.img_url} />
+      </div> */}
+          <Box
+            rounded={"lg"}
+            mt={-12}
+            pos={"relative"}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            _after={{
+              transition: "all .3s ease",
+              content: '""',
+              w: "full",
+              h: "full",
+              pos: "absolute",
+
+              top: 5,
+              left: 0,
+              backgroundImage: `url(${data.poster})`,
+              filter: "blur(15px)",
+              zIndex: -1,
+            }}
+            _groupHover={{
+              _after: {
+                filter: "blur(20px)",
+              },
+            }}
           >
             <Image
-              objectFit="contain"
-              boxSize="90%"
+              rounded={"lg"}
+              // height={230}
+              // width={282}
+              objectFit={"contain"}
               src={data.poster}
-              // maxWidth="150px"
             />
-          </Link>
-        </Flex>
-        <Stack
-          flex={1}
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="flex-start"
-          p={1}
-        >
-          <Heading fontSize={"l"} fontFamily={"body"}>
-            {data.jp_name ? `${data.jp_name}` : ""}
-            {data.eng_name ? ` | ${data.eng_name}` : ""}
-          </Heading>
-
-          <Text fontWeight={600} color={"gray.500"} size="sm" mb={1}>
-            No of episodes {data.no_of_episodes}
-          </Text>
-
-          <Box display={"flex"} alignItems="center" justifyContent={"center"}>
-            <AiFillStar color="#FDCC0D" />
-            <Text ml={"5px"}>
-
-            {data.score}
-            </Text>
           </Box>
+          <Stack pt={5} align={"center"}>
+            <Flex flex={1} width={"100%"}>
+              <Text
+                color={"gray.500"}
+                fontSize={"sm"}
+                textTransform={"uppercase"}
+              >
+                {data.type}
+              </Text>
+              <Spacer />
+              {/* <Box sx={{ display: "flex" }}>
+                <Text
+                  color={"gray.500"}
+                  fontSize={"sm"}
+                  textTransform={"uppercase"}
+                >
+                  Rank
+                </Text>
+                <Text
+                  fontWeight={500}
+                  ml={1}
+                  // color={"gray.500"}
+                  fontSize={"sm"}
+                  textTransform={"uppercase"}
+                >
+                  #{data.rank}
+                </Text>
+              </Box> */}
+            </Flex>
 
-          <Stack align={"center"} justify={"center"} direction={"row"}>
-            <Badge
-              px={2}
-              py={1}
-              bg={useColorModeValue("gray.50", "gray.800")}
-              fontWeight={"400"}
+            <Heading
+              fontSize={"xl"}
+              fontFamily={"body"}
+              fontWeight={500}
+              textAlign={"left"}
+              alignSelf={"flex-start"}
             >
-              {data.type}
-            </Badge>
-            <Badge
-              px={2}
-              py={1}
-              bg={useColorModeValue("gray.50", "gray.800")}
-              fontWeight={"400"}
+              {data.jp_name ? `${data.jp_name}` : ""}
+              {data.eng_name ? ` | ${data.eng_name}` : ""}
+            </Heading>
+            <Flex
+              pt={2}
+              direction={"row"}
+              justifyContent={"space-between"}
+              flex={1}
+              width={"100%"}
             >
-              {data.status}
-            </Badge>
+              <Box
+                display={"flex"}
+                alignItems="center"
+                justifyContent={"center"}
+              >
+                <AiFillStar color="#FDCC0D" fontSize={"20px"} />
+                <Text ml={"5px"} fontWeight={800} fontSize={"sm"} mt={0}>
+                  {data.score}
+                </Text>
+              </Box>
+              <Badge
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "5px",
+                  p: 1,
+                }}
+              >
+                <Text color={"gray.300"}>
+                  {data.episodes !== "?"
+                    ? "Ep " + data.no_of_episodes
+                    : "Running"}
+                </Text>
+              </Badge>
+            </Flex>
           </Stack>
-        </Stack>
-      </Stack>
+        </Box>
+      </Box>
     </Link>
   );
 };
