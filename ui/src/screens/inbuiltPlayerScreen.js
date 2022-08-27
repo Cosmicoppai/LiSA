@@ -110,7 +110,7 @@ const InbuiltPlayerScreen = () => {
           current_ep: ep_no + 1,
         })
       );
-      console.log(item)
+      console.log(item);
     }
   };
   const prevEpHandler = () => {
@@ -152,13 +152,15 @@ const InbuiltPlayerScreen = () => {
       >
         {epDetails && anime && (
           <Box w="100%">
-            <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
-              {anime.eng_name ? ` | ${anime.eng_name}` : ""}
-              <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-                {`Episode ${epDetails?.details?.current_ep}`}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Heading fontSize={"2xl"} fontFamily={"body"}>
+                {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
+                {anime.eng_name ? ` | ${anime.eng_name}` : ""}
+              </Heading>
+              <Text fontWeight={600} color={"gray.500"} size="sm" ml={2}>
+                {`| Episode ${epDetails?.details?.current_ep}`}
               </Text>
-            </Heading>
+            </Box>
 
             {details && language && epDetails ? (
               <VideoPlayer
@@ -187,39 +189,39 @@ const InbuiltPlayerScreen = () => {
         >
           <Flex
             flex={1}
-            justifyContent={"space-evenly"}
+            justifyContent={"space-between"}
             alignItems={"center"}
             p={1}
             pt={2}
             gap={6}
           >
-            <Button flex={1} onClick={prevEpHandler}>
+            <Button onClick={prevEpHandler} width={"max-content"}>
               Previous
             </Button>
-
-            <Button flex={1} onClick={nextEpHandler}>
+            <Select
+              placeholder="Language"
+              size="md"
+              value={language}
+              onChange={languageChangeHandler}
+              width={"max-content"}
+            >
+              {Object.keys(details || {}).map((language, idx) => {
+                return (
+                  <option key={idx} value={language}>
+                    {language === "jpn"
+                      ? "Japanese"
+                      : language === "eng"
+                      ? "English"
+                      : ""}
+                  </option>
+                );
+              })}
+            </Select>
+            <Button onClick={nextEpHandler} width={"max-content"}>
               Next
             </Button>
           </Flex>
-          <Select
-            placeholder="Language"
-            size="md"
-            width={"max-content"}
-            value={language}
-            onChange={languageChangeHandler}
-          >
-            {Object.keys(details || {}).map((language, idx) => {
-              return (
-                <option key={idx} value={language}>
-                  {language === "jpn"
-                    ? "Japanese"
-                    : language === "eng"
-                    ? "English"
-                    : ""}
-                </option>
-              );
-            })}
-          </Select>
+
           <PaginateCard
             data={data}
             ep_details={eps_details}
