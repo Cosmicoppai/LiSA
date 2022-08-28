@@ -3,52 +3,29 @@ import {
   Button,
   Center,
   Flex,
-  Image,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Select,
   Stack,
-  useDisclosure,
-  useToast,
   Text,
   Heading,
-  Progress,
   Skeleton,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addCurrentEp,
   addEpisodesDetails,
-  clearEp,
-  downloadVideo,
-  getRecommendations,
   getStreamDetails,
-  getVideoUrl,
-  playVideoExternal,
-  searchAnimeList,
 } from "../actions/animeActions";
 import VideoPlayer from "../components/video-player";
-import { Link, useNavigate } from "react-router-dom";
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
 import server from "../axios";
 
 const InbuiltPlayerScreen = () => {
-  // const navigate = useNavigate();
 
-  // const toast = useToast();
-  // const { isOpen, onOpen, onClose } = useDisclosure();
 
   const dispatch = useDispatch();
   const { details } = useSelector((state) => state.animeStreamDetails);
-  // const { error: externalError, loading: externalLoading } = useSelector(
-  //   (state) => state.animeStreamExternal
-  // );
 
   const { animes: data, loading } = useSelector(
     (state) => state.animeSearchList
@@ -173,7 +150,7 @@ const InbuiltPlayerScreen = () => {
                 nextEpHandler={nextEpHandler}
               />
             ) : (
-              <Skeleton width={"100%"} height={"660px"} />
+              <Skeleton width={"100%"} height={"660px"} mt={3} />
             )}
           </Box>
         )}

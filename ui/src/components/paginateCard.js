@@ -6,9 +6,8 @@ import {
   addEpisodesDetails,
   getRecommendations,
   getStreamDetails,
-  searchAnimeList,
 } from "../actions/animeActions";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import server from "../axios";
 
 const PaginateCard = ({ data, loading, ep_details, redirect }) => {
@@ -18,11 +17,6 @@ const PaginateCard = ({ data, loading, ep_details, redirect }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const episodeClickHandler = (item, ep_no) => {
-    // dispatch(clearEp());
-    console.log(item);
-    console.log();
-
-    console.log(ep_no);
     dispatch(getStreamDetails(item.stream_detail));
     dispatch(
       addCurrentEp({
@@ -39,20 +33,22 @@ const PaginateCard = ({ data, loading, ep_details, redirect }) => {
     const { data } = await server.get(url);
     dispatch(addEpisodesDetails(data));
   };
-
   let coloredIdx;
-  let current_page_eps = ep_details.ep_details;
-  console.log(currentEp);
-  current_page_eps.map((single_ep, idx) => {
-    if (Object.keys(single_ep)[0] == currentEp) {
-      coloredIdx = idx;
-    }
-  });
+
+  if (!loading && ep_details) {
+    let current_page_eps = ep_details.ep_details;
+    console.log(currentEp);
+    current_page_eps.map((single_ep, idx) => {
+      if (Object.keys(single_ep)[0] == currentEp) {
+        coloredIdx = idx;
+      }
+    });
+  }
 
   return (
     <>
       <Box mt={5}>
-        {!loading ? (
+        {!loading && ep_details ? (
           <Flex
             direction={"row"}
             flexWrap="wrap"
@@ -94,7 +90,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect }) => {
             width={"100%"}
             justifyContent="center"
           >
-            {Array(30)
+            {Array(25)
               .fill(0)
               .map((item, key) => {
                 return (

@@ -1,24 +1,12 @@
+
 import {
-  DownloadIcon,
-  HamburgerIcon,
-  SearchIcon,
-  SettingsIcon,
-} from "@chakra-ui/icons";
-import {
-  Box,
   Flex,
   Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  VStack,
+
 } from "@chakra-ui/react";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { BiTrendingUp } from "react-icons/bi";
-import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch, AiOutlineSetting } from "react-icons/ai";
+import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch } from "react-icons/ai";
 
 const Navbar = () => {
   const { pathname } = useLocation();

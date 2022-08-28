@@ -63,7 +63,7 @@ export const animeSearchListReducer = (state = { animes: null }, action) => {
 export const animeEpisodesReducer = (state = {}, action) => {
   switch (action.type) {
     case ANIME_EPISODES_ADD_REQUEST:
-      return { loading: false, details: action.payload };
+      return { loading: true, details: action.payload };
 
     case ANIME_EPISODES_ADD_SUCCESS:
       return { loading: false, details: action.payload };
@@ -78,7 +78,7 @@ export const animeEpisodesReducer = (state = {}, action) => {
 export const animeCurrentEpReducer = (state = {}, action) => {
   switch (action.type) {
     case ANIME_CURRENT_EP_REQUEST:
-      return { loading: false, details: action.payload };
+      return { loading: true, details: action.payload };
 
     case ANIME_CURRENT_EP_SUCCESS:
       return { loading: false, details: action.payload };
@@ -93,7 +93,7 @@ export const animeCurrentEpReducer = (state = {}, action) => {
 export const animeDetailsReducer = (state = {}, action) => {
   switch (action.type) {
     case ANIME_DETAILS_REQUEST:
-      return { loading: false, details: action.payload };
+      return { loading: true, details: action.payload };
 
     case ANIME_DETAILS_SUCCESS:
       return { loading: false, details: action.payload };

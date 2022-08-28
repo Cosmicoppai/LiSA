@@ -56,6 +56,7 @@ export const addAnimeDetails = (data) => async (dispatch) => {
     let url;
     let ep_details;
     dispatch({ type: ANIME_DETAILS_REQUEST });
+    dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
 
     console.log(data);
     if (data.anime_detail) {
@@ -67,6 +68,7 @@ export const addAnimeDetails = (data) => async (dispatch) => {
       ep_details = await server.get(data.ep_details);
       dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
     }
+    
     dispatch(addEpisodesDetails(ep_details.data));
     dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
   } catch (error) {
@@ -75,16 +77,16 @@ export const addAnimeDetails = (data) => async (dispatch) => {
 };
 
 export const addEpisodesDetails = (data) => async (dispatch, getState) => {
-  let { details } = getState().animeEpisodesDetails;
-  let allDetails;
-  if (details) {
-    allDetails = { ...details, ...data };
-  } else {
-    allDetails = data;
-  }
+ 
   try {
     dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
-
+    let { details } = getState().animeEpisodesDetails;
+    let allDetails;
+    if (details) {
+      allDetails = { ...details, ...data };
+    } else {
+      allDetails = data;
+    }
     dispatch({ type: ANIME_EPISODES_ADD_SUCCESS, payload: allDetails });
   } catch (error) {
     dispatch({ type: ANIME_EPISODES_ADD_FAIL, payload: error });

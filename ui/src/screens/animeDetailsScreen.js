@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Badge,
   Button,
@@ -10,6 +10,8 @@ import {
   Text,
   Icon,
   Box,
+  Skeleton,
+  SkeletonText,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -25,33 +27,18 @@ import { AiFillStar } from "react-icons/ai";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
-  const { details: data, loading } = useSelector((state) => state.animeDetails);
+  const { details: data } = useSelector((state) => state.animeDetails);
   const { details, loading: ep_loading } = useSelector(
     (state) => state.animeEpisodesDetails
   );
-  console.log(details);
-  console.log("data", data);
-  const navigate = useNavigate();
 
-  // const nextPage = (item) => {
-  //   // dispatch(clearEp());
 
-  //   dispatch(getStreamDetails(data.session, item.ep_session));
-  //   dispatch(addEpisodesDetails(item));
-  //   if (redirect) {
-  //     navigate("/play");
-  //   }
-  // };
 
-  // useEffect(() => {
-  //   if (!data && !loading) {
-  //     navigate("/");
-  //   }
-  // }, [data]);
+
 
   return (
     <Center py={6} w="100%">
-      {data && (
+      {data ? (
         <Stack
           borderWidth="1px"
           borderRadius="lg"
@@ -153,6 +140,78 @@ export default function AnimeDetailsScreen() {
             </Stack>
             <Text color={"gray.400"} px={3}>
               {details?.description?.synopsis}
+            </Text>
+            <div>
+              <PaginateCard
+                data={data}
+                ep_details={details}
+                loading={ep_loading}
+                redirect
+              />
+            </div>
+          </Stack>
+        </Stack>
+      ) : (
+        <Stack
+          borderWidth="1px"
+          borderRadius="lg"
+          w={{ sm: "100%", md: "80%" }}
+          justifyContent="space-between"
+          direction={{ base: "column", md: "row" }}
+          boxShadow={"2xl"}
+          padding={4}
+        >
+          <Box
+            rounded={"lg"}
+            flex={1}
+            maxW={"30%"}
+            maxHeight={"500px"}
+            mt={0}
+            pos={"relative"}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            _after={{
+              transition: "all .3s ease",
+              content: '""',
+              w: "full",
+              h: "full",
+              pos: "absolute",
+
+              top: 5,
+              left: 0,
+              zIndex: 1,
+            }}
+            _groupHover={{
+              _after: {
+                filter: "blur(20px)",
+              },
+            }}
+          >
+            <Skeleton height={"100%"} width={"100%"} />
+          </Box>
+
+          <Stack
+            maxW={"65%"}
+            flex={1}
+            flexDirection="column"
+            alignItems="flex-start"
+            p={1}
+            pt={2}
+          >
+            <Skeleton height={"25px"} width={"50%"} />
+
+            <Skeleton height={"15px"} width={"50%"} mb={4} />
+
+            <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
+              <Skeleton height={"15px"} width={"50px"} />
+              <Skeleton height={"15px"} width={"50px"} />
+              <Skeleton height={"15px"} width={"50px"} />
+            </Stack>
+            <Text color={"gray.400"} width="100%">
+              <SkeletonText mt="4" noOfLines={20} spacing="2" width={"100%"} />
             </Text>
             <div>
               <PaginateCard
