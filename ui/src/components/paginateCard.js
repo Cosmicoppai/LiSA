@@ -74,7 +74,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect }) => {
                   minHeight={"45px"}
                   justifyContent="center"
                   alignItems="center"
-                  bg={coloredIdx == key  ? "#10495F" : "brand.900"}
+                  bg={coloredIdx == key && !redirect ? "#10495F" : "brand.900"}
                   onClick={() =>
                     episodeClickHandler(
                       Object.values(item)[0],

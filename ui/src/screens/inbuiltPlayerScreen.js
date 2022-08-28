@@ -156,6 +156,7 @@ const InbuiltPlayerScreen = () => {
               <Heading fontSize={"2xl"} fontFamily={"body"}>
                 {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
                 {anime.eng_name ? ` | ${anime.eng_name}` : ""}
+                {anime.title ? `${anime.title}` : ""}
               </Heading>
               <Text fontWeight={600} color={"gray.500"} size="sm" ml={2}>
                 {`| Episode ${epDetails?.details?.current_ep}`}

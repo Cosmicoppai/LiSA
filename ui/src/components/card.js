@@ -11,11 +11,26 @@ import {
   Spacer,
 } from "@chakra-ui/react";
 import { AiFillStar } from "react-icons/ai";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { addAnimeDetails } from "../actions/animeActions";
 
 export default function Card({ data }) {
   console.log(data);
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+
+  const exploreCardHandler = () => {
+    dispatch(addAnimeDetails(data));
+    navigate("/anime-details");
+
+  };
   return (
-    <Box sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}>
+    <Box
+      sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}
+      onClick={exploreCardHandler}
+    >
       <Box
         role={"group"}
         p={6}

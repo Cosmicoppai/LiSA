@@ -1,5 +1,3 @@
-import { useToast } from "@chakra-ui/react";
-// import axios from "axios";
 import server from "../axios";
 import {
   ANIME_CURRENT_EP_FAIL,
@@ -55,8 +53,20 @@ export const searchAnimeList = (query) => async (dispatch) => {
 
 export const addAnimeDetails = (data) => async (dispatch) => {
   try {
+    let url;
+    let ep_details;
     dispatch({ type: ANIME_DETAILS_REQUEST });
-    const ep_details = await server.get(data.ep_details);
+
+    console.log(data);
+    if (data.anime_detail) {
+      const searchRes = await server.get(data.anime_detail);
+
+      ep_details = await server.get(searchRes.data[0].ep_details);
+      dispatch({ type: ANIME_DETAILS_SUCCESS, payload: ep_details.data });
+    } else {
+      ep_details = await server.get(data.ep_details);
+      dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
+    }
     dispatch(addEpisodesDetails(ep_details.data));
     dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
   } catch (error) {

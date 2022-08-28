@@ -82,7 +82,7 @@ export default function AnimeDetailsScreen() {
 
               top: 5,
               left: 0,
-              backgroundImage: `url(${data.poster})`,
+              backgroundImage: `url(${data.poster || data.img_url})`,
               filter: "blur(15px)",
               zIndex: 1,
             }}
@@ -96,7 +96,7 @@ export default function AnimeDetailsScreen() {
               rounded={"lg"}
               objectFit="contain"
               boxSize="100%"
-              src={data.poster}
+              src={data.poster || data.img_url}
               zIndex={2}
             />
           </Box>
@@ -112,10 +112,13 @@ export default function AnimeDetailsScreen() {
             <Heading fontSize={"2xl"} fontFamily={"body"}>
               {data.jp_name ? `${data.jp_name}` : ""}{" "}
               {data.eng_name ? ` | ${data.eng_name}` : ""}
+              {data.title ? `${data.title}` : ""}
             </Heading>
 
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
-              No of episodes {data.no_of_episodes}
+              No of episodes{" "}
+              {data.no_of_episodes !== "?" ? data.no_of_episodes : "running"}
+              {data.episodes !== "?" ? data.episodes : "running"}
             </Text>
 
             <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
@@ -132,9 +135,11 @@ export default function AnimeDetailsScreen() {
                 <Icon as={FiMonitor} />
                 <Text ml="1">{data.type}</Text>
               </Badge>
-              <Badge px={2} py={1} fontWeight={"400"}>
-                {data.status}
-              </Badge>
+              {data.status && (
+                <Badge px={2} py={1} fontWeight={"400"}>
+                  {data.status}
+                </Badge>
+              )}
               <Badge px={2} py={1} fontWeight={"400"}>
                 <Box
                   display={"flex"}
