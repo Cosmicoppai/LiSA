@@ -14,7 +14,7 @@ class Anime(ABC):
     api_url: str
     video_file_name: str
     video_extension: str = ".mp4"
-    default_poster: str = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "../defaults/kaicons.jpg")
+    default_poster: str = "kaicons.jpg"
 
     @abstractmethod
     def search_anime(self, session, anime_name: str):
@@ -171,7 +171,11 @@ class Animepahe(Anime):
         for var in scripts:
             _var = var.strip("\n\tlet ")
             if _var[:7] == "preview":
-                description["youtube_url"] = _var[_var.index("=")+1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
+                url = _var[_var.index("=")+1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
+                if url.find("https://wwww.youtube.com") == 0 or url.find("https://youtube.com") == 0 or url.find("https://youtu.be") == 0:
+                    description["youtube_url"] = url
+                else:
+                    description["youtube_url"] = None
                 break
 
         details: Dict[str, Any] = {}
@@ -290,7 +294,7 @@ class Animepahe(Anime):
                              "year": year,
                              "score": 0,
                              "session": session,
-                             "poster": col_2.find("img").get("data-src", self.default_poster),
+                             "poster": col_2.find("img").get("data-src", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}"),
                              "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={session}"
                              })
 
@@ -314,7 +318,7 @@ class Animepahe(Anime):
                 "year": anime_detail.get("year", None),
                 "score": anime_detail.get("score", 0),
                 "session": anime_detail.get("session", None),
-                "poster": anime_detail.get("poster", self.default_poster),
+                "poster": anime_detail.get("poster", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}"),
                 "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
             })
 
