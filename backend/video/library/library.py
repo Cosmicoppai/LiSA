@@ -9,7 +9,8 @@ Example: {file_name: {total_size: int, location: str}}
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 import json
-from pathlib import Path
+import sys
+from os import path
 
 
 class Library(ABC):
@@ -38,7 +39,7 @@ class Library(ABC):
 
 
 class JsonLibrary(Library):
-    file_location: str = Path(__file__).resolve().parent.joinpath("./library.json").__str__()
+    file_location: str = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "library.json")
 
     @classmethod
     def get_all(cls) -> List[Dict[str, Dict[str, Any]]]:
@@ -65,5 +66,10 @@ class JsonLibrary(Library):
     @classmethod
     def load_data(cls):
         print("loading data")
-        with open(cls.file_location, 'r') as j_file:
-            cls.data = json.load(j_file)
+        try:
+            with open(cls.file_location, 'r') as j_file:
+                cls.data = json.load(j_file)
+        except FileNotFoundError:
+            with open(cls.file_location, 'w') as j_file:
+                j_file.write("[]")
+                cls.data = []

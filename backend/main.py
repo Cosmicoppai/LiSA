@@ -1,11 +1,11 @@
 import logging
 from video.downloader.msg_system import MsgSystem
 from threading import Thread
-import uvicorn
 from sys import stdout
 import asyncio
 from video.library import JsonLibrary
 import config
+from api import start_api_server
 
 
 def run_api_server(port: int = 8000):
@@ -13,7 +13,7 @@ def run_api_server(port: int = 8000):
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     print(f"server started on port: {port} \n You can access API SERVER on {config.API_SERVER_ADDRESS}")
-    uvicorn.run("api:app",  port=port)
+    start_api_server(port=port)
 
 
 if __name__ == "__main__":

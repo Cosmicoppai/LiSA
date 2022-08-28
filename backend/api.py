@@ -17,7 +17,8 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from utils.headers import get_headers
 from utils.master_m3u8 import build_master_manifest
-from middleware.ErrorHandlerMiddleware import ErrorHandlerMiddleware
+from middleware import ErrorHandlerMiddleware
+import uvicorn
 
 
 async def search(request: Request):
@@ -155,15 +156,17 @@ async def download(request: Request):
 
         jb = await request.json()
 
-        video_url = jb.get("video_url", None)
-        if not video_url:
-            return await bad_request_400(request, msg="Malformed body: pass valid Pahewin url")
+        anime_session = jb.get("anime_session", None)  # get anime_session
 
-        file_name = jb.get("file_name", None)
-        if not file_name or file_name[-3:] != Animepahe.video_extension:
-            return await bad_request_400(request, msg="Malformed body: pass valid filename")
-
-        await Download().start_download(url=video_url, file_name=file_name)
+        # if anime_session:  # if anime session exists start batch download
+        #     Download(session=anime_session).start_download()
+        #
+        # manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
+        #
+        # if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
+        #     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+        #
+        # Download(manifest_url=manifest_url).start_download()
         return JSONResponse({"status": "started"})
 
     except JSONDecodeError:
@@ -242,7 +245,7 @@ async def get_master_manifest(request: Request):
     if kwik_urls[-1] == "":
         kwik_urls.pop()
 
-    with open("master.m3u8", "w+") as f:
+    with open(Animepahe.master_manifest_location, "w+") as f:
         try:
             f.write(build_master_manifest(kwik_urls))
         except ValueError as err_msg:
@@ -328,3 +331,7 @@ app = Starlette(
     middleware=middleware,
     on_startup=[JsonLibrary().load_data],
 )
+
+
+def start_api_server(port: int):
+    uvicorn.run(app, port=port)

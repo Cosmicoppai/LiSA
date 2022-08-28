@@ -1,11 +1,12 @@
 import requests
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
-from pathlib import Path
 from typing import Dict, List, Tuple, Any
 import config
 from utils.headers import get_headers
 import re
+import sys
+from os import path
 
 
 class Anime(ABC):
@@ -13,7 +14,7 @@ class Anime(ABC):
     api_url: str
     video_file_name: str
     video_extension: str = ".mp4"
-    default_poster: str = "https://www.pinterest.com/pin/762163936933748159/"
+    default_poster: str = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "../defaults/kaicons.jpg")
 
     @abstractmethod
     def search_anime(self, session, anime_name: str):
@@ -36,9 +37,9 @@ class Animepahe(Anime):
     site_url: str = "https://animepahe.com"
     api_url: str = "https://animepahe.com/api?"
     video_file_name: str = None  # variable will be assign while scraping for kwik f link
-    manifest_location = "./uwu.m3u8"
+    manifest_location = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "uwu.m3u8")
     manifest_filename = "uwu.m3u8"
-    master_manifest_location = "./master.m3u8"
+    master_manifest_location = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "master.m3u8")
     master_manifest_filename = "uwu.m3u8"
 
     def search_anime(self, session, input_anime):
