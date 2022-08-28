@@ -19,6 +19,8 @@ from utils.headers import get_headers
 from utils.master_m3u8 import build_master_manifest
 from middleware import ErrorHandlerMiddleware
 import uvicorn
+from starlette.routing import Mount
+from starlette.staticfiles import StaticFiles
 
 
 async def search(request: Request):
@@ -310,7 +312,8 @@ routes = [
     Route("/library", endpoint=library, methods=["GET"]),
     Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
-    Route('/proxy', endpoint=proxy, methods=["GET"])
+    Route('/proxy', endpoint=proxy, methods=["GET"]),
+    Mount('/default', app=StaticFiles(directory=config.DEFAULT_DIR, check_dir=True), name="static"),
 ]
 
 exception_handlers = {
