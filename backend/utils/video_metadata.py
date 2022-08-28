@@ -8,7 +8,7 @@ def get_video_resolution(progressive_resolution: int) -> (int, int):  # width, h
 
 
 def get_bandwith(width: int, height: int, fps: int = 30, bpp: float = 0.1) -> int:
-    return ceil(width*height*fps*bpp/1000)
+    return int(round(width*height/10**6, 1)*fps*24*1000)
 
 
 def get_metadata(progressive_resolution: int) -> (str, int):
