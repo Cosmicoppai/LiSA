@@ -5,9 +5,13 @@ run_server.sh
 *.m3u8
 
 ui/node_modules
+node_modules
+node_modules/
 
 dist/
 
 *.spec
 
 build/
+resources/
+.eslintcache
