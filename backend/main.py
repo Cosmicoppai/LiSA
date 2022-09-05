@@ -6,12 +6,11 @@ import asyncio
 from video.library import JsonLibrary
 import config
 from api import start_api_server
+from multiprocessing import Pipe
 
 
 def run_api_server(port: int = 8000):
     config.API_SERVER_ADDRESS = f"http://localhost:{port}"
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
     print(f"server started on port: {port} \n You can access API SERVER on {config.API_SERVER_ADDRESS}")
     start_api_server(port=port)
 
@@ -22,10 +21,11 @@ if __name__ == "__main__":
         p1 = Thread(target=run_api_server, args=(6969, ))
         p1.daemon = True
         p1.start()
-        event_loop = asyncio.new_event_loop()  # get new event loop
-        asyncio.set_event_loop(event_loop)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        MsgSystem.out_pipe, MsgSystem.in_pipe = Pipe()
         msg_system = MsgSystem()
-        msg_system.event_loop = event_loop  # assign event loop
-        event_loop.run_until_complete(msg_system.run_server())  # run socket server
+        loop.create_task(msg_system.send_updates())
+        loop.run_until_complete(msg_system.run_server())  # run socket server
     except KeyboardInterrupt:
         JsonLibrary().save()

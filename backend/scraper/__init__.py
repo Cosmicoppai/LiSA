@@ -1,1 +1,1 @@
-from .scraper import MyAL, Animepahe
+from .scraper import MyAL, Animepahe, Anime

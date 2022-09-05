@@ -7,6 +7,8 @@ from .download_progress import IN_PROGRESS
 from websockets.exceptions import ConnectionClosed
 from json import JSONDecodeError
 import config
+from multiprocessing.connection import Connection
+from typing import Any
 
 
 class MsgSystemMeta(type):
@@ -21,7 +23,8 @@ class MsgSystemMeta(type):
 class MsgSystem(metaclass=MsgSystemMeta):
     connected_client: WebSocketServerProtocol = None
     _instance = None
-    event_loop: asyncio.ProactorEventLoop
+    out_pipe: Connection = None
+    in_pipe: Connection = None
 
     def __init__(self, port: int = 9000):
         config.SOCKET_SERVER_ADDRESS = f"ws://localhost:{port}"
@@ -31,6 +34,8 @@ class MsgSystem(metaclass=MsgSystemMeta):
         async with websockets.serve(MsgSystem._server_handler, "", self.ws_port):
             print(f"Socket server started on port: {self.ws_port}\n You can access SOCKET SERVER on {config.SOCKET_SERVER_ADDRESS}")
             await asyncio.Future()  # run forever
+            self.in_pipe.send(None)  # cancel send_updates task
+            self.in_pipe.close()
 
     @classmethod
     async def _server_handler(cls, websocket: websockets):
@@ -40,7 +45,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
                 if event.get("type", "") == "connect" and not cls.connected_client:
                     cls.connected_client = websocket
                     print("connected with: ", websocket)
-                    await cls._instance.send({"type": "all_files_status", "data": IN_PROGRESS})
+                    cls.in_pipe.send({"type": "all_files_status", "data": IN_PROGRESS})
             cls.connected_client = None
         except ConnectionClosed:
             cls.connected_client = None
@@ -49,13 +54,12 @@ class MsgSystem(metaclass=MsgSystemMeta):
             await websocket.close(code=1000, reason="Invalid JSON")
 
     @classmethod
-    async def send(cls, msg: Dict[str, str]):
-        await cls.connected_client.send(json.dumps(msg))
-
-
-if __name__ == "__main__":
-    a = MsgSystem()
-    print(a.ws_port)
-    print(id(MsgSystem().connected_client))
-    print(id(MsgSystem().connected_client))
-    print(id(MsgSystem().connected_client))
+    async def send_updates(cls):
+        while True:
+            await asyncio.sleep(1)
+            if cls.out_pipe.poll():  # poll for msg with timeout of 1 sec
+                msg: Dict[str, Any] = cls.out_pipe.recv()
+                if not msg:
+                    break
+                if cls.connected_client:  # send msg if any client is connected
+                    await cls.connected_client.send(json.dumps(msg))

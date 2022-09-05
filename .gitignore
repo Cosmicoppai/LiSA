@@ -11,3 +11,5 @@ dist/
 *.spec
 
 build/
+
+backend/video/segments

@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 import json
 import sys
-from os import path
+from pathlib import Path
 
 
 class Library(ABC):
@@ -39,7 +39,7 @@ class Library(ABC):
 
 
 class JsonLibrary(Library):
-    file_location: str = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "library.json")
+    file_location: str = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.joinpath("library.json"))
 
     @classmethod
     def get_all(cls) -> List[Dict[str, Dict[str, Any]]]:
