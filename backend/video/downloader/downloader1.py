@@ -13,6 +13,7 @@ from pathlib import Path
 from .download_progress import IN_PROGRESS, LAST_PACKET_DATA
 from video.library import JsonLibrary
 from datetime import datetime as dt
+import config
 
 CHUNK_SIZE: int = 26214400  # chunk size of 25 mb
 
@@ -35,10 +36,9 @@ class DownloadMeta(type):
 
 
 class Download:
-    chunk_size = CHUNK_SIZE
     event_loop = asyncio.get_event_loop()
     msg_system = MsgSystem()
-    download_location = Path().resolve().parent.joinpath("downloads")
+    download_location = config.DEFAULT_DOWNLOAD_LOCATION
 
     async def download(self, url: str, file_name: str) -> bool:
 
@@ -92,10 +92,3 @@ class Download:
             msg = {"type": _typ, "data": {file_name: data}}
             await self.msg_system.send(msg)
 
-# if __name__ == "__main__":
-#     loop = asyncio.new_event_loop()
-#     Download.event_loop = loop
-#     url = "https://eu-991.files.nextcdn.org/get/02/65cada3812fc15c12b16bdedc925bac64a3a4e6c2d7dc48667126a7a44167c7b?file=AnimePahe_Renmei_Kuugun_Koukuu_Mahou_Ongakutai_Luminous_Witches_-_04_720p_SubsPlease.mp4&token=cGf7Cc27hKWwcD46ITijdA&expires=1658706589"
-#     file_name = "AnimePahe_Kimi_no_Na_wa.mp4"
-#     d = Download()
-#     print(asyncio.run(d.download(url, file_name)))

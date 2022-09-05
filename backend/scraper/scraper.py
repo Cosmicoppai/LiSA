@@ -1,3 +1,4 @@
+from __future__ import annotations
 import requests
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
@@ -6,22 +7,31 @@ import config
 from utils.headers import get_headers
 import re
 import sys
-from os import path
+from pathlib import Path
+import string
 
 
 class Anime(ABC):
     site_url: str
     api_url: str
-    video_file_name: str
-    video_extension: str = ".mp4"
     default_poster: str = "kaicons.jpg"
+    session: requests.Session = requests.session()
+    _SCRAPERS: Dict[str, object] = {}
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._SCRAPERS[cls._SITE_NAME] = cls
+
+    @classmethod
+    def get_scraper(cls, site_name: str) -> Anime:
+        return cls._SCRAPERS[site_name.lower()]
 
     @abstractmethod
-    def search_anime(self, session, anime_name: str):
+    def search_anime(self, anime_name: str):
         ...
 
     @abstractmethod
-    async def get_episode_sessions(self, session, anime_session: str):
+    async def get_episode_sessions(self, anime_session: str):
         ...
 
     @abstractmethod
@@ -34,38 +44,45 @@ class Anime(ABC):
 
 
 class Animepahe(Anime):
+    _SITE_NAME: str = "animepahe"
     site_url: str = "https://animepahe.com"
-    api_url: str = "https://animepahe.com/api?"
-    video_file_name: str = None  # variable will be assign while scraping for kwik f link
-    manifest_location = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "uwu.m3u8")
+    api_url: str = "https://animepahe.com/api"
+    manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("uwu.m3u8"))
     manifest_filename = "uwu.m3u8"
-    master_manifest_location = path.join(getattr(sys, '_MEIPASS', path.dirname(path.abspath(__file__))), "master.m3u8")
+    master_manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("master.m3u8"))
     master_manifest_filename = "uwu.m3u8"
 
-    def search_anime(self, session, input_anime):
+    @staticmethod
+    def __minify_text(text: str) -> str:
+        return re.sub(r"\s+", "", text).strip()
+
+    def __get_minified(self, path: str) -> str:
+        return self.__get_minified_uri(f"{self.site_url}{path}")
+
+    def __get_api(self, data: dict, headers: dict = get_headers()) -> str:
+        return self.session.get(f"{self.api_url}", params=data, headers=headers).json()
+
+    def search_anime(self, input_anime: str):
         """A scraper for searching an anime user requested
 
         Args:
-            session: request session object
             input_anime (str): name of the anime user entered
 
         Returns:
             json: response with the most significant match
         """
-        search_headers = get_headers()
 
         search_params = {
             'm': 'search',
             'q': input_anime,
         }
 
-        return session.get(f"{self.site_url}/api", params=search_params, headers=search_headers).json()["data"]
+        return self.__get_api(search_params)["data"]
 
-    def get_episode_sessions(self, session, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
+    def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
 
         Args:
-            session: request session object
             anime_session (str): session of an anime (changes after each interval)
             page_no (str, optional): Page number when the episode number is greater than 30. Defaults to "1".
 
@@ -81,16 +98,16 @@ class Animepahe(Anime):
             'page': page_no,
         }
 
-        return session.get(f"{self.site_url}/api", params=episodes_params, headers=episodes_headers).json()
+        return self.__get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, session: requests.Session, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
         episodes = {"ep_details": [], "description": {}}
 
         try:
-            episode_data = self.get_episode_sessions(session, anime_session=anime_session, page_no=page_no)
+            episode_data = self.get_episode_sessions(anime_session=anime_session, page_no=page_no)
 
             if page_no == "1":
-                description = self.get_anime_description(session, anime_session)
+                description = self.get_anime_description(anime_session)
                 episodes["recommendation"] = f"{config.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
 
             episodes["total_page"] = episode_data.get("last_page", -1)
@@ -131,11 +148,10 @@ class Animepahe(Anime):
         except TypeError:
             raise TypeError
 
-    async def get_anime_description(self, session, anime_session: str) -> Dict[str, str]:
+    async def get_anime_description(self, anime_session: str) -> Dict[str, str]:
         """scraping the anime description
 
         Args:
-            session: request session object
             anime_session (str): session of an anime (changes after each interval)
 
         Returns:
@@ -156,7 +172,7 @@ class Animepahe(Anime):
         }
 
         description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
-        description_response = session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
+        description_response = self.session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
         if description_response.status_code != 200:
             return description
 
@@ -216,9 +232,7 @@ class Animepahe(Anime):
             'p': 'kwik',
         }
 
-        ep_headers = get_headers()
-
-        return requests.get(f"{self.site_url}/api", params=ep_params, headers=ep_headers).json()["data"]
+        return self.__get_api(ep_params)["data"]
 
     def get_stream_data(self, episode_session: str):
         resp: Dict[str, str] = {}
@@ -233,31 +247,17 @@ class Animepahe(Anime):
 
         return resp
 
-    async def get_manifest_file(self, kwik_url: str) -> (str, str):
-        stream_headers = get_headers(extra={"referer": self.site_url})
+    async def get_manifest_file(self, kwik_url: str) -> (str, str, str):
+        hls_data = self.get_hls_playlist(kwik_url)
 
-        stream_response = requests.get(kwik_url, headers=stream_headers)
-        if stream_response.status_code != 200:
-            raise ValueError("Invalid Kwik URL")
+        uwu_url = hls_data["manifest_url"]
 
-        bs = BeautifulSoup(stream_response.text, 'html.parser')
-
-        all_scripts = bs.find_all('script')
-        pattern = r'\|\|\|.*\'\.'
-        pattern_list = (re.findall(pattern, str(all_scripts[6]))[0]).split('|')[88:98]
-
-        uwu_root_domain = f"https://{pattern_list[9]}-{pattern_list[8]}.{pattern_list[7]}.{pattern_list[6]}.{pattern_list[5]}"
-
-        uwu_url = '{}/{}/{}/{}/{}.{}'.format(uwu_root_domain, pattern_list[4], pattern_list[3],
-                                             pattern_list[2], pattern_list[1], pattern_list[0])
-
-        return requests.get(uwu_url, headers=get_headers(
-            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_root_domain
+        return self.session.get(uwu_url, headers=get_headers(
+            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_url.split("/uwu.m3u8")[0], hls_data["file_name"].strip(".mp4")
 
     async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
 
-        resp = requests.get(f"{self.site_url}/anime/{anime_session}", params=anime_session,
-                            headers=get_headers(extra={"referer": self.site_url}))
+        resp = self.session.get(f"{self.site_url}/anime/{anime_session}", params=anime_session, headers=get_headers(extra={"referer": self.site_url}))
 
         if resp.status_code != 200:
             raise ValueError("Invalid anime session")
@@ -323,6 +323,78 @@ class Animepahe(Anime):
             })
 
         return search_response
+
+    def get_episodes(self, anime_session: str, page: int = 1) -> list:
+        episode_ids = []
+        data = self.__get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page})
+        episode_ids += [x["session"] for x in data["data"]]
+        if data["last_page"] > page:
+            episode_ids += self.get_episodes(anime_id, page + 1)
+
+        return episode_ids
+
+    def get_links(self, anime_session: str, page: int = 1) -> list:
+        links = []
+        for episode in self.get_episodes(anime_session, page):
+            data = self.__get_api(
+                {"m": "links", "id": anime_session, "session": episode, "p": "kwik"}
+            )
+            best_q = {"id": 0, "res": 0}
+            for i, x in enumerate(data["data"]):
+                for xx in x:
+                    if int(xx) > best_q["res"]:
+                        best_q["res"] = int(xx)
+                        best_q["id"] = i
+            links.append(data["data"][best_q["id"]][str(best_q["res"])]["kwik"])
+        return links
+
+    def get_hls_playlist(self, kwik_url: str) -> dict:
+        stream_response = self.session.get(kwik_url, headers=get_headers(extra={"referer": self.site_url}))
+        if stream_response.status_code != 200:
+            raise ValueError("Invalid Kwik URL")
+
+        data = self.__minify_text(stream_response.text)
+        rx = re.compile(r"returnp}\('(.*?)',(\d\d),(\d\d),'(.*?)'.split")
+        title_re = re.compile(r"<title>(.*?)</title>")
+        title = title_re.search(data).group(1)
+        r = rx.findall(data)
+        x = r[-1]
+        unpacked = self.js_unpack(x[0], x[1], x[2], x[3])
+        stream_re = re.compile(r"https://(.*?)uwu.m3u8")
+        return {"file_name": title, "manifest_url": stream_re.search(unpacked).group(0)}
+
+    @staticmethod
+    def int2base(x, base):
+        digs = string.digits + string.ascii_letters
+        if x < 0:
+            sign = -1
+        elif x == 0:
+            return digs[0]
+        else:
+            sign = 1
+        x *= sign
+        digits = []
+        while x:
+            digits.append(digs[int(x % base)])
+            x = int(x / base)
+        if sign < 0:
+            digits.append("-")
+        digits.reverse()
+        return "".join(digits)
+
+    def js_unpack(self, p, a, c, k):
+        k = k.split("|")
+        a = int(a)
+        c = int(c)
+        d = {}
+        while c > 0:
+            c -= 1
+            d[self.int2base(c, a)] = k[c]
+        for x in d:
+            if d[x] == "":
+                d[x] = x
+            p = re.sub(f"\\b{x}\\b", d[x], p)
+        return p
 
 
 class MyAL:

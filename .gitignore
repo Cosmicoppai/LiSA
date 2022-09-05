@@ -15,3 +15,5 @@ dist/
 build/
 resources/
 .eslintcache
+
+backend/video/segments

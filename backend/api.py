@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
-from video.downloader import Download
+from video.downloader import start_download
 from scraper import Animepahe, MyAL
 from video.streamer import Stream
 import config
@@ -21,6 +21,7 @@ from middleware import ErrorHandlerMiddleware
 import uvicorn
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
+from urllib.parse import parse_qsl
 
 
 async def search(request: Request):
@@ -60,9 +61,10 @@ async def search(request: Request):
     with requests.Session() as session:
         try:
 
-            anime_details = Animepahe().search_anime(session, input_anime=anime)
+            scraper = Animepahe()
+            anime_details = scraper.search_anime(input_anime=anime)
 
-            return JSONResponse(Animepahe().build_search_resp(anime_details[:total_res]))
+            return JSONResponse(scraper.build_search_resp(anime_details[:total_res]))
 
         except KeyError:
             return await not_found_404(request, msg="anime not found")
@@ -98,7 +100,7 @@ async def get_ep_details(request: Request):
 
     with requests.Session() as session:
         try:
-            return JSONResponse(await Animepahe().get_episode_details(session, anime_session=anime_session, page_no=page))
+            return JSONResponse(await Animepahe().get_episode_details(anime_session=anime_session, page_no=page))
         except TypeError:
             return await not_found_404(request, msg="Anime, Not yet Aired...")
 
@@ -160,25 +162,20 @@ async def download(request: Request):
 
         anime_session = jb.get("anime_session", None)  # get anime_session
 
-        # if anime_session:  # if anime session exists start batch download
-        #     Download(session=anime_session).start_download()
-        #
-        # manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
-        #
-        # if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
-        #     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
-        #
-        # Download(manifest_url=manifest_url).start_download()
+        if anime_session:  # if anime session exists start batch download
+            await start_download(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
+        else:
+
+            manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
+
+            if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
+                return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+
+            await start_download(kwik_url=parse_qsl(manifest_url)[0][1], site="animepahe")
         return JSONResponse({"status": "started"})
 
     except JSONDecodeError:
         return await bad_request_400(request, msg="Malformed body: Invalid JSON")
-
-
-def get_video_url_and_name(pahewin: str) -> Tuple[str, str]:
-    animepahe = Animepahe()
-    f_link = animepahe.get_kwik_f_link(pahewin_url=pahewin)
-    return animepahe.extract_download_details(animepahe.get_kwik_f_page(f_link), f_link)
 
 
 async def library(request: Request):
@@ -263,7 +260,7 @@ async def get_manifest(request: Request):
 
     try:
 
-        response, uwu_root_domain = await Animepahe().get_manifest_file(kwik_url)
+        response, uwu_root_domain, _ = await Animepahe().get_manifest_file(kwik_url)
 
         with open(Animepahe.manifest_location, "w+") as f:
             f.write(response.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
