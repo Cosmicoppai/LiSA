@@ -56,7 +56,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
     @classmethod
     async def send_updates(cls):
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.25)
             if cls.out_pipe.poll():  # poll for msg with timeout of 1 sec
                 msg: Dict[str, Any] = cls.out_pipe.recv()
                 if not msg:
