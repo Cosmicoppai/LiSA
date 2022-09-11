@@ -58,19 +58,18 @@ async def search(request: Request):
     elif total_res > 9:
         total_res = 9
 
-    with requests.Session() as session:
-        try:
+    try:
 
-            scraper = Animepahe()
-            anime_details = scraper.search_anime(input_anime=anime)
+        scraper = Animepahe()
+        anime_details = scraper.search_anime(input_anime=anime)
 
-            return JSONResponse(scraper.build_search_resp(anime_details[:total_res]))
+        return JSONResponse(scraper.build_search_resp(anime_details[:total_res]))
 
-        except KeyError:
-            return await not_found_404(request, msg="anime not found")
+    except KeyError:
+        return await not_found_404(request, msg="anime not found")
 
-        except ValueError:
-            return await bad_request_400(request, msg="invalid query parameter: total_res should be type int")
+    except ValueError:
+        return await bad_request_400(request, msg="invalid query parameter: total_res should be type int")
 
 
 async def get_ep_details(request: Request):
@@ -98,11 +97,12 @@ async def get_ep_details(request: Request):
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
 
-    with requests.Session() as session:
-        try:
-            return JSONResponse(await Animepahe().get_episode_details(anime_session=anime_session, page_no=page))
-        except TypeError:
-            return await not_found_404(request, msg="Anime, Not yet Aired...")
+    try:
+        return JSONResponse(await Animepahe().get_episode_details(anime_session=anime_session, page_no=page))
+    except TypeError:
+        return await not_found_404(request, msg="Anime, Not yet Aired...")
+    except JSONDecodeError:
+        return await not_found_404(request, msg="Anime not found")
 
 
 async def get_stream_details(request: Request):

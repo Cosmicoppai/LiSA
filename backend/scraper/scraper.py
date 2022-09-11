@@ -9,6 +9,7 @@ import re
 import sys
 from pathlib import Path
 import string
+from json import JSONDecodeError
 
 
 class Anime(ABC):
@@ -100,7 +101,7 @@ class Animepahe(Anime):
 
         return self.__get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
         episodes = {"ep_details": [], "description": {}}
 
         try:
@@ -147,6 +148,8 @@ class Animepahe(Anime):
                 return episodes
         except TypeError:
             raise TypeError
+        except JSONDecodeError:
+            raise JSONDecodeError
 
     async def get_anime_description(self, anime_session: str) -> Dict[str, str]:
         """scraping the anime description
