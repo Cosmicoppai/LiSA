@@ -113,11 +113,10 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
                 key = await _key
 
                 decrypt_pipe_input.send((resp_data, key, file_name, segment_number, resp.content_length//(perf_counter()-start_time)))
-                download_queue.task_done()
         except asyncio.TimeoutError:
             await download_queue.put(segment_data)
-            print("Retrying")
-            continue
+            print(f"Retrying segment-{segment_number}")
+        download_queue.task_done()
 
 
 class ProgressTracker:
