@@ -147,7 +147,7 @@ class Downloader:
         m3u8_str: str,
         output_file_name: str,
         resume_code=None,
-        max_workers: int = 3,
+        max_workers: int = 5,
         hooks: dict = {},
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.M3U8(m3u8_str)
@@ -166,7 +166,7 @@ class Downloader:
         # data to the decrypt process for decryption and for writing to the
         # disk.
         decrypt_pipe_output, decrypt_pipe_input = Pipe()
-        timeout = aiohttp.ClientTimeout(20)
+        timeout = aiohttp.ClientTimeout(25)
         client = aiohttp.ClientSession(headers=get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"}), timeout=timeout, raise_for_status=True)
 
         # Check if the m3u8 file passed in has multiple streams, if this is the
