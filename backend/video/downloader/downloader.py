@@ -42,9 +42,9 @@ def _write_resume_info(file_name, segment_number):
 
 def _merge_segments(output_file_name):
     # Run the command to merge the downloaded files.
-    output_dir = SEGMENT_DIR.joinpath(output_file_name)
-    input_file = output_dir.joinpath(CONCAT_FILE_NAME)
-    output_file = OUTPUT_DIR.joinpath(f"{output_file_name}{OUTPUT_EXTENSION}")
+    output_dir: Path = SEGMENT_DIR.joinpath(output_file_name)
+    input_file: Path = output_dir.joinpath(CONCAT_FILE_NAME)
+    output_file: Path = OUTPUT_DIR.joinpath(f"{output_file_name}{OUTPUT_EXTENSION}")
     cmd = f"ffmpeg -f concat -safe 0 -i {input_file} -c copy {output_file} -hide_banner -loglevel warning"
 
     subprocess.run(
@@ -53,7 +53,7 @@ def _merge_segments(output_file_name):
     _remove_segments(output_dir)
 
     JsonLibrary().add({"file_name": f"{output_file_name}{OUTPUT_EXTENSION}", "total_size": os.path.getsize(output_file),
-                       "location": output_file, "created_on": dt.now().__str__()})
+                       "location": output_file.__str__(), "created_on": dt.now().__str__()})
     del IN_PROGRESS[output_file_name]  # delete the download status
 
 
@@ -90,12 +90,14 @@ def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker, in_pro
 
 
 def _write_concat_info(segment_count: int, output_file_name: str):
+    print("merging started")
     # Write the concat info needed by ffmpeg to a file.
     with open(os.path.join(SEGMENT_DIR.joinpath(output_file_name), CONCAT_FILE_NAME), "w+") as file:
         for segment_number in range(segment_count):
             f = "file " + f"segment-{segment_number}{SEGMENT_EXTENSION}\n"
             file.write(f)
     _merge_segments(output_file_name)
+    print("Merging completed")
 
 
 async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue, decrypt_pipe_input, client: aiohttp.ClientSession):
@@ -237,9 +239,10 @@ class Downloader:
             )
             for _ in range(self._max_workers)
         ]
-
         # Wait for the download workers to finish.
         await download_queue.join()
+
+        print("Downloading finished")
 
         # After all the tasks in the download queue are finished,
         # put a None into the decrypt pip to stop the decrypt process.
