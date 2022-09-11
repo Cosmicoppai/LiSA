@@ -206,6 +206,7 @@ class Downloader:
         segment_list = tuple(
             filter(lambda seg: seg[0] not in resume_info, enumerate(stream.segments))
         )
+        self._max_workers = min(self._max_workers, len(segment_list))  # create max workers according to rem segments
 
         progress_tracker = ProgressTracker(self._output_file_name, len(stream.segments), len(resume_info), MsgSystem.in_pipe)
 
