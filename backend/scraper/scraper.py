@@ -115,7 +115,7 @@ class Animepahe(Anime):
             if episode_data.get("current_page") <= episode_data.get("last_page", -1):
                 next_page_url = episode_data.get("next_page_url", None)
                 if next_page_url:
-                    next_page_url = next_page_url.replace(self.api_url,
+                    next_page_url = next_page_url.replace(f"{self.api_url}?",
                                                           f"/ep_details?anime_session={anime_session}&")
                     episodes["next_page_url"] = next_page_url
                 else:
@@ -123,7 +123,7 @@ class Animepahe(Anime):
 
                 prev_page_url = episode_data.get("prev_page_url", None)
                 if prev_page_url:
-                    prev_page_url = prev_page_url.replace(self.api_url,
+                    prev_page_url = prev_page_url.replace(f"{self.api_url}?",
                                                           f"/ep_details?anime_session={anime_session}&")
                     episodes["prev_page_url"] = prev_page_url
                 else:
