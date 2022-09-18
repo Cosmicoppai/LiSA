@@ -191,7 +191,7 @@ class Animepahe(Anime):
             _var = var.strip("\n\tlet ")
             if _var[:7] == "preview":
                 url = _var[_var.index("=")+1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
-                if url.find("https://wwww.youtube.com") == 0 or url.find("https://youtube.com") == 0 or url.find("https://youtu.be") == 0:
+                if url.find("https://www.youtube.com") == 0 or url.find("https://youtube.com") == 0 or url.find("https://youtu.be") == 0:
                     description["youtube_url"] = url
                 else:
                     description["youtube_url"] = None
