@@ -12,6 +12,11 @@ import {
   Box,
   Skeleton,
   SkeletonText,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -19,11 +24,13 @@ import { FiMonitor } from "react-icons/fi";
 import {
   addEpisodesDetails,
   clearEp,
+  getRecommendations,
   getStreamDetails,
   searchAnimeList,
 } from "../actions/animeActions";
 import PaginateCard from "../components/paginateCard";
 import { AiFillStar } from "react-icons/ai";
+import SearchResultCard from "../components/search-result-card";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
@@ -31,6 +38,26 @@ export default function AnimeDetailsScreen() {
   const { details, loading: ep_loading } = useSelector(
     (state) => state.animeEpisodesDetails
   );
+
+  const { details: recommendations } = useSelector(
+    (state) => state.animeRecommendations
+  );
+
+  const { loading } = useSelector((state) => state.animeSearchList);
+
+  useEffect(() => {
+    if (details.recommendation) {
+      dispatch(getRecommendations(details.recommendation));
+    }
+  }, [details]);
+
+  function ytToEmbeded(input) {
+    return input.split("?")[1].slice(2);
+  }
+
+  // if(){
+  //   console.log(ytToEmbeded(details?.description?.youtube_url))
+  // }
 
   return (
     <Center py={6} w="100%">
@@ -101,7 +128,9 @@ export default function AnimeDetailsScreen() {
             <Box>
               <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
                 {data.jp_name ? `${data.jp_name}` : ""}{" "}
-                {data.eng_name ? ` | ${data.eng_name}` : ""}
+                {details?.description?.eng_name
+                  ? ` | ${details?.description?.eng_name}`
+                  : ""}
                 {data.title ? `${data.title}` : ""}
               </Heading>
               <Text
@@ -186,24 +215,104 @@ export default function AnimeDetailsScreen() {
             </div>
           </Stack>
         </Stack>
-        {details?.description?.youtube_url && (
-          <>
-            <Box w="100%" mt={5}>
-              <Heading fontSize={"2xl"} fontFamily={"body"}>
-                Trailer
-              </Heading>
-            </Box>
-            <Stack
-              borderWidth="1px"
-              borderRadius="lg"
-              w={"100%"}
-              justifyContent="space-between"
-              direction={{ base: "column", md: "row" }}
-              boxShadow={"2xl"}
-              padding={4}
-            ></Stack>
-          </>
-        )}
+
+        <Tabs width={"100%"} variant="enclosed" mt={5}>
+          <TabList>
+            <Tab>Trailer </Tab>
+            <Tab>Recommendations</Tab>
+          </TabList>
+          <TabPanels>
+            <TabPanel>
+              {details?.description?.youtube_url ? (
+                <Stack
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  w={"100%"}
+                  justifyContent="space-between"
+                  boxShadow={"2xl"}
+                >
+                  <div
+                    style={{
+                      overflow: "hidden",
+                      paddingBottom: "56.25%",
+                      position: "relative",
+                      height: 0,
+                    }}
+                  >
+                    <iframe
+                      width="853"
+                      style={{
+                        left: 0,
+                        top: 0,
+                        height: "100%",
+                        width: "100%",
+                        position: "absolute",
+                      }}
+                      height="480"
+                      src={`https://www.youtube.com/embed/${ytToEmbeded(
+                        details?.description?.youtube_url
+                      )}`}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
+                    />
+                  </div>
+                </Stack>
+              ) : (
+                <Box>
+                  <Text>No trailer available</Text>
+                </Box>
+              )}
+            </TabPanel>
+            <TabPanel>
+              <Box>
+                <Stack
+                  mt={2}
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  justifyContent="space-between"
+                  direction={"column"}
+                  bg={"gray.900"}
+                  boxShadow={"2xl"}
+                  padding={0}
+                  w="100%"
+                >
+                  <Box
+                    sx={{
+                      // position: "absolute",
+                      // top: 0,
+                      marginTop: "10px",
+
+                      justifyContent: "center",
+                      display: "flex",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    {recommendations
+                      ? recommendations.map((anime) => {
+                          return (
+                            <SearchResultCard
+                              data={anime}
+                              cardWidth={"270px"}
+                              cardMargin={"10px 40px"}
+                            />
+                          );
+                        })
+                      : Array(30)
+                          .fill(0)
+                          .map(() => (
+                            <Skeleton
+                              width={"200px"}
+                              height={"300px"}
+                              sx={{ padding: "1rem", margin: "10px auto" }}
+                              padding={6}
+                            />
+                          ))}
+                  </Box>
+                </Stack>
+              </Box>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Flex>
     </Center>
   );

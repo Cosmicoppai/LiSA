@@ -14,7 +14,14 @@ import { useDispatch, useSelector } from "react-redux";
 import hlsQualitySelector from "videojs-hls-quality-selector";
 import { downloadVideo } from "../actions/animeActions";
 
-const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime, nextEpHandler }) => {
+const VideoPlayer = ({
+  url,
+  epDetails,
+  player,
+  setPlayer,
+  prevTime,
+  nextEpHandler,
+}) => {
   const toast = useToast();
 
   const { details } = useSelector((state) => state.animeStreamDetails);
@@ -53,7 +60,7 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime, nextEpHandle
 
   useEffect(() => {
     if (callFinishVideoAPI) {
-      nextEpHandler()
+      nextEpHandler();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [callFinishVideoAPI]);
@@ -106,7 +113,9 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime, nextEpHandle
       externalPlayerButtonDom.innerHTML = "external";
 
       externalPlayerButtonDom.onclick = function () {
-        fullscreen.handleClick();
+        if (plyer.isFullscreen()) {
+          fullscreen.handleClick();
+        }
         onOpen();
       };
     }
@@ -227,7 +236,6 @@ const VideoPlayer = ({ url, epDetails, player, setPlayer, prevTime, nextEpHandle
           ref={videoRef}
           lan
           onLoadedMetadata={(e, px) => {
-
             setVidDuration(e.target.duration);
           }}
           onTimeUpdate={(e) => {

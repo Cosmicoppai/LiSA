@@ -80,7 +80,7 @@ export const HomeScreen = () => {
               pointerEvents="none"
               children={<SearchIcon color="gray.300" />}
             />
-            z
+            
             <Input
               sx={{ position: "relative" }}
               color={"font.main"}

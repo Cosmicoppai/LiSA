@@ -24,7 +24,7 @@ const PaginateCard = ({ data, loading, ep_details, redirect }) => {
         current_ep: ep_no,
       })
     );
-    dispatch(getRecommendations(ep_details.recommendation));
+    // dispatch(getRecommendations(ep_details.recommendation));
     if (redirect) {
       navigate("/play");
     }

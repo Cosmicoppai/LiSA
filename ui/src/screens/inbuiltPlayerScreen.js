@@ -22,8 +22,6 @@ import SearchResultCard from "../components/search-result-card";
 import server from "../axios";
 
 const InbuiltPlayerScreen = () => {
-
-
   const dispatch = useDispatch();
   const { details } = useSelector((state) => state.animeStreamDetails);
 
@@ -35,9 +33,7 @@ const InbuiltPlayerScreen = () => {
   const urlDetails = useSelector((state) => state.animeEpUrl);
   const { details: anime } = useSelector((state) => state.animeDetails);
 
-  const { details: recommendations } = useSelector(
-    (state) => state.animeRecommendations
-  );
+ 
   const { details: eps_details, loading: eps_loading } = useSelector(
     (state) => state.animeEpisodesDetails
   );
@@ -206,71 +202,6 @@ const InbuiltPlayerScreen = () => {
             loading={eps_loading}
             currentEp={epDetails?.details?.current_ep}
           />
-        </Stack>
-        <Box w="100%" mt={5}>
-          <Heading fontSize={"2xl"} fontFamily={"body"}>
-            Recommendations
-          </Heading>
-        </Box>
-
-        <Stack
-          mt={2}
-          borderWidth="1px"
-          borderRadius="lg"
-          justifyContent="space-between"
-          direction={"column"}
-          bg={"gray.900"}
-          boxShadow={"2xl"}
-          padding={3}
-          w="100%"
-        >
-          {!loading && recommendations && (
-            <Box
-              sx={{
-                // position: "absolute",
-                // top: 0,
-                marginTop: "10px",
-                maxWidth: "100%",
-                maxHeight: "100%",
-
-                height: "100%",
-                width: "100%",
-                overflowX: "auto",
-                "&::-webkit-scrollbar": {
-                  width: "8px",
-                  borderRadius: "8px",
-                  backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                },
-                justifyContent: "center",
-                display: "flex",
-                flexWrap: "wrap",
-              }}
-            >
-              {recommendations
-                ? recommendations.map((anime) => {
-                    return (
-                      <SearchResultCard
-                        data={anime}
-                        cardWidth={"270px"}
-                        cardMargin={"10px 40px"}
-                      />
-                    );
-                  })
-                : Array(30)
-                    .fill(0)
-                    .map(() => (
-                      <Skeleton
-                        width={"200px"}
-                        height={"300px"}
-                        sx={{ padding: "1rem", margin: "10px auto" }}
-                        padding={6}
-                      />
-                    ))}
-            </Box>
-          )}
         </Stack>
       </Flex>
     </Center>
