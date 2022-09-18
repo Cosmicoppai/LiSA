@@ -39,8 +39,7 @@ export const HomeScreen = () => {
   const { animes, loading, error } = useSelector(
     (state) => state.animeSearchList
   );
-  console.log(error);
-  console.log(animes);
+
 
   const handleKeyDown = (event) => {
     if (event.key === "Enter" && query) {

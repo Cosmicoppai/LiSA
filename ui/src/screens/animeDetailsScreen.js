@@ -32,17 +32,19 @@ export default function AnimeDetailsScreen() {
     (state) => state.animeEpisodesDetails
   );
 
-
-
-
-
   return (
     <Center py={6} w="100%">
-      {data ? (
+      <Flex
+        flexDirection={"column"}
+        justifyContent="center"
+        alignItems={"center"}
+        w={{ sm: "90%", md: "80%" }}
+        margin={"0 auto"}
+      >
         <Stack
           borderWidth="1px"
           borderRadius="lg"
-          w={{ sm: "100%", md: "80%" }}
+          w={"100%"}
           justifyContent="space-between"
           direction={{ base: "column", md: "row" }}
           boxShadow={"2xl"}
@@ -69,7 +71,7 @@ export default function AnimeDetailsScreen() {
 
               top: 5,
               left: 0,
-              backgroundImage: `url(${data.poster || data.img_url})`,
+              backgroundImage: `url(${data?.poster || data?.img_url})`,
               filter: "blur(15px)",
               zIndex: 1,
             }}
@@ -83,7 +85,7 @@ export default function AnimeDetailsScreen() {
               rounded={"lg"}
               objectFit="contain"
               boxSize="100%"
-              src={data.poster || data.img_url}
+              src={data?.poster || data?.img_url}
               zIndex={2}
             />
           </Box>
@@ -96,11 +98,31 @@ export default function AnimeDetailsScreen() {
             p={1}
             pt={2}
           >
-            <Heading fontSize={"2xl"} fontFamily={"body"}>
-              {data.jp_name ? `${data.jp_name}` : ""}{" "}
-              {data.eng_name ? ` | ${data.eng_name}` : ""}
-              {data.title ? `${data.title}` : ""}
-            </Heading>
+            <Box>
+              <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
+                {data.jp_name ? `${data.jp_name}` : ""}{" "}
+                {data.eng_name ? ` | ${data.eng_name}` : ""}
+                {data.title ? `${data.title}` : ""}
+              </Heading>
+              <Text
+                fontWeight={600}
+                color={"gray.500"}
+                size="sm"
+                display="inline"
+                ml={1}
+              >
+                {!ep_loading ? (
+                  `by ${details?.description?.studio}`
+                ) : (
+                  <Skeleton
+                    height={"18px"}
+                    width={"100px"}
+                    alignSelf={"baseline"}
+                    display={"inline-block"}
+                  />
+                )}
+              </Text>
+            </Box>
 
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
               No of episodes{" "}
@@ -138,8 +160,21 @@ export default function AnimeDetailsScreen() {
                 </Box>
               </Badge>
             </Stack>
-            <Text color={"gray.400"} px={3}>
-              {details?.description?.synopsis}
+            <Text color={"gray.400"} px={3} pl={0} width="100%">
+              {details?.description?.synopsis && !ep_loading ? (
+                details?.description?.synopsis
+              ) : (
+                <Stack align={"center"} justify={"center"} direction={"row"}>
+                  <Text color={"gray.400"} width="100%" px={3} pl={0}>
+                    <SkeletonText
+                      mt="2"
+                      noOfLines={20}
+                      spacing="2"
+                      width={"100%"}
+                    />
+                  </Text>
+                </Stack>
+              )}
             </Text>
             <div>
               <PaginateCard
@@ -151,79 +186,25 @@ export default function AnimeDetailsScreen() {
             </div>
           </Stack>
         </Stack>
-      ) : (
-        <Stack
-          borderWidth="1px"
-          borderRadius="lg"
-          w={{ sm: "100%", md: "80%" }}
-          justifyContent="space-between"
-          direction={{ base: "column", md: "row" }}
-          boxShadow={"2xl"}
-          padding={4}
-        >
-          <Box
-            rounded={"lg"}
-            flex={1}
-            maxW={"30%"}
-            maxHeight={"500px"}
-            mt={0}
-            pos={"relative"}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            _after={{
-              transition: "all .3s ease",
-              content: '""',
-              w: "full",
-              h: "full",
-              pos: "absolute",
-
-              top: 5,
-              left: 0,
-              zIndex: 1,
-            }}
-            _groupHover={{
-              _after: {
-                filter: "blur(20px)",
-              },
-            }}
-          >
-            <Skeleton height={"100%"} width={"100%"} />
-          </Box>
-
-          <Stack
-            maxW={"65%"}
-            flex={1}
-            flexDirection="column"
-            alignItems="flex-start"
-            p={1}
-            pt={2}
-          >
-            <Skeleton height={"25px"} width={"50%"} />
-
-            <Skeleton height={"15px"} width={"50%"} mb={4} />
-
-            <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
-              <Skeleton height={"15px"} width={"50px"} />
-              <Skeleton height={"15px"} width={"50px"} />
-              <Skeleton height={"15px"} width={"50px"} />
-            </Stack>
-            <Text color={"gray.400"} width="100%">
-              <SkeletonText mt="4" noOfLines={20} spacing="2" width={"100%"} />
-            </Text>
-            <div>
-              <PaginateCard
-                data={data}
-                ep_details={details}
-                loading={ep_loading}
-                redirect
-              />
-            </div>
-          </Stack>
-        </Stack>
-      )}
+        {details?.description?.youtube_url && (
+          <>
+            <Box w="100%" mt={5}>
+              <Heading fontSize={"2xl"} fontFamily={"body"}>
+                Trailer
+              </Heading>
+            </Box>
+            <Stack
+              borderWidth="1px"
+              borderRadius="lg"
+              w={"100%"}
+              justifyContent="space-between"
+              direction={{ base: "column", md: "row" }}
+              boxShadow={"2xl"}
+              padding={4}
+            ></Stack>
+          </>
+        )}
+      </Flex>
     </Center>
   );
 }

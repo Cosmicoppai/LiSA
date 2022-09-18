@@ -56,28 +56,30 @@ export const addAnimeDetails = (data) => async (dispatch) => {
     let url;
     let ep_details;
     dispatch({ type: ANIME_DETAILS_REQUEST });
-    dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
+    dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
+    dispatch({ type: ANIME_EPISODES_ADD_REQUEST, payload: data });
 
     console.log(data);
     if (data.anime_detail) {
+      // dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
+
       const searchRes = await server.get(data.anime_detail);
 
       ep_details = await server.get(searchRes.data[0].ep_details);
-      dispatch({ type: ANIME_DETAILS_SUCCESS, payload: ep_details.data });
+      dispatch({ type: ANIME_DETAILS_SUCCESS, payload: {...data, ...ep_details.data} });
     } else {
-      ep_details = await server.get(data.ep_details);
       dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
+
+      ep_details = await server.get(data.ep_details);
     }
-    
+
     dispatch(addEpisodesDetails(ep_details.data));
-    dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: ANIME_DETAILS_FAIL, payload: error });
   }
 };
 
 export const addEpisodesDetails = (data) => async (dispatch, getState) => {
- 
   try {
     dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
     let { details } = getState().animeEpisodesDetails;
