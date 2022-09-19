@@ -16,6 +16,7 @@ class Anime(ABC):
     site_url: str
     api_url: str
     default_poster: str = "kaicons.jpg"
+    manifest_header: dict
     session: requests.Session = requests.session()
     _SCRAPERS: Dict[str, object] = {}
 
@@ -25,7 +26,7 @@ class Anime(ABC):
 
     @classmethod
     def get_scraper(cls, site_name: str) -> Anime:
-        return cls._SCRAPERS[site_name.lower()]
+        return cls._SCRAPERS.get(site_name.lower(), None)
 
     @abstractmethod
     def search_anime(self, anime_name: str):
@@ -48,6 +49,7 @@ class Animepahe(Anime):
     _SITE_NAME: str = "animepahe"
     site_url: str = "https://animepahe.com"
     api_url: str = "https://animepahe.com/api"
+    manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
     manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("uwu.m3u8"))
     manifest_filename = "uwu.m3u8"
     master_manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("master.m3u8"))
