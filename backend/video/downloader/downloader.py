@@ -382,16 +382,12 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def _schedule_pending_downloads(cls):
-        cur = DB.connection.cursor()
-        cur.execute(f"SELECT * FROM {DBLibrary.table_name} WHERE status='in_progress'")
-        await cls.create_task_from_db(cur)
-        cur.close()
+        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))
 
     @classmethod
-    async def create_task_from_db(cls, cur):
+    async def create_task_from_db(cls, _tasks):
         tasks = []
-        for row in cur.fetchall():
-            row = dict(row)
+        for row in _tasks:
             manifest_file_path = row["manifest_file_path"]
 
             try:
@@ -402,9 +398,6 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                     tasks.append(cls._schedule_download(manifest_file.read(), row["file_name"], header, file_data))
             except FileNotFoundError:
                 DBLibrary.delete(row["id"])
-
-        DB.connection.commit()
-        cur.close()
 
         await asyncio.gather(*tasks)  # schedule all remaining tasks
 
