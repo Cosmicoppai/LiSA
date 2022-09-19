@@ -7,6 +7,7 @@ from json import JSONDecodeError
 import config
 from multiprocessing.connection import Connection
 from typing import Any, Dict
+from video.library import DBLibrary
 
 
 class MsgSystemMeta(type):
@@ -42,8 +43,6 @@ class MsgSystem(metaclass=MsgSystemMeta):
                 event = json.loads(msg)
                 if event.get("type", "") == "connect" and not cls.connected_client:
                     cls.connected_client = websocket
-                    print("connected with: ", websocket)
-                    cls.in_pipe.send({"type": "all_files_status", "data": IN_PROGRESS})
             cls.connected_client = None
         except ConnectionClosed:
             cls.connected_client = None
