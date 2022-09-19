@@ -11,11 +11,11 @@ from typing import Dict, List, Any
 import json
 import sys
 from pathlib import Path
+from utils import DB
 
 
 class Library(ABC):
-    data: List[Dict[str, Dict[str, Any]]] = []
-    data_changed: bool = False  # to  track addition of data
+    data: Dict[int, Dict[str, Any]] = {}
 
     @classmethod
     @abstractmethod
@@ -24,12 +24,17 @@ class Library(ABC):
 
     @classmethod
     @abstractmethod
-    def save(cls) -> bool:
+    def create(cls, _data: Dict[str, Dict[str, Any]]) -> None:
         ...
 
     @classmethod
     @abstractmethod
-    def add(cls, _data: Dict[str, Dict[str, Any]]) -> None:
+    def update(cls, _id: int, _data: Dict[str, Dict[str, Any]]) -> None:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def delete(cls, _id: int) -> None:
         ...
 
     @classmethod
@@ -38,38 +43,64 @@ class Library(ABC):
         ...
 
 
-class JsonLibrary(Library):
-    file_location: str = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.joinpath("library.json"))
+class DBLibrary(Library):
+    table_name: str = "progress_tracker"
 
     @classmethod
     def get_all(cls) -> List[Dict[str, Dict[str, Any]]]:
         return cls.data
 
     @classmethod
-    def save(cls) -> bool:
-        if cls.data_changed:  # if new data has been added
-            print("saving data")
-            with open(cls.file_location, 'w') as j_file:
-                j_file.write(json.dumps(cls.data, indent=4))
-            print("Data successfully saved")
+    def create(cls, data: Dict[str, Any]) -> None:
+        set_statement, field_values = cls.__query_helper(data)
+        cmd = f"INSERT INTO {cls.table_name} SET {set_statement}"
+        cur = DB.connection.cursor()
+        cur.execute(cmd, field_values)
+        DB.connection.commit()
+        cur.close()
 
-            cls.data = []  # reset the in-memory data
-            cls.data_changed = False
-        return True
-
-    @classmethod
-    def add(cls, _data: Dict[str, Dict[str, Any]]) -> None:
-        cls.data.append(_data)
-        if not cls.data_changed:
-            cls.data_changed = True
+        cls.data[data["id"]] = data
 
     @classmethod
-    def load_data(cls):
-        print("loading data")
-        try:
-            with open(cls.file_location, 'r') as j_file:
-                cls.data = json.load(j_file)
-        except FileNotFoundError:
-            with open(cls.file_location, 'w') as j_file:
-                j_file.write("[]")
-                cls.data = []
+    def update(cls, _id: int, data: Dict[str, Any]) -> None:
+        set_statement, field_values = cls.__query_helper(data)
+        field_values.append(_id)
+        cmd = f"UPDATE {cls.table_name} SET {set_statement} WHERE id=?"
+        cur = DB.connection.cursor()
+        cur.execute(cmd, field_values)
+        DB.connection.commit()
+        cur.execute(f"SELECT * FROM {cls.table_name} WHERE id=?", _id)
+        cls.data[_id] = dict(cur.fetchone()[0])
+        cur.close()
+
+    @classmethod
+    def delete(cls, _id: int) -> None:
+        cur = DB.connection.cursor()
+        cur.execute(f"DELETE FROM {cls.table_name} WHERE id=?", _id)
+        DB.connection.commit()
+        cur.close()
+        del cls.data[_id]
+
+    @staticmethod
+    def __query_helper(data: Dict[str, Any]) -> (str, list):
+        fields_to_set = []
+        field_values = []
+        for key in data:
+            fields_to_set.append(key + "=?")
+            field_values.append(params[key])
+        set_statement = ", ".join(fields_to_set)
+        return set_statement, field_values
+
+    @classmethod
+    def load_data(cls) -> None:
+
+        """
+        Load all data from database
+        if status is in progress eventual updates will be sent through socket server
+        """
+        cur = DB.connection.cursor()
+        cur.execute(f"SELECT * from {cls.table_name};")
+        for row in cur.fetchall():
+            data = dict(row)
+            cls.data[data["id"]] = data
+        cur.close()
