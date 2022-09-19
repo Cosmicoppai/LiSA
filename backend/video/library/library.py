@@ -47,13 +47,27 @@ class DBLibrary(Library):
     table_name: str = "progress_tracker"
 
     @classmethod
-    def get_all(cls) -> List[Dict[str, Dict[str, Any]]]:
+    def get_all(cls) -> List[Dict[int, Dict[str, Any]]]:
         return cls.data
 
     @classmethod
+    def get(cls, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
+        cur = DB.connection.cursor()
+        cmd = f"SELECT * FROM {cls.table_name} WHERE "
+        for idx, _filter in enumerate(filters):
+            if idx != 0:
+                cmd += "AND "
+            cmd += f"{_filter}='{filters[_filter]}'"
+
+        cur.execute(cmd)
+        data = [dict(row) for row in cur.fetchall()]
+        cur.close()
+        return data
+
+    @classmethod
     def create(cls, data: Dict[str, Any]) -> None:
-        set_statement, field_values = cls.__query_helper(data)
-        cmd = f"INSERT INTO {cls.table_name} SET {set_statement}"
+        set_statement, field_values = cls.__query_builder(data)
+        cmd = f"INSERT INTO {cls.table_name} ({set_statement}) VALUES {'(' + ','.join('?' * len(data))+ ')'}"
         cur = DB.connection.cursor()
         cur.execute(cmd, field_values)
         DB.connection.commit()
@@ -63,13 +77,13 @@ class DBLibrary(Library):
 
     @classmethod
     def update(cls, _id: int, data: Dict[str, Any]) -> None:
-        set_statement, field_values = cls.__query_helper(data)
+        set_statement, field_values = cls.__query_builder(data, "update")
         field_values.append(_id)
         cmd = f"UPDATE {cls.table_name} SET {set_statement} WHERE id=?"
         cur = DB.connection.cursor()
         cur.execute(cmd, field_values)
         DB.connection.commit()
-        cur.execute(f"SELECT * FROM {cls.table_name} WHERE id=?", _id)
+        cur.execute(f"SELECT * FROM {cls.table_name} WHERE id=?", [_id])
         cls.data[_id] = dict(cur.fetchone()[0])
         cur.close()
 
@@ -82,12 +96,15 @@ class DBLibrary(Library):
         del cls.data[_id]
 
     @staticmethod
-    def __query_helper(data: Dict[str, Any]) -> (str, list):
+    def __query_builder(data: Dict[str, Any], typ: str = "insert") -> (str, list):
         fields_to_set = []
         field_values = []
         for key in data:
-            fields_to_set.append(key + "=?")
-            field_values.append(params[key])
+            if typ == "insert":
+                fields_to_set.append(key)
+            else:
+                fields_to_set.append(key + "=?")
+            field_values.append(data[key])
         set_statement = ", ".join(fields_to_set)
         return set_statement, field_values
 
