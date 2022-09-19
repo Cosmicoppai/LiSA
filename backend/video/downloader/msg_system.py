@@ -2,13 +2,11 @@ import asyncio
 import websockets
 import json
 from websockets.legacy.server import WebSocketServerProtocol
-from typing import Dict
-from .download_progress import IN_PROGRESS
 from websockets.exceptions import ConnectionClosed
 from json import JSONDecodeError
 import config
 from multiprocessing.connection import Connection
-from typing import Any
+from typing import Any, Dict
 
 
 class MsgSystemMeta(type):
