@@ -48,7 +48,7 @@ class DBLibrary(Library):
 
     @classmethod
     def get_all(cls) -> List[Dict[int, Dict[str, Any]]]:
-        return cls.data
+        return [data for data in cls.data.values()]
 
     @classmethod
     def get(cls, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
