@@ -3,15 +3,36 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
+"----------------------------------------------------------------------------------------------------------------------------------"
+# Server Configurations
+
 API_SERVER_ADDRESS: str
 
 SOCKET_SERVER_ADDRESS: str
+
+"----------------------------------------------------------------------------------------------------------------------------------"
+
+"----------------------------------------------------------------------------------------------------------------------------------"
+
+# Default directories and file locations
 
 DEFAULT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.joinpath("defaults/"))
 
 CONFIG_JSON_PATH = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.joinpath("config.json"))
 
 DEFAULT_DOWNLOAD_LOCATION: Path = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.parent.joinpath("downloads"))
+
+"----------------------------------------------------------------------------------------------------------------------------------"
+
+
+"----------------------------------------------------------------------------------------------------------------------------------"
+# Database Configuration
+
+DEFAULT_SQL_DIR: Path = Path(__file__).parent.parent.joinpath("sql_queries")
+
+DB_NAME: str = "lisa"
+
+"----------------------------------------------------------------------------------------------------------------------------------"
 
 
 @lru_cache

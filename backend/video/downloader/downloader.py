@@ -13,13 +13,12 @@ from scraper import Animepahe, Anime
 import sys
 from pathlib import Path
 import config
-from utils.headers import get_headers
 from .msg_system import MsgSystem
-from .download_progress import IN_PROGRESS, LAST_PACKET_DATA
-from video.library import JsonLibrary
+from video.library import DBLibrary
 from time import perf_counter
-from datetime import datetime as dt
-
+from utils import DB
+import logging
+from typing import List, Dict, Any
 
 SEGMENT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.joinpath("segments"))
 OUTPUT_DIR = config.DEFAULT_DOWNLOAD_LOCATION
@@ -27,6 +26,8 @@ SEGMENT_EXTENSION = ".ts"
 RESUME_EXTENSION = ".resumeinfo.yuk"
 OUTPUT_EXTENSION = ".mp4"
 CONCAT_FILE_NAME = "concat_info.txt"
+MANIFEST_FILE_NAME = "uwu"
+MANIFEST_FILE_EXTENSION = ".m3u8"
 
 
 def _parse_resume_info(raw_file_data):
@@ -52,19 +53,13 @@ def _merge_segments(output_file_name):
     )
     _remove_segments(output_dir)
 
-    JsonLibrary().add({"file_name": f"{output_file_name}{OUTPUT_EXTENSION}", "total_size": os.path.getsize(output_file),
-                       "location": output_file.__str__(), "created_on": dt.now().__str__()})
-    del IN_PROGRESS[output_file_name]  # delete the download status
-
 
 def _remove_segments(segment_folder: str):
     if os.path.isdir(segment_folder):
         shutil.rmtree(segment_folder)
 
 
-def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker, in_progress):
-    global IN_PROGRESS
-    IN_PROGRESS = in_progress
+def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
     while True:
         pipe_message = pipe_output.recv()
 
@@ -100,8 +95,8 @@ def _write_concat_info(segment_count: int, output_file_name: str):
     print("Merging completed")
 
 
-async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue, decrypt_pipe_input, client: aiohttp.ClientSession):
-
+async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue, decrypt_pipe_input,
+                           client: aiohttp.ClientSession):
     while True:
         segment_data = await download_queue.get()
         file_name, segment, segment_number = segment_data
@@ -112,7 +107,8 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
                 resp_data: bytes = await resp.read()
                 key = await _key
 
-                decrypt_pipe_input.send((resp_data, key, file_name, segment_number, resp.content_length//(perf_counter()-start_time)))
+                decrypt_pipe_input.send(
+                    (resp_data, key, file_name, segment_number, resp.content_length // (perf_counter() - start_time)))
         except asyncio.TimeoutError:
             await download_queue.put(segment_data)
             print(f"Retrying segment-{segment_number}")
@@ -120,44 +116,54 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
 
 
 class ProgressTracker:
-    def __init__(self, file_name: str, total: int, done: int = 0, msg_pipe_input: connection.Connection = None):
+    def __init__(self, file_data: dict, total: int, done: int = 0, msg_pipe_input: connection.Connection = None):
         self.msg_pipe_input = msg_pipe_input
         self.total = total
         self.done = done
-        self.file_name = file_name
-        IN_PROGRESS[self.file_name] = {"file_size": self.total, "downloaded": self.done, "speed": 0}
-        self.send_status("new_file")
+        self.file_data = file_data
+        self.file_data["total_size"] = self.total
+        self.file_data["downloaded"] = 0
+        self.send_status("started")
 
     def increment_done(self, speed: int = 0) -> None:
         self.done += 1
-        IN_PROGRESS[self.file_name]["downloaded"] = self.done
-        IN_PROGRESS[self.file_name]["speed"] = speed
+        self.file_data["downloaded"] = self.done
+        self.file_data["speed"] = speed
         self.send_status()
 
     def send_status(self, _typ: str = "file_update") -> None:
-        msg = {"type": _typ, "data": {self.file_name: IN_PROGRESS[self.file_name]}}
-        self.msg_pipe_input.send(msg)
+        if self.msg_pipe_input:  # if pipe exists, pass the msg
+            msg = {"type": _typ, "data": self.file_data}
+            self.msg_pipe_input.send(msg)
 
 
 class Downloader:
 
     def __init__(
-        self,
-        m3u8_str: str,
-        output_file_name: str,
-        resume_code=None,
-        max_workers: int = 5,
-        hooks: dict = {},
+            self,
+            m3u8_str: str,
+            file_data: dict,
+            msg_system_in_pipe: Pipe = None,
+            resume_code=None,
+            max_workers: int = 5,
+            hooks: dict = {},
+            headers: dict = {}
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.M3U8(m3u8_str)
         self._max_workers = max_workers
-        self._output_file_name = output_file_name.replace(" ", "-")
+        self.file_data = file_data  # {id: int, file_name: str, total_size: None, downloaded: None}
+        self._output_file_name = self.file_data["file_name"].replace(" ", "-")
+        self.msg_system_in_pipe = msg_system_in_pipe
         self._resume_code = resume_code or self._output_file_name
         self._hooks = hooks
         self.key: bytes | None = None
         self.file_dir = SEGMENT_DIR.joinpath(self._output_file_name)
+        self.headers = headers
 
-    async def run(self):
+    def run(self):
+        asyncio.run(self._run())
+
+    async def _run(self):
         # The download queue that will be used by download workers
         download_queue: asyncio.Queue = asyncio.Queue()
 
@@ -166,7 +172,7 @@ class Downloader:
         # disk.
         decrypt_pipe_output, decrypt_pipe_input = Pipe()
         timeout = aiohttp.ClientTimeout(25)
-        client = aiohttp.ClientSession(headers=get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"}), timeout=timeout, raise_for_status=True)
+        client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
 
         # Check if the m3u8 file passed in has multiple streams, if this is the
         # case then select the stream with the highest "bandwidth" specified.
@@ -201,19 +207,24 @@ class Downloader:
             resume_info = []
             print(f"No resume data found for {self._resume_code}")
 
+            # update total_size
+            DBLibrary.update(self.file_data["id"], {"total_size": len(stream.segments)})
+
         assert len(stream.segments) != 0
 
         segment_list = tuple(
             filter(lambda seg: seg[0] not in resume_info, enumerate(stream.segments))
         )
-        self._max_workers = min(self._max_workers, len(segment_list))  # create max workers according to rem segments
+        self._max_workers = min(self._max_workers,
+                                len(segment_list))  # create max workers according to remaining segments
 
-        progress_tracker = ProgressTracker(self._output_file_name, len(stream.segments), len(resume_info), MsgSystem.in_pipe)
+        progress_tracker = ProgressTracker(self.file_data, len(stream.segments), len(resume_info),
+                                           self.msg_system_in_pipe)
 
         # Start the process that will decrypt and write the files to disk.
         decrypt_process = Process(
             target=_decrypt_worker,
-            args=(decrypt_pipe_output, resume_file_path, progress_tracker, IN_PROGRESS),
+            args=(decrypt_pipe_output, resume_file_path, progress_tracker),
             daemon=True,
         )
         decrypt_process.start()
@@ -262,6 +273,7 @@ class Downloader:
         _write_concat_info(
             len(stream.segments), self._output_file_name
         )
+        DBLibrary.update(self.file_data["id"], {"status": "downloaded"})
 
     async def get_key(self, client, segment):
         if self.key:
@@ -276,13 +288,13 @@ class Downloader:
 
     @classmethod
     async def from_url(
-        cls,
-        url: str,
-        output_file_name: str,
-        resume_code=None,
-        max_workers: int = 3,
-        hooks: dict = {},
-        headers: dict = {}
+            cls,
+            url: str,
+            output_file_name: str,
+            resume_code=None,
+            max_workers: int = 5,
+            hooks: dict = {},
+            headers: dict = {}
     ):
         client = aiohttp.ClientSession(headers=headers)
         resp = await client.get(url)
@@ -292,36 +304,227 @@ class Downloader:
 
     @classmethod
     async def from_file(
-        cls,
-        file_path: str,
-        output_file_name: str,
-        resume_code=None,
-        max_workers: int = 3,
-        hooks: dict = {},
+            cls,
+            file_path: str,
+            output_file_name: str,
+            resume_code=None,
+            max_workers: int = 5,
+            hooks: dict = {},
     ):
         with open(file_path, "r") as file:
             _m3u8 = file.read()
         return cls(_m3u8, output_file_name, resume_code, max_workers, hooks)
 
 
-class BatchDownloader:
+class DownloadManagerMeta(type):
+    _instance = None
 
-    def __init__(self, scraper: Anime, anime_id: str, page: int = 1):
-        self.scraper = scraper()
-        self.anime_id = anime_id
-        self.page = page
-
-    async def run(self):
-        for link in self.scraper.get_links(self.anime_id, self.page):
-            manifest, _, file_name = await self.scraper.get_manifest_file(link)
-            await Downloader(m3u8_str=manifest, output_file_name=file_name).run()
+    def __call__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__call__(*args, **kwargs)
+        return cls._instance
 
 
-async def start_download(anime_session: str = None, kwik_url: str = None, site: str = "animepahe", page: int = 1):
-    loop = asyncio.get_event_loop()
-    if anime_session:
-        loop.create_task(BatchDownloader(Animepahe, anime_session, page).run())
-    elif kwik_url:
-        scraper = Anime.get_scraper(site)
-        manifest, _, file_name = await scraper().get_manifest_file(kwik_url)
-        loop.create_task(Downloader(m3u8_str=manifest, output_file_name=file_name).run())
+class DownloadManager(metaclass=DownloadManagerMeta):
+    _TaskData: Dict[int, Dict[str, Any]] = {}
+    DownloadTaskQueue: asyncio.Queue = asyncio.Queue()  # all download tasks will be put into this queue
+
+    """
+    _TaskData : {id: {"process": Process Object, "status": str, task_data: List[str], "file_name": str}}
+    """
+
+    def __init__(self, no_of_workers: int = 4):
+        """
+        __init__ function will populate the active tasks from database
+        """
+        # start 3 task_workers to process items from DownloadTaskQueue
+        loop = asyncio.get_event_loop()
+        self.task_workers = [loop.create_task(self.workers()) for _ in range(no_of_workers)]
+        loop.run_until_complete(self._schedule_pending_downloads())
+
+    @staticmethod
+    async def __get_manifest__(scraper: Anime, anime_session: str, manifest_url: str, page: int = 1) -> str:
+        if anime_session:
+            tasks = [scraper.get_manifest_file(link) for link in scraper.get_links(anime_session, page)]
+            manifest_data = await asyncio.gather(*tasks)
+        else:
+            manifest_data = [(await scraper.get_manifest_file(manifest_url))]
+
+        return manifest_data
+
+    @classmethod
+    async def workers(cls) -> bool:
+        while True:
+            task_id = await DownloadManager.DownloadTaskQueue.get()
+            manifest, file_data, headers = cls._TaskData[task_id]["task_data"]
+
+            task_status = cls._TaskData[task_id]["status"]
+            if task_status != Status.scheduled:  # if task is in paused state
+                if task_status == status.cancelled:  # if task is in cancelled state, remove from the _Task Dict
+                    del cls._TaskData[file_data["id"]]
+
+            else:
+                # start download as a new process
+                print(f"Task received with id {task_id}")
+                p = Process(target=Downloader(m3u8_str=manifest, file_data=file_data,
+                                              msg_system_in_pipe=MsgSystem.in_pipe, headers=headers).run)
+                p.start()
+                cls._TaskData[file_data["id"]]["process"] = p
+                cls._TaskData[file_data]["id"]["status"] = Status.started
+                p.join()
+                p.close()
+                print("Process exited with status", p.exitcode)
+
+                if p.exitcode == 0:  # if task ended successfully
+                    del cls._TaskData[file_data["id"]]  # remove task_data
+
+            await cls.DownloadTaskQueue.task_done()
+
+    @classmethod
+    async def _schedule_pending_downloads(cls):
+        cur = DB.connection.cursor()
+        cur.execute(f"SELECT * FROM {DBLibrary.table_name} WHERE status='in_progress'")
+        await cls.create_task_from_db(cur)
+        cur.close()
+
+    @classmethod
+    async def create_task_from_db(cls, cur):
+        tasks = []
+        for row in cur.fetchall():
+            row = dict(row)
+            manifest_file_path = row["manifest_file_path"]
+
+            try:
+                with open(manifest_file_path, 'r') as manifest_file:
+                    file_data = {"id": row["id"], "file_name": row["file_name"], "total_size": row["total_size"],
+                                 "downloaded": len(_parse_resume_info(row["manifest_file_path"]))}
+                    header = Anime.get_scraper(row.get("site", "animepahe")).manifest_header
+                    tasks.append(cls._schedule_download(manifest_file.read(), row["file_name"], header, file_data))
+            except FileNotFoundError:
+                DBLibrary.delete(row["id"])
+
+        DB.connection.commit()
+        cur.close()
+
+        await asyncio.gather(*tasks)  # schedule all remaining tasks
+
+    @classmethod
+    async def schedule(cls, anime_session: str = None, manifest_url: str = None, site: str = "animepahe",
+                       page: int = 1):
+
+        scraper = Anime.get_scraper(site)()
+        if not scraper:
+            raise AttributeError("Site not supported")
+
+        manifest_datas = await cls.__get_manifest__(scraper, anime_session, manifest_url, page)
+
+        await asyncio.gather(
+            *[cls._schedule_download(data[0], data[2], scraper.manifest_header) for data in manifest_datas])
+
+    @classmethod
+    async def _schedule_download(cls, manifest, file_name, header, file_data: dict = None) -> None:
+
+        seg_dir = SEGMENT_DIR.joinpath(file_name)
+        manifest_file_path = seg_dir.joinpath(f"{MANIFEST_FILE_NAME}{MANIFEST_FILE_EXTENSION}")
+
+        if not Path.exists(seg_dir):  # if manifest file doesn't exist
+            os.makedirs(seg_dir)  # create seg directory
+            with open(manifest_file_path, "w") as manifest_file:
+                manifest_file.write(manifest)  # write manifest data to disk
+
+        if not file_data:
+            file_data = cls.create_data(file_name, manifest_file_path.__str__())
+
+        if MsgSystem.in_pipe:
+            MsgSystem.in_pipe.send({"type": "scheduled", "data": file_data})  # send msg to update about the status
+
+        # add task_data and metadata for tracking and scheduling
+        cls._TaskData[file_data["id"]] = {"status": Status.scheduled,
+                                          "file_name": file_name, "task_data": (manifest, file_data, header)}
+        await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
+
+    @staticmethod
+    def create_data(file_name: str, manifest_file_path: str) -> Dict[str, str | int]:
+        """
+        This function will save the metaData into DB and serialize it into python dict.
+        This dict will act as the base format while saving the status into database.
+        """
+        _id = DB.get_id()
+        resume_file_path = SEGMENT_DIR.joinpath(file_name).joinpath(f"{file_name}{RESUME_EXTENSION}")
+        file_location = OUTPUT_DIR.joinpath(f"{file_name}{OUTPUT_EXTENSION}")
+
+        DBLibrary.create({"id": _id, "file_name": file_name, "status": "scheduled", "total_size": 0,
+                          "manifest_file_path": manifest_file_path,
+                          "resume_file_path": resume_file_path.__str__(), "file_location": file_location.__str__()})
+
+        return {"id": _id, "file_name": file_name, "total_size": None, "downloaded": None}
+
+    @classmethod
+    async def pause(cls, task_ids: List[int]):
+        for task_id in task_ids:
+            task = cls._TaskData.get(task_id, None)
+            if not task:
+                raise ValueError("task doesn't exist")
+            if task["status"] not in [Status.scheduled, Status.started]:
+                raise AttributeError("Task doesn't have pause method")
+        await asyncio.gather(*[cls._pause(task_id) for task_id in task_ids])
+
+    @classmethod
+    async def _pause(cls, task_id: int):
+        task = cls._TaskData[task_id]
+        status = task["status"]
+        if status == Status.scheduled:
+            if status == Status.started:
+                cls._TaskData[task_id]["process"].kill()  # kill the process
+            cls._TaskData["status"] = Status.paused
+            DBLibrary.update(task_id, {"status": "paused"})
+
+    @classmethod
+    async def resume(cls, task_ids: List[int]):
+        for task_id in task_ids:
+            task = cls._TaskData.get(task_id, None)
+            if not task:
+                raise ValueError("task doesn't exist")
+            if task["status"] != Status.paused:
+                raise AttributeError("Task doesn't have resume method")
+        await asyncio.gather(*[cls._resume(task_id) for task_id in task_ids])
+
+    @classmethod
+    async def _resume(cls, task_id: int):
+        cls._TaskData[task_id]["status"] = Status.scheduled
+        await DownloadManager.DownloadTaskQueue.put(task_id)
+        DBLibrary.update(task_id, {"status": "scheduled"})
+
+    @classmethod
+    async def cancel(cls, task_ids: List[int]):
+        for task_id in task_ids:
+            task = cls._TaskData.get(task_id, None)
+            if not task:
+                raise ValueError("task doesn't exist")
+        await asyncio.gather(*[cls._cancel(task_id) for task_id in task_ids])
+
+    @classmethod
+    async def _cancel(cls, task_id: int):
+        task = cls._TaskData.get[task_id]
+
+        task["process"].kill()  # kill the process
+
+        # remove record from DB
+        DBLibrary.delete(task_id)
+
+        # remove related files
+        folder_cleanup(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
+
+    @staticmethod
+    def folder_cleanup(location: str):
+        try:
+            shutil.rmtree(location)
+        except FileNotFoundError or NotADirectoryError:
+            ...
+
+
+class Status:
+    scheduled = 1
+    started = 2
+    paused = 3
+    cancelled = 4

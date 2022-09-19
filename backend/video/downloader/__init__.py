@@ -1,1 +1,1 @@
-from .downloader import Downloader, BatchDownloader, start_download
+from .downloader import Downloader, DownloadManager
