@@ -1,14 +1,14 @@
 import asyncio
 from json import JSONDecodeError
 import requests
-from video.library import JsonLibrary
+from video.library import DBLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
-from video.downloader import start_download
+from video.downloader import DownloadManager
 from scraper import Animepahe, MyAL
 from video.streamer import Stream
 import config
@@ -17,7 +17,7 @@ from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from utils.headers import get_headers
 from utils.master_m3u8 import build_master_manifest
-from middleware import ErrorHandlerMiddleware
+from middleware import ErrorHandlerMiddleware, requestValidator
 import uvicorn
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
@@ -133,49 +133,69 @@ async def get_stream_details(request: Request):
 
 
 async def stream(request: Request):
-    try:
-        if request.headers.get("content-type", None) != "application/json":
-            return await bad_request_400(request, msg="Invalid content type")
 
-        jb = await request.json()
+    jb = request.state.body
 
-        player_name = jb.get("player", None)
-        if not player_name:
-            return await bad_request_400(request, msg="pass video player_name")
+    player_name = jb.get("player", None)
+    if not player_name:
+        return await bad_request_400(request, msg="pass video player_name")
 
-        manifest_url = jb.get("manifest_url", None)
-        if not manifest_url:
-            return await bad_request_400(request, msg="pass valid manifest url")
-        msg, status_code = await play(player_name.lower(), manifest_url)
-        return JSONResponse({"error": msg}, status_code=status_code)
-    except JSONDecodeError:
-        return await bad_request_400(request, msg="Malformed body: Invalid JSON")
+    manifest_url = jb.get("manifest_url", None)
+    if not manifest_url:
+        return await bad_request_400(request, msg="pass valid manifest url")
+    msg, status_code = await play(player_name.lower(), manifest_url)
+    return JSONResponse({"error": msg}, status_code=status_code)
 
 
 async def download(request: Request):
 
+    jb = request.state.body
+
+    anime_session = jb.get("anime_session", None)  # get anime_session
+
+    if anime_session:  # if anime session exists start batch download
+        await DownloadManager.schedule(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
+    else:
+
+        manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
+
+        if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
+            return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+
+        await DownloadManager.schedule(manifest_url=parse_qsl(manifest_url)[0][1], site="animepahe")
+    return JSONResponse({"status": "started"})
+
+
+async def pause_download(request: Request):
     try:
-        if request.headers.get("content-type", None) != "application/json":
-            return await bad_request_400(request, msg="Invalid content type")
+        task_ids = list(request.state.body.get("id", None))
+        if not task_ids:
+            return await bad_request_400(request, msg="download id not present")
+        return DownloadManager.cancel(task_ids)
+    except TypeError:
+        return await bad_request_400(request, msg="'task ids' objects not iterable")
 
-        jb = await request.json()
 
-        anime_session = jb.get("anime_session", None)  # get anime_session
+async def resume_download(request: Request):
 
-        if anime_session:  # if anime session exists start batch download
-            await start_download(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
-        else:
+    try:
+        task_ids = request.state.body.get("id", None)
+        if not task_ids:
+            return await bad_request_400(request, msg="download id not present")
+        return DownloadManager.resume(task_ids)
+    except TypeError:
+        return await bad_request_400(request, msg="'task ids' objects not iterable")
 
-            manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
 
-            if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
-                return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+async def cancel_download(request: Request):
+    try:
+        task_ids = list(request.state.body.get("id", None))
+        if not task_ids:
+            return await bad_request_400(request, msg="download id not present")
 
-            await start_download(kwik_url=parse_qsl(manifest_url)[0][1], site="animepahe")
-        return JSONResponse({"status": "started"})
-
-    except JSONDecodeError:
-        return await bad_request_400(request, msg="Malformed body: Invalid JSON")
+        return DownloadManager.cancel(task_ids)
+    except TypeError:
+        return await bad_request_400(request, msg="'task ids' objects not iterable")
 
 
 async def library(request: Request):
@@ -187,7 +207,7 @@ async def library(request: Request):
     Returns: JSONResponse Consist of all the files in the library
 
     """
-    return JSONResponse(JsonLibrary().get_all())
+    return JSONResponse(DBLibrary().get_all())
 
 
 async def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
@@ -306,6 +326,9 @@ routes = [
     Route("/stream_detail", endpoint=get_stream_details, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
     Route("/download", endpoint=download, methods=["POST"]),
+    Route("/download/pause", endpoint=pause_download, methods=["POST"]),
+    Route("/download/resume", endpoint=resume_download, methods=["POST"]),
+    Route("/download/cancel", endpoint=cancel_download, methods=["POST"]),
     Route("/library", endpoint=library, methods=["GET"]),
     Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
@@ -320,8 +343,9 @@ exception_handlers = {
 }
 
 middleware = [
-    Middleware(ErrorHandlerMiddleware),
-    Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"], allow_credentials=True)
+    Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"], allow_credentials=True),
+    Middleware(requestValidator),
+    Middleware(ErrorHandlerMiddleware)
 ]
 
 app = Starlette(
@@ -329,7 +353,7 @@ app = Starlette(
     routes=routes,
     exception_handlers=exception_handlers,
     middleware=middleware,
-    on_startup=[JsonLibrary().load_data],
+    on_startup=[DBLibrary().load_data],
 )
 
 
