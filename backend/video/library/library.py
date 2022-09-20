@@ -84,7 +84,8 @@ class DBLibrary(Library):
         cur.execute(cmd, field_values)
         DB.connection.commit()
         cur.execute(f"SELECT * FROM {cls.table_name} WHERE id=?", [_id])
-        cls.data[_id] = dict(cur.fetchone()[0])
+        d = cur.fetchone()
+        cls.data[_id] = dict(cur.fetchone())
         cur.close()
 
     @classmethod
@@ -116,7 +117,7 @@ class DBLibrary(Library):
         if status is in progress eventual updates will be sent through socket server
         """
         cur = DB.connection.cursor()
-        cur.execute(f"SELECT * from {cls.table_name};")
+        cur.execute(f"SELECT id, file_name, status, created_on, total_size, file_location from {cls.table_name};")
         for row in cur.fetchall():
             data = dict(row)
             cls.data[data["id"]] = data
