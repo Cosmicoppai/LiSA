@@ -16,6 +16,7 @@ class MetaDB(type):
 
 class DB(metaclass=MetaDB):
     connection: sqlite3.Connection = sqlite3.connect(DB_NAME, check_same_thread=False)
+    connection.row_factory = sqlite3.Row
     _highest_ids: Dict[str, int] = {}
 
     def __init__(self, table_names: List[str] = ("progress_tracker", )) -> int:
@@ -29,14 +30,12 @@ class DB(metaclass=MetaDB):
 
     @classmethod
     def migrate(cls, file_: str = DEFAULT_SQL_DIR.joinpath("progress_tracker.sql").__str__()):
-        conn = cls.connection
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
+        cur = cls.connection.cursor()
         with open(file_) as file:
             try:
                 sql_queries = file.read()
                 cur.executescript(sql_queries)
-                conn.commit()
+                cls.connection.commit()
                 cur.close()
             except sqlite3.Error as error:
                 logging.error(error)
