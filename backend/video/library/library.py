@@ -93,10 +93,13 @@ class DBLibrary(Library):
     @classmethod
     def delete(cls, _id: int) -> None:
         cur = DB.connection.cursor()
-        cur.execute(f"DELETE FROM {cls.table_name} WHERE id=?", _id)
+        cur.execute(f"DELETE FROM {cls.table_name} WHERE id=?", [_id, ])
         DB.connection.commit()
         cur.close()
-        del cls.data[_id]
+        try:
+            del cls.data[_id]
+        except KeyError:
+            ...
 
     @staticmethod
     def __query_builder(data: Dict[str, Any], typ: str = "insert") -> (str, list):
