@@ -290,6 +290,7 @@ class Animepahe(Anime):
             season, year = self._strip_split(data[2])
 
             session = self._strip_split(col_2.find("a", href=True)["href"], strip_chr="/", split_chr="/")[1]
+            poster = col_2.find("img").get("data-src", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}").replace(".th.jpg", ".jpg")
 
             rec_list.append({"jp_name": title,
                              "no_of_episodes": ep,
@@ -299,7 +300,7 @@ class Animepahe(Anime):
                              "year": year,
                              "score": 0,
                              "session": session,
-                             "poster": col_2.find("img").get("data-src", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}"),
+                             "poster": poster,
                              "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={session}"
                              })
 
