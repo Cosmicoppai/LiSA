@@ -14,11 +14,11 @@ import sys
 from pathlib import Path
 import config
 from .msg_system import MsgSystem
-from video.library import DBLibrary
+from video.library import DBLibrary, Library
 from time import perf_counter
 from utils import DB
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 
 SEGMENT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.joinpath("segments"))
 OUTPUT_DIR = config.DEFAULT_DOWNLOAD_LOCATION
@@ -112,6 +112,10 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
         except asyncio.TimeoutError:
             await download_queue.put(segment_data)
             print(f"Retrying segment-{segment_number}")
+        except Exception as e:
+            print(e)
+            await download_queue.put(segment_data)
+            print(f"Retrying segment-{segment_number}")
         download_queue.task_done()
 
 
@@ -143,15 +147,17 @@ class Downloader:
             self,
             m3u8_str: str,
             file_data: dict,
+            library_data: Tuple[Library, dict],
             msg_system_in_pipe: Pipe = None,
             resume_code=None,
-            max_workers: int = 5,
+            max_workers: int = 8,
             hooks: dict = {},
             headers: dict = {}
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.M3U8(m3u8_str)
         self._max_workers = max_workers
         self.file_data = file_data  # {id: int, file_name: str, total_size: None, downloaded: None}
+        self.library, self.lib_data = library_data
         self._output_file_name = self.file_data["file_name"].replace(" ", "-")
         self.msg_system_in_pipe = msg_system_in_pipe
         self._resume_code = resume_code or self._output_file_name
@@ -161,6 +167,7 @@ class Downloader:
         self.headers = headers
 
     def run(self):
+        self.library.data = self.lib_data
         asyncio.run(self._run())
 
     async def _run(self):
@@ -202,13 +209,13 @@ class Downloader:
                 resume_info = _parse_resume_info(file.read())
             print(f"Resume data found for {self._resume_code}.")
         else:
-            with open(resume_file_path, "w+") as file:
+            with open(resume_file_path, "w+"):
                 ...
             resume_info = []
             print(f"No resume data found for {self._resume_code}")
 
             # update total_size
-            DBLibrary.update(self.file_data["id"], {"total_size": len(stream.segments)})
+            self.library.update(self.file_data["id"], {"total_size": len(stream.segments)})
 
         assert len(stream.segments) != 0
 
@@ -273,7 +280,7 @@ class Downloader:
         _write_concat_info(
             len(stream.segments), self._output_file_name
         )
-        DBLibrary.update(self.file_data["id"], {"status": "downloaded"})
+        self.library.update(self.file_data["id"], {"status": "downloaded"})
 
     async def get_key(self, client, segment):
         if self.key:
@@ -292,7 +299,7 @@ class Downloader:
             url: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 5,
+            max_workers: int = 8,
             hooks: dict = {},
             headers: dict = {}
     ):
@@ -308,7 +315,7 @@ class Downloader:
             file_path: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 5,
+            max_workers: int = 8,
             hooks: dict = {},
     ):
         with open(file_path, "r") as file:
@@ -340,7 +347,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         # start 3 task_workers to process items from DownloadTaskQueue
         loop = asyncio.get_event_loop()
         self.task_workers = [loop.create_task(self.workers()) for _ in range(no_of_workers)]
-        loop.run_until_complete(self._schedule_pending_downloads())
+        loop.create_task(self._schedule_pending_downloads())
 
     @staticmethod
     async def __get_manifest__(scraper: Anime, anime_session: str, manifest_url: str, page: int = 1) -> str:
@@ -367,13 +374,13 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                 # start download as a new process
                 print(f"Task received with id {task_id}")
                 p = Process(target=Downloader(m3u8_str=manifest, file_data=file_data,
-                                              msg_system_in_pipe=MsgSystem.in_pipe, headers=headers).run)
+                                              msg_system_in_pipe=MsgSystem.in_pipe, headers=headers, library_data=(DBLibrary, Library.data)).run)
                 p.start()
-                cls._TaskData[file_data["id"]]["process"] = p
-                cls._TaskData[file_data]["id"]["status"] = Status.started
-                p.join()
+                cls._TaskData[task_id]["process"] = p
+                cls._TaskData[task_id]["status"] = Status.started
+                while p.is_alive():
+                    await asyncio.sleep(10)
                 p.close()
-                print("Process exited with status", p.exitcode)
 
                 if p.exitcode == 0:  # if task ended successfully
                     del cls._TaskData[file_data["id"]]  # remove task_data
@@ -443,12 +450,11 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         This dict will act as the base format while saving the status into database.
         """
         _id = DB.get_id()
-        resume_file_path = SEGMENT_DIR.joinpath(file_name).joinpath(f"{file_name}{RESUME_EXTENSION}")
         file_location = OUTPUT_DIR.joinpath(f"{file_name}{OUTPUT_EXTENSION}")
 
         DBLibrary.create({"id": _id, "file_name": file_name, "status": "scheduled", "total_size": 0,
                           "manifest_file_path": manifest_file_path,
-                          "resume_file_path": resume_file_path.__str__(), "file_location": file_location.__str__()})
+                          "file_location": file_location.__str__()})
 
         return {"id": _id, "file_name": file_name, "total_size": None, "downloaded": None}
 

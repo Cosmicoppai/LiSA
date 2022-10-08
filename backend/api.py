@@ -22,6 +22,7 @@ import uvicorn
 from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
+from utils.init_db import DB
 
 
 async def search(request: Request):
@@ -140,10 +141,20 @@ async def stream(request: Request):
     if not player_name:
         return await bad_request_400(request, msg="pass video player_name")
 
-    manifest_url = jb.get("manifest_url", None)
-    if not manifest_url:
-        return await bad_request_400(request, msg="pass valid manifest url")
-    msg, status_code = await play(player_name.lower(), manifest_url)
+    manifest_url, _id = jb.get("manifest_url", None), jb.get("id", None)
+    video_src = manifest_url or _id
+    if not video_src:
+        return await bad_request_400(request, msg="pass valid manifest url or video id")
+    if _id:
+        cur = DB.connection.cursor()
+        cur.execute("SELECT file_location FROM progress_tracker WHERE id=?", [_id, ])
+        res = cur.fetchone()
+        if not res:
+            return JSONResponse({"error": "Invalid Id"}, status_code=400)
+        video_src = res[0]
+        cur.close()
+
+    msg, status_code = await play(player_name.lower(), video_src)
     return JSONResponse({"error": msg}, status_code=status_code)
 
 
@@ -153,17 +164,21 @@ async def download(request: Request):
 
     anime_session = jb.get("anime_session", None)  # get anime_session
 
-    if anime_session:  # if anime session exists start batch download
-        await DownloadManager.schedule(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
-    else:
+    try:
 
-        manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
+        if anime_session:  # if anime session exists start batch download
+            await DownloadManager.schedule(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
+        else:
 
-        if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
-            return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+            manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
 
-        await DownloadManager.schedule(manifest_url=parse_qsl(manifest_url)[0][1], site="animepahe")
-    return JSONResponse({"status": "started"})
+            if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
+                return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+
+            await DownloadManager.schedule(manifest_url=parse_qsl(manifest_url)[0][1], site="animepahe")
+        return JSONResponse({"status": "started"})
+    except ValueError as err:
+        return await bad_request_400(request, msg=err.__str__())
 
 
 async def pause_download(request: Request):

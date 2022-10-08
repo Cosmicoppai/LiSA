@@ -6,8 +6,9 @@ import asyncio
 from utils import DB
 import config
 from api import start_api_server
-from multiprocessing import Pipe
+from multiprocessing import Pipe, Manager
 from video.downloader import DownloadManager
+from video.library import Library
 
 
 def run_api_server(port: int = 8000):
@@ -21,19 +22,23 @@ if __name__ == "__main__":
         logging.basicConfig(stream=stdout, level=logging.ERROR)
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
+
+        Library.data = Manager().dict()  # update the dict into manager dict
+
         t1 = Thread(target=run_api_server, args=(6969, ))
         t1.daemon = True
         t1.start()
 
+        # initialize DownloadManager
+
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
+
+        DownloadManager()
 
         MsgSystem.out_pipe, MsgSystem.in_pipe = Pipe()
         msg_system = MsgSystem()
         loop.create_task(msg_system.send_updates())
-
-        # initialize DownloadManager
-        DownloadManager()
 
         loop.run_until_complete(msg_system.run_server())  # run socket server
     except KeyboardInterrupt:

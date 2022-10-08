@@ -43,6 +43,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
                 event = json.loads(msg)
                 if event.get("type", "") == "connect" and not cls.connected_client:
                     cls.connected_client = websocket
+                    print(f"connected with {websocket}")
             cls.connected_client = None
         except ConnectionClosed:
             cls.connected_client = None
@@ -54,7 +55,7 @@ class MsgSystem(metaclass=MsgSystemMeta):
     async def send_updates(cls):
         while True:
             await asyncio.sleep(0.25)
-            if cls.out_pipe.poll():  # poll for msg with timeout of 1 sec
+            if cls.out_pipe.poll():  # poll for msg
                 msg: Dict[str, Any] = cls.out_pipe.recv()
                 if not msg:
                     break

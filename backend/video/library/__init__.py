@@ -1,1 +1,1 @@
-from .library import DBLibrary
+from .library import DBLibrary, Library

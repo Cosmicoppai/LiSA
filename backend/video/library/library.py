@@ -5,17 +5,17 @@ This file will handle the saving and extraction of metadata about downloaded fil
 Example: {file_name: {total_size: int, location: str}}
 
 """
-
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 import json
 import sys
 from pathlib import Path
 from utils import DB
+from sqlite3 import IntegrityError
 
 
 class Library(ABC):
-    data: Dict[int, Dict[str, Any]] = {}
+    data: Dict[int, Dict[str, Any]]
 
     @classmethod
     @abstractmethod
@@ -68,10 +68,13 @@ class DBLibrary(Library):
     def create(cls, data: Dict[str, Any]) -> None:
         set_statement, field_values = cls.__query_builder(data)
         cmd = f"INSERT INTO {cls.table_name} ({set_statement}) VALUES {'(' + ','.join('?' * len(data))+ ')'}"
-        cur = DB.connection.cursor()
-        cur.execute(cmd, field_values)
-        DB.connection.commit()
-        cur.close()
+        try:
+            cur = DB.connection.cursor()
+            cur.execute(cmd, field_values)
+            DB.connection.commit()
+            cur.close()
+        except IntegrityError:
+            raise ValueError("File with this name already exist")
 
         cls.data[data["id"]] = data
 
@@ -83,8 +86,7 @@ class DBLibrary(Library):
         cur = DB.connection.cursor()
         cur.execute(cmd, field_values)
         DB.connection.commit()
-        cur.execute(f"SELECT * FROM {cls.table_name} WHERE id=?", [_id])
-        d = cur.fetchone()
+        cur.execute(f"SELECT id, file_name, status, created_on, total_size, file_location from {cls.table_name} WHERE id=?;", [_id, ])
         cls.data[_id] = dict(cur.fetchone())
         cur.close()
 
