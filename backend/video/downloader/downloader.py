@@ -350,6 +350,12 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         loop.create_task(self._schedule_pending_downloads())
 
     @staticmethod
+    def _check_ids(ids: List[int]):
+        for _id in ids:
+            if _id not in DownloadManager._TaskData:
+                raise KeyError("Invalid id")
+
+    @staticmethod
     async def __get_manifest__(scraper: Anime, anime_session: str, manifest_url: str, page: int = 1) -> str:
         if anime_session:
             tasks = [scraper.get_manifest_file(link) for link in scraper.get_links(anime_session, page)]
@@ -460,10 +466,9 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def pause(cls, task_ids: List[int]):
+        cls._check_ids(task_ids)
         for task_id in task_ids:
-            task = cls._TaskData.get(task_id, None)
-            if not task:
-                raise ValueError("task doesn't exist")
+            task = cls._TaskData[task_id]
             if task["status"] not in [Status.scheduled, Status.started]:
                 raise AttributeError("Task doesn't have pause method")
         await asyncio.gather(*[cls._pause(task_id) for task_id in task_ids])
@@ -472,20 +477,18 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     async def _pause(cls, task_id: int):
         task = cls._TaskData[task_id]
         status = task["status"]
-        if status == Status.scheduled:
-            if status == Status.started:
-                cls._TaskData[task_id]["process"].kill()  # kill the process
-            cls._TaskData["status"] = Status.paused
-            DBLibrary.update(task_id, {"status": "paused"})
+        if status == Status.started:
+            cls._TaskData[task_id]["process"].kill()  # kill the process
+        cls._TaskData[task_id]["status"] = Status.paused
+        DBLibrary.update(task_id, {"status": "paused"})
 
     @classmethod
     async def resume(cls, task_ids: List[int]):
+        cls._check_ids(task_ids)
         for task_id in task_ids:
-            task = cls._TaskData.get(task_id, None)
-            if not task:
-                raise ValueError("task doesn't exist")
+            task = cls._TaskData[task_id]
             if task["status"] != Status.paused:
-                raise AttributeError("Task doesn't have resume method")
+                raise AttributeError(f"Task with {task_id} doesn't have resume method")
         await asyncio.gather(*[cls._resume(task_id) for task_id in task_ids])
 
     @classmethod
@@ -496,15 +499,14 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def cancel(cls, task_ids: List[int]):
+        cls._check_ids(task_ids)
         for task_id in task_ids:
-            task = cls._TaskData.get(task_id, None)
-            if not task:
-                raise ValueError("task doesn't exist")
+            task = cls._TaskData[task_id]
         await asyncio.gather(*[cls._cancel(task_id) for task_id in task_ids])
 
     @classmethod
     async def _cancel(cls, task_id: int):
-        task = cls._TaskData.get[task_id]
+        task = cls._TaskData[task_id]
 
         task["process"].kill()  # kill the process
 
@@ -512,7 +514,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         DBLibrary.delete(task_id)
 
         # remove related files
-        folder_cleanup(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
+        cls.folder_cleanup(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
 
     @staticmethod
     def folder_cleanup(location: str):

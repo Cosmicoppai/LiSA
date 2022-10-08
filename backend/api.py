@@ -186,9 +186,12 @@ async def pause_download(request: Request):
         task_ids = list(request.state.body.get("id", None))
         if not task_ids:
             return await bad_request_400(request, msg="download id not present")
-        return DownloadManager.cancel(task_ids)
-    except TypeError:
-        return await bad_request_400(request, msg="'task ids' objects not iterable")
+        await DownloadManager.pause(task_ids)
+        return JSONResponse({"msg": "all tasks are successfully paused"})
+    except KeyError:
+        return await bad_request_400(request, msg="One or more ids are invalid")
+    except AttributeError as err_msg:
+        return await bad_request_400(request, msg=err_msg.__str__())
 
 
 async def resume_download(request: Request):
@@ -197,20 +200,24 @@ async def resume_download(request: Request):
         task_ids = request.state.body.get("id", None)
         if not task_ids:
             return await bad_request_400(request, msg="download id not present")
-        return DownloadManager.resume(task_ids)
-    except TypeError:
-        return await bad_request_400(request, msg="'task ids' objects not iterable")
+        await DownloadManager.resume(task_ids)
+        return JSONResponse({"msg": "all tasks are successfully resumed"})
+    except KeyError:
+        return await bad_request_400(request, msg="One or more ids are invalid")
+    except AttributeError as err_msg:
+        return await bad_request_400(request, msg=err_msg)
 
 
 async def cancel_download(request: Request):
     try:
-        task_ids = list(request.state.body.get("id", None))
+        task_ids = request.state.body.get("id", None)
         if not task_ids:
             return await bad_request_400(request, msg="download id not present")
 
-        return DownloadManager.cancel(task_ids)
-    except TypeError:
-        return await bad_request_400(request, msg="'task ids' objects not iterable")
+        await DownloadManager.cancel(task_ids)
+        return JSONResponse({"msg": "sll tasks are successfully cancelled"})
+    except KeyError:
+        return await bad_request_400(request, msg="One or more ids are invalid")
 
 
 async def library(request: Request):
