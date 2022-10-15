@@ -244,6 +244,8 @@ const VideoPlayer = ({
             }
           }}
           className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
+          id="my-video"
+
         ></video>
       </div>
 
