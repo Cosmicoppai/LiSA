@@ -17,4 +17,7 @@ resources/
 .eslintcache
 
 backend/video/segments
+
 downloads
+
+backend/lisa
