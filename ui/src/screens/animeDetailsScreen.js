@@ -31,9 +31,12 @@ import {
 import PaginateCard from "../components/paginateCard";
 import { AiFillStar } from "react-icons/ai";
 import SearchResultCard from "../components/search-result-card";
+import { BiArrowBack } from "react-icons/bi";
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { details: data } = useSelector((state) => state.animeDetails);
   const { details, loading: ep_loading } = useSelector(
     (state) => state.animeEpisodesDetails
@@ -65,9 +68,23 @@ export default function AnimeDetailsScreen() {
         flexDirection={"column"}
         justifyContent="center"
         alignItems={"center"}
-        w={{ sm: "90%", md: "80%" }}
+        w={{ sm: "90%" }}
         margin={"0 auto"}
       >
+        <Box
+          onClick={() => navigate("/")}
+          alignSelf={"flex-start"}
+          _hover={{
+            cursor: "pointer",
+          }}
+          mb={2}
+          display="flex"
+          justifyContent={"center"}
+          alignItems={"center"}
+        >
+          <BiArrowBack />
+          <Text ml={1}>Back</Text>
+        </Box>
         <Stack
           borderWidth="1px"
           borderRadius="lg"
@@ -215,7 +232,6 @@ export default function AnimeDetailsScreen() {
             </div>
           </Stack>
         </Stack>
-
         <Tabs width={"100%"} variant="enclosed" mt={5}>
           <TabList>
             <Tab>Trailer </Tab>

@@ -17,8 +17,8 @@ function App() {
   return (
     <BrowserRouter>
       <Grid
-        templateColumns="repeat(1, 0.05fr 1fr)"
-        gap={2}
+        templateColumns="repeat(1, 0.04fr 1fr)"
+        
         w={"100%"}
         h={"100%"}
         overflow={"hidden"}

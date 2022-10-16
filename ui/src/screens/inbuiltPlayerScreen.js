@@ -20,10 +20,13 @@ import VideoPlayer from "../components/video-player";
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
 import server from "../axios";
+import { Link, useNavigate } from "react-router-dom";
+import { BiArrowBack } from "react-icons/bi";
 
 const InbuiltPlayerScreen = () => {
   const dispatch = useDispatch();
   const { details } = useSelector((state) => state.animeStreamDetails);
+  const navigate = useNavigate();
 
   const { animes: data, loading } = useSelector(
     (state) => state.animeSearchList
@@ -33,7 +36,6 @@ const InbuiltPlayerScreen = () => {
   const urlDetails = useSelector((state) => state.animeEpUrl);
   const { details: anime } = useSelector((state) => state.animeDetails);
 
- 
   const { details: eps_details, loading: eps_loading } = useSelector(
     (state) => state.animeEpisodesDetails
   );
@@ -126,14 +128,38 @@ const InbuiltPlayerScreen = () => {
         {epDetails && anime && (
           <Box w="100%">
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Heading fontSize={"2xl"} fontFamily={"body"}>
-                {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
-                {anime.eng_name ? ` | ${anime.eng_name}` : ""}
-                {anime.title ? `${anime.title}` : ""}
-              </Heading>
-              <Text fontWeight={600} color={"gray.500"} size="sm" ml={2}>
-                {`| Episode ${epDetails?.details?.current_ep}`}
-              </Text>
+              <Box
+                onClick={() => navigate("/anime-details")}
+                alignSelf={"flex-start"}
+                _hover={{
+                  cursor: "pointer",
+                }}
+                display="flex"
+                justifyContent={"center"}
+                alignItems={"center"}
+                mr={6}
+                height={"fit-content"}
+                mt={1}
+              >
+                <BiArrowBack />
+                <Text ml={1}>Back</Text>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  flexDirection: "row",
+                }}
+              >
+                <Heading fontSize={"2xl"} fontFamily={"body"}>
+                  {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
+                  {anime.eng_name ? ` | ${anime.eng_name}` : ""}
+                  {anime.title ? `${anime.title}` : ""}
+                </Heading>
+                <Text fontWeight={600} color={"gray.500"} size="sm" ml={2} mt={1}>
+                  {`| Episode ${epDetails?.details?.current_ep}`}
+                </Text>
+              </Box>
             </Box>
 
             {details && language && epDetails ? (
@@ -173,7 +199,7 @@ const InbuiltPlayerScreen = () => {
               Previous
             </Button>
             <Select
-              placeholder="Language"
+              // placeholder="Language"
               size="md"
               value={language}
               onChange={languageChangeHandler}
