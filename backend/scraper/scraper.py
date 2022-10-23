@@ -334,8 +334,6 @@ class Animepahe(Anime):
         episode_ids = []
         data = self.__get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page})
         episode_ids += [x["session"] for x in data["data"]]
-        if data["last_page"] > page:
-            episode_ids += self.get_episodes(anime_id, page + 1)
 
         return episode_ids
 
