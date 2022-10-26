@@ -6,7 +6,7 @@ import asyncio
 from utils import DB
 import config
 from api import start_api_server
-from multiprocessing import Pipe, Manager
+from multiprocessing import Pipe, Manager, freeze_support
 from video.downloader import DownloadManager
 from video.library import Library
 
@@ -18,6 +18,7 @@ def run_api_server(port: int = 8000):
 
 
 if __name__ == "__main__":
+    freeze_support()
     try:
         logging.basicConfig(stream=stdout, level=logging.ERROR)
         DB.migrate()  # migrate the database
