@@ -20,7 +20,7 @@ from utils import DB
 import logging
 from typing import List, Dict, Any, Tuple
 
-SEGMENT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.joinpath("segments"))
+SEGMENT_DIR = Path(__file__).resolve().parent.parent.joinpath("segments")
 OUTPUT_DIR = config.DEFAULT_DOWNLOAD_LOCATION
 SEGMENT_EXTENSION = ".ts"
 RESUME_EXTENSION = ".resumeinfo.yuk"
@@ -85,14 +85,14 @@ def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
 
 
 def _write_concat_info(segment_count: int, output_file_name: str):
-    print("merging started")
+    logging.info("merging started")
     # Write the concat info needed by ffmpeg to a file.
     with open(os.path.join(SEGMENT_DIR.joinpath(output_file_name), CONCAT_FILE_NAME), "w+") as file:
         for segment_number in range(segment_count):
             f = "file " + f"segment-{segment_number}{SEGMENT_EXTENSION}\n"
             file.write(f)
     _merge_segments(output_file_name)
-    print("Merging completed")
+    logging.info("Merging completed")
 
 
 async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue, decrypt_pipe_input,
@@ -111,11 +111,11 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
                     (resp_data, key, file_name, segment_number, resp.content_length // (perf_counter() - start_time)))
         except asyncio.TimeoutError:
             await download_queue.put(segment_data)
-            print(f"Retrying segment-{segment_number}")
+            logging.info(f"Retrying segment-{segment_number}")
         except Exception as e:
-            print(e)
+            logging.error(e)
             await download_queue.put(segment_data)
-            print(f"Retrying segment-{segment_number}")
+            logging.info(f"Retrying segment-{segment_number}")
         download_queue.task_done()
 
 
@@ -207,12 +207,12 @@ class Downloader:
         if os.path.isfile(resume_file_path):
             with open(resume_file_path) as file:
                 resume_info = _parse_resume_info(file.read())
-            print(f"Resume data found for {self._resume_code}.")
+            logging.info(f"Resume data found for {self._resume_code}.")
         else:
             with open(resume_file_path, "w+"):
                 ...
             resume_info = []
-            print(f"No resume data found for {self._resume_code}")
+            logging.info(f"No resume data found for {self._resume_code}")
 
             # update total_size
             self.library.update(self.file_data["id"], {"total_size": len(stream.segments)})
@@ -250,7 +250,7 @@ class Downloader:
             )
 
         # Start the workers but wrapping the coroutines into tasks.
-        print(f"Starting {self._max_workers} download workers.")
+        logging.info(f"Starting {self._max_workers} download workers.")
         workers = [
             asyncio.create_task(
                 _download_worker(self, download_queue, decrypt_pipe_input, client)
@@ -260,7 +260,7 @@ class Downloader:
         # Wait for the download workers to finish.
         await download_queue.join()
 
-        print("Downloading finished")
+        logging.info("Downloading finished")
 
         # After all the tasks in the download queue are finished,
         # put a None into the decrypt pip to stop the decrypt process.
@@ -500,8 +500,6 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     @classmethod
     async def cancel(cls, task_ids: List[int]):
         cls._check_ids(task_ids)
-        for task_id in task_ids:
-            task = cls._TaskData[task_id]
         await asyncio.gather(*[cls._cancel(task_id) for task_id in task_ids])
 
     @classmethod
