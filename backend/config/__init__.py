@@ -2,6 +2,7 @@ import sys
 import json
 from functools import lru_cache
 from pathlib import Path
+import logging as logger
 
 "----------------------------------------------------------------------------------------------------------------------------------"
 # Server Configurations
@@ -20,7 +21,7 @@ DEFAULT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.jo
 
 CONFIG_JSON_PATH = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.joinpath("config.json"))
 
-DEFAULT_DOWNLOAD_LOCATION: Path = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.parent.joinpath("downloads"))
+DEFAULT_DOWNLOAD_LOCATION: Path = Path(__file__).resolve().parent.parent.parent.joinpath("downloads")
 
 "----------------------------------------------------------------------------------------------------------------------------------"
 
@@ -45,6 +46,8 @@ def parse_config_json(file_path: str):
                 DEFAULT_DOWNLOAD_LOCATION = Path(data["download_location"])
     except FileNotFoundError:
         ...
+    except PermissionError as e:
+        logger.error(e)
 
 
 parse_config_json(CONFIG_JSON_PATH)
