@@ -5,16 +5,21 @@ from starlette.middleware.base import RequestResponseEndpoint
 from requests import ConnectionError
 from errors.http_error import bad_request_400
 from json import JSONDecodeError
+from logging import info
 
 
 class requestValidator(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         try:
             if request.method == "POST":
-                if request.headers.get("content-type", None) != "application/json":
-                    return await bad_request_400(request, msg="Invalid content type")
-                request.state.body = await request.json()
+                if request.headers.get("content-type", None) == "application/json":
+                    request.state.body = await request.json()
             return await call_next(request)
         except JSONDecodeError as msg:
-            print(msg)
+            info(msg)
             return await bad_request_400(request, msg="Malformed body: Invalid JSON")
+
+        except RuntimeError as exc:
+            if str(exc) == "No response returned." and await request.is_disconnected():
+                return Response(status_code=204)
+            raise
