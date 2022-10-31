@@ -46,8 +46,8 @@ def _merge_segments(output_file_name):
     seg_output_dir: Path = SEGMENT_DIR.joinpath(output_file_name)
     input_file: Path = seg_output_dir.joinpath(CONCAT_FILE_NAME)
     output_file: Path = OUTPUT_DIR.joinpath(f"{output_file_name}{OUTPUT_EXTENSION}")
-    if not Path.exists(output_file):
-        os.makedirs(output_file)
+    if not Path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
     cmd = f"ffmpeg -f concat -safe 0 -i {input_file} -c copy {output_file} -hide_banner -loglevel warning"
 
     subprocess.run(
