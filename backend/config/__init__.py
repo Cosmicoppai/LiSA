@@ -31,7 +31,7 @@ DEFAULT_DOWNLOAD_LOCATION: Path = Path(__file__).resolve().parent.parent.parent.
 
 DEFAULT_SQL_DIR: Path = Path(__file__).parent.parent.joinpath("sql_queries")
 
-DB_NAME: str = "lisa"
+DB_PATH: str = str(Path(__file__).parent.parent.joinpath("lisa"))  # database path
 
 "----------------------------------------------------------------------------------------------------------------------------------"
 

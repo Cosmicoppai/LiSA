@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 from sys import exit as EXIT
-from config import DEFAULT_SQL_DIR, DB_NAME
+from config import DEFAULT_SQL_DIR, DB_PATH
 from typing import Dict, List
 
 
@@ -15,7 +15,7 @@ class MetaDB(type):
 
 
 class DB(metaclass=MetaDB):
-    connection: sqlite3.Connection = sqlite3.connect(DB_NAME, check_same_thread=False)
+    connection: sqlite3.Connection = sqlite3.connect(DB_PATH, check_same_thread=False)
     connection.row_factory = sqlite3.Row
     _highest_ids: Dict[str, int] = {}
 
