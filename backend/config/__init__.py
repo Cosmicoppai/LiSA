@@ -17,9 +17,9 @@ SOCKET_SERVER_ADDRESS: str
 
 # Default directories and file locations
 
-DEFAULT_DIR = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.parent.joinpath("defaults/"))
+DEFAULT_DIR = Path(__file__).resolve().parent.parent.joinpath("defaults/")
 
-CONFIG_JSON_PATH = getattr(sys, '_MEIPASS', Path(__file__).resolve().parent.joinpath("config.json"))
+CONFIG_JSON_PATH = Path(__file__).resolve().parent.joinpath("config.json")
 
 DEFAULT_DOWNLOAD_LOCATION: Path = Path(__file__).resolve().parent.parent.parent.joinpath("downloads")
 
