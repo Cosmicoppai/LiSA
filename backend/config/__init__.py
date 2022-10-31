@@ -1,8 +1,10 @@
+import os
 import sys
 import json
 from functools import lru_cache
 from pathlib import Path
 import logging as logger
+from platform import system
 
 "----------------------------------------------------------------------------------------------------------------------------------"
 # Server Configurations
@@ -35,6 +37,10 @@ DB_PATH: str = str(Path(__file__).parent.parent.joinpath("lisa"))  # database pa
 
 "----------------------------------------------------------------------------------------------------------------------------------"
 
+# ffmpeg extensions
+
+_ffmpeg_exts = {"windows": "ffmpeg.exe", "linux": "ffmpeg", "darwin": "ffmpeg"}
+
 
 @lru_cache
 def parse_config_json(file_path: str):
@@ -48,6 +54,11 @@ def parse_config_json(file_path: str):
         ...
     except PermissionError as e:
         logger.error(e)
+
+
+def update_environ():
+    ffmpeg_path = Path(__file__).resolve().parent.parent.joinpath(_ffmpeg_exts[system().lower()])
+    os.environ["ffmpeg"] = ffmpeg_path
 
 
 parse_config_json(CONFIG_JSON_PATH)
