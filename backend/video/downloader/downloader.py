@@ -43,15 +43,17 @@ def _write_resume_info(file_name, segment_number):
 
 def _merge_segments(output_file_name):
     # Run the command to merge the downloaded files.
-    output_dir: Path = SEGMENT_DIR.joinpath(output_file_name)
-    input_file: Path = output_dir.joinpath(CONCAT_FILE_NAME)
+    seg_output_dir: Path = SEGMENT_DIR.joinpath(output_file_name)
+    input_file: Path = seg_output_dir.joinpath(CONCAT_FILE_NAME)
     output_file: Path = OUTPUT_DIR.joinpath(f"{output_file_name}{OUTPUT_EXTENSION}")
+    if not Path.exists(output_file):
+        os.makedirs(output_file)
     cmd = f"ffmpeg -f concat -safe 0 -i {input_file} -c copy {output_file} -hide_banner -loglevel warning"
 
     subprocess.run(
         cmd, check=True
     )
-    _remove_segments(output_dir)
+    _remove_segments(seg_output_dir)
 
 
 def _remove_segments(segment_folder: str):
