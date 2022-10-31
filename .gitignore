@@ -21,3 +21,4 @@ backend/video/segments
 downloads
 
 backend/lisa
+*.exe
