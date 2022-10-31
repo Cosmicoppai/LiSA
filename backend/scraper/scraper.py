@@ -50,9 +50,9 @@ class Animepahe(Anime):
     site_url: str = "https://animepahe.com"
     api_url: str = "https://animepahe.com/api"
     manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
-    manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("uwu.m3u8"))
+    manifest_location = Path(__file__).resolve().parent.parent.joinpath("uwu.m3u8")
     manifest_filename = "uwu.m3u8"
-    master_manifest_location = getattr(sys, '_MEIPASS', Path().resolve().parent.joinpath("master.m3u8"))
+    master_manifest_location = Path(__file__).resolve().parent.parent.joinpath("master.m3u8")
     master_manifest_filename = "uwu.m3u8"
 
     @staticmethod
