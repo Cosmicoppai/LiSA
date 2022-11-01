@@ -4,24 +4,22 @@ import aiohttp
 import asyncio
 import m3u8
 import os
-import shutil
 import requests
 from Crypto.Cipher import AES
 from multiprocessing import connection, Process, Pipe
 import subprocess
 from scraper import Animepahe, Anime
-import sys
 from pathlib import Path
-import config
+from config import FileConfig
 from .msg_system import MsgSystem
 from video.library import DBLibrary, Library
 from time import perf_counter
-from utils import DB
+from utils import DB, remove_folder
 import logging
 from typing import List, Dict, Any, Tuple
 
 SEGMENT_DIR = Path(__file__).resolve().parent.parent.joinpath("segments")
-OUTPUT_DIR = config.DEFAULT_DOWNLOAD_LOCATION
+OUTPUT_DIR = FileConfig.DEFAULT_DOWNLOAD_LOCATION
 SEGMENT_EXTENSION = ".ts"
 RESUME_EXTENSION = ".resumeinfo.yuk"
 OUTPUT_EXTENSION = ".mp4"
@@ -53,12 +51,7 @@ def _merge_segments(output_file_name):
     subprocess.run(
         cmd, check=True
     )
-    _remove_segments(seg_output_dir)
-
-
-def _remove_segments(segment_folder: str):
-    if os.path.isdir(segment_folder):
-        shutil.rmtree(segment_folder)
+    remove_folder(seg_output_dir)  # remove segments
 
 
 def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
@@ -514,14 +507,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         DBLibrary.delete(task_id)
 
         # remove related files
-        cls.folder_cleanup(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
-
-    @staticmethod
-    def folder_cleanup(location: str):
-        try:
-            shutil.rmtree(location)
-        except FileNotFoundError or NotADirectoryError:
-            ...
+        remove_folder(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
 
 
 class Status:

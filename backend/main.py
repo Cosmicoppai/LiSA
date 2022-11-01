@@ -4,7 +4,7 @@ from threading import Thread
 from sys import stdout
 import asyncio
 from utils import DB
-import config
+from config import ServerConfig, parse_config_json, update_environ, FileConfig
 from api import start_api_server
 from multiprocessing import Pipe, Manager, freeze_support
 from video.downloader import DownloadManager
@@ -12,8 +12,8 @@ from video.library import Library
 
 
 def run_api_server(port: int = 8000):
-    config.API_SERVER_ADDRESS = f"http://localhost:{port}"
-    print(f"server started on port: {port} \n You can access API SERVER on {config.API_SERVER_ADDRESS}")
+    ServerConfig.API_SERVER_ADDRESS = f"http://localhost:{port}"
+    print(f"server started on port: {port} \n You can access API SERVER on {ServerConfig.API_SERVER_ADDRESS}")
     start_api_server(port=port)
 
 
@@ -25,6 +25,12 @@ if __name__ == "__main__":
         DB()  # initialize the highest id
 
         Library.data = Manager().dict()  # update the dict into manager dict
+
+        """
+        update configs and environment variables
+        """
+        parse_config_json(FileConfig.CONFIG_JSON_PATH)
+        update_environ()
 
         t1 = Thread(target=run_api_server, args=(6969, ))
         t1.daemon = True

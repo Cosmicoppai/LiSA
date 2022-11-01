@@ -11,7 +11,7 @@ from errors.http_error import not_found_404, bad_request_400, internal_server_50
 from video.downloader import DownloadManager
 from scraper import Animepahe, MyAL
 from video.streamer import Stream
-import config
+from config import ServerConfig, FileConfig
 from bs4 import BeautifulSoup
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
@@ -24,6 +24,7 @@ from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
 from utils.init_db import DB
 from setup import _setup
+from utils import remove_file
 
 
 async def search(request: Request):
@@ -227,9 +228,22 @@ async def library(request: Request):
     Args:
         request: Request object consist of client request data
 
-    Returns: JSONResponse Consist of all the files in the library
+    Returns: JSONResponse Consist of all the files in the library for GET request
 
     """
+    if request.method == "DELETE":
+        try:
+            _id = request.query_params["id"]
+            if DBLibrary.data[_id]["status"] != "downloaded":  # if file hasn't been downloaded yet raise key-error
+                raise KeyError
+
+            file_location = DBLibrary.data[_id]["file_location"]
+            DBLibrary.delete(_id)
+            remove_file(file_location)
+            return Response(status_code=204)
+        except KeyError or TypeError:
+            return await bad_request_400(request, msg="missing or invalid query parameter: 'id'")
+
     return JSONResponse(DBLibrary().get_all())
 
 
@@ -306,7 +320,7 @@ async def get_manifest(request: Request):
         response, uwu_root_domain, _ = await Animepahe().get_manifest_file(kwik_url)
 
         with open(Animepahe.manifest_location, "w+") as f:
-            f.write(response.replace(uwu_root_domain, f"{config.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
+            f.write(response.replace(uwu_root_domain, f"{ServerConfig.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
 
         return FileResponse(Animepahe.manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.manifest_filename)
     except ValueError as err_msg:
@@ -360,12 +374,12 @@ routes = [
     Route("/download/pause", endpoint=pause_download, methods=["POST"]),
     Route("/download/resume", endpoint=resume_download, methods=["POST"]),
     Route("/download/cancel", endpoint=cancel_download, methods=["POST"]),
-    Route("/library", endpoint=library, methods=["GET"]),
+    Route("/library", endpoint=library, methods=["GET", "DELETE"]),
     Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route('/proxy', endpoint=proxy, methods=["GET"]),
     Route("/setup", endpoint=setup, methods=["POST"]),
-    Mount('/default', app=StaticFiles(directory=config.DEFAULT_DIR, check_dir=True), name="static"),
+    Mount('/default', app=StaticFiles(directory=FileConfig.DEFAULT_DIR, check_dir=True), name="static"),
 ]
 
 exception_handlers = {

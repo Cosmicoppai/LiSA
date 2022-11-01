@@ -4,7 +4,7 @@ import json
 from websockets.legacy.server import WebSocketServerProtocol
 from websockets.exceptions import ConnectionClosed
 from json import JSONDecodeError
-import config
+from config import ServerConfig
 from multiprocessing.connection import Connection
 from typing import Any, Dict
 from video.library import DBLibrary
@@ -26,12 +26,12 @@ class MsgSystem(metaclass=MsgSystemMeta):
     in_pipe: Connection = None
 
     def __init__(self, port: int = 9000):
-        config.SOCKET_SERVER_ADDRESS = f"ws://localhost:{port}"
+        ServerConfig.SOCKET_SERVER_ADDRESS = f"ws://localhost:{port}"
         self.ws_port = port
 
     async def run_server(self):
         async with websockets.serve(MsgSystem._server_handler, "", self.ws_port):
-            print(f"Socket server started on port: {self.ws_port}\n You can access SOCKET SERVER on {config.SOCKET_SERVER_ADDRESS}")
+            print(f"Socket server started on port: {self.ws_port}\n You can access SOCKET SERVER on {ServerConfig.SOCKET_SERVER_ADDRESS}")
             await asyncio.Future()  # run forever
             self.in_pipe.send(None)  # cancel send_updates task
             self.in_pipe.close()

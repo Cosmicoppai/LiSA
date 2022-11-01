@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 from sys import exit as EXIT
-from config import DEFAULT_SQL_DIR, DB_PATH
+from config import DBConfig
 from typing import Dict, List
 
 
@@ -15,7 +15,7 @@ class MetaDB(type):
 
 
 class DB(metaclass=MetaDB):
-    connection: sqlite3.Connection = sqlite3.connect(DB_PATH, check_same_thread=False)
+    connection: sqlite3.Connection = sqlite3.connect(DBConfig.DB_PATH, check_same_thread=False)
     connection.row_factory = sqlite3.Row
     _highest_ids: Dict[str, int] = {}
 
@@ -29,7 +29,7 @@ class DB(metaclass=MetaDB):
             DB._highest_ids[table_name] = _highestId
 
     @classmethod
-    def migrate(cls, file_: str = DEFAULT_SQL_DIR.joinpath("progress_tracker.sql").__str__()):
+    def migrate(cls, file_: str = DBConfig.DEFAULT_SQL_DIR.joinpath("progress_tracker.sql").__str__()):
         cur = cls.connection.cursor()
         with open(file_) as file:
             try:

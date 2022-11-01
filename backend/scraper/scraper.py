@@ -3,7 +3,7 @@ import requests
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple, Any
-import config
+from config import ServerConfig
 from utils.headers import get_headers
 import re
 import sys
@@ -111,7 +111,7 @@ class Animepahe(Anime):
 
             if page_no == "1":
                 description = self.get_anime_description(anime_session)
-                episodes["recommendation"] = f"{config.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
+                episodes["recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
 
             episodes["total_page"] = episode_data.get("last_page", -1)
             if episode_data.get("current_page") <= episode_data.get("last_page", -1):
@@ -135,7 +135,7 @@ class Animepahe(Anime):
                 for ep in episode_session:
                     episodes["ep_details"].append(
                         {ep["episode"]: {
-                            "stream_detail": f'{config.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
+                            "stream_detail": f'{ServerConfig.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
                             "snapshot": ep["snapshot"], "duration": ep["duration"]}})
 
                 if page_no == "1":
@@ -248,7 +248,7 @@ class Animepahe(Anime):
                     stream_dt (dict): {'quality': stream url (str)}
                 """
                 aud, kwik_url = quality_data["audio"], quality_data["kwik"]
-                resp[aud] = resp.get(aud, f"{config.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{config.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{quality}" + ","
+                resp[aud] = resp.get(aud, f"{ServerConfig.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{ServerConfig.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{quality}" + ","
 
         return resp
 
@@ -290,7 +290,7 @@ class Animepahe(Anime):
             season, year = self._strip_split(data[2])
 
             session = self._strip_split(col_2.find("a", href=True)["href"], strip_chr="/", split_chr="/")[1]
-            poster = col_2.find("img").get("data-src", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}").replace(".th.jpg", ".jpg")
+            poster = col_2.find("img").get("data-src", f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}").replace(".th.jpg", ".jpg")
 
             rec_list.append({"jp_name": title,
                              "no_of_episodes": ep,
@@ -301,7 +301,7 @@ class Animepahe(Anime):
                              "score": 0,
                              "session": session,
                              "poster": poster,
-                             "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={session}"
+                             "ep_details": f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={session}"
                              })
 
         return rec_list
@@ -324,8 +324,8 @@ class Animepahe(Anime):
                 "year": anime_detail.get("year", None),
                 "score": anime_detail.get("score", 0),
                 "session": anime_detail.get("session", None),
-                "poster": anime_detail.get("poster", f"{config.API_SERVER_ADDRESS}/default/{self.default_poster}"),
-                "ep_details": f"{config.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
+                "poster": anime_detail.get("poster", f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}"),
+                "ep_details": f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
             })
 
         return search_response
@@ -491,19 +491,19 @@ class MyAL:
                 rank = "na"
             top_anime.append({"rank": rank, "img_url": imgs[idx], "title": title[idx].text, "anime_type": a_type[idx],
                               "episodes": episodes[idx].replace('eps', ''), "score": score[idx * 2].text,
-                              "anime_detail": f'{config.API_SERVER_ADDRESS}/search?anime={title[idx].text}&total_res=1'})
+                              "anime_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?anime={title[idx].text}&total_res=1'})
 
         response: Dict[str, Any] = {"data": top_anime}
 
         try:
             next_top = bs_top.find("a", {"class": "next"}).get("href")
-            response["next_top"] = f"{config.API_SERVER_ADDRESS}/top_anime{next_top}"
+            response["next_top"] = f"{ServerConfig.API_SERVER_ADDRESS}/top_anime{next_top}"
         except AttributeError:
             response["next_top"] = None
 
         try:
             prev_top = bs_top.find("a", {"class": "prev"}).get("href")
-            response["prev_top"] = f"{config.API_SERVER_ADDRESS}/top_anime{prev_top}"
+            response["prev_top"] = f"{ServerConfig.API_SERVER_ADDRESS}/top_anime{prev_top}"
         except AttributeError:
             response["prev_top"] = None
 

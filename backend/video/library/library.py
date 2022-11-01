@@ -8,7 +8,6 @@ Example: {file_name: {total_size: int, location: str}}
 from abc import ABC, abstractmethod
 from typing import Dict, List, Any
 import json
-import sys
 from pathlib import Path
 from utils import DB
 from sqlite3 import IntegrityError
@@ -92,14 +91,11 @@ class DBLibrary(Library):
 
     @classmethod
     def delete(cls, _id: int) -> None:
+        del cls.data[_id]
         cur = DB.connection.cursor()
         cur.execute(f"DELETE FROM {cls.table_name} WHERE id=?", [_id, ])
         DB.connection.commit()
         cur.close()
-        try:
-            del cls.data[_id]
-        except KeyError:
-            ...
 
     @staticmethod
     def __query_builder(data: Dict[str, Any], typ: str = "insert") -> (str, list):
