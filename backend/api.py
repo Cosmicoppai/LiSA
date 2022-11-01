@@ -232,7 +232,7 @@ async def library(request: Request):
     """
     if request.method == "DELETE":
         try:
-            _id = request.query_params["id"]
+            _id = int(request.query_params["id"])
             if DBLibrary.data[_id]["status"] != "downloaded":  # if file hasn't been downloaded yet raise key-error
                 raise KeyError
 
