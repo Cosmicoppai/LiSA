@@ -39,7 +39,7 @@ def _write_resume_info(file_name, segment_number):
         file.write(f"SEGMENT {segment_number}\n")
 
 
-def _merge_segments(output_file_name):
+def _merge_segments(output_file_name) -> int:  # will return length of output_file
     # Run the command to merge the downloaded files.
     seg_output_dir: Path = SEGMENT_DIR.joinpath(output_file_name)
     input_file: Path = seg_output_dir.joinpath(CONCAT_FILE_NAME)
@@ -52,6 +52,8 @@ def _merge_segments(output_file_name):
         cmd, check=True
     )
     remove_folder(seg_output_dir)  # remove segments
+    logging.info("Merging completed")
+    return os.path.getsize(output_file)
 
 
 def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
@@ -79,15 +81,14 @@ def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
         progress_tracker.increment_done(speed)
 
 
-def _write_concat_info(segment_count: int, output_file_name: str):
+def _write_concat_info(segment_count: int, output_file_name: str) -> int:
     logging.info("merging started")
     # Write the concat info needed by ffmpeg to a file.
     with open(os.path.join(SEGMENT_DIR.joinpath(output_file_name), CONCAT_FILE_NAME), "w+") as file:
         for segment_number in range(segment_count):
             f = "file " + f"segment-{segment_number}{SEGMENT_EXTENSION}\n"
             file.write(f)
-    _merge_segments(output_file_name)
-    logging.info("Merging completed")
+    return _merge_segments(output_file_name)
 
 
 async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue, decrypt_pipe_input,
@@ -272,10 +273,11 @@ class Downloader:
         decrypt_process.join()
 
         # Write the concat info and invoke ffmpeg to concatenate the files.
-        _write_concat_info(
+        file_size = _write_concat_info(
             len(stream.segments), self._output_file_name
         )
-        self.library.update(self.file_data["id"], {"status": "downloaded"})
+
+        self.library.update(self.file_data["id"], {"status": "downloaded", "total_size": file_size})
 
     async def get_key(self, client, segment):
         if self.key:
