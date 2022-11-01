@@ -23,7 +23,6 @@ from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
 from utils.init_db import DB
-from setup import _setup
 from utils import remove_file
 
 
@@ -355,14 +354,6 @@ async def get_recommendation(request: Request):
         return service_unavailable_503(request, msg="Try Again After Sometime")
 
 
-async def setup(request: Request):
-    try:
-        _setup()
-        return Response(content="setup successful")
-    except Exception as e:
-        return await internal_server_500(request, msg=str(e))
-
-
 routes = [
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
@@ -378,7 +369,6 @@ routes = [
     Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route('/proxy', endpoint=proxy, methods=["GET"]),
-    Route("/setup", endpoint=setup, methods=["POST"]),
     Mount('/default', app=StaticFiles(directory=FileConfig.DEFAULT_DIR, check_dir=True), name="static"),
 ]
 
