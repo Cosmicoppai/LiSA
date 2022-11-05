@@ -211,7 +211,7 @@ class Downloader:
             logging.info(f"No resume data found for {self._resume_code}")
 
             # update total_size
-            self.library.update(self.file_data["id"], {"total_size": len(stream.segments)})
+            self.library.update(self.file_data["id"], {"total_size": len(stream.segments), "status": "started"})
 
         assert len(stream.segments) != 0
 
@@ -337,7 +337,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     _TaskData : {id: {"process": Process Object, "status": str, task_data: List[str], "file_name": str}}
     """
 
-    def __init__(self, no_of_workers: int = 4):
+    def __init__(self, no_of_workers: int = 1):
         """
         __init__ function will populate the active tasks from database
         """
@@ -383,12 +383,10 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                 cls._TaskData[task_id]["status"] = Status.started
                 while p.is_alive():
                     await asyncio.sleep(10)
-                p.close()
 
                 if p.exitcode == 0:  # if task ended successfully
                     del cls._TaskData[file_data["id"]]  # remove task_data
 
-            await cls.DownloadTaskQueue.task_done()
 
     @classmethod
     async def _schedule_pending_downloads(cls):
