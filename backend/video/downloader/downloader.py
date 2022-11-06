@@ -123,17 +123,18 @@ class ProgressTracker:
         self.file_data = file_data
         self.file_data["total_size"] = self.total
         self.file_data["downloaded"] = 0
-        self.send_status("started")
+        self.file_data["status"] = "started"
+        self.send_update()
 
     def increment_done(self, speed: int = 0) -> None:
         self.done += 1
         self.file_data["downloaded"] = self.done
         self.file_data["speed"] = speed
-        self.send_status()
+        self.send_update()
 
-    def send_status(self, _typ: str = "file_update") -> None:
+    def send_update(self) -> None:
         if self.msg_pipe_input:  # if pipe exists, pass the msg
-            msg = {"type": _typ, "data": self.file_data}
+            msg = {"data": self.file_data}
             self.msg_pipe_input.send(msg)
 
 
@@ -400,7 +401,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
             try:
                 with open(manifest_file_path, 'r') as manifest_file:
-                    file_data = {"id": row["id"], "file_name": row["file_name"], "total_size": row["total_size"],
+                    file_data = {"id": row["id"], "status": row["status"], "file_name": row["file_name"], "total_size": row["total_size"],
                                  "downloaded": len(_parse_resume_info(row["manifest_file_path"]))}
                     header = Anime.get_scraper(row.get("site", "animepahe")).manifest_header
                     tasks.append(cls._schedule_download(manifest_file.read(), row["file_name"], header, file_data))
@@ -437,7 +438,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
             file_data = cls.create_data(file_name, manifest_file_path.__str__())
 
         if MsgSystem.in_pipe:
-            MsgSystem.in_pipe.send({"type": "scheduled", "data": file_data})  # send msg to update about the status
+            MsgSystem.in_pipe.send({"data": file_data})  # send msg to update about the status
 
         # add task_data and metadata for tracking and scheduling
         cls._TaskData[file_data["id"]] = {"status": Status.scheduled,
@@ -457,7 +458,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                           "manifest_file_path": manifest_file_path,
                           "file_location": file_location.__str__()})
 
-        return {"id": _id, "file_name": file_name, "total_size": None, "downloaded": None}
+        return {"id": _id, "status": "scheduled", "file_name": file_name, "total_size": None, "downloaded": None}
 
     @classmethod
     async def pause(cls, task_ids: List[int]):
