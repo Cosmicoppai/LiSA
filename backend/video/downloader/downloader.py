@@ -337,7 +337,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     _TaskData : {id: {"process": Process Object, "status": str, task_data: List[str], "file_name": str}}
     """
 
-    def __init__(self, no_of_workers: int = 1):
+    def __init__(self, no_of_workers: int = 4):
         """
         __init__ function will populate the active tasks from database
         """
@@ -386,7 +386,6 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
                 if p.exitcode == 0:  # if task ended successfully
                     del cls._TaskData[file_data["id"]]  # remove task_data
-
 
     @classmethod
     async def _schedule_pending_downloads(cls):
