@@ -389,7 +389,8 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def _schedule_pending_downloads(cls):
-        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))
+        await cls.create_task_from_db(DBLibrary.get({"status": "started"}))  # re-start already started download
+        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))  # schedule remaining pending downloads
 
     @classmethod
     async def create_task_from_db(cls, _tasks):
@@ -500,13 +501,19 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     async def _cancel(cls, task_id: int):
         task = cls._TaskData[task_id]
 
-        task["process"].kill()  # kill the process
+        _process: Process = task.get("process", None)
+
+        if _process:
+            _process.kill()  # kill the process
 
         # remove record from DB
         DBLibrary.delete(task_id)
 
         # remove related files
         remove_folder(SEGMENT_DIR.joinpath(cls._TaskData[task_id]["file_name"]))
+
+        # remove from cls._TaskData
+        del cls._TaskData[task_id]
 
 
 class Status:
