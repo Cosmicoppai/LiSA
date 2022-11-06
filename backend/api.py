@@ -216,7 +216,7 @@ async def cancel_download(request: Request):
             return await bad_request_400(request, msg="download id not present")
 
         await DownloadManager.cancel(task_ids)
-        return JSONResponse({"msg": "sll tasks are successfully cancelled"})
+        return JSONResponse({"msg": "all tasks are successfully cancelled"})
     except KeyError:
         return await bad_request_400(request, msg="One or more ids are invalid")
 
@@ -233,7 +233,7 @@ async def library(request: Request):
     if request.method == "DELETE":
         try:
             _id = int(request.query_params["id"])
-            if DBLibrary.data[_id]["status"] != "downloaded":  # if file hasn't been downloaded yet raise key-error
+            if DBLibrary.data[_id]["status"] != "downloaded":  # if file hasn't been downloaded, raise key-error
                 raise KeyError
 
             file_location = DBLibrary.data[_id]["file_location"]
