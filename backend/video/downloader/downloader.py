@@ -116,26 +116,22 @@ async def _download_worker(downloader: Downloader, download_queue: asyncio.Queue
 
 
 class ProgressTracker:
-    def __init__(self, file_data: dict, total: int, done: int = 0, msg_pipe_input: connection.Connection = None):
+    def __init__(self, file_data: dict, done: int = 0, msg_pipe_input: connection.Connection = None):
         self.msg_pipe_input = msg_pipe_input
-        self.total = total
         self.done = done
         self.file_data = file_data
-        self.file_data["total_size"] = self.total
-        self.file_data["downloaded"] = 0
-        self.file_data["status"] = "started"
         self.send_update()
 
     def increment_done(self, speed: int = 0) -> None:
         self.done += 1
         self.file_data["downloaded"] = self.done
         self.file_data["speed"] = speed
-        self.send_update()
+        if self.done != self.file_data["total_size"]:
+            self.send_update()
 
     def send_update(self) -> None:
         if self.msg_pipe_input:  # if pipe exists, pass the msg
-            msg = {"data": self.file_data}
-            self.msg_pipe_input.send(msg)
+            self.msg_pipe_input.send({"data": self.file_data})
 
 
 class Downloader:
@@ -211,8 +207,12 @@ class Downloader:
             resume_info = []
             logging.info(f"No resume data found for {self._resume_code}")
 
-            # update total_size
-            self.library.update(self.file_data["id"], {"total_size": len(stream.segments), "status": "started"})
+            # update data
+            self.file_data["total_size"] = len(stream.segments)
+            self.file_data["downloaded"] = 0
+            self.file_data["status"] = "started"
+            self.file_data["speed"] = 0
+            self.library.update(self.file_data["id"], {"total_size": self.file_data["total_size"], "status": self.file_data["status"]})
 
         assert len(stream.segments) != 0
 
@@ -222,8 +222,7 @@ class Downloader:
         self._max_workers = min(self._max_workers,
                                 len(segment_list))  # create max workers according to remaining segments
 
-        progress_tracker = ProgressTracker(self.file_data, len(stream.segments), len(resume_info),
-                                           self.msg_system_in_pipe)
+        progress_tracker = ProgressTracker(self.file_data, len(resume_info), self.msg_system_in_pipe)
 
         # Start the process that will decrypt and write the files to disk.
         decrypt_process = Process(
@@ -278,7 +277,10 @@ class Downloader:
             len(stream.segments), self._output_file_name
         )
 
-        self.library.update(self.file_data["id"], {"status": "downloaded", "total_size": file_size})
+        self.file_data["downloaded"] = len(stream.segments)
+        self.file_data["status"] = "downloaded"
+        self.library.update(self.file_data["id"], {"status": self.file_data["status"], "total_size": file_size})
+        self.msg_system_in_pipe.send({"data": self.file_data})
 
     async def get_key(self, client, segment):
         if self.key:
