@@ -15,20 +15,49 @@ import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { playVideoExternal } from "../actions/animeActions";
 
-const ExternalPlayerPopup = ({ isOpen, onOpen, onClose, language }) => {
+const ExternalPlayerPopup = ({
+  isOpen,
+  onOpen,
+  onClose,
+  language,
+  historyPlay,
+  playId,
+}) => {
   const dispatch = useDispatch();
 
   const { error: externalError, loading: externalLoading } = useSelector(
     (state) => state.animeStreamExternal
   );
   const { details } = useSelector((state) => state.animeStreamDetails);
-
-  const playHandler = (player) => {
+  console.log(externalError);
+  const playHandler = async (player) => {
     console.log(player);
-    if (details) {
-      dispatch(playVideoExternal(details[language], player));
+    console.log(details);
 
-      onClose();
+    try {
+      if (historyPlay) {
+        console.log(playId);
+        await dispatch(
+          playVideoExternal({
+            id: playId,
+            player,
+          })
+        );
+        onClose();
+
+      } else {
+        if (details) {
+          await dispatch(
+            playVideoExternal({
+              url: details[language],
+              player,
+            })
+          );
+          onClose();
+        }
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 

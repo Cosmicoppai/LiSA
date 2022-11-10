@@ -4,7 +4,6 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import {
   animeCurrentEpReducer,
   animeDetailsReducer,
-  animeDownloadReducer,
   animeEpisodesReducer,
   animeEpUrlReducer,
   animeExploreDetailsReducer,
@@ -13,6 +12,7 @@ import {
   animeStreamExternalReducer,
   recommendationsReducer,
 } from "./reducers/animeReducers";
+import { animeDownloadReducer } from "./reducers/downloadReducers";
 
 const reducer = combineReducers({
   animeSearchList: animeSearchListReducer,

@@ -14,7 +14,8 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 
 import React, { useState } from "react";
-import { downloadVideo, playVideoExternal } from "../actions/animeActions";
+import {  playVideoExternal } from "../actions/animeActions";
+import { downloadVideo } from "../actions/downloadActions";
 
 const EpPopover = ({ isOpen, onOpen, onClose }) => {
   const dispatch = useDispatch();

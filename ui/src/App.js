@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
@@ -10,21 +10,41 @@ import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import ExploreScreen from "./screens/exploreScreen";
 import VideoPlayer from "./components/video-player";
+import { SocketContext } from "./socket";
 
 // const { app } = window.require("@electron/remote");
 
 function App() {
+  const client = useContext(SocketContext);
+
+  useEffect(() => {
+    if (!client) return;
+    console.log(client)
+    client.onopen = () => {
+      console.log("WebSocket Client Connected");
+      client.send(JSON.stringify({ type: "connect" }));
+
+    };
+  }, [client]);
+
   return (
     <BrowserRouter>
       <Grid
         templateColumns="repeat(1, 0.04fr 1fr)"
-        
         w={"100%"}
         h={"100%"}
         overflow={"hidden"}
-
       >
-        <GridItem w="100%" h={"100vh"} maxWidth={"70px"} sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
+        <GridItem
+          w="100%"
+          h={"100vh"}
+          maxWidth={"70px"}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
           <Navbar />
         </GridItem>
         <GridItem

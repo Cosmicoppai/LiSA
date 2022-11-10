@@ -7,21 +7,29 @@ import {
   Flex,
   Badge,
   Spacer,
+  useToast,
 } from "@chakra-ui/react";
 import { AiFillStar } from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addAnimeDetails } from "../actions/animeActions";
-
-export default function Card({ data }) {
-  console.log(data);
+export default function Card({ data, query }) {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const dispatch = useDispatch();
 
   const exploreCardHandler = () => {
-    dispatch(addAnimeDetails(data));
-    navigate("/anime-details");
+    if (query !== "upcoming") {
+      dispatch(addAnimeDetails(data));
+      navigate("/anime-details");
+    }else{
+      toast({
+        title: "Anime has not been aired yet! ❤️",
+        status: "error",
+        duration: 2000,
+      });
+    }
   };
   return (
     <Box
@@ -116,6 +124,7 @@ export default function Card({ data }) {
             fontWeight={500}
             textAlign={"left"}
             alignSelf={"flex-start"}
+            noOfLines={2}
           >
             {data.title}
           </Heading>

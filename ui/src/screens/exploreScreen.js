@@ -49,7 +49,6 @@ const ExploreScreen = () => {
           <Spacer />
           <Select
             onChange={filterChangeHandler}
-            placeholder="Select option"
             maxWidth={"150px"}
             icon={<AiFillFilter />}
             value={query}
@@ -76,7 +75,7 @@ const ExploreScreen = () => {
         >
           {details
             ? details?.data?.map((anime) => {
-                return <Card data={anime} />;
+                return <Card data={anime} query={query} />;
               })
             : Array(30)
                 .fill(0)

@@ -9,7 +9,7 @@ import {
   Heading,
   Skeleton,
 } from "@chakra-ui/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addCurrentEp,
@@ -25,7 +25,9 @@ import { BiArrowBack } from "react-icons/bi";
 
 const InbuiltPlayerScreen = () => {
   const dispatch = useDispatch();
-  const { details } = useSelector((state) => state.animeStreamDetails);
+  const { details, loading: streamLoading } = useSelector(
+    (state) => state.animeStreamDetails
+  );
   const navigate = useNavigate();
 
   const { animes: data, loading } = useSelector(
@@ -41,8 +43,13 @@ const InbuiltPlayerScreen = () => {
   );
 
   const [language, setLanguage] = useState("jpn");
+  const [qualityOptions, setQualityOptions] = useState([]);
+  const [test, setTest] = useState({});
   const [prevTime, setPrevTime] = useState(null);
   const [player, setPlayer] = useState(undefined);
+  const [toogleRefresh, setToogleRefresh] = useState(
+    Math.floor(Math.random() * 100000)
+  );
 
   const languageChangeHandler = (e) => {
     setPrevTime(player.currentTime());
@@ -56,9 +63,11 @@ const InbuiltPlayerScreen = () => {
       dispatch(addEpisodesDetails({ ...data, current_ep: ep_no + 1 }));
     }
   };
-  let current_page_eps = eps_details.ep_details;
+  let current_page_eps = eps_details?.ep_details;
 
   const nextEpHandler = () => {
+    setToogleRefresh(null);
+
     if (
       ep_no == Object.keys(current_page_eps[current_page_eps.length - 1])[0]
     ) {
@@ -86,6 +95,8 @@ const InbuiltPlayerScreen = () => {
         })
       );
       console.log(item);
+
+      setToogleRefresh(Math.floor(Math.random() * 100000));
     }
   };
   const prevEpHandler = () => {
@@ -115,6 +126,19 @@ const InbuiltPlayerScreen = () => {
       );
     }
   };
+
+  useEffect(() => {
+    if (!details || !player) return;
+    if (!details[language]) return;
+    player.src({
+      src: details[language],
+      type: "application/x-mpegURL",
+      withCredentials: false,
+    });
+    player.poster("");
+  }, [details, streamLoading]);
+  console.log("streamLoading", streamLoading);
+  console.log("player", player);
 
   return (
     <Center py={6} w="100%">
@@ -156,20 +180,29 @@ const InbuiltPlayerScreen = () => {
                   {anime.eng_name ? ` | ${anime.eng_name}` : ""}
                   {anime.title ? `${anime.title}` : ""}
                 </Heading>
-                <Text fontWeight={600} color={"gray.500"} size="sm" ml={2} mt={1}>
+                <Text
+                  fontWeight={600}
+                  color={"gray.500"}
+                  size="sm"
+                  ml={2}
+                  mt={1}
+                >
                   {`| Episode ${epDetails?.details?.current_ep}`}
                 </Text>
               </Box>
             </Box>
 
-            {details && language && epDetails ? (
+            {details && language && epDetails && !streamLoading ? (
               <VideoPlayer
                 url={details[language]}
+                streamLoading={streamLoading}
                 epDetails={epDetails}
                 player={player}
                 setPlayer={setPlayer}
                 prevTime={prevTime}
                 nextEpHandler={nextEpHandler}
+                setQualityOptions={setQualityOptions}
+                qualityOptions={qualityOptions}
               />
             ) : (
               <Skeleton width={"100%"} height={"660px"} mt={3} />
@@ -227,6 +260,10 @@ const InbuiltPlayerScreen = () => {
             ep_details={eps_details}
             loading={eps_loading}
             currentEp={epDetails?.details?.current_ep}
+            isSingleAvailable={true}
+            player={player}
+            qualityOptions={qualityOptions}
+            setTest={setTest}
           />
         </Stack>
       </Flex>

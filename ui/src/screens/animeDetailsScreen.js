@@ -17,6 +17,7 @@ import {
   Tab,
   TabPanels,
   TabPanel,
+  Tag,
 } from "@chakra-ui/react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -32,6 +33,7 @@ import PaginateCard from "../components/paginateCard";
 import { AiFillStar } from "react-icons/ai";
 import SearchResultCard from "../components/search-result-card";
 import { BiArrowBack } from "react-icons/bi";
+// const { shell } = window.require("electron");
 
 export default function AnimeDetailsScreen() {
   const dispatch = useDispatch();
@@ -145,11 +147,9 @@ export default function AnimeDetailsScreen() {
             <Box>
               <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
                 {data.jp_name ? `${data.jp_name}` : ""}{" "}
-                {details?.description?.eng_name
-                  ? ` | ${details?.description?.eng_name}`
-                  : ""}
                 {data.title ? `${data.title}` : ""}
               </Heading>
+
               <Text
                 fontWeight={600}
                 color={"gray.500"}
@@ -168,14 +168,26 @@ export default function AnimeDetailsScreen() {
                   />
                 )}
               </Text>
+              {!ep_loading ? (
+                <Heading fontSize={"xl"} fontFamily={"body"} display="block">
+                  {details?.description?.eng_name
+                    ? `${details?.description?.eng_name}`
+                    : ""}{" "}
+                </Heading>
+              ) : (
+                <Skeleton
+                  height={"18px"}
+                  width={"100px"}
+                  alignSelf={"baseline"}
+                  display={"block"}
+                />
+              )}
             </Box>
-
             <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
               No of episodes{" "}
               {data.no_of_episodes !== "?" ? data.no_of_episodes : "running"}
               {data.episodes !== "?" ? data.episodes : "running"}
             </Text>
-
             <Stack align={"center"} justify={"center"} direction={"row"} mt={6}>
               <Badge
                 px={2}
@@ -229,6 +241,27 @@ export default function AnimeDetailsScreen() {
                 loading={ep_loading}
                 redirect
               />
+            </div>
+            <div>
+              <Text fontWeight={600} color={"gray.500"} size="sm" mt={4}>
+                External Links
+              </Text>
+              <Box>
+                {details?.description &&
+                  Object.entries(details?.description?.external_links).map(
+                    ([key, value]) => {
+                      return (
+                        <Tag
+                          // onClick={() => shell.openExternal(value)}
+                          mr={2}
+                          sx={{ cursor: "pointer" }}
+                        >
+                          {key}
+                        </Tag>
+                      );
+                    }
+                  )}
+              </Box>
             </div>
           </Stack>
         </Stack>

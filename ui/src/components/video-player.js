@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 //   return { innerWidth, innerHeight };
 // }
 import hlsQualitySelector from "videojs-hls-quality-selector";
-import { downloadVideo } from "../actions/animeActions";
+import { downloadVideo } from "../actions/downloadActions";
 
 const VideoPlayer = ({
   url,
@@ -21,6 +21,9 @@ const VideoPlayer = ({
   setPlayer,
   prevTime,
   nextEpHandler,
+  streamLoading,
+  setQualityOptions,
+  qualityOptions,
 }) => {
   const toast = useToast();
 
@@ -31,14 +34,13 @@ const VideoPlayer = ({
   const videoRef = useRef();
   const [callFinishVideoAPI, setCallFinishVideoAPI] = useState(false);
   const [vidDuration, setVidDuration] = useState(50000);
-  const videoId = url;
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
 
-  const thumbnailURL = epDetails?.details?.snapshot;
-  const liveURL = url;
   useEffect(() => {
     if (player && url) {
       player.src({
-        src: liveURL,
+        src: url,
         type: "application/x-mpegURL",
         withCredentials: false,
       });
@@ -56,7 +58,7 @@ const VideoPlayer = ({
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [videoId, liveURL, thumbnailURL]);
+  }, [url]);
 
   useEffect(() => {
     if (callFinishVideoAPI) {
@@ -74,14 +76,14 @@ const VideoPlayer = ({
       playbackRates: [0.5, 1, 1.5, 2],
 
       controls: true,
-      poster: thumbnailURL,
+      poster: epDetails?.details?.snapshot,
       controlBar: {
         pictureInPictureToggle: false,
       },
       fluid: true,
       sources: [
         {
-          src: liveURL,
+          src: url,
           type: "application/x-mpegURL",
           withCredentials: false,
         },
@@ -119,81 +121,28 @@ const VideoPlayer = ({
         onOpen();
       };
     }
-    var downloadButton = plyer.controlBar.addChild("button", {}, index);
 
-    var downloadButtonDom = downloadButton.el();
-    if (downloadButtonDom) {
-      downloadButtonDom.style.width = "2em";
-      downloadButtonDom.innerHTML = `<img style={{margin: "0 auto"}} src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABmJLR0QA/wD/AP+gvaeTAAAAjklEQVQ4je2UsQkCQRBF34iBVRjYhsZygZ3YxKYWYEdnGwY2oUbPZEHxzpMbBRMfTLDM8ubDsAtfIoaa6gpY1uMhItrUFLV4pwzdnaQm/EUpOutX58AemAGLWgDHWhdgGxGnt3Z1rZ7tclU3o6L2yMZLemR5yYOsUZuPJL/j6XGOpQBMq6sFdskcua/lFTf9ZKaqnDiZAAAAAABJRU5ErkJggg==">`;
+    let qualityLevels = plyer.qualityLevels();
 
-      downloadButtonDom.onclick = function () {
-        try {
-          dispatch(downloadVideo(url));
+    console.log(qualityLevels);
+    console.log(qualityLevels?.levels_?.length);
+    console.log(typeof qualityLevels);
+    console.log(qualityLevels.levels_.forEach((x) => console.log(x)));
+    setQualityOptions(qualityLevels.levels_);
 
-          toast({
-            title: "Download Started",
-            description:
-              "Download has bee started. You can check in downloads sections",
-            status: "success",
-            duration: 6000,
-            isClosable: true,
-          });
-        } catch (error) {
-          console.log(error);
-        }
-      };
-    }
-
-    //lANGUAGE Selector Inbuilt
-
-    // var MenuButton = videojs.getComponent("MenuButton");
-    // var MenuItem = videojs.getComponent("MenuItem");
-
-    // var CustomMenuButton = videojs.extend(MenuButton, {
-    //   createItems: function () {
-    //     return this.options().myItems.map(function (i) {
-    //       var item = new MenuItem(plyer, { label: i.name });
-    //       item.handleClick = function () {
-    //         setLanguage(i.name);
-    //         console.log(i.name);
-    //       };
-    //       return item;
-    //     });
-    //   },
-    //   selectable: true,
-    //   multiSelectable: false,
+    // qualityLevels.on('change', function() {
+    //   console.log('Quality Level changed!');
+    //   console.log('New level:', qualityLevels[qualityLevels.selectedIndex]);
     // });
-    // videojs.registerComponent("CustomMenuButton", CustomMenuButton);
-    // console.log(plyer.controlBar.children());
+    // var downloadButton = plyer.controlBar.addChild("button", {}, index);
 
-    // if (details && language) {
-    //   plyer.controlBar.children().map((child) => {
-    //     {
-    //       if (
-    //         child.name() === "CustomMenuButton" ||
-    //         child.name() === "subClass"
-    //       ) {
-    //         plyer.removeChild("CustomMenuButton");
-    //       }
-    //     }
-    //   });
+    // var downloadButtonDom = downloadButton.el();
+    // if (downloadButtonDom) {
+    //   downloadButtonDom.style.width = "2em";
+    //   downloadButtonDom.innerHTML = `<img style={{margin: "0 auto"}} src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABmJLR0QA/wD/AP+gvaeTAAAAjklEQVQ4je2UsQkCQRBF34iBVRjYhsZygZ3YxKYWYEdnGwY2oUbPZEHxzpMbBRMfTLDM8ubDsAtfIoaa6gpY1uMhItrUFLV4pwzdnaQm/EUpOutX58AemAGLWgDHWhdgGxGnt3Z1rZ7tclU3o6L2yMZLemR5yYOsUZuPJL/j6XGOpQBMq6sFdskcua/lFTf9ZKaqnDiZAAAAAABJRU5ErkJggg==">`;
 
-    //   console.log(plyer.controlBar.children());
+    //   downloadButtonDom.onclick = function () {
 
-    //   var lanBtn = plyer.controlBar.addChild("CustomMenuButton", {
-    //     title: "Language",
-    //     default: "jpcccccn",
-    //     name: "jpccccccn",
-    //     text: "jpccccccn",
-    //     myItems: Object.keys(details)?.map((lan) => {
-    //       return { name: lan };
-    //     }),
-    //   });
-    //   // console.log(plyer.controlBar.children());
-    //   var lanBtnDom = lanBtn.el();
-    //   lanBtn.controlText("language");
-
-    //   lanBtnDom.querySelector(".vjs-icon-placeholder").innerHTML = language;
     // }
 
     setPlayer(plyer);
@@ -202,13 +151,20 @@ const VideoPlayer = ({
       if (player) player.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [epDetails]);
+  console.log(downloadUrl);
 
   useEffect(() => {
     if (player && player.hlsQualitySelector) {
       player.hlsQualitySelector = hlsQualitySelector;
 
       player.hlsQualitySelector({ displayCurrentQuality: true });
+      let qualityLevels = player.qualityLevels();
+      setQualityOptions(qualityLevels.levels_);
+      console.log(qualityLevels.levels_);
+      qualityLevels.levels_.forEach(element => {
+          console.log(element)
+      });
     }
   }, [player]);
 
@@ -239,13 +195,12 @@ const VideoPlayer = ({
             setVidDuration(e.target.duration);
           }}
           onTimeUpdate={(e) => {
-            if (e.target.currentTime >= vidDuration - 10) {
+            if (e.target.currentTime >= vidDuration - 1) {
               setCallFinishVideoAPI(true);
             }
           }}
           className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
           id="my-video"
-
         ></video>
       </div>
 

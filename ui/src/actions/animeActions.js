@@ -6,9 +6,6 @@ import {
   ANIME_DETAILS_FAIL,
   ANIME_DETAILS_REQUEST,
   ANIME_DETAILS_SUCCESS,
-  ANIME_DOWNLOAD_FAIL,
-  ANIME_DOWNLOAD_REQUEST,
-  ANIME_DOWNLOAD_SUCCESS,
   ANIME_EPISODES_ADD_FAIL,
   ANIME_EPISODES_ADD_REQUEST,
   ANIME_EPISODES_ADD_SUCCESS,
@@ -66,7 +63,10 @@ export const addAnimeDetails = (data) => async (dispatch) => {
       const searchRes = await server.get(data.anime_detail);
 
       ep_details = await server.get(searchRes.data[0].ep_details);
-      dispatch({ type: ANIME_DETAILS_SUCCESS, payload: {...data, ...ep_details.data} });
+      dispatch({
+        type: ANIME_DETAILS_SUCCESS,
+        payload: { ...data, ...ep_details.data },
+      });
     } else {
       dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
 
@@ -105,7 +105,7 @@ export const addCurrentEp = (data) => async (dispatch) => {
   }
 };
 export const clearSearch = () => async (dispatch) => {
-  // dispatch({ type: ANIME_SEARCH_CLEAR });
+  dispatch({ type: ANIME_SEARCH_CLEAR });
 };
 export const clearEp = () => async (dispatch) => {
   dispatch({ type: ANIME_STREAM_URL_CLEAR });
@@ -136,28 +136,17 @@ export const getExploreDetails = (query) => async (dispatch) => {
   }
 };
 
-export const playVideoExternal = (url, player) => async (dispatch) => {
+export const playVideoExternal = (payload) => async (dispatch) => {
   try {
-    console.log(url);
-    console.log(player);
     dispatch({ type: ANIME_STREAM_EXTERNAL_REQUEST });
     // console.log(anime_session, ep_session);
-    await server.post(
-      `/stream`,
-      {
-        manifest_url: url,
-        player: player,
-      },
-      {
-        "Content-Type": "application/json",
-      }
-    );
+    await server.post(`/stream`, payload, {
+      "Content-Type": "application/json",
+    });
 
     // console.log(data);
     dispatch({ type: ANIME_STREAM_EXTERNAL_SUCCESS });
   } catch (error) {
-    console.log(error);
-
     dispatch({
       type: ANIME_STREAM_EXTERNAL_FAIL,
       payload: error.response.data,
@@ -168,6 +157,7 @@ export const playVideoExternal = (url, player) => async (dispatch) => {
         type: ANIME_STREAM_EXTERNAL_CLEAR,
       });
     }, 3000);
+    throw new Error(error);
   }
 };
 export const getVideoUrl = (pahewin_url) => async (dispatch) => {
@@ -190,25 +180,55 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
     dispatch({ type: ANIME_STREAM_URL_FAIL, payload: error });
   }
 };
-
-export const downloadVideo = (url, file_name) => async (dispatch) => {
+export const cancelLiveDownload = async (id) => {
   try {
-    dispatch({ type: ANIME_DOWNLOAD_REQUEST });
+    // console.log(anime_session, ep_session);
     const { data } = await server.post(
-      `/download`,
+      `/download/cancel`,
       {
-        manifest_url: url,
-        file_name,
+        id: [id],
       },
       {
         "Content-Type": "application/json",
       }
     );
-
     console.log(data);
-    dispatch({ type: ANIME_DOWNLOAD_SUCCESS, payload: data });
   } catch (error) {
-    dispatch({ type: ANIME_DOWNLOAD_FAIL, payload: error });
+    console.log(error);
+  }
+};
+export const pauseLiveDownload = async (id) => {
+  try {
+    // console.log(anime_session, ep_session);
+    const { data } = await server.post(
+      `/download/pause`,
+      {
+        id: [id],
+      },
+      {
+        "Content-Type": "application/json",
+      }
+    );
+    console.log(data);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const resumeLiveDownload = async (id) => {
+  try {
+    // console.log(anime_session, ep_session);
+    const { data } = await server.post(
+      `/download/resume`,
+      {
+        id: [id],
+      },
+      {
+        "Content-Type": "application/json",
+      }
+    );
+    console.log(data);
+  } catch (error) {
+    console.log(error);
   }
 };
 
