@@ -26,6 +26,11 @@ from utils.init_db import DB
 from utils import remove_file
 
 
+async def LiSA(request: Request):
+
+    return Response("All servers started successfully")
+
+
 async def search(request: Request):
     """searches for anime
 
@@ -355,6 +360,7 @@ async def get_recommendation(request: Request):
 
 
 routes = [
+    Route("/", endpoint=LiSA, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),

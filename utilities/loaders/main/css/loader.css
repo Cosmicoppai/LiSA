@@ -1,0 +1,39 @@
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #1a202c;
+}
+.circle {
+  position: relative;
+  width: 250px;
+  height: 250px;
+}
+.circle svg {
+  fill: none;
+  stroke: #8a3ab9;
+  stroke-linecap: round;
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: stroke-draw 4s ease-out infinite alternate;
+}
+.circle img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  border-radius: 50%;
+}
+@keyframes stroke-draw {
+  from {
+    stroke: #de0f3f;
+    stroke-dasharray: 1;
+  }
+  to {
+    stroke: #aa1945;
+    transform: rotate(180deg);
+    stroke-dasharray: 8;
+  }
+}
