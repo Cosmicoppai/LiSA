@@ -10,7 +10,6 @@ node_modules/
 
 dist/
 
-*.spec
 
 build/
 resources/
