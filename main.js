@@ -162,8 +162,10 @@ app.whenReady().then(async () => {
       frame: false,
       transparent: true,
       alwaysOnTop: true,
-      width: 300,
-      height: 300,
+      width: 500,
+      autoHideMenuBar: true,
+
+      height: 500,
     });
     createLoadingWindow().then(() => createMainWindow());
     // var devProc = spawn(`python backend/LiSA.py`, {
@@ -196,7 +198,7 @@ app.whenReady().then(async () => {
         "app.app"
       )}" --args`,
       linux: "./resources/main/main",
-      win32: `powershell -Command "./resources/LiSA/LiSA.exe -runAs"`,
+      win32: `powershell -Command Start-Process -WindowStyle Hidden -Verb runAS ./LiSA`,
     }[process.platform];
 
     var proc = spawn(`${runPython}`, {
