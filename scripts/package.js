@@ -116,6 +116,7 @@ class Packager {
         '--asar',
         '--extra-resource=./resources/LiSA',
         '--icon ./public/favicon.ico',
+        "--win32metadata.requested-execution-level=highestAvailable",
         '--win32',
         '--out',
         './dist/windows',
@@ -134,7 +135,7 @@ class Packager {
       appIconPath: path('../utilities/msi/images/icon.ico'),
       description: 'Anime Home',
       exe: 'LiSA',
-      manufacturer: 'Cosmicoppai Infotech',
+      manufacturer: 'MF Tek',
       name: 'LiSA',
       outputDirectory: path('../dist/windows/setup'),
       ui: {
