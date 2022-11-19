@@ -49,7 +49,7 @@ def _merge_segments(output_file_name) -> int:  # will return length of output_fi
     cmd = f"ffmpeg -f concat -safe 0 -i {input_file} -c copy {output_file} -hide_banner -loglevel warning"
 
     subprocess.run(
-        cmd, check=True
+        cmd, check=True, shell=False
     )
     remove_folder(seg_output_dir)  # remove segments
     logging.info("Merging completed")
