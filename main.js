@@ -56,6 +56,7 @@ const createMainWindow = () => {
        * Keep show() & hide() in this order to prevent
        * unresponsive behavior during page load.
        */
+
       mainWindow.show();
       loadingWindow.hide();
       loadingWindow.close();
@@ -91,6 +92,8 @@ const createMainWindow = () => {
       executeOnWindow(isPageLoaded, handleLoad);
     });
   } else {
+    mainWindow.hide();
+
     mainWindow.removeMenu(true);
 
     mainWindow.loadFile(path.join(__dirname, "build/index.html"));
@@ -112,12 +115,11 @@ const createLoadingWindow = () => {
 
     // Variants of developer loading screen
     const loaderConfig = {
-      react: "utilities/loaders/main/loader.html",
-      redux: "utilities/loaders/main/loader.html",
+      main: "utilities/loaders/main/loader.html",
     };
 
     try {
-      loadingWindow.loadFile(path.join(__dirname, loaderConfig.redux));
+      loadingWindow.loadFile(path.join(__dirname, loaderConfig.main));
       loadingWindow.removeMenu(true);
 
       loadingWindow.webContents.on("did-finish-load", () => {
@@ -142,11 +144,12 @@ app.whenReady().then(async () => {
    * browserWindows object.
    */
   browserWindows.mainWindow = new BrowserWindow({
+    show: false,
     webPreferences: {
       contextIsolation: false,
       enableRemoteModule: true,
       autoHideMenuBar: true,
-
+      show: false,
       nodeIntegration: true,
       preload: path.join(app.getAppPath(), "preload.js"),
     },
@@ -162,10 +165,8 @@ app.whenReady().then(async () => {
       frame: false,
       transparent: true,
       alwaysOnTop: true,
-      width: 500,
-      autoHideMenuBar: true,
-
-      height: 500,
+      width: 300,
+      height: 300,
     });
     createLoadingWindow().then(() => createMainWindow());
     // var devProc = spawn(`python backend/LiSA.py`, {
@@ -198,7 +199,7 @@ app.whenReady().then(async () => {
         "app.app"
       )}" --args`,
       linux: "./resources/main/main",
-      win32: `powershell -Command Start-Process -WindowStyle Hidden -Verb runAS ./LiSA`,
+      win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
     }[process.platform];
 
     var proc = spawn(`${runPython}`, {
@@ -277,7 +278,7 @@ app.whenReady().then(async () => {
       // });
 
       spawn("taskkill /IM LiSA.exe /F", {
-        shell: true,
+        shell: false,
         detached: true,
       });
 
