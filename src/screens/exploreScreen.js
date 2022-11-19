@@ -51,12 +51,16 @@ const ExploreScreen = () => {
             icon={<AiFillFilter />}
             value={query}
           >
+            <option value="all_anime">All</option>
+            <option value="tv">TV</option>
+            <option value="movie">Movie</option>
             <option value="airing">Airing</option>
             <option value="upcoming">Upcoming</option>
             <option value="by_popularity">By Popularity</option>
-            <option value="movie">Movie</option>
-
-            <option value="tv">TV</option>
+            <option value="ova">OVA</option>
+            <option value="ona">ONA</option>
+            <option value="special">Special</option>
+            <option value="favorite">Favorite</option>
           </Select>
         </Flex>
 
