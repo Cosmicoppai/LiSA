@@ -29,17 +29,19 @@ class DB(metaclass=MetaDB):
             DB._highest_ids[table_name] = _highestId
 
     @classmethod
-    def migrate(cls, file_: str = DBConfig.DEFAULT_SQL_DIR.joinpath("progress_tracker.sql").__str__()):
+    def migrate(cls, files: List[str] = ("progress_tracker.sql", "watchlist.sql")):
         cur = cls.connection.cursor()
-        with open(file_) as file:
-            try:
-                sql_queries = file.read()
-                cur.executescript(sql_queries)
-                cls.connection.commit()
-                cur.close()
-            except sqlite3.Error as error:
-                logging.error(error)
-                EXIT()
+        for fil in files:
+            file_ = DBConfig.DEFAULT_SQL_DIR.joinpath(fil).__str__()
+            with open(file_) as file:
+                try:
+                    sql_queries = file.read()
+                    cur.executescript(sql_queries)
+                    cls.connection.commit()
+                except sqlite3.Error as error:
+                    logging.error(error)
+                    EXIT()
+        cur.close()
 
     @classmethod
     def get_id(cls, table_name: str = "progress_tracker") -> int:

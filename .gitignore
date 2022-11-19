@@ -10,7 +10,6 @@ node_modules/
 
 dist/
 
-*.spec
 
 build/
 resources/
@@ -20,5 +19,6 @@ backend/video/segments
 
 downloads
 
-backend/lisa
+backend/lisa/scripts
+backend/lisa/setup
 *.exe
