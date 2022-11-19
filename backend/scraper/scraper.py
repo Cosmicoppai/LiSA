@@ -326,6 +326,7 @@ class Animepahe(Anime):
                 "session": anime_detail.get("session", None),
                 "poster": anime_detail.get("poster", f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}"),
                 "ep_details": f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
+                "anime_id": anime_detail.get("id", None)
             })
 
         return search_response
