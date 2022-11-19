@@ -24,6 +24,7 @@ from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
 from utils.init_db import DB
 from utils import remove_file
+from sqlite3 import IntegrityError
 
 
 async def LiSA(request: Request):
@@ -98,11 +99,20 @@ async def get_ep_details(request: Request):
             "previous_page": str(url) or None,
         }
     """
-    anime_session = request.query_params.get("anime_session", None)
-    page = request.query_params.get("page", "1")
+    anime_id = request.query_params.get("anime_id", None)
+
+    if anime_id:
+        resp = requests.get(f"{Animepahe.site_url}/a/{anime_id}", allow_redirects=False)
+        if resp.status_code != 302:
+            return await service_unavailable_503(request)
+        anime_session = resp.headers["location"].strip(f"{Animepahe.site_url}/anime/")
+    else:
+        anime_session = request.query_params.get("anime_session", None)
 
     if not anime_session:
         return await bad_request_400(request, msg="Pass anime session")
+
+    page = request.query_params.get("page", "1")
 
     try:
         return JSONResponse(await Animepahe().get_episode_details(anime_session=anime_session, page_no=page))
@@ -359,6 +369,40 @@ async def get_recommendation(request: Request):
         return service_unavailable_503(request, msg="Try Again After Sometime")
 
 
+async def watchlist(request: Request):
+    try:
+        if request.method == "GET":
+            cur = DB.connection.cursor()
+            cur.execute("SELECT * FROM watchlist ORDER BY created_on DESC")
+            return JSONResponse({"data": [dict(row) for row in cur.fetchall()]})
+
+        elif request.method == "POST":
+            jb = request.state.body
+
+            anime_id = jb["anime_id"]
+            ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+
+            cur = DB.connection.cursor()
+
+            cur.execute("INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
+                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
+                         jb["year"], jb["score"], jb["poster"], ep_details))
+
+            DB.connection.commit()
+            return JSONResponse(content="Anime successfully added in watch later", status_code=201)
+
+        cur = DB.connection.cursor()
+        # id validation is bypassed by choice
+        cur.execute("DELETE FROM watchlist where anime_id=?", (request.query_params["anime_id"], ))
+        DB.connection.commit()
+        return Response(status_code=204)
+    except KeyError as _msg:
+        return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
+    except IntegrityError:
+        return await bad_request_400(request, msg=f"Record already exists")
+
+
 routes = [
     Route("/", endpoint=LiSA, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
@@ -374,7 +418,8 @@ routes = [
     Route("/library", endpoint=library, methods=["GET", "DELETE"]),
     Route("/master_manifest", endpoint=get_master_manifest, methods=["GET"]),
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
-    Route('/proxy', endpoint=proxy, methods=["GET"]),
+    Route("/proxy", endpoint=proxy, methods=["GET"]),
+    Route("/watchlist", endpoint=watchlist, methods=["GET", "POST", "DELETE"]),
     Mount('/default', app=StaticFiles(directory=FileConfig.DEFAULT_DIR, check_dir=True), name="static"),
 ]
 
