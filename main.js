@@ -278,7 +278,7 @@ app.whenReady().then(async () => {
       // });
 
       spawn("taskkill /IM LiSA.exe /F", {
-        shell: false,
+        shell: true,
         detached: true,
       });
 
