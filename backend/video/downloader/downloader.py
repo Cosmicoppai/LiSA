@@ -46,7 +46,7 @@ def _merge_segments(output_file_name) -> int:  # will return length of output_fi
     output_file: Path = OUTPUT_DIR.joinpath(f"{output_file_name}{OUTPUT_EXTENSION}")
     if not Path.exists(OUTPUT_DIR):
         os.makedirs(OUTPUT_DIR)
-    cmd = f"ffmpeg -f concat -safe 0 -i {input_file} -c copy {output_file} -hide_banner -loglevel warning"
+    cmd = f'ffmpeg -f concat -safe 0 -i "{input_file}" -c copy "{output_file}" -hide_banner -loglevel warning'
 
     subprocess.run(
         cmd, check=True, shell=False
