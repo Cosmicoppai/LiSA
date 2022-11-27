@@ -70,5 +70,6 @@ def parse_config_json(file_path: str):
 
 def update_environ():
     ffmpeg_path: Path = Path(__file__).resolve().parent.parent.joinpath(_ffmpeg_exts[system().lower()])
-    environ["ffmpeg"] = str(ffmpeg_path)
+    if Path(ffmpeg_path).exists():
+        environ["ffmpeg"] = str(ffmpeg_path)
 
