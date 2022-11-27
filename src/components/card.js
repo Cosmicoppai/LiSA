@@ -23,7 +23,7 @@ export default function Card({ data, query }) {
     if (query !== "upcoming") {
       dispatch(addAnimeDetails(data));
       navigate("/anime-details");
-    }else{
+    } else {
       toast({
         title: "Anime has not been aired yet! ❤️",
         status: "error",
@@ -37,6 +37,7 @@ export default function Card({ data, query }) {
       onClick={exploreCardHandler}
     >
       <Box
+        sx={{ cursor: "pointer" }}
         role={"group"}
         p={6}
         maxW={"270px"}
@@ -66,10 +67,10 @@ export default function Card({ data, query }) {
             h: "full",
             pos: "absolute",
 
-            top: 5,
+            top: 2,
             left: 0,
             backgroundImage: `url(${data.img_url})`,
-            filter: "blur(15px)",
+            filter: "blur(10px)",
             zIndex: -1,
           }}
           _groupHover={{
