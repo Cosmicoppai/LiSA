@@ -3,6 +3,10 @@ import { extendTheme } from "@chakra-ui/react";
 export const theme = extendTheme({
   initialColorMode: "light",
   useSystemColorMode: false,
+  fonts: {
+    heading: `'Montserrat', sans-serif`,
+    body: `'Montserrat', sans-serif`,
+  },
   styles: {
     global: {
       'body': {

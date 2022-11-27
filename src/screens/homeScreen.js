@@ -74,18 +74,16 @@ export const HomeScreen = () => {
           h="100%"
           pt={"20px"}
         >
-          <Image
-            objectFit="cover"
-            src={HomeScreenLogoImage}
-            alt="logo"
-          />{" "}
+          <Image objectFit="cover" src={HomeScreenLogoImage} alt="logo" />{" "}
           <Box w="50%" sx={{ position: "relative" }}>
             <InputGroup>
               <InputRightElement
                 pointerEvents="none"
                 children={
-                  <Box mr="2">
-                    <Kbd>Enter</Kbd>
+                  <Box mr="10" p={1} px={2}>
+                    <Kbd  fontSize={"1.2rem"}>
+                      Enter
+                    </Kbd>
                   </Box>
                 }
               />
@@ -161,11 +159,7 @@ export const HomeScreen = () => {
             </Box>
           )}
           {loading && (
-            <Image
-              src={LoaderSearchGif}
-              alt="loader"
-              boxSize="150px"
-            />
+            <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />
           )}
         </Flex>
       ) : (
