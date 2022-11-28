@@ -2,11 +2,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 .circle {
   position: relative;
   width: 250px;
   height: 250px;
+  overflow: hidden;
+
 }
 .circle svg {
   fill: none;
