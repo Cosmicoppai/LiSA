@@ -10,7 +10,7 @@ a = Analysis(
     ['backend\\LiSA.py'],
     pathex=[],
     binaries=[('ffmpeg.exe', '.')],
-    datas=[('backend/defaults', 'defaults'), ('backend/sql_queries', 'sql_queries'), ('backend/scripts', 'scripts'),
+    datas=[('backend/defaults', 'defaults'), ('backend/sql_queries', 'sql_queries'),
      ('backend/config/config.json', '.')],
     hiddenimports=[],
     hookspath=[],

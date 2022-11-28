@@ -58,10 +58,12 @@ export const HomeScreen = () => {
   };
 
   useEffect(() => {
+  
     return () => {
       dispatch(clearSearch());
     };
   }, []);
+
 
   return (
     <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
@@ -81,9 +83,7 @@ export const HomeScreen = () => {
                 pointerEvents="none"
                 children={
                   <Box mr="10" p={1} px={2}>
-                    <Kbd  fontSize={"1.2rem"}>
-                      Enter
-                    </Kbd>
+                    <Kbd fontSize={"1.2rem"}>Enter</Kbd>
                   </Box>
                 }
               />

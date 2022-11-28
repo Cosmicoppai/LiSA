@@ -25,6 +25,13 @@ const ExploreScreen = () => {
   };
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (window) {
+      window?.scrollTo(0, 0);
+    }
+  }, []);
+
   useEffect(() => {
     dispatch(getExploreDetails(query));
   }, [query]);

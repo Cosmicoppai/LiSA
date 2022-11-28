@@ -19,6 +19,5 @@ backend/video/segments
 
 downloads
 
-backend/lisa/scripts
-backend/lisa/setup
 *.exe
+backend/lisa

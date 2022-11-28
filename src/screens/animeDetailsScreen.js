@@ -51,6 +51,10 @@ export default function AnimeDetailsScreen() {
   const { loading } = useSelector((state) => state.animeSearchList);
 
   useEffect(() => {
+    if (window) {
+      window?.scrollTo(0, 0);
+    }
+
     if (details.recommendation) {
       dispatch(getRecommendations(details.recommendation));
     }
