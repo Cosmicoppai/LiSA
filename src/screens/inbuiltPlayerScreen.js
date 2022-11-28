@@ -87,8 +87,6 @@ const InbuiltPlayerScreen = () => {
         item = Object.values(single_ep)[0];
       }
     });
-    console.log("item", item);
-    console.log("???????????????????????????????????");
 
     if (item) {
       console.log("item", item);
@@ -144,6 +142,12 @@ const InbuiltPlayerScreen = () => {
   }, [details, streamLoading]);
   console.log("streamLoading", streamLoading);
   console.log("player", player);
+
+  useEffect(() => {
+    if (window) {
+      window?.scrollTo(0, 0);
+    }
+  }, []);
 
   return (
     <Center py={6} w="100%">
