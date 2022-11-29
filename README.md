@@ -16,7 +16,7 @@
 
 ## CONTENTS OF THE FILE
 
-* [Features](#😊-features)
+* [Features](#🚀-features)
 * [Dependencies](#dependencies)
 * [Download](#🤗-download)
 * [Installation](#📖-installation)
@@ -32,7 +32,7 @@
 * [License](#🪪-license)
 * [Disclaimer](#disclaimer)
 
-## 😊 Features
+## 🚀 Features
 
 * A User Friendly Interface
 * Download anime from [supported websites](#😶‍🌫️-supported-websites) in multiple resoultions and languages
