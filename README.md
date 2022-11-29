@@ -1,4 +1,4 @@
-![Banner](src\assests\images\home_screen_logo.png)
+![Banner](src/assests/images/home_screen_logo.png)
 
 ![GitHub contributors](https://img.shields.io/github/contributors/cosmicoppai/LiSA?color=lightgrey)
 [![GitHub forks](https://img.shields.io/github/forks/cosmicoppai/LiSA?color=lightgrey)](https://github.com/Cosmicoppai/LiSA/network)
@@ -118,19 +118,19 @@ Note:
 
 ### Screenshots
 
-![search](demo_images\ss_search.png)
+![search](demo_images/ss_search.png)
 *Search results for Bakuman*
 
-![Anime Details Page](demo_images\ss_anime_details.png)
+![Anime Details Page](demo_images/ss_anime_details.png)
 *Episode details of Bakuman*
 
-![Video Player](demo_images\ss_play_episode.png)
+![Video Player](demo_images/ss_play_episode.png)
 *Built-in Video Player on LiSA*
 
-![Download Manager and Library](demo_images\ss_download_manager.png)
+![Download Manager and Library](demo_images/ss_download_manager.png)
 *Download Manager and Library*
 
-![Explore Page](demo_images\ss_explore.png)
+![Explore Page](demo_images/ss_explore.png)
 *Explore Page with filters*
 
 *Demo*
