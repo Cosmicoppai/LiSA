@@ -14,29 +14,30 @@
 
 > A Desktop application, for streaming and downloading your favourite anime.
 
-## Donations
-
-If this project is helpful to you and love our work and feels like showing love/appreciation, would you like to support?
-
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/SayAnime)
-
 ## CONTENTS OF THE FILE
 
-* [Features](#features)
+* [Features](#😊-features)
 * [Dependencies](#dependencies)
-* [Download](#download)
-* [Installation](#installation)
-* [Demo](#demo)
+* [Download](#🤗-download)
+* [Installation](#📖-installation)
+* [Demo](#😁-demo)
 * [Future Plans](#future-plans)
-* [FAQ](#faq)
-* [License](#license)
+* [FAQ](#🤔-faq)
+* Appendix
+    * [Supported Webistes](#😶‍🌫️-supported-websites)
+    * [Supported External Video Player](#📺-supported-external-players)
+    * [Filters](#filters)
+* [Contributing](#🤝-contributing)
+* [Support](#⭐-support)
+* [License](#🪪-license)
+* [Disclaimer](#disclaimer)
 
-## Features
+## 😊 Features
 
 * A User Friendly Interface
-* Download anime from [supported websites](#supported-websites) in multiple resoultions and languages
+* Download anime from [supported websites](#😶‍🌫️-supported-websites) in multiple resoultions and languages
 * Batch Download
-* Stream anime on the inbuilt player and your favourite [external video player](#supported-external-players)
+* Stream anime on the inbuilt player and your favourite [external video player](#📺-supported-external-players)
 * Explore anime based on different [filters](#filters)
 * Download Manager
 * Library to view pre-downloaded episodes and active downloads
@@ -47,12 +48,10 @@ If this project is helpful to you and love our work and feels like showing love/
 ## Dependencies
 
 * [ffmpeg](https://ffmpeg.org/download.html)
-* [Python 3.10](https://www.python.org/downloads/release/python-3108/)
-* [Node.js](https://nodejs.org/en/download/)
 
 <br>
 
-## Download
+## 🤗 Download
 
 [![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases)
 
@@ -60,7 +59,7 @@ If this project is helpful to you and love our work and feels like showing love/
 
 Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from here and extract the zip file.
 
-## Installation
+## 📖 Installation
 
 ### Building From Source
 
@@ -72,14 +71,15 @@ git clone https://github.com/Cosmicoppai/LiSA.git
 
 #### Prerequisites
 
-* Make sure python 3.10 and pip3 is installed.
+* Make sure python 3.10 and node 18 are installed.
 
 #### Installing
 
-1) Create the virtual environment
+1) Create and activate the virtual environment
 
 ```cli
 python -m venv ./env
+env/Script/activate
 ```
 
 2) Download the dependancies using requirements.txt file
@@ -89,18 +89,18 @@ pip install -r ./requirements.txt
 pip install -r ./buid_requirements.txt
 ```
 
-3) Install NPM
+3) Install Node modules
 
 ```cli
 npm install
 ```
 
-4) Add ffmpeg executable to root
+4) Add ffmpeg executable to root folder or in PATH Var.
 
-5) Build a specification file 
+5) Build package using
 
 ```cli
-py installer lisa.spec --clean
+npm run build:package:windows
 ```
 
 Note:
@@ -110,27 +110,27 @@ Note:
 
 ### Environment Tested on
 
-* Tested on Windows 8+.
+* Tested on Windows 8, 10 & 11.
 
 <br>
 
-## Demo
+## 😁 Demo
 
 ### Screenshots
 
-![search](src\assests\images\ss_search.png)
+![search](demo_images\ss_search.png)
 *Search results for Bakuman*
 
-![Anime Details Page](src\assests\images\ss_anime_details.png)
+![Anime Details Page](demo_images\ss_anime_details.png)
 *Episode details of Bakuman*
 
-![Video Player](src\assests\images\ss_play_episode.png)
+![Video Player](demo_images\ss_play_episode.png)
 *Built-in Video Player on LiSA*
 
-![Download Manager and Library](src\assests\images\ss_download_manager.png)
+![Download Manager and Library](demo_images\ss_download_manager.png)
 *Download Manager and Library*
 
-![Explore Page](src\assests\images\ss_explore.png)
+![Explore Page](demo_images\ss_explore.png)
 *Explore Page with filters*
 
 *Demo*
@@ -142,7 +142,7 @@ Note:
 * Continue Watching
 * Download episodes with custom range
 
-## FAQ
+## 🤔 FAQ
 
 ### Q) How can I download detective conan's episodes from 10 to 30?
 
@@ -168,14 +168,14 @@ Note:
 
 -> No, you do not need to sign up to any account to stream or download anime.
 
-## Supported Websites
+## 😶‍🌫️ Supported Websites
 
 Note: In the following version the user can only download from animepahe, more websites to come in future. <br>
 | Website | Sub/Dub selection | Supported resolutions | File Size |
 |--- |--- |--- |--- |
 | [AnimePahe](https://animepahe.com/) | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
 
-## Supported External Players
+## 📺 Supported External Players
 
 ### MPV
 
@@ -209,7 +209,17 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 * Special
 * Favourite
 
-## LICENSE
+## 🤝 CONTRIBUTING
+
+Contribututions, issues, and feature requests are welcome! See [CONTRIBUTING.md]()
+
+## ⭐ SUPPORT
+
+If this project is helpful to you and love our work and feels like showing love/appreciation, give a ⭐, AND 😉...
+
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/SayAnime)
+
+## 🪪 LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Cosmicoppai/LiSA/blob/main/LICENSE) file for details.
 
