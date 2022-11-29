@@ -38,13 +38,13 @@
 ## 🚀 Features
 
 * A User Friendly Interface
-* Download anime from [supported websites](#-supported-websites) in multiple resoultions and languages
+* Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
 * Batch Download
 * Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
 * Explore anime based on different [filters](#filters)
 * Download Manager
 * Library to view pre-downloaded episodes and active downloads
-* Recomendation System
+* Recommendation System
 
 <br>
 
@@ -58,7 +58,7 @@
 
 [![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases)
 
-> Note: Currently only windows executables is provided.
+> Note: Currently only windows executables are provided.
 
 Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from here and extract the zip file.
 
@@ -150,27 +150,27 @@ Note:
 
 ### Q) How can I download detective conan's episodes from 10 to 30?
 
--> Search for the anime with ```dective conan```, on the anime page you get **Download all** option, this will start the batch download of all the episodes present in that page.
+-> Search for the anime with ```detective conan```, on the anime page you get **Download all** option, this will start the batch download of all the episodes present on that page.
 
 ### Q) Where can I access all the downloaded episodes?
 
--> You can either view them in the Download page of LiSA application, OR Visit ```LiSA-win32-x64\resources\downloads\``` on windows file explorer.
+-> You can either view them on the Download page of LiSA , OR Visit ```LiSA-win32-x64\resources\downloads\``` on windows file explorer.
 
 ### Q) Where can I view recommendations, if I liked Kimetsu no Yaiba?
 
 -> Search for the anime, in this case `Kimetsu no Yaiba`, scroll down there you see a tab recommendations.
 
-### Q) How can I switch to external player?
+### Q) How can I switch to the external player?
 
--> In video player, on the bottom right click the keyword `external`, choose your favourite video player, [currently supported players](#supported-external-players).
+-> In video player, on the bottom right click on `external`, choose your favourite video player, [currently supported players](#supported-external-players).
 
 ### Q) How do I download Episode 8 of Mob Psycho III?
 
--> Visit the episode, you want to download, select the langauge, and resolution you want to download in, the downloud will start, the status of which you can check from Download manager.
+-> Visit the episode, you want to download, select the language, and resolution you want to download in, the downloud will start, the status of which you can check from Download manager.
 
 ### Q) Do I have to create any user account to stream or download anime?
 
--> No, you do not need to sign up to any account to stream or download anime.
+-> No, you do not need to sign up for an account to stream, explore or download anime.
 
 ## 😶‍🌫️ Supported Websites
 
@@ -215,7 +215,7 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## 🤝 CONTRIBUTING
 
-Contribututions, issues, and feature requests are welcome! See [CONTRIBUTING.md]()
+Contributions, issues, and feature requests are welcome! See [CONTRIBUTING.md](./contributing.md)
 
 ## ⭐ SUPPORT
 
@@ -231,4 +231,4 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 ## DISCLAIMER
 
-This software has been developed just to improve users experience while streaming and downloading anime. Please support original content creaters!
+This software has been developed just to improve users experience while streaming and downloading anime. Please support original content creators!
