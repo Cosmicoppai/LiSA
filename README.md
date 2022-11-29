@@ -1,3 +1,5 @@
+<div align="center">
+
 ![Banner](src/assests/images/home_screen_logo.png)
 
 ![GitHub contributors](https://img.shields.io/github/contributors/cosmicoppai/LiSA?color=lightgrey)
@@ -9,6 +11,7 @@
 ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
 ![image](https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=9FEAF9)
 ![image](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+</div>
 
 # LiSA
 
@@ -16,28 +19,28 @@
 
 ## CONTENTS OF THE FILE
 
-* [Features](#🚀-features)
+* [Features](#-features)
 * [Dependencies](#dependencies)
-* [Download](#🤗-download)
-* [Installation](#📖-installation)
-* [Demo](#😁-demo)
+* [Download](#-download)
+* [Installation](#-installation)
+* [Demo](#-demo)
 * [Future Plans](#future-plans)
-* [FAQ](#🤔-faq)
+* [FAQ](#-faq)
 * Appendix
-    * [Supported Webistes](#😶‍🌫️-supported-websites)
-    * [Supported External Video Player](#📺-supported-external-players)
+    * [Supported Webistes](#%EF%B8%8F-supported-websites)
+    * [Supported External Video Player](#-supported-external-players)
     * [Filters](#filters)
-* [Contributing](#🤝-contributing)
-* [Support](#⭐-support)
-* [License](#🪪-license)
+* [Contributing](#-contributing)
+* [Support](#-support)
+* [License](#-license)
 * [Disclaimer](#disclaimer)
 
 ## 🚀 Features
 
 * A User Friendly Interface
-* Download anime from [supported websites](#😶‍🌫️-supported-websites) in multiple resoultions and languages
+* Download anime from [supported websites](#-supported-websites) in multiple resoultions and languages
 * Batch Download
-* Stream anime on the inbuilt player and your favourite [external video player](#📺-supported-external-players)
+* Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
 * Explore anime based on different [filters](#filters)
 * Download Manager
 * Library to view pre-downloaded episodes and active downloads
@@ -133,6 +136,7 @@ Note:
 ![Explore Page](demo_images/ss_explore.png)
 *Explore Page with filters*
 
+<video src='https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4' width=180></video>
 *Demo*
 
 ## Future Plans
