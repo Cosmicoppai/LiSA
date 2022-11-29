@@ -223,7 +223,7 @@ If this project is helpful to you and love our work and feels like showing love/
 
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/SayAnime)
 
-## 🪪 LICENSE
+## 📄 LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Cosmicoppai/LiSA/blob/main/LICENSE) file for details.
 
