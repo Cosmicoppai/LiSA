@@ -57,6 +57,7 @@ class Animepahe(Anime):
 
     @staticmethod
     def __minify_text(text: str) -> str:
+        # remove all whitespace from text
         return re.sub(r"\s+", "", text).strip()
 
     def __get_minified(self, path: str) -> str:
@@ -359,7 +360,7 @@ class Animepahe(Anime):
             raise ValueError("Invalid Kwik URL")
 
         data = self.__minify_text(stream_response.text)
-        rx = re.compile(r"returnp}\('(.*?)',(\d\d),(\d\d),'(.*?)'.split")
+        rx = re.compile(r"returnp}\('(.*?)',(\d*),(\d*),'(.*?)'.split")
         title_re = re.compile(r"<title>(.*?)</title>")
         title = title_re.search(data).group(1)
         r = rx.findall(data)
