@@ -44,7 +44,7 @@ export default function AnimeDetailsScreen() {
     (state) => state.animeEpisodesDetails
   );
 
-  const { details: recommendations } = useSelector(
+  const { details: recommendations, loading: recommendationLoading } = useSelector(
     (state) => state.animeRecommendations
   );
 
@@ -236,6 +236,7 @@ export default function AnimeDetailsScreen() {
             </Text>
             <div>
               <PaginateCard
+              recommendationLoading={recommendationLoading}
                 data={data}
                 ep_details={details}
                 loading={ep_loading}

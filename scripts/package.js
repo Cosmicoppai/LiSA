@@ -128,34 +128,38 @@ class Packager {
 
     spawnSync(`electron-packager . ${options.app}`, options.spawn);
 
-    const { MSICreator } = require('electron-wix-msi');
-
-    const msiCreator = new MSICreator({
-      appDirectory: path('../dist/windows/LiSA-win32-x64'),
-      appIconPath: path('../utilities/msi/images/icon.ico'),
-      description: 'Anime Home',
-      exe: 'LiSA',
-      manufacturer: 'MF Tek',
-      name: 'LiSA',
-      outputDirectory: path('../dist/windows/setup'),
-      ui: {
-        chooseDirectory: true,
-        images: {
-          background: path('../utilities/msi/images/background.png'),
-          banner: path('../utilities/msi/images/banner.png')
-        }
-      },
-      version: '1.0.0'
-    });
-
-    // Customized MSI template
-    msiCreator.wixTemplate = msiCreator.wixTemplate
-      .replace(/ \(Machine - MSI\)/gi, '')
-      .replace(/ \(Machine\)/gi, '');
 
 
-    // Create .wxs template and compile MSI
-    msiCreator.create().then(() => msiCreator.compile());
+    //////////////////////Msi Build Commented ///////////////////
+
+    // const { MSICreator } = require('electron-wix-msi');
+
+    // const msiCreator = new MSICreator({
+    //   appDirectory: path('../dist/windows/LiSA-win32-x64'),
+    //   appIconPath: path('../utilities/msi/images/icon.ico'),
+    //   description: 'Anime Home',
+    //   exe: 'LiSA',
+    //   manufacturer: 'MF Tek',
+    //   name: 'LiSA',
+    //   outputDirectory: path('../dist/windows/setup'),
+    //   ui: {
+    //     chooseDirectory: true,
+    //     images: {
+    //       background: path('../utilities/msi/images/background.png'),
+    //       banner: path('../utilities/msi/images/banner.png')
+    //     }
+    //   },
+    //   version: '1.0.0'
+    // });
+
+    // // Customized MSI template
+    // msiCreator.wixTemplate = msiCreator.wixTemplate
+    //   .replace(/ \(Machine - MSI\)/gi, '')
+    //   .replace(/ \(Machine\)/gi, '');
+
+
+    // // Create .wxs template and compile MSI
+    // msiCreator.create().then(() => msiCreator.compile());
   };
 
 }

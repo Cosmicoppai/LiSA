@@ -37,16 +37,21 @@ const PaginateCard = ({
   qualityOptions,
   player,
   setTest,
+  recommendationLoading,
 }) => {
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const { loading: epsLoading } = useSelector(
+    (state) => state.animeEpisodesDetails
+  );
   const epDetails = useSelector((state) => state.animeCurrentEp);
   const { session } = useSelector((state) => state.animeDetails.details);
   let currentEp = parseInt(epDetails?.details?.current_ep);
   const { loading: downloadLoading } = useSelector(
     (state) => state.animeDownloadDetails
   );
+  console.log(epsLoading);
   const [isDownloadButtonAvailable, setIsDownloadButtonAvailable] =
     useState(false);
   const navigate = useNavigate();
@@ -78,7 +83,6 @@ const PaginateCard = ({
 
     sleep(2000).then(() => {
       setIsDownloadButtonAvailable(true);
-      setTest({ assdfda: "assdfdasd" });
     });
   };
   let coloredIdx;
@@ -217,7 +221,12 @@ const PaginateCard = ({
             <Fade in={ep_details?.prev_page_url}>
               <Button
                 onClick={() => pageChangeHandler(ep_details?.prev_page_url)}
-                disabled={loading || !ep_details?.prev_page_url}
+                disabled={
+                  loading ||
+                  !ep_details?.prev_page_url ||
+                  epsLoading ||
+                  recommendationLoading
+                }
               >
                 Previous Page
               </Button>
@@ -229,7 +238,7 @@ const PaginateCard = ({
               <Button
                 ml={5}
                 onClick={() => pageChangeHandler(ep_details?.next_page_url)}
-                disabled={loading}
+                disabled={loading || epsLoading || recommendationLoading}
               >
                 Next Page
               </Button>
@@ -237,7 +246,9 @@ const PaginateCard = ({
           </Flex>
         )}
         {!isSingleAvailable && <Spacer />}
-        <Button onClick={downloadPageHandler}>Download all</Button>
+        <Button disabled={epsLoading || recommendationLoading}>
+          Download all
+        </Button>
         {isSingleAvailable && (
           <>
             <Spacer />
