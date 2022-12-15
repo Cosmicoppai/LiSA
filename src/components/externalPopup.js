@@ -45,7 +45,7 @@ const ExternalPlayerPopup = ({
         if (details) {
           await dispatch(
             playVideoExternal({
-              url: details[language],
+              manifest_url: details[language],
               player,
             })
           );
