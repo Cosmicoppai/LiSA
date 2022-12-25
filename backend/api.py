@@ -9,7 +9,7 @@ from starlette.responses import PlainTextResponse, JSONResponse, Response, FileR
 from typing import Tuple, Dict, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager
-from scraper import Animepahe, MyAL
+from scraper import Animepahe, MyAL, Manga, MangaKatana
 from video.streamer import Stream
 from config import ServerConfig, FileConfig
 from bs4 import BeautifulSoup
@@ -25,6 +25,7 @@ from urllib.parse import parse_qsl
 from utils.init_db import DB
 from utils import remove_file
 from sqlite3 import IntegrityError
+from sys import modules
 
 
 async def LiSA(request: Request):
@@ -55,11 +56,15 @@ async def search(request: Request):
             "ep_details": str
         }
     """
-    anime = request.query_params.get("anime", None)
+    _type = request.query_params.get("type", "anime")
 
+    return await getattr(modules[__name__], f"_search_{_type}")(request)
+
+
+async def _search_anime(request: Request):
+    anime = request.query_params.get("anime", None)
     if not anime:
         return await bad_request_400(request, msg="Pass an anime name")
-
     total_res = int(request.query_params.get("total_res", 9))
     if total_res <= 0:
         total_res = 1
@@ -78,6 +83,33 @@ async def search(request: Request):
 
     except ValueError:
         return await bad_request_400(request, msg="invalid query parameter: total_res should be type int")
+
+
+async def _search_manga(request: Request):
+    manga = request.query_params.get("manga", None)
+    page = request.query_params.get("page", 1)
+
+    try:
+        if not manga:
+            return await bad_request_400(request, msg="Pass Manga name")
+
+        page = int(page)
+        if page <= 0:
+            page = 1
+
+        total_res = int(request.query_params.get("total_res", 20))
+        if total_res <= 0:
+            total_res = 1
+        elif total_res > 20:
+            total_res = 20
+
+        return JSONResponse(await MangaKatana().search_manga(manga_name=manga, page_no=page, total_res=total_res))
+
+    except KeyError:
+        return await not_found_404(request, msg="manga not found")
+
+    except ValueError:
+        return await bad_request_400(request, msg="invalid query parameter: param should be of type int")
 
 
 async def get_ep_details(request: Request):
@@ -120,6 +152,15 @@ async def get_ep_details(request: Request):
         return await not_found_404(request, msg="Anime, Not yet Aired...")
     except JSONDecodeError:
         return await not_found_404(request, msg="Anime not found")
+
+
+async def get_chp_details(request: Request):
+    session = request.query_params.get("session", None)
+
+    if not session:
+        return await bad_request_400(request, msg="Pass Session")
+
+    return JSONResponse(MangaKatana().get_chp_session(session))
 
 
 async def get_stream_details(request: Request):
@@ -172,6 +213,15 @@ async def stream(request: Request):
 
     msg, status_code = await play(player_name.lower(), video_src)
     return JSONResponse({"error": msg}, status_code=status_code)
+
+
+async def read(request: Request):
+    chp_session = request.query_params.get("chp_session")
+
+    if not chp_session:
+        return await bad_request_400(request, msg="pass chapter session")
+
+    return JSONResponse(MangaKatana().get_manga_source_data(chp_session))
 
 
 async def download(request: Request):
@@ -355,6 +405,15 @@ async def proxy(request: Request):
 
 
 async def get_recommendation(request: Request):
+
+    _type = request.query_params.get("type", "anime")
+
+    if _type.lower() == "anime":
+        return await _anime_recommendation(request)
+    return await _manga_recommendation(request)
+
+
+async def _anime_recommendation(request: Request):
     anime_session = request.query_params.get("anime_session", None)
     if not anime_session:
         return await bad_request_400(request, msg="Pass Anime session")
@@ -367,6 +426,14 @@ async def get_recommendation(request: Request):
 
     except AttributeError or IndexError:
         return service_unavailable_503(request, msg="Try Again After Sometime")
+
+
+async def _manga_recommendation(request: Request):
+    manga_session = request.query_params.get("manga_session", None)
+    if not manga_session:
+        return await bad_request_400(request, msg="Pass Manga Session")
+
+    return JSONResponse(MangaKatana().get_recommendation(manga_session))
 
 
 async def watchlist(request: Request):
@@ -408,9 +475,11 @@ routes = [
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
+    Route("/chp_details", endpoint=get_chp_details, methods=["GET"]),
     Route("/recommendation", endpoint=get_recommendation, methods=["GET"]),
     Route("/stream_detail", endpoint=get_stream_details, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),
+    Route("/read", endpoint=read, methods=["GET"]),
     Route("/download", endpoint=download, methods=["POST"]),
     Route("/download/pause", endpoint=pause_download, methods=["POST"]),
     Route("/download/resume", endpoint=resume_download, methods=["POST"]),
