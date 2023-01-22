@@ -22,6 +22,7 @@ from utils import validate_path
 from sys import modules, exc_info
 from abc import ABC, abstractmethod
 import traceback
+from yarl import URL
 
 
 def _parse_resume_info(raw_file_data):
@@ -106,7 +107,6 @@ class Downloader(ABC):
         self.library, self.lib_data = library_data
         self.OUTPUT_LOC: Path = Path(file_data["output_dir"])
         self.SEGMENT_DIR: Path = Path(file_data["segment_dir"])
-        self._output_file = self.OUTPUT_LOC.joinpath(f"{self.file_data['file_name']}{self.OUTPUT_EXTENSION}")
         self.msg_system_in_pipe = msg_system_in_pipe
         self._resume_code = resume_code or self.file_data["file_name"]
         self._hooks = hooks
@@ -207,9 +207,7 @@ class MangaDownloader(Downloader):
             file_name, img_url, img_num = segment_data
             start_time = perf_counter()
             try:
-                async with client.get(img_url) as resp:
-                    if resp.status != 200:
-                        raise Exception
+                async with client.get(URL(img_url, encoded=True)) as resp:
 
                     resp_data: bytes = await resp.read()
 
@@ -229,6 +227,7 @@ class MangaDownloader(Downloader):
                 logging.info(f"Retrying segment-{img_num}")
             except Exception as e:
                 logging.error(e)
+                traceback.format_exception(*exc_info())
                 await download_queue.put(segment_data)
                 logging.info(f"Retrying segment-{img_num}")
 
@@ -294,7 +293,7 @@ class MangaDownloader(Downloader):
     def read_manifest(file_path: str) -> str | List[str]:
         with open(file_path, "r") as file:
             # This grabs the entire file as a string and split on new_line
-            return file.read().split("\n")
+            return file.read().strip().split("\n")
 
     @staticmethod
     def write_manifest(file_path: str, manifest: str | List[str]):
@@ -323,6 +322,7 @@ class VideoDownloader(Downloader):
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.M3U8(m3u8_str)
         super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
+        self._output_file = self.OUTPUT_LOC.joinpath(f"{self.file_data['file_name']}{self.OUTPUT_EXTENSION}")
 
     async def _download_worker(self, download_queue: asyncio.Queue, client: aiohttp.ClientSession,
                                decrypt_pipe_input=None, downloader: Downloader = None):
