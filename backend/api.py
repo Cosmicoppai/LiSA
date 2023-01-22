@@ -255,7 +255,7 @@ async def download(request: Request):
                 site = "mangakatana"
 
                 if jb.get("manga_session", None):
-                    await DownloadManager.schedule(typ, jb["manga_session"], site, page=jb.get("page_no", 1))
+                    await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1))
 
                 elif jb.get("chp_url", None):
                     await DownloadManager.schedule(typ, manifest_url=jb["chp_url"], site=site)
