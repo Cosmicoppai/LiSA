@@ -25,6 +25,7 @@ if __name__ == "__main__":
         DB()  # initialize the highest id
 
         Library.data = Manager().dict()  # update the dict into manager dict
+        Library.load_datas()  # load data of all tables in-mem
 
         """
         update configs and environment variables
