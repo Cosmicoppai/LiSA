@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException
 class Manga(ABC):
     site_url: str
     api_url: str
+    manifest_header: dict = get_headers()
     default_poster: str = "def_manga.png"
     session: requests.Session = requests.session()
     _SCRAPERS: Dict[str, object] = {}
@@ -71,24 +72,24 @@ class MangaKatana(Manga):
 
         resp_text, redirected = self.__get(f"{self.site_url}/page/{page_no}", ** {"params": query_params})
 
-        if not redirected:
-            scrape_func = self.__scrape_list
-        else:
-            scrape_func = self.__scrape_detail
+        resp = {"response": List[Dict[str, str]]}
 
         search_bs = BeautifulSoup(resp_text, 'html.parser')
 
+        if not redirected:
+            scrape_func = self.__scrape_list
+
+            pag_list = search_bs.find("ul", {"class": "uk-pagination"})
+
+            resp["prev"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) - 1}&query={manga_name}" if pag_list.find(
+                "a", {"class": "prev"}) else None
+
+            resp["next"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) + 1}&query={manga_name}" if pag_list.find(
+                "a", {"class": "next"}) else None
+        else:
+            scrape_func = self.__scrape_detail
+
         manga_list = scrape_func(search_bs)
-
-        resp = {"response": List[Dict[str, str]]}
-
-        pag_list = search_bs.find("ul", {"class": "uk-pagination"})
-
-        resp["prev"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) - 1}&manga={manga_name}" if pag_list.find(
-            "a", {"class": "prev"}) else None
-
-        resp["next"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) + 1}&manga={manga_name}" if pag_list.find(
-            "a", {"class": "next"}) else None
 
         resp["response"] = (await manga_list)[:total_res]
         return resp
@@ -173,16 +174,8 @@ class MangaKatana(Manga):
 
         return res
 
-    def get_manga_source_data(self, chp_session: str) -> List[str]:
-        resp_text, _ = self.__get(chp_session)
-        p = re.compile("var thzq=(.*);")  # get all image links from variable inside the script tag
-        m = p.search(resp_text)
-        if m:
-            chp_links = m.group(1).split(";")[0].strip("[]").replace("'", "").split(",")
-            if chp_links[-1] == "":
-                chp_links.pop()
-            return chp_links
-        return []
+    async def get_manga_source_data(self, chp_session: str) -> List[str]:
+        return (await self.get_manifest_file(chp_session))[0]
 
     def get_recommendation(self, manga_session: str) -> List[Dict[str, str]]:
         resp_text, _ = self.__get(manga_session)
@@ -213,3 +206,23 @@ class MangaKatana(Manga):
                 break
 
         return recommendations
+
+    async def get_manifest_file(self, chp_url) -> (List[str], _, ("series_name", "file_name")):
+        """
+        This function will return all images from a particular chapter
+        This func will call the self.get_manga_source_data
+        It is called by downloadManager
+        It is implemented as get_manifest_file to provide uniform interface
+
+        """
+        resp_text, _ = self.__get(chp_url)
+        p = re.compile("var thzq=(.*);")  # get all image links from variable inside the script tag
+        m = p.search(resp_text)
+        if m:
+            chp_links = m.group(1).split(";")[0].strip("[]").replace("'", "").split(",")
+            if chp_links[-1] == "":
+                chp_links.pop()
+            series_name = chp_url.split("/")[4].split(".")[0]
+            file_name = BeautifulSoup(resp_text, 'html.parser').find("select", {"name": "chapter_select"}).find("option", {"selected": "selected"}).text
+            return chp_links, _, [series_name, file_name]
+        return [], _, "", ""
