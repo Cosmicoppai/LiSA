@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import io
 from abc import ABC, abstractmethod
 from os import system
@@ -8,7 +10,7 @@ import shlex
 
 
 class Stream(ABC):
-    players: Dict[str, object] = {}
+    players: Dict[str, Stream] = {}
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
