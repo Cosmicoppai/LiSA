@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
 from typing import Tuple, Dict, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
-from video.downloader import DownloadManager
+from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, Manga, MangaKatana
 from video.streamer import Stream
 from config import ServerConfig, FileConfig
@@ -23,9 +23,10 @@ from starlette.routing import Mount
 from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
 from utils.init_db import DB
-from utils import remove_file
+from utils import remove_file, CustomStaticFiles
 from sqlite3 import IntegrityError
 from sys import modules
+from glob import glob
 
 
 async def LiSA(request: Request):
@@ -62,7 +63,7 @@ async def search(request: Request):
 
 
 async def _search_anime(request: Request):
-    anime = request.query_params.get("anime", None)
+    anime = request.query_params.get("query", None)
     if not anime:
         return await bad_request_400(request, msg="Pass an anime name")
     total_res = int(request.query_params.get("total_res", 9))
@@ -86,7 +87,7 @@ async def _search_anime(request: Request):
 
 
 async def _search_manga(request: Request):
-    manga = request.query_params.get("manga", None)
+    manga = request.query_params.get("query", None)
     page = request.query_params.get("page", 1)
 
     try:
@@ -203,46 +204,70 @@ async def stream(request: Request):
     if not video_src:
         return await bad_request_400(request, msg="pass valid manifest url or video id")
     if _id:
-        cur = DB.connection.cursor()
-        cur.execute("SELECT file_location FROM progress_tracker WHERE id=?", [_id, ])
-        res = cur.fetchone()
+        res = DBLibrary.get(filters={"id":_id, "type": "anime"}, query=["file_location"])
         if not res:
             return JSONResponse({"error": "Invalid Id"}, status_code=400)
-        video_src = res[0]
-        cur.close()
+        print(res)
+        video_src = res[0]["file_location"]
 
     msg, status_code = await play(player_name.lower(), video_src)
     return JSONResponse({"error": msg}, status_code=status_code)
 
 
-async def read(request: Request):
-    chp_session = request.query_params.get("chp_session")
+async def read(request: Request) -> List[str]:
+    chp_session, _id = request.query_params.get("chp_session", None), request.query_params.get("id", None)
 
-    if not chp_session:
-        return await bad_request_400(request, msg="pass chapter session")
+    if chp_session:
+        return JSONResponse(await MangaKatana().get_manga_source_data(chp_session))
+    elif _id:
+        res = DBLibrary.get(filters={"id": _id, "type": "image"}, query=["file_location"])
+        if not res:
+            return JSONResponse({"error": "Invalid Id"}, status_code=400)
+        img_urls = []
+        for file in glob(res[0]["file_location"] + f"/*img-*[0-3]{MangaDownloader.SEGMENT_EXTENSION}"):
+            file = file.lstrip(str(MangaDownloader.OUTPUT_LOC)).replace("\\", "/")
+            img_urls.append(f"{ServerConfig.API_SERVER_ADDRESS}/image/manga/{file}")
+        return JSONResponse(img_urls)
 
-    return JSONResponse(MangaKatana().get_manga_source_data(chp_session))
+    return await bad_request_400(request, msg="pass chapter session or manga id")
 
 
 async def download(request: Request):
 
     jb = request.state.body
 
-    anime_session = jb.get("anime_session", None)  # get anime_session
-
     try:
+        # if anime session or manga_session exists start batch download
 
-        if anime_session:  # if anime session exists start batch download
-            await DownloadManager.schedule(anime_session=anime_session, site="animepahe", page=jb.get("page_no", 1))
-        else:
+        typ = "video" if (jb.get("anime_session", None) or jb.get("manifest_url", None)) else "image"
 
-            manifest_url = jb.get("manifest_url", None)  # if anime_session doesn't exists get manifest_url
+        match typ:
+            case "video":
+                site = "animepahe"
 
-            if not manifest_url:  # if manifest url doesn't exist (i.e. both session and manifest url are absent)
-                return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+                if jb.get("anime_session", None):
+                    await DownloadManager.schedule(typ, jb["anime_session"], site, page=jb.get("page_no", 1))
 
-            await DownloadManager.schedule(manifest_url=parse_qsl(manifest_url)[0][1], site="animepahe")
+                elif jb.get("manifest_url", None):
+                    await DownloadManager.schedule(typ, manifest_url=parse_qsl(jb["manifest_url"])[0][1], site=site)
+
+            case "image":
+                site = "mangakatana"
+
+                if jb.get("manga_session", None):
+                    await DownloadManager.schedule(typ, jb["manga_session"], site, page=jb.get("page_no", 1))
+
+                elif jb.get("chp_url", None):
+                    await DownloadManager.schedule(typ, manifest_url=jb["chp_url"], site=site)
+
+                else:
+                    return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
+
+            case _:
+                print("fuck you")
+
         return JSONResponse({"status": "started"})
+
     except ValueError as err:
         return await bad_request_400(request, msg=err.__str__())
 
@@ -489,7 +514,8 @@ routes = [
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route("/proxy", endpoint=proxy, methods=["GET"]),
     Route("/watchlist", endpoint=watchlist, methods=["GET", "POST", "DELETE"]),
-    Mount('/default', app=StaticFiles(directory=FileConfig.DEFAULT_DIR, check_dir=True), name="static"),
+    Mount('/default', app=CustomStaticFiles(directory=FileConfig.DEFAULT_DIR), name="static"),
+    Mount("/image", app=CustomStaticFiles(directory=FileConfig.DEFAULT_DOWNLOAD_LOCATION), name="image-router"),
 ]
 
 exception_handlers = {
@@ -509,7 +535,6 @@ app = Starlette(
     routes=routes,
     exception_handlers=exception_handlers,
     middleware=middleware,
-    on_startup=[DBLibrary().load_data],
 )
 
 
