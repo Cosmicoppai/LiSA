@@ -253,13 +253,14 @@ class Animepahe(Anime):
 
         return resp
 
-    async def get_manifest_file(self, kwik_url: str) -> (str, str, str):
+    async def get_manifest_file(self, kwik_url: str) -> ('manifest_file', 'uwu_root_domain', 'file_name'):
         hls_data = self.get_hls_playlist(kwik_url)
 
         uwu_url = hls_data["manifest_url"]
 
         return self.session.get(uwu_url, headers=get_headers(
-            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_url.split("/uwu.m3u8")[0], hls_data["file_name"].strip(".mp4")
+            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_url.split("/uwu.m3u8")[0], \
+               [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 
     async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
 
