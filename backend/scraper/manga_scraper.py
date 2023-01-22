@@ -226,3 +226,13 @@ class MangaKatana(Manga):
             file_name = BeautifulSoup(resp_text, 'html.parser').find("select", {"name": "chapter_select"}).find("option", {"selected": "selected"}).text
             return chp_links, _, [series_name, file_name]
         return [], _, "", ""
+
+    def get_links(self, manga_session: str, page: int = 1) -> List[str]:
+        resp_text, _ = self.__get(manga_session)
+        resp_bs = BeautifulSoup(resp_text, 'html.parser')
+        res = []
+        for tr in resp_bs.find("div", {"class": "chapters"}).find_all("tr"):
+            res.append(tr.find("div", {"class": "chapter"}).find("a")["href"])
+
+        return res
+
