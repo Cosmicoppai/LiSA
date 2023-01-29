@@ -406,6 +406,7 @@ class Animepahe(Anime):
 
 class MyAL:
     site_url: str = "https://myanimelist.net"
+    session: requests.Session = requests.session()
 
     anime_types_dict = {
         "all_anime": "",
@@ -445,7 +446,7 @@ class MyAL:
             'limit': limit,
         }
 
-        top_anime_response = requests.get(f'{self.site_url}/topanime.php', params=top_anime_params, headers=top_anime_headers)
+        top_anime_response = self.session.get(f'{self.site_url}/topanime.php', params=top_anime_params, headers=top_anime_headers)
 
         bs_top = BeautifulSoup(top_anime_response.text, 'html.parser')
 
