@@ -2,8 +2,6 @@
 
 This file will handle the saving and extraction of metadata about downloaded files.
 
-Example: {file_name: {total_size: int, location: str}}
-
 """
 from __future__ import annotations
 
@@ -18,6 +16,7 @@ from sqlite3 import IntegrityError
 class Library(ABC):
     data: Dict[int, Dict[str, Any]] = {}
     _libraries: List[Library] = []
+    table_name: str
     fields: str = ""
     oid: str = "id"
 
