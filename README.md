@@ -179,7 +179,7 @@ Note: In the following version the user can only download from animepahe, more w
 |--- |--- |--- |--- |
 | [AnimePahe](https://animepahe.com/) | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
 
-## 📺 Supported External Players
+## 📺 Supported External Players:
 
 ### MPV
 
