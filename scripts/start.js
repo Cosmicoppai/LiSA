@@ -41,7 +41,7 @@ class Starter {
           const expectedErrors = ["ECONNRESET", "ECONNREFUSED"];
 
           // Send command to Flask server to quit and close
-          get(`http://localhost:3967/quit`).catch(
+          get(`http://localhost:3000/quit`).catch(
             (error) =>
               !expectedErrors.includes(error.code) && console.log(error)
           );

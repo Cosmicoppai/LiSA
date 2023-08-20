@@ -40,7 +40,7 @@ export const searchAnimeList = (query) => async (dispatch) => {
     dispatch({ type: ANIME_SEARCH_REQUEST, payload: {} });
 
 
-    const { data } = await server.get(`/search?anime=${query}`);
+    const { data } = await server.get(`/search?type=anime&query=${query}`);
     dispatch({ type: ANIME_SEARCH_SUCCESS, payload: data });
   } catch (error) {
     dispatch({ type: ANIME_SEARCH_FAIL, payload: error.response.data });

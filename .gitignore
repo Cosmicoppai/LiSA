@@ -21,3 +21,5 @@ downloads
 
 *.exe
 backend/lisa
+
+env/
