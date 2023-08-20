@@ -27,10 +27,11 @@ from utils import remove_file, CustomStaticFiles
 from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
+import logging
+from io import BytesIO
 
 
 async def LiSA(request: Request):
-
     return Response("All servers started successfully")
 
 
@@ -75,7 +76,7 @@ async def _search_anime(request: Request):
     try:
 
         scraper = Animepahe()
-        anime_details = scraper.search_anime(input_anime=anime)
+        anime_details = await scraper.search_anime(input_anime=anime)
 
         return JSONResponse(scraper.build_search_resp(anime_details[:total_res]))
 
@@ -133,22 +134,21 @@ async def get_ep_details(request: Request):
         }
     """
     anime_id = request.query_params.get("anime_id", None)
+    anime_session = request.query_params.get("anime_session", None)
+
+    if not anime_session and not anime_id:
+        return await bad_request_400(request, msg="Pass anime session or anime-id")
+
+    scraper = Animepahe()
 
     if anime_id:
-        resp = requests.get(f"{Animepahe.site_url}/a/{anime_id}", allow_redirects=False)
-        if resp.status_code != 302:
-            return await service_unavailable_503(request)
+        resp = await scraper.get(f"{Animepahe.site_url}/a/{anime_id}")
         anime_session = resp.headers["location"].strip(f"{Animepahe.site_url}/anime/")
-    else:
-        anime_session = request.query_params.get("anime_session", None)
-
-    if not anime_session:
-        return await bad_request_400(request, msg="Pass anime session")
 
     page = request.query_params.get("page", "1")
 
     try:
-        return JSONResponse(await Animepahe().get_episode_details(anime_session=anime_session, page_no=page))
+        return JSONResponse(await scraper.get_episode_details(anime_session=anime_session, page_no=page))
     except TypeError:
         return await not_found_404(request, msg="Anime, Not yet Aired...")
     except JSONDecodeError:
@@ -179,20 +179,30 @@ async def get_stream_details(request: Request):
             "quality_audio":{"kwik_pahewin":str(url)}, ...
         }
     """
-    # anime_session = request.query_params.get("anime_session", None)
+    anime_session = request.query_params.get("anime_session", None)
     episode_session = request.query_params.get("ep_session", None)
 
-    if not episode_session:  # or episode_session is None:
-        return await bad_request_400(request, msg="Pass Episode sessions")
+    if not episode_session or not anime_session:  # or episode_session is None:
+        return await bad_request_400(request, msg="Pass Anime & Episode sessions")
 
     try:
-        return JSONResponse(Animepahe().get_stream_data(episode_session=episode_session))
-    except JSONDecodeError:
-        return await not_found_404(request, msg="Pass valid anime and episode sessions")
+        stream_detail = await Animepahe().get_stream_data(anime_session, episode_session)
+        for audio, streams in stream_detail.items():
+            master_manifest_url = f"{ServerConfig.API_SERVER_ADDRESS}/master_manifest?kwik_url="
+            for stream_data in streams:
+                print(stream_data)
+                master_manifest_url += f"{ServerConfig.API_SERVER_ADDRESS}/manifest?kwik_url={stream_data[1]}-{stream_data[0]},"
+
+            stream_detail[audio] = master_manifest_url
+
+        return JSONResponse(stream_detail)
+
+    except KeyError as err:
+        logging.error(err)
+        return await service_unavailable_503(request, "Try again after sometime!")
 
 
 async def stream(request: Request):
-
     jb = request.state.body
 
     player_name = jb.get("player", None)
@@ -204,10 +214,9 @@ async def stream(request: Request):
     if not video_src:
         return await bad_request_400(request, msg="pass valid manifest url or video id")
     if _id:
-        res = DBLibrary.get(filters={"id":_id, "type": "anime"}, query=["file_location"])
+        res = DBLibrary.get(filters={"id": _id, "type": "anime"}, query=["file_location"])
         if not res:
             return JSONResponse({"error": "Invalid Id"}, status_code=400)
-        print(res)
         video_src = res[0]["file_location"]
 
     msg, status_code = await play(player_name.lower(), video_src)
@@ -233,7 +242,6 @@ async def read(request: Request) -> List[str]:
 
 
 async def download(request: Request):
-
     jb = request.state.body
 
     try:
@@ -264,7 +272,7 @@ async def download(request: Request):
                     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
 
             case _:
-                print("fuck you")
+                logging.error("fuck you")
 
         return JSONResponse({"status": "started"})
 
@@ -286,7 +294,6 @@ async def pause_download(request: Request):
 
 
 async def resume_download(request: Request):
-
     try:
         task_ids = request.state.body.get("id", None)
         if not task_ids:
@@ -373,7 +380,7 @@ async def top_anime(request: Request):
     if not anime_type or anime_type.lower() not in MyAL.anime_types_dict:
         return await bad_request_400(request, msg="Pass valid anime type")
 
-    top_anime_response = MyAL().get_top_anime(anime_type=anime_type, limit=limit)
+    top_anime_response = await MyAL().get_top_anime(anime_type=anime_type, limit=limit)
 
     if not top_anime_response["next_top"] and not top_anime_response["prev_top"]:
         return await not_found_404(request, msg="limit out of range")
@@ -390,13 +397,9 @@ async def get_master_manifest(request: Request):
     if kwik_urls[-1] == "":
         kwik_urls.pop()
 
-    with open(Animepahe.master_manifest_location, "w+") as f:
-        try:
-            f.write(build_master_manifest(kwik_urls))
-        except ValueError as err_msg:
-            return await bad_request_400(request, msg=str(err_msg))
-
-    return FileResponse(Animepahe.master_manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.master_manifest_filename)
+    return Response(build_master_manifest(kwik_urls),
+                    media_type="application/vnd.apple.mpegurl",
+                    headers={"Content-Disposition": "attachment; filename=uwu.m3u8"})
 
 
 async def get_manifest(request: Request):
@@ -408,10 +411,11 @@ async def get_manifest(request: Request):
 
         response, uwu_root_domain, _ = await Animepahe().get_manifest_file(kwik_url)
 
-        with open(Animepahe.manifest_location, "w+") as f:
-            f.write(response.replace(uwu_root_domain, f"{ServerConfig.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"))
+        return Response(
+            response.replace(uwu_root_domain, f"{ServerConfig.API_SERVER_ADDRESS}/proxy?url={uwu_root_domain}"),
+            media_type="application/vnd.apple.mpegurl",
+            headers={"Content-Disposition": "attachment; filename=uwu.m3u8"})
 
-        return FileResponse(Animepahe.manifest_location, media_type="application/vnd.apple.mpegurl", filename=Animepahe.manifest_filename)
     except ValueError as err_msg:
         return await bad_request_400(request, msg=str(err_msg))
 
@@ -430,7 +434,6 @@ async def proxy(request: Request):
 
 
 async def get_recommendation(request: Request):
-
     _type = request.query_params.get("type", "anime")
 
     if _type.lower() == "anime":
@@ -476,17 +479,18 @@ async def watchlist(request: Request):
 
             cur = DB.connection.cursor()
 
-            cur.execute("INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
-                        " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
-                         jb["year"], jb["score"], jb["poster"], ep_details))
+            cur.execute(
+                "INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
+                 jb["year"], jb["score"], jb["poster"], ep_details))
 
             DB.connection.commit()
             return JSONResponse(content="Anime successfully added in watch later", status_code=201)
 
         cur = DB.connection.cursor()
         # id validation is bypassed by choice
-        cur.execute("DELETE FROM watchlist where anime_id=?", (request.query_params["anime_id"], ))
+        cur.execute("DELETE FROM watchlist where anime_id=?", (request.query_params["anime_id"],))
         DB.connection.commit()
         return Response(status_code=204)
     except KeyError as _msg:

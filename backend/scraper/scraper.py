@@ -1,5 +1,6 @@
 from __future__ import annotations
-import requests
+import aiohttp
+import asyncio
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple, Any
@@ -10,14 +11,14 @@ import sys
 from pathlib import Path
 import string
 from json import JSONDecodeError
+from .base import Scraper
 
 
-class Anime(ABC):
+class Anime(Scraper):
     site_url: str
     api_url: str
     default_poster: str = "kaicons.jpg"
     manifest_header: dict
-    session: requests.Session = requests.session()
     _SCRAPERS: Dict[str, object] = {}
 
     def __init_subclass__(cls, **kwargs):
@@ -29,7 +30,7 @@ class Anime(ABC):
         return cls._SCRAPERS.get(site_name.lower(), None)
 
     @abstractmethod
-    def search_anime(self, anime_name: str):
+    async def search_anime(self, anime_name: str):
         ...
 
     @abstractmethod
@@ -37,23 +38,19 @@ class Anime(ABC):
         ...
 
     @abstractmethod
-    def get_episode_stream_data(self, episode_session: str):
+    async def get_stream_data(self, anime_session: str, episode_session: str):
         ...
 
     @abstractmethod
-    def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
+    async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
         ...
 
 
 class Animepahe(Anime):
     _SITE_NAME: str = "animepahe"
-    site_url: str = "https://animepahe.com"
-    api_url: str = "https://animepahe.com/api"
+    site_url: str = "https://animepahe.ru"
+    api_url: str = "https://animepahe.ru/api"
     manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
-    manifest_location = Path(__file__).resolve().parent.parent.joinpath("uwu.m3u8")
-    manifest_filename = "uwu.m3u8"
-    master_manifest_location = Path(__file__).resolve().parent.parent.joinpath("master.m3u8")
-    master_manifest_filename = "uwu.m3u8"
 
     @staticmethod
     def __minify_text(text: str) -> str:
@@ -63,10 +60,7 @@ class Animepahe(Anime):
     def __get_minified(self, path: str) -> str:
         return self.__get_minified_uri(f"{self.site_url}{path}")
 
-    def __get_api(self, data: dict, headers: dict = get_headers()) -> str:
-        return self.session.get(f"{self.api_url}", params=data, headers=headers).json()
-
-    def search_anime(self, input_anime: str):
+    async def search_anime(self, input_anime: str):
         """A scraper for searching an anime user requested
 
         Args:
@@ -81,9 +75,9 @@ class Animepahe(Anime):
             'q': input_anime,
         }
 
-        return self.__get_api(search_params)["data"]
+        return (await self.get_api(search_params))["data"]
 
-    def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
+    async def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
         """scraping the sessions of all the episodes of an anime
 
         Args:
@@ -102,53 +96,43 @@ class Animepahe(Anime):
             'page': page_no,
         }
 
-        return self.__get_api(episodes_params, episodes_headers)
+        return await self.get_api(episodes_params, episodes_headers)
 
     async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
-        episodes = {"ep_details": [], "description": {}}
+        episodes = {"ep_details": []}
 
         try:
-            episode_data = self.get_episode_sessions(anime_session=anime_session, page_no=page_no)
+            episode_data = await self.get_episode_sessions(anime_session=anime_session, page_no=page_no)
 
             if page_no == "1":
                 description = self.get_anime_description(anime_session)
-                episodes["recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
-
-            episodes["total_page"] = episode_data.get("last_page", -1)
-            if episode_data.get("current_page") <= episode_data.get("last_page", -1):
-                next_page_url = episode_data.get("next_page_url", None)
-                if next_page_url:
-                    next_page_url = next_page_url.replace(f"{self.api_url}?",
-                                                          f"/ep_details?anime_session={anime_session}&")
-                    episodes["next_page_url"] = next_page_url
-                else:
-                    episodes["next_page_url"] = next_page_url
-
-                prev_page_url = episode_data.get("prev_page_url", None)
-                if prev_page_url:
-                    prev_page_url = prev_page_url.replace(f"{self.api_url}?",
-                                                          f"/ep_details?anime_session={anime_session}&")
-                    episodes["prev_page_url"] = prev_page_url
-                else:
-                    episodes["prev_page_url"] = prev_page_url
-
-                episode_session = episode_data.get("data", None)
-                for ep in episode_session:
-                    episodes["ep_details"].append(
-                        {ep["episode"]: {
-                            "stream_detail": f'{ServerConfig.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}',
-                            "snapshot": ep["snapshot"], "duration": ep["duration"]}})
-
-                if page_no == "1":
-                    episodes["description"] = await description
-                else:
-                    del episodes["description"]
-                return episodes
-            else:
-                episodes["next_page"] = episode_data.get("next_page_url")
                 episodes[
-                    "previous_page"] = f"/ep_details?anime_session={anime_session}&page={episode_data['last_page']}"
-                return episodes
+                    "recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?anime_session={anime_session}"
+
+            episodes["total_page"] = episode_data.get("last_page", 0)
+            next_page_url = episode_data.get("next_page_url", None)
+            if next_page_url:
+                next_page_url = next_page_url.replace(f"{self.api_url}?",
+                                                      f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&")
+            episodes["next_page_url"] = next_page_url
+
+            prev_page_url = episode_data.get("prev_page_url", None)
+            if prev_page_url:
+                prev_page_url = prev_page_url.replace(f"{self.api_url}?",
+                                                      f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&")
+            episodes["prev_page_url"] = prev_page_url
+
+            episode_session = episode_data.get("data", None)
+            for ep in episode_session:
+                episodes["ep_details"].append(
+                    {ep["episode"]: {
+                        "stream_detail": f'{ServerConfig.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}&anime_session={anime_session}',
+                        "snapshot": ep["snapshot"], "duration": ep["duration"]}})
+
+            if page_no == "1":
+                episodes["description"] = await description
+
+            return episodes
         except TypeError:
             raise TypeError
         except JSONDecodeError:
@@ -178,11 +162,10 @@ class Animepahe(Anime):
         }
 
         description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
-        description_response = self.session.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)
-        if description_response.status_code != 200:
-            return description
 
-        description_bs = BeautifulSoup(description_response.text, 'html.parser')
+        description_bs = BeautifulSoup(
+            (await self.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)),
+            'html.parser')
 
         synopsis = description_bs.find('div', {'class': 'anime-synopsis'})
         if synopsis:
@@ -193,8 +176,9 @@ class Animepahe(Anime):
         for var in scripts:
             _var = var.strip("\n\tlet ")
             if _var[:7] == "preview":
-                url = _var[_var.index("=")+1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
-                if url.find("https://www.youtube.com") == 0 or url.find("https://youtube.com") == 0 or url.find("https://youtu.be") == 0:
+                url = _var[_var.index("=") + 1:].strip('"').strip("'").strip(" ").strip("' ").strip('" ')
+                if url.find("https://www.youtube.com") == 0 or url.find("https://youtube.com") == 0 or url.find(
+                        "https://youtu.be") == 0:
                     description["youtube_url"] = url
                 else:
                     description["youtube_url"] = None
@@ -218,10 +202,11 @@ class Animepahe(Anime):
 
         return description
 
-    def get_episode_stream_data(self, episode_session: str) -> Dict[str, List[Dict[str, str]]]:
+    async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[str, List[Dict[str, str]]]:
         """getting the streaming details
 
         Args:
+            anime_session (str): Anime session
             episode_session (str): session of an episode (changes after each interval)
 
         Returns:
@@ -229,47 +214,42 @@ class Animepahe(Anime):
                 'data':[{'quality': {'kwik_pahewin': str(url)}}]
             }
         """
-        # episode_session = self.episode_session_dict[episode_no]
-        # ep_headers = get_headers(extra='play/{}/{}'.format(anime_session, episode_session))
 
-        ep_params = {
-            'm': 'links',
-            'id': episode_session,
-            'p': 'kwik',
-        }
-
-        return self.__get_api(ep_params)["data"]
-
-    def get_stream_data(self, episode_session: str):
         resp: Dict[str, str] = {}
 
-        for data in self.get_episode_stream_data(episode_session=episode_session):
-            for quality, quality_data in data.items():
-                """
-                    stream_dt (dict): {'quality': stream url (str)}
-                """
-                aud, kwik_url = quality_data["audio"], quality_data["kwik"]
-                resp[aud] = resp.get(aud, f"{ServerConfig.API_SERVER_ADDRESS}/master_manifest?kwik_url=") + f"{ServerConfig.API_SERVER_ADDRESS}/manifest?kwik_url={kwik_url}-{quality}" + ","
+        streaming_page = await self.get(f"{self.site_url}/play/{anime_session}/{episode_session}",
+                                        headers=get_headers({"referer": "{}/{}".format(self.site_url, anime_session)}))
 
+        for data in BeautifulSoup(streaming_page, 'html.parser').find("div", {"id": "resolutionMenu"}).find_all("button"):
+            quality, kwik_url, aud = data["data-resolution"], data["data-src"], data["data-audio"]
+            """
+                stream_dt (dict): {'quality': stream url (str)}
+            """
+            if not resp.get(aud, None):
+                resp[aud] = []
+            resp[aud].append((quality, kwik_url))
         return resp
 
     async def get_manifest_file(self, kwik_url: str) -> ('manifest_file', 'uwu_root_domain', 'file_name'):
-        hls_data = self.get_hls_playlist(kwik_url)
+        hls_data = await self.get_hls_playlist(kwik_url)
 
         uwu_url = hls_data["manifest_url"]
 
-        return self.session.get(uwu_url, headers=get_headers(
-            extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})).text, uwu_url.split("/uwu.m3u8")[0], \
-               [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
+        return await self.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})),\
+                                    uwu_url.split("/uwu.m3u8")[0], \
+                                    [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 
     async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
 
-        resp = self.session.get(f"{self.site_url}/anime/{anime_session}", params=anime_session, headers=get_headers(extra={"referer": self.site_url}))
+        try:
 
-        if resp.status_code != 200:
+            resp = await self.get(f"{self.site_url}/anime/{anime_session}", {"anime_session": anime_session},
+                                  headers=get_headers(extra={"referer": self.site_url}))
+
+        except aiohttp.ClientResponseError:
             raise ValueError("Invalid anime session")
 
-        rec_bs = BeautifulSoup(resp.text, 'html.parser')
+        rec_bs = BeautifulSoup(resp, 'html.parser')
 
         col_2s = rec_bs.find_all("div", {"class": 'col-2'})
         col_9s = rec_bs.find_all("div", {"class": 'col-9'})
@@ -292,7 +272,9 @@ class Animepahe(Anime):
             season, year = self._strip_split(data[2])
 
             session = self._strip_split(col_2.find("a", href=True)["href"], strip_chr="/", split_chr="/")[1]
-            poster = col_2.find("img").get("data-src", f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}").replace(".th.jpg", ".jpg")
+            poster = col_2.find("img").get("data-src",
+                                           f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}").replace(
+                ".th.jpg", ".jpg")
 
             rec_list.append({"jp_name": title,
                              "no_of_episodes": ep,
@@ -326,41 +308,39 @@ class Animepahe(Anime):
                 "year": anime_detail.get("year", None),
                 "score": anime_detail.get("score", 0),
                 "session": anime_detail.get("session", None),
-                "poster": anime_detail.get("poster", f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}"),
+                "poster": anime_detail.get("poster",
+                                           f"{ServerConfig.API_SERVER_ADDRESS}/default/{self.default_poster}"),
                 "ep_details": f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_detail['session']}",
                 "anime_id": anime_detail.get("id", None)
             })
 
         return search_response
 
-    def get_episodes(self, anime_session: str, page: int = 1) -> list:
-        episode_ids = []
-        data = self.__get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page})
-        episode_ids += [x["session"] for x in data["data"]]
+    async def __get_episodes(self, anime_session: str, page: int = 1) -> list:
+        return [x["session"] for x in
+                (await self.get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page}))[
+                    "data"]]
 
-        return episode_ids
-
-    def get_links(self, anime_session: str, page: int = 1) -> list:
+    async def get_links(self, anime_session: str, page: int = 1, aud: str = "jap") -> list:
         links = []
-        for episode in self.get_episodes(anime_session, page):
-            data = self.__get_api(
-                {"m": "links", "id": anime_session, "session": episode, "p": "kwik"}
-            )
-            best_q = {"id": 0, "res": 0}
-            for i, x in enumerate(data["data"]):
-                for xx in x:
-                    if int(xx) > best_q["res"]:
-                        best_q["res"] = int(xx)
-                        best_q["id"] = i
-            links.append(data["data"][best_q["id"]][str(best_q["res"])]["kwik"])
+
+        stream_datas = await asyncio.gather(
+            *[self.get_stream_data(anime_session, episode) for episode in
+              await self.__get_episodes(anime_session, page)])
+        for stream_datas in stream_datas:
+            best_quality: Tuple = (0, "")
+            for _stream_data in stream_datas[aud]:
+                best_quality = _stream_data if best_quality[0] < _stream_data[0] else ...
+            links.append(best_quality[1])
         return links
 
-    def get_hls_playlist(self, kwik_url: str) -> dict:
-        stream_response = self.session.get(kwik_url, headers=get_headers(extra={"referer": self.site_url}))
-        if stream_response.status_code != 200:
+    async def get_hls_playlist(self, kwik_url: str) -> dict:
+        try:
+            stream_response = await self.get(kwik_url, headers=get_headers(extra={"referer": self.site_url}))
+        except aiohttp.ClientResponseError:
             raise ValueError("Invalid Kwik URL")
 
-        data = self.__minify_text(stream_response.text)
+        data = self.__minify_text(stream_response)
         rx = re.compile(r"returnp}\('(.*?)',(\d*),(\d*),'(.*?)'.split")
         title_re = re.compile(r"<title>(.*?)</title>")
         title = title_re.search(data).group(1)
@@ -404,9 +384,8 @@ class Animepahe(Anime):
         return p
 
 
-class MyAL:
+class MyAL(Scraper):
     site_url: str = "https://myanimelist.net"
-    session: requests.Session = requests.session()
 
     anime_types_dict = {
         "all_anime": "",
@@ -421,7 +400,7 @@ class MyAL:
         "favorite": "favorite",
     }
 
-    def get_top_anime(self, anime_type: str, limit: str):
+    async def get_top_anime(self, anime_type: str, limit: str):
         """request to scrape top anime from MAL website
         Args:
             anime_type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
@@ -446,9 +425,8 @@ class MyAL:
             'limit': limit,
         }
 
-        top_anime_response = self.session.get(f'{self.site_url}/topanime.php', params=top_anime_params, headers=top_anime_headers)
-
-        bs_top = BeautifulSoup(top_anime_response.text, 'html.parser')
+        bs_top = BeautifulSoup(await self.get(f'{self.site_url}/topanime.php', top_anime_params, top_anime_headers),
+                               'html.parser')
 
         rank = bs_top.find_all("span", {"class": ['rank1', 'rank2', 'rank3', 'rank4']})
         ranks = []

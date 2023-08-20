@@ -555,8 +555,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     @staticmethod
     async def __get_manifest__(scraper: Anime | Manga, session: str, manifest_url: str, page: int = 1) -> str:
         if session:
-            tasks = [scraper.get_manifest_file(link) for link in scraper.get_links(session, page)]
-            manifest_data = await asyncio.gather(*tasks)
+            manifest_data = await asyncio.gather(*[scraper.get_manifest_file(link) for link in await scraper.get_links(session, page)])
         else:
             manifest_data = [(await scraper.get_manifest_file(manifest_url))]
 

@@ -9,6 +9,7 @@ from api import start_api_server
 from multiprocessing import Pipe, Manager, freeze_support
 from video.downloader import DownloadManager
 from video.library import Library
+from scraper import Scraper
 
 
 def run_api_server(port: int = 8000):
