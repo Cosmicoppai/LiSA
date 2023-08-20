@@ -136,8 +136,7 @@ Note:
 ![Explore Page](demo_images/ss_explore.png)
 *Explore Page with filters*
 
-<video src='https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4' width=180></video>
-*Demo*
+https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4
 
 ## Future Plans
 
