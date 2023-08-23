@@ -4,6 +4,7 @@ import aiohttp
 from utils.headers import get_headers
 from json import loads
 import logging
+from random import choice
 
 
 class Scraper(ABC):
