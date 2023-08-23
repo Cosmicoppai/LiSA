@@ -70,7 +70,8 @@ const createMainWindow = () => {
   // executeOnWindow(isPageLoaded, handleLoad);
 
   if (isDevMode) {
-    mainWindow.loadURL("http://localhost:3967");
+    const REACT_PORT = process.argv[2];
+    mainWindow.loadURL(`http://localhost:${REACT_PORT}`);
 
     mainWindow.hide();
 
@@ -174,7 +175,8 @@ app.whenReady().then(async () => {
     //   shell: true,
     //   stdio: "inherit",
     // });
-    var devProc = spawn("python backend/LiSA.py", {
+    const PYTHON_SERVER = process.argv[3];
+    var devProc = spawn(`python backend/LiSA.py ${PYTHON_SERVER}`, {
       detached: true,
       shell: true,
     });
@@ -259,22 +261,22 @@ app.whenReady().then(async () => {
 
       // // spawn(`powershell.exe -Command kill ${devProc.pid}`);
 
-      // devProc.kill("SIGHUP");
+      // devProc.kill();
 
       // psTree(devProc.pid, function (err, children) {
-      //   console.log(`asdasdasdasdasd`)
-      //   console.log(err)
-      //   console.log(children)
-      //   devProc.spawn(
-      //     "kill",
-      //     ["-9"].concat(
-      //       children.map(function (p) {
-      //         console.log(`inside map child`)
-      //         console.log(children)
-      //         return p.PID;
-      //       })
-      //     )
-      //   );
+      //     console.log(`asdasdasdasdasd`)
+      //     console.log(err)
+      //     console.log(children)
+      //     devProc.spawn(
+      //         "kill",
+      //         ["-9"].concat(
+      //             children.map(function (p) {
+      //                 console.log(`inside map child`)
+      //                 console.log(children)
+      //                 return p.PID;
+      //             })
+      //         )
+      //     );
       // });
 
       spawn("taskkill /IM LiSA.exe /F", {

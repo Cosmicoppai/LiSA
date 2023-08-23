@@ -1,7 +1,7 @@
 import logging
 from video.downloader.msg_system import MsgSystem
 from threading import Thread
-from sys import stdout
+from sys import stdout, argv
 import asyncio
 from utils import DB
 from config import ServerConfig, parse_config_json, update_environ, FileConfig
@@ -14,7 +14,9 @@ from scraper import Scraper
 
 def run_api_server(port: int = 8000):
     ServerConfig.API_SERVER_ADDRESS = f"http://localhost:{port}"
-    print(f"server started on port: {port} \n You can access API SERVER on {ServerConfig.API_SERVER_ADDRESS}")
+    print(
+        f"server started on port: {port} \n You can access API SERVER on {ServerConfig.API_SERVER_ADDRESS}"
+    )
     start_api_server(port=port)
 
 
@@ -34,7 +36,10 @@ if __name__ == "__main__":
         parse_config_json(FileConfig.CONFIG_JSON_PATH)
         update_environ()
 
-        t1 = Thread(target=run_api_server, args=(6969, ))
+        # For your development cosmic, you don't need to change your testing port number
+        PORT = int(argv[1]) if (len(argv) >= 2 and argv[1]) else 6969
+
+        t1 = Thread(target=run_api_server, args=(PORT,))
         t1.daemon = True
         t1.start()
 
