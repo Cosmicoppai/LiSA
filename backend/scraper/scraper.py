@@ -473,7 +473,7 @@ class MyAL(Scraper):
                 rank = "na"
             top_anime.append({"rank": rank, "img_url": imgs[idx], "title": title[idx].text, "anime_type": a_type[idx],
                               "episodes": episodes[idx].replace('eps', ''), "score": score[idx * 2].text,
-                              "anime_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?anime={title[idx].text}&total_res=1'})
+                              "anime_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type=anime&query={title[idx].text}&total_res=1'})
 
         response: Dict[str, Any] = {"data": top_anime}
 

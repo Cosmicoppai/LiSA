@@ -155,13 +155,13 @@ async def get_ep_details(request: Request):
         return await not_found_404(request, msg="Anime not found")
 
 
-async def get_chp_details(request: Request):
+async def get_manga_detail(request: Request):
     session = request.query_params.get("session", None)
 
     if not session:
         return await bad_request_400(request, msg="Pass Session")
 
-    return JSONResponse(MangaKatana().get_chp_session(session))
+    return JSONResponse(await MangaKatana().get_chp_session(session))
 
 
 async def get_stream_details(request: Request):
@@ -265,8 +265,8 @@ async def download(request: Request):
                 if jb.get("manga_session", None):
                     await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1))
 
-                elif jb.get("chp_url", None):
-                    await DownloadManager.schedule(typ, manifest_url=jb["chp_url"], site=site)
+                elif jb.get("chp_session", None):
+                    await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site)
 
                 else:
                     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
@@ -461,7 +461,7 @@ async def _manga_recommendation(request: Request):
     if not manga_session:
         return await bad_request_400(request, msg="Pass Manga Session")
 
-    return JSONResponse(MangaKatana().get_recommendation(manga_session))
+    return JSONResponse(await MangaKatana().get_recommendation(manga_session))
 
 
 async def watchlist(request: Request):
@@ -504,7 +504,7 @@ routes = [
     Route("/search", endpoint=search, methods=["GET"]),
     Route("/top_anime", endpoint=top_anime, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
-    Route("/chp_details", endpoint=get_chp_details, methods=["GET"]),
+    Route("/manga_detail", endpoint=get_manga_detail, methods=["GET"]),
     Route("/recommendation", endpoint=get_recommendation, methods=["GET"]),
     Route("/stream_detail", endpoint=get_stream_details, methods=["GET"]),
     Route("/stream", endpoint=stream, methods=["POST"]),

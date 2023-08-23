@@ -11,14 +11,14 @@ from pathlib import Path
 import string
 from json import JSONDecodeError
 from starlette.exceptions import HTTPException
+from .base import Scraper
 
 
-class Manga(ABC):
+class Manga(Scraper):
     site_url: str
     api_url: str
     manifest_header: dict = get_headers()
     default_poster: str = "def_manga.png"
-    session: requests.Session = requests.session()
     _SCRAPERS: Dict[str, object] = {}
 
     def __init_subclass__(cls, **kwargs):
@@ -51,41 +51,26 @@ class MangaKatana(Manga):
     site_url: str = "https://mangakatana.com"
     api_url: str = "https://mangakatana.com"
 
-    def __get(self, url: str = site_url, *, headers=get_headers(), **kwargs) -> (requests.Response, bool):  # * force parameters after that as keyword only arguments
-        redirected: bool = False
-
-        resp = self.session.get(url, headers=headers, allow_redirects=False, **kwargs)
-        if resp.status_code not in [200, 302]:
-            raise HTTPException(status_code=404, detail="page not found")
-
-        if resp.status_code == 302:
-            redirected: bool = True
-            resp = self.session.get(url=resp.headers["location"])
-        return resp.text, redirected
-
     async def search_manga(self, manga_name: str, search_by: str = "book_name", page_no: int = 1, total_res: int = 20) -> Dict[str, Any]:
 
-        query_params = {
-            "search": manga_name,
-            "search_by": search_by,
-        }
-
-        resp_text, redirected = self.__get(f"{self.site_url}/page/{page_no}", ** {"params": query_params})
+        resp_text = await self.get(f"{self.site_url}/page/{page_no}", data={"search": manga_name, "search_by": search_by})
 
         resp = {"response": List[Dict[str, str]]}
 
         search_bs = BeautifulSoup(resp_text, 'html.parser')
 
-        if not redirected:
+        if len(search_bs.find("title").text) != len(manga_name):
             scrape_func = self.__scrape_list
 
-            pag_list = search_bs.find("ul", {"class": "uk-pagination"})
+            pag_list = search_bs.find("ul", {"class": "uk-pagination"})  # check if multiple pages exists or not
 
-            resp["prev"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) - 1}&query={manga_name}" if pag_list.find(
-                "a", {"class": "prev"}) else None
+            if pag_list:
 
-            resp["next"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) + 1}&query={manga_name}" if pag_list.find(
-                "a", {"class": "next"}) else None
+                resp["prev"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) - 1}&query={manga_name}" if pag_list.find(
+                    "a", {"class": "prev"}) else None
+
+                resp["next"] = f"{ServerConfig.API_SERVER_ADDRESS}/search?type=manga&page={int(page_no) + 1}&query={manga_name}" if pag_list.find(
+                    "a", {"class": "next"}) else None
         else:
             scrape_func = self.__scrape_detail
 
@@ -120,7 +105,9 @@ class MangaKatana(Manga):
             manga["cover"] = media_a.find("img")["src"]
             manga["status"] = media.find("div", {"class": "status"}).text.strip().capitalize()
 
-            manga["chp_details"] = f"{ServerConfig.API_SERVER_ADDRESS}/chp_details?session={media_a['href']}"
+            manga_session = media_a['href']
+            manga["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_session}"
+            manga["session"] = manga_session
 
             res.append(manga)
 
@@ -143,14 +130,15 @@ class MangaKatana(Manga):
         manga["cover"] = search_bs.find("div", {"class": "cover"}).find("img")["src"]
         manga["status"] = meta_data.find("div", {"class": "status"}).text.capitalize()
         manga_url = search_bs.find("meta", property="og:url")["content"]
-        manga["chp_details"] = f"{ServerConfig.API_SERVER_ADDRESS}/chp_details?session={manga_url}"
+        manga["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_url}"
+        manga["session"] = manga_url
 
         return [manga]
 
-    def get_chp_session(self, manga_session: str) -> List[Dict[int, Dict[str, str]]]:
-        res = {"chp_details": [], "description": {}}
+    async def get_chp_session(self, manga_session: str) -> List[Dict[int, Dict[str, str]]]:
+        res = {"chapters": [], "description": {}}
 
-        resp_text, _ = self.__get(manga_session)
+        resp_text = await self.get(manga_session)
 
         detail_bs = BeautifulSoup(resp_text, 'html.parser')
 
@@ -158,9 +146,11 @@ class MangaKatana(Manga):
             chp_info = info.find("div", {"class": "chapter"})
             _chp_info = chp_info.text.lstrip("Chapter ").split(":")
             chp_no, chp_name = _chp_info[0], _chp_info[-1]
-            res["chp_details"].append({chp_no: {
-                "chp_link": f'{ServerConfig.API_SERVER_ADDRESS}/read?chp_session={chp_info.find("a")["href"]}',
-                "chp_name": chp_name}})
+            chp_session = chp_info.find("a")["href"]
+            res["chapters"].append({chp_no: {
+                "chp_link": f'{ServerConfig.API_SERVER_ADDRESS}/read?chp_session={chp_session}',
+                "chp_name": chp_name,
+                "chp_session": chp_session}})
 
         for meta_data in detail_bs.find("ul", {"class": "meta"}).find_all("div", {"class": ["alt_name", "authors"]}):
             if "alt_name" in meta_data["class"]:
@@ -169,16 +159,15 @@ class MangaKatana(Manga):
                 res["description"]["author"] = meta_data.text
 
         res["description"]["summary"] = detail_bs.find("div", {"class": "summary"}).find("p").text
-        res[
-            "recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?type=manga&manga_session={manga_session}"
+        res["recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?type=manga&manga_session={manga_session}"
 
         return res
 
     async def get_manga_source_data(self, chp_session: str) -> List[str]:
         return (await self.get_manifest_file(chp_session))[0]
 
-    def get_recommendation(self, manga_session: str) -> List[Dict[str, str]]:
-        resp_text, _ = self.__get(manga_session)
+    async def get_recommendation(self, manga_session: str) -> List[Dict[str, str]]:
+        resp_text = await self.get(manga_session)
 
         rec_bs = BeautifulSoup(resp_text, 'html.parser')
 
@@ -191,7 +180,7 @@ class MangaKatana(Manga):
 
                 for rec in widget.find_all("div", {"class": "item"}):
 
-                    recommendation = {"title": str, "total_eps": float, "cover": str, "status": str, "chp_details": str}  # noqa
+                    recommendation = {"title": str, "total_eps": float, "cover": str, "status": str, "manga_detail": str}  # noqa
 
                     recommendation["cover"] = rec.find("div", {"class": "wrap_img"}).find("a")["href"]
                     rec_data = rec.find("div", {"class": "text"})
@@ -199,8 +188,9 @@ class MangaKatana(Manga):
                     recommendation["title"] = title_data.text
                     recommendation["total_eps"] = float(rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0])
                     recommendation["status"] = rec_data.find("div", {"class": "status"}).text
-                    recommendation[
-                        "chp_details"] = f"{ServerConfig.API_SERVER_ADDRESS}/chp_details?session={title_data.find('a')['href']}"
+                    manga_session = title_data.find('a')['href']
+                    recommendation["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_session}"
+                    recommendation["session"] = title_data.find('a')['href']
 
                     recommendations.append(recommendation)
                 break
@@ -215,7 +205,7 @@ class MangaKatana(Manga):
         It is implemented as get_manifest_file to provide uniform interface
 
         """
-        resp_text, _ = self.__get(chp_url)
+        resp_text = await self.get(chp_url)
         p = re.compile("var thzq=(.*);")  # get all image links from variable inside the script tag
         m = p.search(resp_text)
         if m:
@@ -224,11 +214,11 @@ class MangaKatana(Manga):
                 chp_links.pop()
             series_name = chp_url.split("/")[4].split(".")[0]
             file_name = BeautifulSoup(resp_text, 'html.parser').find("select", {"name": "chapter_select"}).find("option", {"selected": "selected"}).text
-            return chp_links, _, [series_name, file_name]
-        return [], _, "", ""
+            return chp_links, None, [series_name, file_name]
+        return [], None, "", ""
 
-    def get_links(self, manga_session: str, page: int = 1) -> List[str]:
-        resp_text, _ = self.__get(manga_session)
+    async def get_links(self, manga_session: str, page: int = 1) -> List[str]:
+        resp_text = await self.get(manga_session)
         resp_bs = BeautifulSoup(resp_text, 'html.parser')
         res = []
         for tr in resp_bs.find("div", {"class": "chapters"}).find_all("tr"):
