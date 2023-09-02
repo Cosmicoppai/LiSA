@@ -1,11 +1,11 @@
 {
-  "main": "main.js",
   "name": "lisa",
-  "private": true,
   "version": "1.0.0",
   "author": "",
   "description": "",
+  "private": true,
   "homepage": "./",
+  "main": "main.js",
   "license": "MIT",
   "browserslist": {
     "production": [
