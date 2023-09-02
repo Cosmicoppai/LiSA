@@ -1,6 +1,45 @@
 {
+  "main": "main.js",
+  "name": "lisa",
+  "private": true,
+  "version": "1.0.0",
   "author": "",
   "description": "",
+  "homepage": "./",
+  "license": "MIT",
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "scripts": {
+    "build": "node ./scripts/dispatch build all",
+    "build:all": "node ./scripts/dispatch build all",
+    "build:react": "node ./scripts/dispatch build react",
+    "build:python": "node ./scripts/dispatch build python",
+    "build:package:linux": "node ./scripts/dispatch package linux",
+    "build:package:mac": "node ./scripts/dispatch package mac",
+    "build:package:windows": "node ./scripts/dispatch package windows",
+    "clean": "node ./scripts/dispatch clean",
+    "eject": "react-scripts eject",
+    "start": "node ./scripts/dispatch start",
+    "start:electron": "electron .",
+    "start:react": "react-scripts start",
+    "test": "react-scripts test"
+  },
+  "build": {
+    "appId": "com.lisa.desktop",
+    "extraResources": [
+      "./resources/app"
+    ]
+  },
   "dependencies": {
     "@babel/eslint-parser": "^7.19.1",
     "@chakra-ui/icons": "^2.0.4",
@@ -59,44 +98,5 @@
   },
   "optionalDependencies": {
     "electron-installer-debian": "^3.1.0"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "build": {
-    "appId": "com.lisa.desktop",
-    "extraResources": [
-      "./resources/app"
-    ]
-  },
-  "homepage": "./",
-  "license": "MIT",
-  "main": "main.js",
-  "name": "Lisa",
-  "private": true,
-  "scripts": {
-    "build": "node ./scripts/dispatch build all",
-    "build:all": "node ./scripts/dispatch build all",
-    "build:react": "node ./scripts/dispatch build react",
-    "build:python": "node ./scripts/dispatch build python",
-    "build:package:linux": "node ./scripts/dispatch package linux",
-    "build:package:mac": "node ./scripts/dispatch package mac",
-    "build:package:windows": "node ./scripts/dispatch package windows",
-    "clean": "node ./scripts/dispatch clean",
-    "eject": "react-scripts eject",
-    "start": "node ./scripts/dispatch start",
-    "start:electron": "electron .",
-    "start:react": "react-scripts start",
-    "test": "react-scripts test"
-  },
-  "version": "1.0.0"
+  }
 }
