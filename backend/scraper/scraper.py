@@ -1,20 +1,19 @@
 from __future__ import annotations
 import aiohttp
 import asyncio
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from bs4 import BeautifulSoup
 from typing import Dict, List, Tuple, Any
 from config import ServerConfig
 from utils.headers import get_headers
 import re
-import sys
-from pathlib import Path
 import string
 from json import JSONDecodeError
 from .base import Scraper
 
 
 class Anime(Scraper):
+    _SITE_NAME: str = None
     site_url: str
     api_url: str
     default_poster: str = "kaicons.jpg"
@@ -57,9 +56,6 @@ class Animepahe(Anime):
         # remove all whitespace from text
         return re.sub(r"\s+", "", text).strip()
 
-    def __get_minified(self, path: str) -> str:
-        return self.__get_minified_uri(f"{self.site_url}{path}")
-
     async def search_anime(self, input_anime: str):
         """A scraper for searching an anime user requested
 
@@ -77,7 +73,7 @@ class Animepahe(Anime):
 
         return (await self.get_api(search_params))["data"]
 
-    async def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> List[Dict[str, str | int]] | None:
+    async def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> dict:
         """scraping the sessions of all the episodes of an anime
 
         Args:
@@ -98,7 +94,8 @@ class Animepahe(Anime):
 
         return await self.get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[
+                                                                                 str, str] | TypeError | JSONDecodeError:
         episodes = {"ep_details": []}
 
         try:
@@ -202,7 +199,7 @@ class Animepahe(Anime):
 
         return description
 
-    async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[str, List[Dict[str, str]]]:
+    async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[Any, List[Dict[str, str]]]:
         """getting the streaming details
 
         Args:
@@ -215,12 +212,13 @@ class Animepahe(Anime):
             }
         """
 
-        resp: Dict[str, str] = {}
+        resp: Dict[Any, List] = {}
 
         streaming_page = await self.get(f"{self.site_url}/play/{anime_session}/{episode_session}",
                                         headers=get_headers({"referer": "{}/{}".format(self.site_url, anime_session)}))
 
-        for data in BeautifulSoup(streaming_page, 'html.parser').find("div", {"id": "resolutionMenu"}).find_all("button"):
+        for data in BeautifulSoup(streaming_page, 'html.parser').find("div", {"id": "resolutionMenu"}).find_all(
+                "button"):
             quality, kwik_url, aud = data["data-resolution"], data["data-src"], data["data-audio"]
             """
                 stream_dt (dict): {'quality': stream url (str)}
@@ -235,9 +233,10 @@ class Animepahe(Anime):
 
         uwu_url = hls_data["manifest_url"]
 
-        return await self.get(uwu_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})),\
-                                    uwu_url.split("/uwu.m3u8")[0], \
-                                    [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
+        return await self.get(uwu_url,
+                              headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})), \
+            uwu_url.split("/uwu.m3u8")[0], \
+            [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 
     async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
 

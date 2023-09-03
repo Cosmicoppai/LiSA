@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, Any
 
 
 def get_headers(extra: Dict[str, Any] = {}) -> Dict[str, str]:

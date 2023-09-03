@@ -1,26 +1,24 @@
-import asyncio
 from json import JSONDecodeError
 import requests
+from starlette.exceptions import HTTPException
 from video.library import DBLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
-from starlette.responses import PlainTextResponse, JSONResponse, Response, FileResponse
-from typing import Tuple, Dict, List
+from starlette.responses import JSONResponse, Response, HTMLResponse
+from typing import Tuple, List, Callable, Any, Coroutine
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
-from scraper import Animepahe, MyAL, Manga, MangaKatana
+from scraper import Animepahe, MyAL, MangaKatana
 from video.streamer import Stream
 from config import ServerConfig, FileConfig
-from bs4 import BeautifulSoup
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from utils.headers import get_headers
 from utils.master_m3u8 import build_master_manifest
-from middleware import ErrorHandlerMiddleware, requestValidator
+from middleware import ErrorHandlerMiddleware, RequestValidator
 import uvicorn
 from starlette.routing import Mount
-from starlette.staticfiles import StaticFiles
 from urllib.parse import parse_qsl
 from utils.init_db import DB
 from utils import remove_file, CustomStaticFiles
@@ -28,7 +26,6 @@ from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
 import logging
-from io import BytesIO
 
 
 async def LiSA(request: Request):
@@ -190,7 +187,6 @@ async def get_stream_details(request: Request):
         for audio, streams in stream_detail.items():
             master_manifest_url = f"{ServerConfig.API_SERVER_ADDRESS}/master_manifest?kwik_url="
             for stream_data in streams:
-                print(stream_data)
                 master_manifest_url += f"{ServerConfig.API_SERVER_ADDRESS}/manifest?kwik_url={stream_data[1]}-{stream_data[0]},"
 
             stream_detail[audio] = master_manifest_url
@@ -199,7 +195,7 @@ async def get_stream_details(request: Request):
 
     except KeyError as err:
         logging.error(err)
-        return await service_unavailable_503(request, "Try again after sometime!")
+        return await service_unavailable_503(request, msg="Try again after sometime!")
 
 
 async def stream(request: Request):
@@ -223,7 +219,7 @@ async def stream(request: Request):
     return JSONResponse({"error": msg}, status_code=status_code)
 
 
-async def read(request: Request) -> List[str]:
+async def read(request: Request):
     chp_session, _id = request.query_params.get("chp_session", None), request.query_params.get("id", None)
 
     if chp_session:
@@ -303,7 +299,7 @@ async def resume_download(request: Request):
     except KeyError:
         return await bad_request_400(request, msg="One or more ids are invalid")
     except AttributeError as err_msg:
-        return await bad_request_400(request, msg=err_msg)
+        return await bad_request_400(request, msg=str(err_msg))
 
 
 async def cancel_download(request: Request):
@@ -343,7 +339,7 @@ async def library(request: Request):
     return JSONResponse(DBLibrary().get_all())
 
 
-async def play(player_name: str, manifest_url: str) -> Tuple[str, int]:
+async def play(player_name: str, manifest_url: str) -> Tuple[str | None, int]:
     try:
         await Stream.play(player_name, manifest_url)
         return None, 200
@@ -429,7 +425,8 @@ async def proxy(request: Request):
     if not actual_url:
         await bad_request_400(request, msg="url not present")
 
-    resp = requests.get(actual_url, headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/", "accept": "*/*"}))
+    resp = requests.get(actual_url, headers=get_headers(
+        extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/", "accept": "*/*"}))
     return Response(resp.content, headers=resp.headers)
 
 
@@ -450,7 +447,7 @@ async def _anime_recommendation(request: Request):
         return JSONResponse(await Animepahe().get_recommendation(anime_session))
 
     except ValueError as err_msg:
-        return bad_request_400(request, msg=err_msg)
+        return bad_request_400(request, msg=str(err_msg))
 
     except AttributeError or IndexError:
         return service_unavailable_503(request, msg="Try Again After Sometime")
@@ -530,7 +527,7 @@ exception_handlers = {
 
 middleware = [
     Middleware(CORSMiddleware, allow_methods=["*"], allow_headers=["*"], allow_origins=["*"], allow_credentials=True),
-    Middleware(requestValidator),
+    Middleware(RequestValidator),
     Middleware(ErrorHandlerMiddleware)
 ]
 

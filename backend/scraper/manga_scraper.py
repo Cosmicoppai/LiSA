@@ -1,20 +1,15 @@
 from __future__ import annotations
-import requests
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from bs4 import BeautifulSoup
-from typing import Dict, List, Tuple, Any, Callable
+from typing import Dict, List, Any
 from config import ServerConfig
 from utils.headers import get_headers
 import re
-import sys
-from pathlib import Path
-import string
-from json import JSONDecodeError
-from starlette.exceptions import HTTPException
 from .base import Scraper
 
 
 class Manga(Scraper):
+    _SITE_NAME: str = None
     site_url: str
     api_url: str
     manifest_header: dict = get_headers()
@@ -26,7 +21,7 @@ class Manga(Scraper):
         cls._SCRAPERS[cls._SITE_NAME] = cls
 
     @classmethod
-    def get_scraper(cls, site_name: str) -> Anime:
+    def get_scraper(cls, site_name: str) -> Manga:
         return cls._SCRAPERS.get(site_name.lower(), None)
 
     @abstractmethod
@@ -135,7 +130,7 @@ class MangaKatana(Manga):
 
         return [manga]
 
-    async def get_chp_session(self, manga_session: str) -> List[Dict[int, Dict[str, str]]]:
+    async def get_chp_session(self, manga_session: str) -> dict[str, list[Any] | dict[Any, Any] | str]:
         res = {"chapters": [], "description": {}}
 
         resp_text = await self.get(manga_session)
@@ -197,7 +192,7 @@ class MangaKatana(Manga):
 
         return recommendations
 
-    async def get_manifest_file(self, chp_url) -> (List[str], _, ("series_name", "file_name")):
+    async def get_manifest_file(self, chp_url) -> (List[str], '_', ("series_name", "file_name")):
         """
         This function will return all images from a particular chapter
         This func will call the self.get_manga_source_data
@@ -225,4 +220,3 @@ class MangaKatana(Manga):
             res.append(tr.find("div", {"class": "chapter"}).find("a")["href"])
 
         return res
-

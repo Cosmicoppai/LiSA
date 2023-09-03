@@ -8,7 +8,7 @@ from json import JSONDecodeError
 from logging import info
 
 
-class requestValidator(BaseHTTPMiddleware):
+class RequestValidator(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
         try:
             if request.method == "POST":

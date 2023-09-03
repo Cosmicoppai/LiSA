@@ -23,3 +23,6 @@ downloads
 backend/lisa
 
 env/
+venv/
+
+.idea

@@ -56,7 +56,7 @@ class DBConfig:
 _ffmpeg_exts: Dict[str, str] = {"windows": "ffmpeg.exe", "linux": "ffmpeg", "darwin": "ffmpeg"}
 
 
-def parse_config_json(file_path: str):
+def parse_config_json(file_path: str | Path):
     try:
         with open(file_path, "r") as config_file:
             data = json.load(config_file)
@@ -72,4 +72,3 @@ def update_environ():
     ffmpeg_path: Path = Path(__file__).resolve().parent.parent.joinpath(_ffmpeg_exts[system().lower()])
     if Path(ffmpeg_path).exists():
         environ["ffmpeg"] = str(ffmpeg_path)
-

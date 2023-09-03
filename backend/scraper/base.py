@@ -1,5 +1,5 @@
 import asyncio
-from abc import ABC, abstractmethod
+from abc import ABC
 import aiohttp
 from utils.headers import get_headers
 from json import loads
@@ -9,6 +9,7 @@ from random import choice
 
 class Scraper(ABC):
     session: aiohttp.ClientSession = None
+    api_url: str = None
 
     @classmethod
     async def set_session(cls):
