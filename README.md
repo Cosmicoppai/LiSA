@@ -11,6 +11,7 @@
 ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
 ![image](https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=9FEAF9)
 ![image](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+
 </div>
 
 # LiSA
@@ -19,38 +20,38 @@
 
 ## CONTENTS OF THE FILE
 
-* [Features](#-features)
-* [Dependencies](#dependencies)
-* [Download](#-download)
-* [Installation](#-installation)
-* [Demo](#-demo)
-* [Future Plans](#future-plans)
-* [FAQ](#-faq)
-* Appendix
-    * [Supported Webistes](#%EF%B8%8F-supported-websites)
-    * [Supported External Video Player](#-supported-external-players)
-    * [Filters](#filters)
-* [Contributing](#-contributing)
-* [Support](#-support)
-* [License](#-license)
-* [Disclaimer](#disclaimer)
+-   [Features](#-features)
+-   [Dependencies](#dependencies)
+-   [Download](#-download)
+-   [Installation](#-installation)
+-   [Demo](#-demo)
+-   [Future Plans](#future-plans)
+-   [FAQ](#-faq)
+-   Appendix
+    -   [Supported Webistes](#%EF%B8%8F-supported-websites)
+    -   [Supported External Video Player](#-supported-external-players)
+    -   [Filters](#filters)
+-   [Contributing](#-contributing)
+-   [Support](#-support)
+-   [License](#-license)
+-   [Disclaimer](#disclaimer)
 
 ## 🚀 Features
 
-* A User Friendly Interface
-* Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
-* Batch Download
-* Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
-* Explore anime based on different [filters](#filters)
-* Download Manager
-* Library to view pre-downloaded episodes and active downloads
-* Recommendation System
+-   A User Friendly Interface
+-   Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
+-   Batch Download
+-   Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
+-   Explore anime based on different [filters](#filters)
+-   Download Manager
+-   Library to view pre-downloaded episodes and active downloads
+-   Recommendation System
 
 <br>
 
 ## Dependencies
 
-* [ffmpeg](https://ffmpeg.org/download.html)
+-   [ffmpeg](https://ffmpeg.org/download.html)
 
 <br>
 
@@ -66,54 +67,62 @@ Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from
 
 ### Building From Source
 
-* Clone the project using
+-   Clone the project using
 
-```cli
-git clone https://github.com/Cosmicoppai/LiSA.git
-```
+    ```cli
+    git clone https://github.com/Cosmicoppai/LiSA.git
+    ```
 
 #### Prerequisites
 
-* Make sure python 3.10 and node 18 are installed.
+-   Make sure python 3.10 and node 18 are installed.
 
 #### Installing
 
-1) Create and activate the virtual environment
+1. Create and activate the virtual environment
 
-```cli
-python -m venv ./env
-env/Script/activate
-```
+    ```cli
+    python -m venv ./env
+    env/Script/activate
+    ```
 
-2) Download the dependancies using requirements.txt file
+2. Install the dependencies using the `requirements.txt` and `build_requirements.txt` files.
 
-```cli
-pip install -r ./requirements.txt
-pip install -r ./buid_requirements.txt
-```
+    ```cli
+    pip install -r ./requirements.txt
+    pip install -r ./build_requirements.txt
+    ```
 
-3) Install Node modules
+3. Create `.env` & paste the following content
 
-```cli
-npm install
-```
+    ```dotenv
+    REACT_APP_SERVER_URL=http://localhost:6969
+    REACT_APP_SOCKET_URL=ws://localhost:9000
+    ```
 
-4) Add ffmpeg executable to root folder or in PATH Var.
+4. Install Node modules
 
-5) Build package using
+    ```
+    npm install
+    ```
 
-```cli
-npm run build:package:windows
-```
+5. Add `ffmpeg` executable to `root folder` or in `PATH` Var.
+
+6. Build package using
+
+    ```cli
+    npm run build:package:windows
+    ```
 
 Note:
-> Make sure to allow app to run as admin and allow incomming port forwarding on (```6969```, ```9000```).
+
+> Make sure to allow app to run as admin and allow incomming port forwarding on (`6969`, `9000`).
 
 <br>
 
 ### Environment Tested on
 
-* Tested on Windows 8, 10 & 11.
+-   Tested on Windows 8, 10 & 11.
 
 <br>
 
@@ -122,38 +131,38 @@ Note:
 ### Screenshots
 
 ![search](demo_images/ss_search.png)
-*Search results for Bakuman*
+_Search results for Bakuman_
 
 ![Anime Details Page](demo_images/ss_anime_details.png)
-*Episode details of Bakuman*
+_Episode details of Bakuman_
 
 ![Video Player](demo_images/ss_play_episode.png)
-*Built-in Video Player on LiSA*
+_Built-in Video Player on LiSA_
 
 ![Download Manager and Library](demo_images/ss_download_manager.png)
-*Download Manager and Library*
+_Download Manager and Library_
 
 ![Explore Page](demo_images/ss_explore.png)
-*Explore Page with filters*
+_Explore Page with filters_
 
 https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4
 
 ## Future Plans
 
-* UI Improvement
-* Watchlist
-* Continue Watching
-* Download episodes with custom range
+-   UI Improvement
+-   Watchlist
+-   Continue Watching
+-   Download episodes with custom range
 
 ## 🤔 FAQ
 
 ### Q) How can I download detective conan's episodes from 10 to 30?
 
--> Search for the anime with ```detective conan```, on the anime page you get **Download all** option, this will start the batch download of all the episodes present on that page.
+-> Search for the anime with `detective conan`, on the anime page you get **Download all** option, this will start the batch download of all the episodes present on that page.
 
 ### Q) Where can I access all the downloaded episodes?
 
--> You can either view them on the Download page of LiSA , OR Visit ```LiSA-win32-x64\resources\downloads\``` on windows file explorer.
+-> You can either view them on the Download page of LiSA , OR Visit `LiSA-win32-x64\resources\downloads\` on windows file explorer.
 
 ### Q) Where can I view recommendations, if I liked Kimetsu no Yaiba?
 
@@ -202,15 +211,15 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## Filters
 
-* TV
-* Movie
-* Airing
-* Upcoming
-* By Popularity
-* OVA
-* ONA
-* Special
-* Favourite
+-   TV
+-   Movie
+-   Airing
+-   Upcoming
+-   By Popularity
+-   OVA
+-   ONA
+-   Special
+-   Favourite
 
 ## 🤝 CONTRIBUTING
 

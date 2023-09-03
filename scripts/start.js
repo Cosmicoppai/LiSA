@@ -1,8 +1,6 @@
 const { spawn, spawnSync } = require("child_process");
 const { get } = require("axios");
 
-const { getRandomPort } = require('../utilities/getRandomPort')
-
 /**
  * @namespace Starter
  * @description - Scripts to start Electron, React, and Python.
@@ -32,13 +30,9 @@ class Starter {
     // spawnSync('npx kill-port 3000', spawnOptions.hideLogs);
 
     // Start & identify React & Electron processes
+    spawn("cross-env BROWSER=none react-scripts start", spawnOptions.showLogs);
+    spawn("electron .", spawnOptions.showLogs);
 
-    const { port: REACT_PORT = 3967 } = await getRandomPort();
-    const { port: PYTHON_SERVER = 6969 } = await getRandomPort();
-    // console.log(REACT_PORT, PYTHON_SERVER);
-
-    spawn(`cross-env BROWSER=none PORT=${REACT_PORT} REACT_APP_SERVER_URL=http://localhost:${PYTHON_SERVER} react-scripts start `, spawnOptions.showLogs);
-    spawn(`npx electron main ${REACT_PORT} ${PYTHON_SERVER}`, spawnOptions.showLogs);
     // Kill processes on exit
     const exitOnEvent = (event) => {
       process.once(event, () => {
@@ -47,7 +41,7 @@ class Starter {
           const expectedErrors = ["ECONNRESET", "ECONNREFUSED"];
 
           // Send command to Flask server to quit and close
-          get(`http://localhost:${REACT_PORT}/quit`).catch(
+          get(`http://localhost:3000/quit`).catch(
             (error) =>
               !expectedErrors.includes(error.code) && console.log(error)
           );
