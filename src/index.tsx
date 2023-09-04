@@ -13,25 +13,25 @@ import store from "./store";
 import { client, SocketContext } from "./socket";
 
 function ForceDarkMode(props) {
-  const { colorMode, toggleColorMode } = useColorMode();
+    const { colorMode, toggleColorMode } = useColorMode();
 
-  useEffect(() => {
-    if (colorMode === "dark") return;
-    toggleColorMode();
-  }, [colorMode]);
+    useEffect(() => {
+        if (colorMode === "dark") return;
+        toggleColorMode();
+    }, [colorMode]);
 
-  return props.children;
+    return props.children;
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <SocketContext.Provider value={client}>
-    <ChakraProvider theme={theme}>
-      <ForceDarkMode>
-        <Provider store={store}>
-          <App />
-        </Provider>
-      </ForceDarkMode>
-    </ChakraProvider>
-  </SocketContext.Provider>
+    <SocketContext.Provider value={client}>
+        <ChakraProvider theme={theme}>
+            <ForceDarkMode>
+                <Provider store={store}>
+                    <App />
+                </Provider>
+            </ForceDarkMode>
+        </ChakraProvider>
+    </SocketContext.Provider>
 );

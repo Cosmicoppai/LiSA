@@ -22,7 +22,7 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     width: 200px;
     border-radius: 50%;
 }
@@ -30,10 +30,10 @@ body {
     from {
         stroke: #de0f3f;
         stroke-dasharray: 1;
-   }
+    }
     to {
         stroke: #aa1945;
         transform: rotate(180deg);
         stroke-dasharray: 8;
-   }
+    }
 }

@@ -1,10 +1,4 @@
-const {
-  existsSync,
-  readdirSync,
-  rmdirSync,
-  statSync,
-  unlinkSync
-} = require('fs');
+const { existsSync, readdirSync, rmdirSync, statSync, unlinkSync } = require("fs");
 
 /**
  * @namespace Cleaner
@@ -12,25 +6,24 @@ const {
  * @see scripts\dispatch.js cleanProject() for complete list
  */
 class Cleaner {
-  removePath = (pathToRemove) => {
+    removePath = (pathToRemove) => {
+        if (existsSync(pathToRemove)) {
+            console.log(`Removing: ${pathToRemove}`);
 
-    if (existsSync(pathToRemove)) {
-      console.log(`Removing: ${pathToRemove}`);
+            if (statSync(pathToRemove).isFile()) unlinkSync(pathToRemove);
+            else {
+                const files = readdirSync(pathToRemove);
 
-      if (statSync(pathToRemove).isFile()) unlinkSync(pathToRemove);
-      else {
-        const files = readdirSync(pathToRemove);
+                files.forEach((file) => {
+                    const filePath = `${pathToRemove}/${file}`;
 
-        files.forEach((file) => {
-          const filePath = `${pathToRemove}/${file}`;
-
-          if (statSync(filePath).isDirectory()) this.removePath(filePath);
-          else unlinkSync(filePath);
-        });
-        rmdirSync(pathToRemove);
-      }
-    }
-  };
+                    if (statSync(filePath).isDirectory()) this.removePath(filePath);
+                    else unlinkSync(filePath);
+                });
+                rmdirSync(pathToRemove);
+            }
+        }
+    };
 }
 
 module.exports.Cleaner = Cleaner;

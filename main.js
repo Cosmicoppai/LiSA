@@ -19,26 +19,26 @@ let pids = [];
  * @memberof BrowserWindow
  */
 const createMainWindow = () => {
-  const { loadingWindow, mainWindow } = browserWindows;
+    const { loadingWindow, mainWindow } = browserWindows;
 
-  /**
-   * @description - Function to use custom JavaSCript in the DOM.
-   * @param {string} command - JavaScript to execute in DOM.
-   * @param {function} callback - Callback to execute here once complete.
-   * @returns {Promise}
-   */
-  const executeOnWindow = (command, callback) => {
-    return mainWindow.webContents
-      .executeJavaScript(command)
-      .then(callback)
-      .catch(console.error);
-  };
+    /**
+     * @description - Function to use custom JavaSCript in the DOM.
+     * @param {string} command - JavaScript to execute in DOM.
+     * @param {function} callback - Callback to execute here once complete.
+     * @returns {Promise}
+     */
+    const executeOnWindow = (command, callback) => {
+        return mainWindow.webContents
+            .executeJavaScript(command)
+            .then(callback)
+            .catch(console.error);
+    };
 
-  /**
-   * If in developer mode, show a loading window while
-   * the app and developer server compile.
-   */
-  const isPageLoaded = `
+    /**
+     * If in developer mode, show a loading window while
+     * the app and developer server compile.
+     */
+    const isPageLoaded = `
    var isBodyFull = document.body.innerHTML !== "";
    var isHeadFull = document.head.innerHTML !== "";
    var isLoadSuccess = isBodyFull && isHeadFull;
@@ -46,63 +46,63 @@ const createMainWindow = () => {
    isLoadSuccess || Boolean(location.reload());
  `;
 
-  /**
-   * @description Updates windows if page is loaded
-   * @param {*} isLoaded
-   */
-  const handleLoad = (isLoaded) => {
-    if (isLoaded) {
-      /**
-       * Keep show() & hide() in this order to prevent
-       * unresponsive behavior during page load.
-       */
+    /**
+     * @description Updates windows if page is loaded
+     * @param {*} isLoaded
+     */
+    const handleLoad = (isLoaded) => {
+        if (isLoaded) {
+            /**
+             * Keep show() & hide() in this order to prevent
+             * unresponsive behavior during page load.
+             */
 
-      mainWindow.show();
-      loadingWindow.hide();
-      loadingWindow.close();
-    }
-  };
-
-  /**
-   * Checks if the page has been populated with
-   * React project. if so, shows the main page.
-   */
-  // executeOnWindow(isPageLoaded, handleLoad);
-
-  if (isDevMode) {
-    mainWindow.loadURL("http://localhost:3000");
-
-    mainWindow.hide();
+            mainWindow.show();
+            loadingWindow.hide();
+            loadingWindow.close();
+        }
+    };
 
     /**
-     * Hide loading window and show main window
-     * once the main window is ready.
+     * Checks if the page has been populated with
+     * React project. if so, shows the main page.
      */
-    mainWindow.webContents.on("did-finish-load", () => {
-      /**
-       * Checks page for errors that may have occurred
-       * during the hot-loading process.
-       */
-      // mainWindow.webContents.openDevTools({ mode: "undocked" });
+    // executeOnWindow(isPageLoaded, handleLoad);
 
-      /**
-       * Checks if the page has been populated with
-       * React project. if so, shows the main page.
-       */
-      executeOnWindow(isPageLoaded, handleLoad);
-    });
-  } else {
-    mainWindow.hide();
+    if (isDevMode) {
+        mainWindow.loadURL("http://localhost:3000");
 
-    mainWindow.removeMenu(true);
+        mainWindow.hide();
 
-    mainWindow.loadFile(path.join(__dirname, "build/index.html"));
-    // mainWindow.webContents.openDevTools({ mode: "undocked" });
+        /**
+         * Hide loading window and show main window
+         * once the main window is ready.
+         */
+        mainWindow.webContents.on("did-finish-load", () => {
+            /**
+             * Checks page for errors that may have occurred
+             * during the hot-loading process.
+             */
+            // mainWindow.webContents.openDevTools({ mode: "undocked" });
 
-    mainWindow.webContents.on("did-finish-load", () => {
-      executeOnWindow(isPageLoaded, handleLoad);
-    });
-  }
+            /**
+             * Checks if the page has been populated with
+             * React project. if so, shows the main page.
+             */
+            executeOnWindow(isPageLoaded, handleLoad);
+        });
+    } else {
+        mainWindow.hide();
+
+        mainWindow.removeMenu(true);
+
+        mainWindow.loadFile(path.join(__dirname, "build/index.html"));
+        // mainWindow.webContents.openDevTools({ mode: "undocked" });
+
+        mainWindow.webContents.on("did-finish-load", () => {
+            executeOnWindow(isPageLoaded, handleLoad);
+        });
+    }
 };
 
 /**
@@ -110,180 +110,175 @@ const createMainWindow = () => {
  * @memberof BrowserWindow
  */
 const createLoadingWindow = () => {
-  return new Promise((resolve, reject) => {
-    const { loadingWindow } = browserWindows;
+    return new Promise((resolve, reject) => {
+        const { loadingWindow } = browserWindows;
 
-    // Variants of developer loading screen
-    const loaderConfig = {
-      main: "utilities/loaders/main/loader.html",
-    };
+        // Variants of developer loading screen
+        const loaderConfig = {
+            main: "utilities/loaders/main/loader.html",
+        };
 
-    try {
-      loadingWindow.loadFile(path.join(__dirname, loaderConfig.main));
-      loadingWindow.removeMenu(true);
+        try {
+            loadingWindow.loadFile(path.join(__dirname, loaderConfig.main));
+            loadingWindow.removeMenu(true);
 
-      loadingWindow.webContents.on("did-finish-load", () => {
-        loadingWindow.show();
-        resolve();
-      });
-    } catch (error) {
-      console.error(error);
-      reject();
-    }
-  });
+            loadingWindow.webContents.on("did-finish-load", () => {
+                loadingWindow.show();
+                resolve();
+            });
+        } catch (error) {
+            console.error(error);
+            reject();
+        }
+    });
 };
 
 app.whenReady().then(async () => {
-  /**
-   * Method to set port in range of 3001-3999,
-   * based on availability.
-   */
-
-  /**
-   * Assigns the main browser window on the
-   * browserWindows object.
-   */
-  browserWindows.mainWindow = new BrowserWindow({
-    show: false,
-    webPreferences: {
-      contextIsolation: false,
-      enableRemoteModule: true,
-      autoHideMenuBar: true,
-      show: false,
-      nodeIntegration: true,
-      preload: path.join(app.getAppPath(), "preload.js"),
-    },
-  });
-
-  /**
-   * If not using in production, use the loading window
-   * and run Python in shell.
-   */
-  if (isDevMode) {
-    // await installExtensions(); // React, Redux devTools
-    browserWindows.loadingWindow = new BrowserWindow({
-      frame: false,
-      transparent: true,
-      alwaysOnTop: true,
-      width: 300,
-      height: 300,
-    });
-    createLoadingWindow().then(() => createMainWindow());
-    // var devProc = spawn(`python backend/LiSA.py`, {
-    //   detached: true,
-    //   shell: true,
-    //   stdio: "inherit",
-    // });
-    var devProc = spawn("python backend/LiSA.py", {
-      detached: true,
-      shell: true,
-    });
-  } else {
     /**
-     * If using in production, use the main window
-     * and run bundled app (dmg, elf, or exe) file.
+     * Method to set port in range of 3001-3999,
+     * based on availability.
      */
-    browserWindows.loadingWindow = new BrowserWindow({
-      frame: false,
-      transparent: true,
-      alwaysOnTop: true,
-    });
-    createLoadingWindow().then(() => {
-      createMainWindow();
-    });
-    // Dynamic script assignment for starting Python in production
-    const runPython = {
-      darwin: `open -gj "${path.join(
-        app.getAppPath(),
-        "resources",
-        "app.app"
-      )}" --args`,
-      linux: "./resources/main/main",
-      win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
-    }[process.platform];
 
-    var proc = spawn(`${runPython}`, {
-      shell: true,
-    });
-  }
-
-  app.on("activate", () => {
     /**
-     * On macOS it's common to re-create a window in the app when the
-     * dock icon is clicked and there are no other windows open.
+     * Assigns the main browser window on the
+     * browserWindows object.
      */
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
-  });
-
-  /**
-   * Ensures that only a single instance of the app
-   * can run, this correlates with the "name" property
-   * used in `package.json`.
-   */
-  const initialInstance = app.requestSingleInstanceLock();
-  if (!initialInstance) app.quit();
-  else {
-    app.on("second-instance", () => {
-      if (browserWindows.mainWindow?.isMinimized())
-        browserWindows.mainWindow?.restore();
-      browserWindows.mainWindow?.focus();
+    browserWindows.mainWindow = new BrowserWindow({
+        show: false,
+        webPreferences: {
+            contextIsolation: false,
+            enableRemoteModule: true,
+            autoHideMenuBar: true,
+            show: false,
+            nodeIntegration: true,
+            preload: path.join(app.getAppPath(), "preload.js"),
+        },
     });
-  }
 
-  /**
-   * Quit when all windows are closed, except on macOS. There, it's common
-   * for applications and their menu bar to stay active until the user quits
-   * explicitly with Cmd + Q.
-   */
+    /**
+     * If not using in production, use the loading window
+     * and run Python in shell.
+     */
+    if (isDevMode) {
+        // await installExtensions(); // React, Redux devTools
+        browserWindows.loadingWindow = new BrowserWindow({
+            frame: false,
+            transparent: true,
+            alwaysOnTop: true,
+            width: 300,
+            height: 300,
+        });
+        createLoadingWindow().then(() => createMainWindow());
+        // var devProc = spawn(`python backend/LiSA.py`, {
+        //   detached: true,
+        //   shell: true,
+        //   stdio: "inherit",
+        // });
+        var devProc = spawn("python backend/LiSA.py", {
+            detached: true,
+            shell: true,
+        });
+    } else {
+        /**
+         * If using in production, use the main window
+         * and run bundled app (dmg, elf, or exe) file.
+         */
+        browserWindows.loadingWindow = new BrowserWindow({
+            frame: false,
+            transparent: true,
+            alwaysOnTop: true,
+        });
+        createLoadingWindow().then(() => {
+            createMainWindow();
+        });
+        // Dynamic script assignment for starting Python in production
+        const runPython = {
+            darwin: `open -gj "${path.join(app.getAppPath(), "resources", "app.app")}" --args`,
+            linux: "./resources/main/main",
+            win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
+        }[process.platform];
 
-  // app.on('before-quit', function() {
-  //   pids.forEach(function(pid) {
-  //     // A simple pid lookup
-  //     ps.kill( pid, function( err ) {
-  //         if (err) {
-  //             throw new Error( err );
-  //         }
-  //         else {
-  //             console.log( 'Process %s has been killed!', pid );
-  //         }
-  //     });
-  //   });
-  // });
-
-  app.on("window-all-closed", () => {
-    console.log("inside close");
-
-    if (process.platform !== "darwin") {
-      // console.log("killing");
-      // console.log(devProc.pid);
-
-      // // spawn(`powershell.exe -Command kill ${devProc.pid}`);
-
-      // devProc.kill("SIGHUP");
-
-      // psTree(devProc.pid, function (err, children) {
-      //   console.log(`asdasdasdasdasd`)
-      //   console.log(err)
-      //   console.log(children)
-      //   devProc.spawn(
-      //     "kill",
-      //     ["-9"].concat(
-      //       children.map(function (p) {
-      //         console.log(`inside map child`)
-      //         console.log(children)
-      //         return p.PID;
-      //       })
-      //     )
-      //   );
-      // });
-
-      spawn("taskkill /IM LiSA.exe /F", {
-        shell: true,
-        detached: true,
-      });
-
-      app.quit();
-      console.log("after quit");
+        var proc = spawn(`${runPython}`, {
+            shell: true,
+        });
     }
-  });
+
+    app.on("activate", () => {
+        /**
+         * On macOS it's common to re-create a window in the app when the
+         * dock icon is clicked and there are no other windows open.
+         */
+        if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
+    });
+
+    /**
+     * Ensures that only a single instance of the app
+     * can run, this correlates with the "name" property
+     * used in `package.json`.
+     */
+    const initialInstance = app.requestSingleInstanceLock();
+    if (!initialInstance) app.quit();
+    else {
+        app.on("second-instance", () => {
+            if (browserWindows.mainWindow?.isMinimized()) browserWindows.mainWindow?.restore();
+            browserWindows.mainWindow?.focus();
+        });
+    }
+
+    /**
+     * Quit when all windows are closed, except on macOS. There, it's common
+     * for applications and their menu bar to stay active until the user quits
+     * explicitly with Cmd + Q.
+     */
+
+    // app.on('before-quit', function() {
+    //   pids.forEach(function(pid) {
+    //     // A simple pid lookup
+    //     ps.kill( pid, function( err ) {
+    //         if (err) {
+    //             throw new Error( err );
+    //         }
+    //         else {
+    //             console.log( 'Process %s has been killed!', pid );
+    //         }
+    //     });
+    //   });
+    // });
+
+    app.on("window-all-closed", () => {
+        console.log("inside close");
+
+        if (process.platform !== "darwin") {
+            // console.log("killing");
+            // console.log(devProc.pid);
+
+            // // spawn(`powershell.exe -Command kill ${devProc.pid}`);
+
+            // devProc.kill("SIGHUP");
+
+            // psTree(devProc.pid, function (err, children) {
+            //   console.log(`asdasdasdasdasd`)
+            //   console.log(err)
+            //   console.log(children)
+            //   devProc.spawn(
+            //     "kill",
+            //     ["-9"].concat(
+            //       children.map(function (p) {
+            //         console.log(`inside map child`)
+            //         console.log(children)
+            //         return p.PID;
+            //       })
+            //     )
+            //   );
+            // });
+
+            spawn("taskkill /IM LiSA.exe /F", {
+                shell: true,
+                detached: true,
+            });
+
+            app.quit();
+            console.log("after quit");
+        }
+    });
 });

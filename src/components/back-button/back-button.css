@@ -6,9 +6,9 @@ div.backBtn {
     transition: all 0.4s ease;
     position: fixed;
     cursor: pointer;
-  }
-  
-  span.line {
+}
+
+span.line {
     bottom: auto;
     right: auto;
     top: auto;
@@ -21,23 +21,23 @@ div.backBtn {
     display: block;
     position: absolute;
     transition: width 0.2s ease 0.1s, left 0.2s ease, transform 0.2s ease 0.3s,
-      background-color 0.2s ease;
-  }
-  
-  span.tLine {
+        background-color 0.2s ease;
+}
+
+span.tLine {
     top: 0px;
-  }
-  
-  span.mLine {
+}
+
+span.mLine {
     top: 13px;
     opacity: 0;
-  }
-  
-  span.bLine {
+}
+
+span.bLine {
     top: 26px;
-  }
-  
-  .label {
+}
+
+.label {
     position: absolute;
     left: 0px;
     top: 5px;
@@ -45,34 +45,33 @@ div.backBtn {
     text-align: center;
     transition: all 0.4s ease;
     font-size: 1em;
-  }
-  
-  div.backBtn:hover span.label {
+}
+
+div.backBtn:hover span.label {
     left: 25px;
-  }
-  
-  div.backBtn:hover span.line {
+}
+
+div.backBtn:hover span.line {
     left: -10px;
     height: 5px;
     background-color: #ffff;
-  }
-  
-  div.backBtn:hover span.tLine {
+}
+
+div.backBtn:hover span.tLine {
     width: 25px;
     transform: rotate(-45deg);
     left: -15px;
     top: 6px;
-  }
-  
-  div.backBtn:hover span.mLine {
+}
+
+div.backBtn:hover span.mLine {
     opacity: 1;
     width: 30px;
-  }
-  
-  div.backBtn:hover span.bLine {
+}
+
+div.backBtn:hover span.bLine {
     width: 25px;
     transform: rotate(45deg);
     left: -15px;
     top: 20px;
-  }
-  
+}
