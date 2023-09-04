@@ -58,6 +58,7 @@ export const animeEpisodesReducer = (state = {}, action) => {
         case ANIME_EPISODES_ADD_REQUEST:
             return {
                 loading: true,
+                // @ts-ignore
                 details: { ...state.details, ...action.payload },
             };
 

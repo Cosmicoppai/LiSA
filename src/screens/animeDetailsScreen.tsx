@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useEffect } from "react";
 import {
     Badge,

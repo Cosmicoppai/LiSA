@@ -4,7 +4,7 @@ import { Box, Grid, GridItem } from "@chakra-ui/react";
 
 import Navbar from "./components/navbar";
 
-import { SocketContext } from "./context/socket";
+import { useSocketContext } from "./context/socket";
 import useSocketStatus from "./hooks/useSocketStatus";
 
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
@@ -20,7 +20,7 @@ export default function App() {
 
     const { isSocketConnected } = useSocketStatus();
 
-    const client = useContext(SocketContext);
+    const client = useSocketContext();
 
     console.log("client", client);
 

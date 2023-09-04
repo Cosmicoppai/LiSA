@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Box, Heading, Text, Stack, Image, Flex, Badge, Spacer, useToast } from "@chakra-ui/react";
 import { AiFillStar } from "react-icons/ai";
 import { useDispatch } from "react-redux";

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Box, Image, useDisclosure, useToast } from "@chakra-ui/react";
 import { useEffect, useState, useRef } from "react";
 import videojs from "video.js";

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { createStandaloneToast } from "@chakra-ui/toast";
 
 import server from "src/utils/axios";

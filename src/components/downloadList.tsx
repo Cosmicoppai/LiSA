@@ -7,7 +7,6 @@ export default function DownloadList(props) {
                 Object.entries(props?.filesStatus).map(([key, value]) => {
                     return (
                         <DownloadItem
-                            id={key}
                             data={value}
                             key={key}
                             cancelDownloadHandler={props.cancelDownloadHandler}

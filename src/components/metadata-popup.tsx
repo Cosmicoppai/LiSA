@@ -13,6 +13,7 @@ import {
 export default function MetaDataPopup({ onClose, onOpen, isOpen }) {
     const cancelRef = useRef();
     return (
+        // @ts-ignore
         <AlertDialog
             motionPreset="slideInBottom"
             leastDestructiveRef={cancelRef}

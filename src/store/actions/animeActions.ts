@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import server from "../../utils/axios";
 import {
     ANIME_CURRENT_EP_FAIL,

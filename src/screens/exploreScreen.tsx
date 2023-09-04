@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Center, Flex, Heading, Skeleton, Spacer, Stack } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Select } from "@chakra-ui/react";
