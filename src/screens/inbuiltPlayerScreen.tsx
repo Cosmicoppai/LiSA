@@ -18,7 +18,7 @@ import { BiArrowBack } from "react-icons/bi";
 import { addCurrentEp, addEpisodesDetails, getStreamDetails } from "../store/actions/animeActions";
 import VideoPlayer from "../components/video-player";
 import PaginateCard from "../components/paginateCard";
-import server from "../axios";
+import server from "../utils/axios";
 
 const InbuiltPlayerScreen = () => {
     const dispatch = useDispatch();

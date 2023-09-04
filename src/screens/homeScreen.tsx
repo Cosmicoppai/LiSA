@@ -14,8 +14,6 @@ import {
 import { Image } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
-import "../App.css";
-
 import { clearEp, clearSearch, searchAnimeList } from "../store/actions/animeActions";
 import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";

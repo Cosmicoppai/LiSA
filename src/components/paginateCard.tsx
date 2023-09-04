@@ -24,7 +24,7 @@ import {
     getStreamDetails,
 } from "../store/actions/animeActions";
 import { useNavigate } from "react-router-dom";
-import server from "../axios";
+import server from "../utils/axios";
 import { downloadVideo } from "../store/actions/downloadActions";
 import MetaDataPopup from "./metadata-popup";
 

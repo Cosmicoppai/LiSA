@@ -4,14 +4,14 @@ import ReactDOM from "react-dom/client";
 import { ChakraProvider, useColorMode } from "@chakra-ui/react";
 import { Provider } from "react-redux";
 
-import "./index.css";
+import "./styles/index.css";
 
 import App from "./App";
 
 import store from "./store/store";
 
-import { client, SocketContext } from "src/socket";
-import { theme } from "./theme";
+import { client, SocketContext } from "src/context/socket";
+import { theme } from "./styles/theme";
 
 function ForceDarkMode({ children }: {
     children: ReactNode

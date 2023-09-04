@@ -4,7 +4,7 @@ import { Box, Grid, GridItem } from "@chakra-ui/react";
 
 import Navbar from "./components/navbar";
 
-import { SocketContext } from "./socket";
+import { SocketContext } from "./context/socket";
 import useSocketStatus from "./hooks/useSocketStatus";
 
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
@@ -13,6 +13,8 @@ import { HomeScreen } from "./screens/homeScreen";
 import DownloadScreen from "./screens/downloadsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import ExploreScreen from "./screens/exploreScreen";
+
+import './styles/App.css';
 
 export default function App() {
 

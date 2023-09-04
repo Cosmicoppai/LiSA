@@ -28,8 +28,8 @@ import {
     resumeLiveDownload,
 } from "../store/actions/animeActions";
 
-import { formatBytes } from "../utils";
-import { SocketContext } from "../socket";
+import { formatBytes } from "../utils/formatBytes";
+import { SocketContext } from "../context/socket";
 import DownloadList from "../components/downloadList";
 import ExternalPlayerPopup from "../components/externalPopup";
 

@@ -1,6 +1,6 @@
 import { createStandaloneToast } from "@chakra-ui/toast";
 
-import server from "src/axios";
+import server from "src/utils/axios";
 
 import {
     ANIME_DOWNLOAD_FAIL,

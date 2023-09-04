@@ -1,4 +1,4 @@
-import server from "../../axios";
+import server from "../../utils/axios";
 import {
     ANIME_CURRENT_EP_FAIL,
     ANIME_CURRENT_EP_REQUEST,

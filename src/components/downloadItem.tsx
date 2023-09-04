@@ -1,7 +1,7 @@
 import { Box, Progress, Td, Text, Tr } from "@chakra-ui/react";
 import { AiOutlineClose, AiOutlinePause } from "react-icons/ai";
 import { FaPlay } from "react-icons/fa";
-import { formatBytes } from "../utils";
+import { formatBytes } from "../utils/formatBytes";
 
 export default function DownloadItem({
     key,
