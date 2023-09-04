@@ -22,10 +22,10 @@ import {
     addEpisodesDetails,
     getRecommendations,
     getStreamDetails,
-} from "../actions/animeActions";
+} from "../store/actions/animeActions";
 import { useNavigate } from "react-router-dom";
 import server from "../axios";
-import { downloadVideo } from "../actions/downloadActions";
+import { downloadVideo } from "../store/actions/downloadActions";
 import MetaDataPopup from "./metadata-popup";
 
 const PaginateCard = ({

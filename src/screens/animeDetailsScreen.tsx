@@ -28,7 +28,7 @@ import {
     getRecommendations,
     getStreamDetails,
     searchAnimeList,
-} from "../actions/animeActions";
+} from "../store/actions/animeActions";
 import PaginateCard from "../components/paginateCard";
 import { AiFillStar } from "react-icons/ai";
 import SearchResultCard from "../components/search-result-card";
@@ -321,27 +321,27 @@ export default function AnimeDetailsScreen() {
                                         }}>
                                         {recommendations
                                             ? recommendations.map((anime) => {
-                                                  return (
-                                                      <SearchResultCard
-                                                          data={anime}
-                                                          cardWidth={"270px"}
-                                                          cardMargin={"10px 40px"}
-                                                      />
-                                                  );
-                                              })
+                                                return (
+                                                    <SearchResultCard
+                                                        data={anime}
+                                                        cardWidth={"270px"}
+                                                        cardMargin={"10px 40px"}
+                                                    />
+                                                );
+                                            })
                                             : Array(30)
-                                                  .fill(0)
-                                                  .map(() => (
-                                                      <Skeleton
-                                                          width={"200px"}
-                                                          height={"300px"}
-                                                          sx={{
-                                                              padding: "1rem",
-                                                              margin: "10px auto",
-                                                          }}
-                                                          padding={6}
-                                                      />
-                                                  ))}
+                                                .fill(0)
+                                                .map(() => (
+                                                    <Skeleton
+                                                        width={"200px"}
+                                                        height={"300px"}
+                                                        sx={{
+                                                            padding: "1rem",
+                                                            margin: "10px auto",
+                                                        }}
+                                                        padding={6}
+                                                    />
+                                                ))}
                                     </Box>
                                 </Stack>
                             </Box>

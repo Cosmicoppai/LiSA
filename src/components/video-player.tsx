@@ -12,7 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 //   return { innerWidth, innerHeight };
 // }
 import hlsQualitySelector from "videojs-hls-quality-selector";
-import { downloadVideo } from "../actions/downloadActions";
+import { downloadVideo } from "../store/actions/downloadActions";
 
 const VideoPlayer = ({
     url,

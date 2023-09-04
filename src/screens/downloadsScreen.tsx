@@ -20,7 +20,7 @@ import {
     getDownloadHistory,
     pauseLiveDownload,
     resumeLiveDownload,
-} from "../actions/animeActions";
+} from "../store/actions/animeActions";
 import DownloadItem from "../components/downloadItem";
 import { useSelector, useDispatch } from "react-redux";
 import { TbMoodSad } from "react-icons/tb";
@@ -248,7 +248,7 @@ const DownloadScreen = () => {
                                 </Thead>
                                 <Tbody>
                                     {historyDetails?.details &&
-                                    historyDetails?.details?.length !== 0 ? (
+                                        historyDetails?.details?.length !== 0 ? (
                                         historyDetails.details.map((history_item, idx) => {
                                             if (history_item.status === "downloaded") {
                                                 return (

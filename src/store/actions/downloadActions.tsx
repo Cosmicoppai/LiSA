@@ -1,5 +1,5 @@
 import { useToast } from "@chakra-ui/react";
-import server from "../axios";
+import server from "../../axios";
 import {
     ANIME_DOWNLOAD_FAIL,
     ANIME_DOWNLOAD_REQUEST,

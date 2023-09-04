@@ -9,7 +9,7 @@ import { ChakraProvider, useColorMode } from "@chakra-ui/react";
 import { theme } from "./theme";
 import App from "./App";
 import { Provider } from "react-redux";
-import store from "./store";
+import store from "./store/store";
 import { client, SocketContext } from "./socket";
 
 function ForceDarkMode(props) {

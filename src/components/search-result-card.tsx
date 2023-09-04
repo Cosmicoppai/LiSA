@@ -13,7 +13,7 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { addAnimeDetails } from "../actions/animeActions";
+import { addAnimeDetails } from "../store/actions/animeActions";
 import { useDispatch } from "react-redux";
 import { AiFillStar } from "react-icons/ai";
 

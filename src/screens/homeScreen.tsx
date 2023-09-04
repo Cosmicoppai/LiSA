@@ -21,7 +21,7 @@ import {
 } from "@chakra-ui/react";
 import { Image } from "@chakra-ui/react";
 import { DownloadIcon, HamburgerIcon, SearchIcon, SettingsIcon } from "@chakra-ui/icons";
-import { clearEp, clearSearch, searchAnimeList } from "../actions/animeActions";
+import { clearEp, clearSearch, searchAnimeList } from "../store/actions/animeActions";
 import { useDispatch, useSelector } from "react-redux";
 import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";

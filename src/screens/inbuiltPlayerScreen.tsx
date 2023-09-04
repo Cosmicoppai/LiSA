@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addCurrentEp, addEpisodesDetails, getStreamDetails } from "../actions/animeActions";
+import { addCurrentEp, addEpisodesDetails, getStreamDetails } from "../store/actions/animeActions";
 import VideoPlayer from "../components/video-player";
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
@@ -228,8 +228,8 @@ const InbuiltPlayerScreen = () => {
                                         {language === "jpn"
                                             ? "Japanese"
                                             : language === "eng"
-                                            ? "English"
-                                            : ""}
+                                                ? "English"
+                                                : ""}
                                     </option>
                                 );
                             })}

@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { playVideoExternal } from "../actions/animeActions";
+import { playVideoExternal } from "../store/actions/animeActions";
 import VlcImage from "../assests/assests/vlc.png";
 import MpvImage from "../assests/assests/mpv.png";
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Select } from "@chakra-ui/react";
 import { AiFillFilter } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
-import { getExploreDetails } from "../actions/animeActions";
+import { getExploreDetails } from "../store/actions/animeActions";
 import Card from "../components/card";
 // import { useNavigate } from "react-router-dom";
 
@@ -73,18 +73,18 @@ const ExploreScreen = () => {
                     }}>
                     {details
                         ? details?.data?.map((anime) => {
-                              return <Card data={anime} query={query} />;
-                          })
+                            return <Card data={anime} query={query} />;
+                        })
                         : Array(30)
-                              .fill(0)
-                              .map(() => (
-                                  <Skeleton
-                                      width={"300px"}
-                                      height={"450px"}
-                                      sx={{ padding: "1rem", margin: "10px auto" }}
-                                      padding={6}
-                                  />
-                              ))}
+                            .fill(0)
+                            .map(() => (
+                                <Skeleton
+                                    width={"300px"}
+                                    height={"450px"}
+                                    sx={{ padding: "1rem", margin: "10px auto" }}
+                                    padding={6}
+                                />
+                            ))}
                 </ul>
 
                 <Flex gap={6} flexWrap="wrap"></Flex>

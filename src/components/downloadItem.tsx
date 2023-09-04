@@ -2,7 +2,7 @@ import { Box, Flex, Progress, Td, Text, Tr } from "@chakra-ui/react";
 import React from "react";
 import { AiOutlineClose, AiOutlinePause } from "react-icons/ai";
 import { FaPlay } from "react-icons/fa";
-import { cancelLiveDownload } from "../actions/animeActions";
+import { cancelLiveDownload } from "../store/actions/animeActions";
 import { formatBytes } from "../utils";
 
 const DownloadItem = ({
