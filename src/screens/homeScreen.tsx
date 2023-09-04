@@ -21,6 +21,10 @@ import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";
 import useNetworkStatus from "../hooks/useNetworkStatus";
 
+import NotFoundImg from "src/assets/img/not-found.png";
+import LoaderSearchGif from "src/assets/img/loader-serch.gif";
+import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
+
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
@@ -58,7 +62,7 @@ export const HomeScreen = () => {
                     w="100%"
                     h="100%"
                     pt={"20px"}>
-                    <Image objectFit="cover" src={"/images/home_screen_logo.png"} alt="logo" />{" "}
+                    <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />{" "}
                     <Box w="50%" sx={{ position: "relative" }}>
                         <InputGroup>
                             <InputRightElement
@@ -121,7 +125,7 @@ export const HomeScreen = () => {
                     {!loading && error && (
                         <Box textAlign="center" py={10} px={6}>
                             <Image
-                                src={"/images/not-found.png"}
+                                src={NotFoundImg}
                                 alt="not-found"
                                 height={200}
                                 display={"flex"}
@@ -136,7 +140,7 @@ export const HomeScreen = () => {
                             </Text>
                         </Box>
                     )}
-                    {loading && <Image src={"/images/loader-serch.gif"} alt="loader" boxSize="150px" />}
+                    {loading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
                 </Flex>
             ) : (
                 <NetworkError />
