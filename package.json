@@ -94,6 +94,7 @@
     "jsdoc": "^3.6.5",
     "prettier": "^2.2.1",
     "sass": "^1.26.5",
+    "typescript": "^5.2.2",
     "wait-on": "^5.2.1"
   },
   "optionalDependencies": {
