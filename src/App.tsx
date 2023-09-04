@@ -1,44 +1,42 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
-import "./index.css";
+import { useContext, useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
-import AnimeDetailsScreen from "./screens/animeDetailsScreen";
-import SettingScreen from "./screens/settingScreen";
-import { HomeScreen } from "./screens/homeScreen";
-import Navbar from "./components/navbar";
-import DownloadScreen from "./screens/downloadsScreen";
-import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
-import ExploreScreen from "./screens/exploreScreen";
-import VideoPlayer from "./components/video-player";
+
+import Navbar from "./components/navbar";
+
 import { SocketContext } from "./socket";
 import useSocketStatus from "./hooks/useSocketStatus";
 
-// const { app } = window.require("@electron/remote");
+import AnimeDetailsScreen from "./screens/animeDetailsScreen";
+import SettingScreen from "./screens/settingScreen";
+import { HomeScreen } from "./screens/homeScreen";
+import DownloadScreen from "./screens/downloadsScreen";
+import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
+import ExploreScreen from "./screens/exploreScreen";
 
-function App() {
+export default function App() {
+
     const { isSocketConnected } = useSocketStatus();
-    // console.log(isSocketConnected);
-    const client = useContext(SocketContext);
-    // ...
-    console.log("client", client);
-    useEffect(() => {
-        if (!client) {
-            return;
-        } else {
-            if (client.readyState === 1) {
-                client.send(JSON.stringify({ type: "connect" }));
-                console.log("WebSocket Client Connected");
 
-                // client.onopen = () => {
-                //   console.log("WebSocket Client Connected");
-                //   client.send(JSON.stringify({ type: "connect" }));
-                // };
-            }
+    const client = useContext(SocketContext);
+
+    console.log("client", client);
+
+    useEffect(() => {
+
+        if (!client) return;
+        else if (client.readyState === 1) {
+            client.send(JSON.stringify({ type: "connect" }));
+            console.log("WebSocket Client Connected");
+
+            // client.onopen = () => {
+            //   console.log("WebSocket Client Connected");
+            //   client.send(JSON.stringify({ type: "connect" }));
+            // };
         }
 
-        () => {
-            client.close();
-        };
+        () => client.close();
+
     }, [isSocketConnected, client]);
 
     return (
@@ -85,5 +83,3 @@ function App() {
         </HashRouter>
     );
 }
-
-export default App;

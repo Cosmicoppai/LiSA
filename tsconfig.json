@@ -1,18 +1,18 @@
 {
-	"compilerOptions": {
-		"target": "ESNext",
-		"module": "commonjs",
-		"jsx": "react-jsx",
-		"allowJs": true,
-		"checkJs": true,
-		"skipLibCheck": true,
-		"esModuleInterop": true,
-		"noImplicitAny": true,
-		"sourceMap": true,
-		"baseUrl": ".",
-		"outDir": "dist",
-		"moduleResolution": "node",
-		"resolveJsonModule": true
-	},
-	"include": ["src"]
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "jsx": "react-jsx",
+        "allowJs": true,
+        "checkJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "outDir": "dist",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "baseUrl": "."
+    },
+    "include": ["src/**/*"]
 }

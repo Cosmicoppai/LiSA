@@ -3,6 +3,7 @@ import { AiFillStar } from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addAnimeDetails } from "../store/actions/animeActions";
+
 export default function Card({ data, query }) {
     const navigate = useNavigate();
     const toast = useToast();

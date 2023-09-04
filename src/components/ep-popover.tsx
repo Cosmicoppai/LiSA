@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Button,
     Modal,
@@ -9,15 +10,15 @@ import {
     ModalOverlay,
     Select,
     Stack,
-    useDisclosure,
 } from "@chakra-ui/react";
+
 import { useSelector, useDispatch } from "react-redux";
 
-import React, { useState } from "react";
 import { playVideoExternal } from "../store/actions/animeActions";
 import { downloadVideo } from "../store/actions/downloadActions";
 
-const EpPopover = ({ isOpen, onOpen, onClose }) => {
+export default function EpPopover({ isOpen, onOpen, onClose }) {
+
     const dispatch = useDispatch();
     const { details, loading } = useSelector((state) => state.animeStreamDetails);
     const [language, setLanguage] = useState(null);
@@ -88,5 +89,3 @@ const EpPopover = ({ isOpen, onOpen, onClose }) => {
         </>
     );
 };
-
-export default EpPopover;

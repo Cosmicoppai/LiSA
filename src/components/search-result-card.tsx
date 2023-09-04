@@ -13,11 +13,13 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
-import { addAnimeDetails } from "../store/actions/animeActions";
 import { useDispatch } from "react-redux";
 import { AiFillStar } from "react-icons/ai";
 
-const SearchResultCard = ({ data, cardWidth, cardMargin, maxImgWidth }) => {
+import { addAnimeDetails } from "../store/actions/animeActions";
+
+export default function SearchResultCard({ data, cardWidth, cardMargin, maxImgWidth }) {
+
     const dispatch = useDispatch();
 
     const detailsClickHandler = () => {
@@ -157,5 +159,3 @@ const SearchResultCard = ({ data, cardWidth, cardMargin, maxImgWidth }) => {
         </Link>
     );
 };
-
-export default SearchResultCard;

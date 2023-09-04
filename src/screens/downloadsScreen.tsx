@@ -14,23 +14,24 @@ import {
     Tr,
     useDisclosure,
 } from "@chakra-ui/react";
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
+
+import { useSelector, useDispatch } from "react-redux";
+import { TbMoodSad } from "react-icons/tb";
+import { FaPlay } from "react-icons/fa";
+import { AiOutlineFolderOpen } from "react-icons/ai";
+
 import {
     cancelLiveDownload,
     getDownloadHistory,
     pauseLiveDownload,
     resumeLiveDownload,
 } from "../store/actions/animeActions";
-import DownloadItem from "../components/downloadItem";
-import { useSelector, useDispatch } from "react-redux";
-import { TbMoodSad } from "react-icons/tb";
-import { FaPlay } from "react-icons/fa";
-import { AiOutlineFolderOpen } from "react-icons/ai";
+
 import { formatBytes } from "../utils";
 import { SocketContext } from "../socket";
 import DownloadList from "../components/downloadList";
 import ExternalPlayerPopup from "../components/externalPopup";
-var W3CWebSocket = require("websocket").w3cwebsocket;
 
 function sleep(milliseconds) {
     const date = Date.now();

@@ -9,15 +9,16 @@ import {
     Heading,
     Skeleton,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+
+import { useNavigate } from "react-router-dom";
+import { BiArrowBack } from "react-icons/bi";
+
 import { addCurrentEp, addEpisodesDetails, getStreamDetails } from "../store/actions/animeActions";
 import VideoPlayer from "../components/video-player";
 import PaginateCard from "../components/paginateCard";
-import SearchResultCard from "../components/search-result-card";
 import server from "../axios";
-import { Link, useNavigate } from "react-router-dom";
-import { BiArrowBack } from "react-icons/bi";
 
 const InbuiltPlayerScreen = () => {
     const dispatch = useDispatch();

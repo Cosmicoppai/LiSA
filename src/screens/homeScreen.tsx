@@ -1,34 +1,29 @@
 import React, { useEffect } from "react";
-import "../App.css";
-import { Link } from "react-router-dom";
+
+import { useDispatch, useSelector } from "react-redux";
 import {
     Box,
-    Center,
     Flex,
-    Heading,
-    IconButton,
     Input,
     InputGroup,
     InputLeftElement,
     InputRightElement,
     Kbd,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    Stack,
     Text,
 } from "@chakra-ui/react";
 import { Image } from "@chakra-ui/react";
-import { DownloadIcon, HamburgerIcon, SearchIcon, SettingsIcon } from "@chakra-ui/icons";
+import { SearchIcon } from "@chakra-ui/icons";
+
+import "../App.css";
 import { clearEp, clearSearch, searchAnimeList } from "../store/actions/animeActions";
-import { useDispatch, useSelector } from "react-redux";
 import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";
 import useNetworkStatus from "../hooks/useNetworkStatus";
+
 import NotFoundImage from "../assests/images/not-found.png";
 import LoaderSearchGif from "../assests/images/loader-serch.gif";
 import HomeScreenLogoImage from "../assests/images/home_screen_logo.png";
+
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
@@ -92,9 +87,6 @@ export const HomeScreen = () => {
                             />
                         </InputGroup>
                     </Box>
-                    {/* {!loading && animes && 
-        
-        } />} */}
                     {!loading && animes && (
                         <Box
                             sx={{

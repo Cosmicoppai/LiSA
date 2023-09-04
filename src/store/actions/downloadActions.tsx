@@ -1,11 +1,12 @@
-import { useToast } from "@chakra-ui/react";
-import server from "../../axios";
+import { createStandaloneToast } from "@chakra-ui/toast";
+
+import server from "src/axios";
+
 import {
     ANIME_DOWNLOAD_FAIL,
     ANIME_DOWNLOAD_REQUEST,
     ANIME_DOWNLOAD_SUCCESS,
 } from "../constants/downloadConstants";
-import { createStandaloneToast } from "@chakra-ui/toast";
 
 const { toast } = createStandaloneToast();
 export const downloadVideo = (payload) => async (dispatch) => {

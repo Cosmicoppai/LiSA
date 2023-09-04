@@ -11,13 +11,14 @@ import {
     Progress,
     Text,
 } from "@chakra-ui/react";
-import React from "react";
+
 import { useDispatch, useSelector } from "react-redux";
 import { playVideoExternal } from "../store/actions/animeActions";
 import VlcImage from "../assests/assests/vlc.png";
 import MpvImage from "../assests/assests/mpv.png";
 
-const ExternalPlayerPopup = ({ isOpen, onOpen, onClose, language, historyPlay, playId }) => {
+export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, historyPlay, playId }) {
+
     const dispatch = useDispatch();
 
     const { error: externalError, loading: externalLoading } = useSelector(
@@ -84,5 +85,3 @@ const ExternalPlayerPopup = ({ isOpen, onOpen, onClose, language, historyPlay, p
         </Modal>
     );
 };
-
-export default ExternalPlayerPopup;

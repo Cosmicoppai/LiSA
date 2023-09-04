@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import VideoPlayer from "../components/video-player";
 
 export default function SettingScreen() {
     return (

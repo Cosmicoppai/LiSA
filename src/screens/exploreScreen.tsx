@@ -1,17 +1,20 @@
-import { Box, Center, Flex, Heading, Skeleton, Spacer, Stack } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { Center, Flex, Heading, Skeleton, Spacer, Stack } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 import { Select } from "@chakra-ui/react";
 import { AiFillFilter } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
+
 import { getExploreDetails } from "../store/actions/animeActions";
 import Card from "../components/card";
-// import { useNavigate } from "react-router-dom";
 
-const ExploreScreen = () => {
+export default function ExploreScreen() {
+
     const [query, setQuery] = useState("airing");
+
     const { loading, details } = useSelector((state) => {
         return state.animeExploreDetails;
     });
+
     const filterChangeHandler = (e) => {
         setQuery(e.target.value);
     };
@@ -72,8 +75,8 @@ const ExploreScreen = () => {
                         marginTop: "20px",
                     }}>
                     {details
-                        ? details?.data?.map((anime) => {
-                            return <Card data={anime} query={query} />;
+                        ? details?.data?.map((anime, index) => {
+                            return <Card key={index} data={anime} query={query} />;
                         })
                         : Array(30)
                             .fill(0)
@@ -84,7 +87,8 @@ const ExploreScreen = () => {
                                     sx={{ padding: "1rem", margin: "10px auto" }}
                                     padding={6}
                                 />
-                            ))}
+                            ))
+                    }
                 </ul>
 
                 <Flex gap={6} flexWrap="wrap"></Flex>
@@ -92,5 +96,3 @@ const ExploreScreen = () => {
         </Center>
     );
 };
-
-export default ExploreScreen;

@@ -1,10 +1,8 @@
-import React from "react";
 import DownloadItem from "./downloadItem";
 
-const DownloadList = (props) => {
+export default function DownloadList(props) {
     return (
         <>
-            {" "}
             {props?.filesStatus &&
                 Object.entries(props?.filesStatus).map(([key, value]) => {
                     return (
@@ -17,9 +15,8 @@ const DownloadList = (props) => {
                             resumeDownloadHandler={props.resumeDownloadHandler}
                         />
                     );
-                })}
+                })
+            }
         </>
     );
 };
-
-export default DownloadList;

@@ -1,10 +1,11 @@
-import { Flex, Icon, Tooltip } from "@chakra-ui/react";
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch } from "react-icons/ai";
+import { Flex, Icon, Tooltip } from "@chakra-ui/react";
+import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch, AiOutlineSetting } from "react-icons/ai";
 
-const Navbar = () => {
+export default function Navbar() {
+
     const { pathname } = useLocation();
+
     return (
         <Flex
             pt="8"
@@ -55,11 +56,12 @@ const Navbar = () => {
             </Tooltip>
 
             {/* <Link to="/setting" >
-        {" "}
-        <Icon as={AiOutlineSetting} w={8} h={8} mb={"-3"} color={pathname === "/setting" ? "white" : "#9c9c9c"} />
-      </Link> */}
+                <Icon
+                    as={AiOutlineSetting}
+                    w={8} h={8} mb={"-3"}
+                    color={pathname === "/setting" ? "white" : "#9c9c9c"}
+                />
+            </Link> */}
         </Flex>
     );
 };
-
-export default Navbar;

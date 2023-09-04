@@ -1,6 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import thunk from "redux-thunk";
 import { composeWithDevTools } from "redux-devtools-extension";
+
 import {
     animeCurrentEpReducer,
     animeDetailsReducer,
@@ -12,6 +13,7 @@ import {
     animeStreamExternalReducer,
     recommendationsReducer,
 } from "./reducers/animeReducers";
+
 import { animeDownloadReducer, animeLibraryReducer } from "./reducers/downloadReducers";
 
 const reducer = combineReducers({

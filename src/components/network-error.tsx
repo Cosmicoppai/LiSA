@@ -1,8 +1,8 @@
 import { Box, Heading, Text, Button } from "@chakra-ui/react";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const NetworkError = () => {
+export default function NetworkError() {
+
     const navigate = useNavigate();
 
     return (
@@ -34,5 +34,3 @@ const NetworkError = () => {
         </Box>
     );
 };
-
-export default NetworkError;

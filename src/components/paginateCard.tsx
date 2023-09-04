@@ -28,7 +28,7 @@ import server from "../axios";
 import { downloadVideo } from "../store/actions/downloadActions";
 import MetaDataPopup from "./metadata-popup";
 
-const PaginateCard = ({
+export default function PaginateCard({
     data,
     loading,
     ep_details,
@@ -38,7 +38,8 @@ const PaginateCard = ({
     player,
     setTest,
     recommendationLoading,
-}) => {
+}) {
+
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -261,5 +262,3 @@ const PaginateCard = ({
         </>
     );
 };
-
-export default PaginateCard;

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
     Badge,
-    Button,
     Center,
     Flex,
     Heading,
@@ -19,20 +18,21 @@ import {
     TabPanel,
     Tag,
 } from "@chakra-ui/react";
-import { Link, useNavigate } from "react-router-dom";
+
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+
 import { FiMonitor } from "react-icons/fi";
-import {
-    addEpisodesDetails,
-    clearEp,
-    getRecommendations,
-    getStreamDetails,
-    searchAnimeList,
-} from "../store/actions/animeActions";
-import PaginateCard from "../components/paginateCard";
 import { AiFillStar } from "react-icons/ai";
-import SearchResultCard from "../components/search-result-card";
 import { BiArrowBack } from "react-icons/bi";
+
+import {
+    getRecommendations,
+} from "../store/actions/animeActions";
+
+import PaginateCard from "../components/paginateCard";
+import SearchResultCard from "../components/search-result-card";
+
 const { shell } = window.require("electron");
 
 export default function AnimeDetailsScreen() {

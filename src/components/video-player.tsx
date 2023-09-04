@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import hlsQualitySelector from "videojs-hls-quality-selector";
 import { downloadVideo } from "../store/actions/downloadActions";
 
-const VideoPlayer = ({
+export default function VideoPlayer({
     url,
     epDetails,
     player,
@@ -24,7 +24,7 @@ const VideoPlayer = ({
     streamLoading,
     setQualityOptions,
     qualityOptions,
-}) => {
+}) {
     const toast = useToast();
 
     const { details } = useSelector((state) => state.animeStreamDetails);
@@ -190,5 +190,3 @@ const VideoPlayer = ({
         </Box>
     );
 };
-
-export default VideoPlayer;
