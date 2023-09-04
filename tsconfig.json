@@ -12,7 +12,12 @@
         "outDir": "dist",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "baseUrl": "."
+
+        "baseUrl": ".",
+        "paths": {
+            "@public/*": ["./public/*"]
+        }
     },
-    "include": ["src/**/*"]
+    "include": ["**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules", "backend"]
 }

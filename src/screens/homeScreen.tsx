@@ -15,14 +15,11 @@ import { Image } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
 import "../App.css";
+
 import { clearEp, clearSearch, searchAnimeList } from "../store/actions/animeActions";
 import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";
 import useNetworkStatus from "../hooks/useNetworkStatus";
-
-import NotFoundImage from "../assests/images/not-found.png";
-import LoaderSearchGif from "../assests/images/loader-serch.gif";
-import HomeScreenLogoImage from "../assests/images/home_screen_logo.png";
 
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
@@ -61,7 +58,7 @@ export const HomeScreen = () => {
                     w="100%"
                     h="100%"
                     pt={"20px"}>
-                    <Image objectFit="cover" src={HomeScreenLogoImage} alt="logo" />{" "}
+                    <Image objectFit="cover" src={"/images/home_screen_logo.png"} alt="logo" />{" "}
                     <Box w="50%" sx={{ position: "relative" }}>
                         <InputGroup>
                             <InputRightElement
@@ -124,7 +121,7 @@ export const HomeScreen = () => {
                     {!loading && error && (
                         <Box textAlign="center" py={10} px={6}>
                             <Image
-                                src={NotFoundImage}
+                                src={"/images/not-found.png"}
                                 alt="not-found"
                                 height={200}
                                 display={"flex"}
@@ -139,7 +136,7 @@ export const HomeScreen = () => {
                             </Text>
                         </Box>
                     )}
-                    {loading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
+                    {loading && <Image src={"/images/loader-serch.gif"} alt="loader" boxSize="150px" />}
                 </Flex>
             ) : (
                 <NetworkError />

@@ -14,8 +14,6 @@ import {
 
 import { useDispatch, useSelector } from "react-redux";
 import { playVideoExternal } from "../store/actions/animeActions";
-import VlcImage from "../assests/assests/vlc.png";
-import MpvImage from "../assests/assests/mpv.png";
 
 export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, historyPlay, playId }) {
 
@@ -60,10 +58,10 @@ export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language,
                 <ModalBody>
                     <Flex display={"flex"} alignItems={"center"} justifyContent={"center"}>
                         <Box p={4} onClick={() => playHandler("mpv")} sx={{ cursor: "pointer" }}>
-                            <Image src={MpvImage} />
+                            <Image src={"/images/mpv.png"} />
                         </Box>
                         <Box p={4} sx={{ cursor: "pointer" }} onClick={() => playHandler("vlc")}>
-                            <Image src={VlcImage} />
+                            <Image src={"/images/vlc.png"} />
                         </Box>
                     </Flex>
                     {externalError && (
