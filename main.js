@@ -115,7 +115,7 @@ const createLoadingWindow = () => {
 
         // Variants of developer loading screen
         const loaderConfig = {
-            main: "utilities/loaders/main/loader.html",
+            main: "public/loader/loader.html",
         };
 
         try {
