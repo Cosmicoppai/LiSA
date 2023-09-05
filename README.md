@@ -1,6 +1,6 @@
 <div align="center">
 
-![Banner](src/assests/images/home_screen_logo.png)
+![Banner](src/assets/img/home_screen_logo.png)
 
 ![GitHub contributors](https://img.shields.io/github/contributors/cosmicoppai/LiSA?color=lightgrey)
 [![GitHub forks](https://img.shields.io/github/forks/cosmicoppai/LiSA?color=lightgrey)](https://github.com/Cosmicoppai/LiSA/network)

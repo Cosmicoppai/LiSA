@@ -2,12 +2,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: transparent;
+    overflow: hidden;
 }
 .circle {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
+    overflow: hidden;
 }
 .circle svg {
     fill: none;
@@ -22,7 +23,7 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
     width: 200px;
     border-radius: 50%;
 }
@@ -30,10 +31,10 @@ body {
     from {
         stroke: #de0f3f;
         stroke-dasharray: 1;
-   }
+    }
     to {
         stroke: #aa1945;
         transform: rotate(180deg);
         stroke-dasharray: 8;
-   }
+    }
 }

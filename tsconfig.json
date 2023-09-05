@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "commonjs",
+        "jsx": "react-jsx",
+        "allowJs": true,
+        "checkJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "sourceMap": true,
+        "outDir": "dist",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+
+        "baseUrl": ".",
+        "paths": {
+            "@public/*": ["./public/*"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "backend"]
+}
