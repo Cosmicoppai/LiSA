@@ -1,10 +1,9 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.middleware.base import RequestResponseEndpoint
-from requests import ConnectionError
-from errors.http_error import bad_request_400
 from json import JSONDecodeError
+from starlette.middleware.base import RequestResponseEndpoint
+from errors.http_error import bad_request_400
 from logging import info
 
 

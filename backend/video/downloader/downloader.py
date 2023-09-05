@@ -4,7 +4,6 @@ import aiohttp
 import asyncio
 import m3u8
 import os
-import requests
 from Crypto.Cipher import AES
 from multiprocessing import connection, Process, Pipe
 import subprocess

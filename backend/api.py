@@ -1,15 +1,13 @@
 from json import JSONDecodeError
-import requests
-from starlette.exceptions import HTTPException
 from video.library import DBLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response, HTMLResponse
-from typing import Tuple, List, Callable, Any, Coroutine
+from starlette.responses import JSONResponse, Response
+from typing import Tuple
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
-from scraper import Animepahe, MyAL, MangaKatana
+from scraper import Animepahe, MyAL, MangaKatana, Proxy
 from video.streamer import Stream
 from config import ServerConfig, FileConfig
 from starlette.middleware import Middleware
@@ -425,9 +423,9 @@ async def proxy(request: Request):
     if not actual_url:
         await bad_request_400(request, msg="url not present")
 
-    resp = requests.get(actual_url, headers=get_headers(
+    content, headers = await Proxy.get(actual_url, headers=get_headers(
         extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/", "accept": "*/*"}))
-    return Response(resp.content, headers=resp.headers)
+    return Response(content, headers=headers)
 
 
 async def get_recommendation(request: Request):
