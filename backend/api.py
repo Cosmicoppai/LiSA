@@ -345,7 +345,7 @@ async def play(player_name: str, manifest_url: str) -> Tuple[str | None, int]:
         return str(error), 400
 
 
-async def top_anime(request: Request):
+async def top(request: Request):
     """Get top anime
 
     Args:
@@ -368,18 +368,30 @@ async def top_anime(request: Request):
             "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
         }
     """
-    anime_type = request.query_params.get("type", None)
-    limit = request.query_params.get("limit", "0")
+    _type = request.query_params.get("type", "anime")
+    _category = request.query_params.get("c", None)
+    _limit = request.query_params.get("limit", "0")
 
-    if not anime_type or anime_type.lower() not in MyAL.anime_types_dict:
-        return await bad_request_400(request, msg="Pass valid anime type")
+    if not _category:
+        return await bad_request_400(request, msg="Pass valid Category")
 
-    top_anime_response = await MyAL().get_top_anime(anime_type=anime_type, limit=limit)
+    match _type:
+        case "anime":
+            if _category.lower() not in MyAL.anime_types_dict:
+                return await bad_request_400(request, msg="Pass valid anime Category")
+            top_resp = await MyAL().get_top_anime(anime_type=_category, limit=_limit)
 
-    if not top_anime_response["next_top"] and not top_anime_response["prev_top"]:
+        case "manga":
+            if _category.lower() not in MyAL.manga_types_dict:
+                return await bad_request_400(request, msg="Pass valid Manga Category")
+            top_resp = await MyAL().get_top_mange(manga_type=_category, limit=_limit)
+        case _:
+            return await bad_request_400(request, msg="Pass valid type")
+
+    if not top_resp["next_top"] and not top_resp["prev_top"]:
         return await not_found_404(request, msg="limit out of range")
 
-    return JSONResponse(top_anime_response)
+    return JSONResponse(top_resp)
 
 
 async def get_master_manifest(request: Request):
@@ -497,7 +509,7 @@ async def watchlist(request: Request):
 routes = [
     Route("/", endpoint=LiSA, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
-    Route("/top_anime", endpoint=top_anime, methods=["GET"]),
+    Route("/top", endpoint=top, methods=["GET"]),
     Route("/ep_details", endpoint=get_ep_details, methods=["GET"]),
     Route("/manga_detail", endpoint=get_manga_detail, methods=["GET"]),
     Route("/recommendation", endpoint=get_recommendation, methods=["GET"]),
