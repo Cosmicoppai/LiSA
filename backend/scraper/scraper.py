@@ -51,7 +51,6 @@ class Animepahe(Anime):
     site_url: str = "https://animepahe.ru"
     api_url: str = "https://animepahe.ru/api"
     manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
-    cur = DB.connection.cursor()
 
     @staticmethod
     def __minify_text(text: str) -> str:
@@ -130,7 +129,8 @@ class Animepahe(Anime):
 
             if page_no == "1":
                 episodes["description"] = await description
-                res = self.cur.execute("SELECT * FROM watchlist WHERE anime_id=?", (episodes["description"]["anime_id"],))
+                cur = DB.connection.cursor()
+                res = cur.execute("SELECT * FROM watchlist WHERE anime_id=?", (episodes["description"]["anime_id"],))
                 episodes["mylist"] = True if res.fetchone() else False
 
             return episodes
