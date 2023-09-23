@@ -10,6 +10,7 @@ import re
 import string
 from json import JSONDecodeError
 from .base import Scraper
+from utils import DB
 
 
 class Anime(Scraper):
@@ -50,6 +51,7 @@ class Animepahe(Anime):
     site_url: str = "https://animepahe.ru"
     api_url: str = "https://animepahe.ru/api"
     manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
+    cur = DB.connection.cursor()
 
     @staticmethod
     def __minify_text(text: str) -> str:
@@ -128,6 +130,8 @@ class Animepahe(Anime):
 
             if page_no == "1":
                 episodes["description"] = await description
+                res = self.cur.execute("SELECT * FROM watchlist WHERE anime_id=?", (episodes["description"]["anime_id"],))
+                episodes["mylist"] = True if res.fetchone() else False
 
             return episodes
         except TypeError:
@@ -155,7 +159,7 @@ class Animepahe(Anime):
         """
 
         description: Dict[str, Any] = {
-            "synopsis": "", "eng_name": "", "studio": "-", "youtube_url": "", "external_links": {},
+            "synopsis": "", "eng_name": "", "studio": "-", "youtube_url": "", "external_links": {}
         }
 
         description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
@@ -163,6 +167,10 @@ class Animepahe(Anime):
         description_bs = BeautifulSoup(
             (await self.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)),
             'html.parser')
+
+        bookmark_href = description_bs.find("a", {"class": "fa-link"}).get("href", "0")
+
+        description["anime_id"] = int(bookmark_href.replace("/a/", ""))
 
         synopsis = description_bs.find('div', {'class': 'anime-synopsis'})
         if synopsis:
