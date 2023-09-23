@@ -29,13 +29,13 @@ function ForceDarkMode({ children }: {
 ReactDOM
     .createRoot(document.getElementById("root"))
     .render(
-        <SocketContext.Provider value={client}>
-            <ChakraProvider theme={theme}>
-                <ForceDarkMode>
+        <ChakraProvider theme={theme}>
+            <ForceDarkMode>
+                <SocketContext.Provider value={client}>
                     <Provider store={store}>
                         <App />
                     </Provider>
-                </ForceDarkMode>
-            </ChakraProvider>
-        </SocketContext.Provider>
+                </SocketContext.Provider>
+            </ForceDarkMode>
+        </ChakraProvider>
     );

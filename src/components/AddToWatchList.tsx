@@ -21,7 +21,7 @@ export function AddToWatchList({
     poster,
     anime_id,
 }) {
-    console.log(poster, mylist, score, 123);
+    console.log(anime_id, poster, mylist, score);
 
     const [isAdded, setIsAdded] = useState(false);
 
@@ -48,7 +48,7 @@ export function AddToWatchList({
     }
 
     async function removefromMyList() {
-        await server.delete(`/watchlist?anime_id=${anime_id}`);
+        if (anime_id) await server.delete(`/watchlist?anime_id=${anime_id}`);
         setIsAdded(false);
     }
 
@@ -56,14 +56,13 @@ export function AddToWatchList({
         <Tooltip label={isAdded ? "Remove from My List" : "Add to My List"} placement="top">
             <Flex
                 cursor={"pointer"}
-                p={1}
                 borderRadius={14}
                 justifyContent="center"
                 alignItems="center"
+                p={2}
                 _hover={{
-                    bg: "#10495F99"
+                    bg: "#E2E8F029"
                 }}
-                columnGap={2}
                 bg={isAdded ? "#10495F" : "brand.900"}
                 onClick={isAdded ? removefromMyList : addToMyList}>
                 <Icon
@@ -72,7 +71,6 @@ export function AddToWatchList({
                     h={8}
                     color={"white"}
                 />
-                {/* <Text textAlign={"center"}>{isAdded ? "Remove from My List" : "Add to My List"}</Text> */}
             </Flex>
         </Tooltip>
     )

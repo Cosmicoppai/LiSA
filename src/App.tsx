@@ -12,11 +12,11 @@ import SettingScreen from "./screens/settingScreen";
 import { HomeScreen } from "./screens/homeScreen";
 import DownloadScreen from "./screens/downloadsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
-import ExploreScreen from "./screens/exploreScreen";
 
 import './styles/App.css';
 import { NotFoundScreen } from "./screens/NotFoundScreen";
 import { MyListScreen } from "./screens/MyListScreen";
+import { ExploreScreen } from "./screens/exploreScreen";
 
 export default function App() {
 
