@@ -123,5 +123,5 @@ class DBLibrary(Library):
 
 class WatchList(Library):
     table_name: str = "watchlist"
-    fields: str = "anime_id, jp_name, no_of_episodes, type, status, season, year, score, ep_details, created_on"
+    fields: str = "anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, created_on"
     oid: str = "anime_id"
