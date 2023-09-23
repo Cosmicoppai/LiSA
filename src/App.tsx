@@ -15,6 +15,7 @@ import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 import ExploreScreen from "./screens/exploreScreen";
 
 import './styles/App.css';
+import { NotFoundScreen } from "./screens/NotFoundScreen";
 
 export default function App() {
 
@@ -78,6 +79,7 @@ export default function App() {
                             <Route path="download" element={<DownloadScreen />} />
                             <Route path="play" element={<InbuiltPlayerScreen />} />
                             <Route path="explore" element={<ExploreScreen />} />
+                            <Route path="*" element={<NotFoundScreen />} />
                         </Routes>
                     </Box>
                 </GridItem>

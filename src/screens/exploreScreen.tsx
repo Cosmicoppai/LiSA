@@ -82,8 +82,9 @@ export default function ExploreScreen() {
                         })
                         : Array(30)
                             .fill(0)
-                            .map(() => (
+                            .map((data, index: number) => (
                                 <Skeleton
+                                    key={index}
                                     width={"300px"}
                                     height={"450px"}
                                     sx={{ padding: "1rem", margin: "10px auto" }}

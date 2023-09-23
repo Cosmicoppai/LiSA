@@ -110,9 +110,10 @@ export const HomeScreen = () => {
                                 display: "flex",
                                 flexWrap: "wrap",
                             }}>
-                            {animes.map((anime) => {
+                            {animes.map((anime, index: number) => {
                                 return (
                                     <SearchResultCard
+                                        key={index}
                                         data={anime}
                                         cardWidth={"250px"}
                                         cardMargin={"10px 30px"}

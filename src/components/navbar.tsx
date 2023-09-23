@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Flex, Icon, Tooltip } from "@chakra-ui/react";
 import { AiOutlineCompass, AiOutlineDownload, AiOutlineSearch, AiOutlineSetting } from "react-icons/ai";
-
+import { LuListVideo } from "react-icons/lu";
 export default function Navbar() {
 
     const { pathname } = useLocation();
@@ -18,7 +18,6 @@ export default function Navbar() {
             maxWidth={"70px"}>
             <Tooltip label="Search" placement="auto-start">
                 <Link to="/">
-                    {" "}
                     <Icon
                         as={AiOutlineSearch}
                         w={8}
@@ -31,7 +30,6 @@ export default function Navbar() {
 
             <Tooltip label="Explore" placement="auto-start">
                 <Link to="/explore">
-                    {" "}
                     <Icon
                         as={AiOutlineCompass}
                         w={8}
@@ -44,7 +42,6 @@ export default function Navbar() {
 
             <Tooltip label="Downloads" placement="auto-start">
                 <Link to="/download">
-                    {" "}
                     <Icon
                         as={AiOutlineDownload}
                         w={8}
@@ -55,6 +52,17 @@ export default function Navbar() {
                 </Link>
             </Tooltip>
 
+            <Tooltip label="My List" placement="auto-start">
+                <Link to="/mylist">
+                    <Icon
+                        as={LuListVideo}
+                        w={8}
+                        h={8}
+                        mb={"-3"}
+                        color={pathname === "/mylist" ? "white" : "#9c9c9c"}
+                    />
+                </Link>
+            </Tooltip>
             {/* <Link to="/setting" >
                 <Icon
                     as={AiOutlineSetting}
