@@ -14,8 +14,8 @@ export function MangaCard({ data, query }) {
 
     const exploreCardHandler = () => {
         if (query !== "upcoming") {
-            dispatch(addAnimeDetails(data));
-            navigate("/anime-details");
+            // dispatch(addAnimeDetails(data));
+            navigate("/manga-details");
         } else {
             toast({
                 title: "Anime has not been aired yet! ❤️",
@@ -27,7 +27,7 @@ export function MangaCard({ data, query }) {
     return (
         <Box
             sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}
-        // onClick={exploreCardHandler}
+            onClick={exploreCardHandler}
         >
             <Box
                 sx={{ cursor: "pointer" }}

@@ -26,17 +26,29 @@ export function MyListScreen() {
                         My List
                     </Heading>
                 </Stack>
-                {list.length ? list.map((anime, index: number) => {
-                    return (
-                        <SearchResultCard
-                            key={index}
-                            data={anime}
-                            cardWidth={"250px"}
-                            cardMargin={"10px 30px"}
-                            maxImgWidth={"180px"}
-                        />
-                    );
-                }) :
+
+                {list.length ?
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexWrap: "wrap",
+                            justifyContent: "center",
+                        }}
+                    >
+                        {list.map((anime, index: number) => {
+                            return (
+                                <SearchResultCard
+                                    key={index}
+                                    data={anime}
+                                    cardWidth={"250px"}
+                                    cardMargin={"10px 30px"}
+                                    maxImgWidth={"180px"}
+                                />
+                            );
+                        }
+                        )}
+                    </div>
+                    :
                     <Flex
                         minHeight={200}
                         alignItems={"center"}
