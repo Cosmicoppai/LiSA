@@ -53,7 +53,7 @@ export function MyListScreen() {
                             color={"gray.500"}
                             size="lg"
                             textAlign={"center"}>
-                            Empty
+                            Your List is Empty
                         </Text>
                     </Flex>
                 }

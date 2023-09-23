@@ -62,7 +62,13 @@ export const HomeScreen = () => {
                     w="100%"
                     h="100%"
                     pt={"20px"}>
-                    <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />{" "}
+                    {/* <Text
+                        fontWeight='extrabold'
+                        letterSpacing={3}
+                        fontSize={150}
+                        color={'white'}
+                    >LiSA</Text> */}
+                    <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
                     <Box w="50%" sx={{ position: "relative" }}>
                         <InputGroup>
                             <InputRightElement
@@ -145,7 +151,8 @@ export const HomeScreen = () => {
                 </Flex>
             ) : (
                 <NetworkError />
-            )}
-        </Flex>
+            )
+            }
+        </Flex >
     );
 };
