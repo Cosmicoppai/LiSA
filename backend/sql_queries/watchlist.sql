@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS watchlist (
     year integer NOT NULL CHECK ( year >= 1900 ),
     score integer NOT NULL CHECK ( score >= 0 ),
     poster varchar NOT NULL,
+    ep_details varchar NOT NULL UNIQUE,
     created_on datetime NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
