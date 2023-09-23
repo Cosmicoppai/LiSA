@@ -502,7 +502,8 @@ async def watchlist(request: Request):
         return Response(status_code=204)
     except KeyError as _msg:
         return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
-    except IntegrityError:
+    except IntegrityError as err:
+        print(err)
         return await bad_request_400(request, msg=f"Record already exists")
 
 
