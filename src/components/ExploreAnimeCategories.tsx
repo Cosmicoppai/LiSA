@@ -1,24 +1,29 @@
 import { Skeleton } from "@chakra-ui/react";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { getExploreDetails } from "../store/actions/animeActions";
 import Card from "../components/card";
+import server from "src/utils/axios";
+import { useQuery } from "@tanstack/react-query";
+
+async function getAnimeList({ category }) {
+    const { data } = await server.get(`top?type=anime&c=${category}&limit=0`);
+    return data;
+}
 
 export function ExploreAnimeCategories({
     category
 }) {
 
-    const dispatch = useDispatch();
-
-    const { loading, details } = useSelector((state) => {
-        // @ts-ignore
-        return state.animeExploreDetails;
+    const {
+        data,
+        error,
+        isLoading,
+    } = useQuery({
+        queryKey: ["anime-list", category],
+        queryFn: () => getAnimeList({ category }),
     });
 
-    useEffect(() => {
-        // @ts-ignore
-        dispatch(getExploreDetails(category));
-    }, [category]);
+    // @ts-ignore
+    if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
+    console.log(data);
 
 
     return (
@@ -32,17 +37,19 @@ export function ExploreAnimeCategories({
                 marginTop: "20px",
             }}
         >
-            {details
-                ? details?.data?.map((anime, index) => <Card key={index} data={anime} query={category} />
-                )
-                : Array(30).fill(0)
+            {isLoading ?
+                Array(30).fill(0)
                     .map((data, index: number) => <Skeleton
                         key={index}
                         width={"300px"}
                         height={"450px"}
                         sx={{ padding: "1rem", margin: "10px auto" }}
                         padding={6} />
-                    )}
+                    ) :
+                data?.data?.map((anime, index) =>
+                    <Card key={index} data={anime} query={category} />
+                )
+            }
         </ul>
     );
 }

@@ -44,6 +44,7 @@
     "electron-installer-debian": "^3.1.0"
   },
   "devDependencies": {
+    "@tanstack/eslint-plugin-query": "^4.34.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -76,6 +77,7 @@
     "@emotion/styled": "^11.10.0",
     "@fontsource/montserrat": "^4.5.13",
     "@reduxjs/toolkit": "^1.1.0",
+    "@tanstack/react-query": "^4.35.3",
     "axios": "^0.27.2",
     "electron-is-dev": "^1.2.0",
     "framer-motion": "4.1.17",

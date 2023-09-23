@@ -60,12 +60,12 @@ export function ExploreScreen() {
                     >
                         {type === 'manga' ? <>
                             <option value="manga">Manga</option>
-                            <option value="oneshots">TV</option>
-                            <option value="doujin">Movie</option>
-                            <option value="light_novels">Airing</option>
-                            <option value="novels">Upcoming</option>
-                            <option value="manhwa">OVA</option>
-                            <option value="manhua">ONA</option>
+                            <option value="oneshots">One Shots</option>
+                            <option value="doujin">Doujin</option>
+                            <option value="light_novels">Light Novels</option>
+                            <option value="novels">Novels</option>
+                            <option value="manhwa">Manhwa</option>
+                            <option value="manhua">Manhua</option>
                             <option value="by_popularity">By Popularity</option>
                             <option value="favourite">Favorite</option>
                         </> : <>
