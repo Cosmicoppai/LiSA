@@ -16,6 +16,7 @@ import ExploreScreen from "./screens/exploreScreen";
 
 import './styles/App.css';
 import { NotFoundScreen } from "./screens/NotFoundScreen";
+import { MyListScreen } from "./screens/MyListScreen";
 
 export default function App() {
 
@@ -79,6 +80,7 @@ export default function App() {
                             <Route path="download" element={<DownloadScreen />} />
                             <Route path="play" element={<InbuiltPlayerScreen />} />
                             <Route path="explore" element={<ExploreScreen />} />
+                            <Route path="mylist" element={<MyListScreen />} />
                             <Route path="*" element={<NotFoundScreen />} />
                         </Routes>
                     </Box>

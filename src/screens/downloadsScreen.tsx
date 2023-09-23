@@ -171,7 +171,6 @@ const DownloadScreen = () => {
     return (
         <Center py={6} w="100%">
             <Stack flex={1} flexDirection="column" p={1} pt={2} maxWidth={"90%"}>
-                {" "}
                 <Stack flex={1} flexDirection="column">
                     <Heading fontSize={"xl"} fontFamily={"body"}>
                         Active Downloads
@@ -188,6 +187,9 @@ const DownloadScreen = () => {
                         <Box sx={{ width: "100%", p: 3 }}>
                             {filesStatus && Object.entries(filesStatus).length === 0 ? (
                                 <Flex alignItems={"center"} justifyContent="center">
+                                    <Box color="gray.500" mr="2">
+                                        <TbMoodSad size={24} />
+                                    </Box>
                                     <Text
                                         fontWeight={600}
                                         color={"gray.500"}
@@ -196,9 +198,6 @@ const DownloadScreen = () => {
                                         No Active Download
                                     </Text>
 
-                                    <Box color="gray.500" ml="2">
-                                        <TbMoodSad size={24} />
-                                    </Box>
                                 </Flex>
                             ) : (
                                 <TableContainer width={"100%"}>
@@ -236,25 +235,26 @@ const DownloadScreen = () => {
                         p={1}
                         pt={2}
                         bg={"gray.900"}
-                        minWidth={"400px"}>
-                        <TableContainer width={"100%"}>
-                            <Table>
-                                <Thead>
-                                    <Tr>
-                                        <Th></Th>
-                                        <Th fontSize={"16px"}>FILE NAME</Th>
-                                        <Th fontSize={"16px"}>STATUS</Th>
-                                        <Th fontSize={"16px"}>TOTAL SIZE</Th>
-                                        <Th fontSize={"16px"}>CREATED ON</Th>
-                                        <Th></Th>
-                                    </Tr>
-                                </Thead>
-                                <Tbody>
-                                    {historyDetails?.details &&
-                                        historyDetails?.details?.length !== 0 ? (
-                                        historyDetails.details.map((history_item, idx) => {
-                                            if (history_item.status === "downloaded") {
-                                                return (
+                        minWidth={"400px"}
+                    >
+                        {historyDetails?.details &&
+                            historyDetails?.details?.length !== 0 ? (
+                            historyDetails.details.map((history_item, idx) => {
+                                if (history_item.status === "downloaded") {
+                                    return (
+                                        <TableContainer width={"100%"}>
+                                            <Table>
+                                                <Thead>
+                                                    <Tr>
+                                                        <Th></Th>
+                                                        <Th fontSize={"16px"}>FILE NAME</Th>
+                                                        <Th fontSize={"16px"}>STATUS</Th>
+                                                        <Th fontSize={"16px"}>TOTAL SIZE</Th>
+                                                        <Th fontSize={"16px"}>CREATED ON</Th>
+                                                        <Th></Th>
+                                                    </Tr>
+                                                </Thead>
+                                                <Tbody>
                                                     <Tr>
                                                         <Td>
                                                             {" "}
@@ -294,34 +294,34 @@ const DownloadScreen = () => {
                                                             </Box>
                                                         </Td>
                                                     </Tr>
-                                                );
-                                            } else {
-                                                return null;
-                                            }
-                                        })
-                                    ) : (
-                                        <Flex
-                                            alignItems={"center"}
-                                            justifyContent="center"
-                                            p={3}
-                                            pt={2}
-                                            width={"100%"}>
-                                            <Text
-                                                fontWeight={600}
-                                                color={"gray.500"}
-                                                size="lg"
-                                                textAlign={"center"}>
-                                                No Previous Downloads
-                                            </Text>
+                                                </Tbody>
+                                            </Table>
+                                        </TableContainer>
+                                    );
+                                } else {
+                                    return null;
+                                }
+                            })
+                        ) : (
+                            <Flex
+                                alignItems={"center"}
+                                justifyContent="center"
+                                p={3}
+                                pt={2}
+                                width={"100%"}>
+                                <Box color="gray.500" marginInline="2">
+                                    <TbMoodSad size={24} />
+                                </Box>
+                                <Text
+                                    fontWeight={600}
+                                    color={"gray.500"}
+                                    size="lg"
+                                    textAlign={"center"}>
+                                    No Previous Downloads
+                                </Text>
 
-                                            <Box color="gray.500" ml="2">
-                                                <TbMoodSad size={24} />
-                                            </Box>
-                                        </Flex>
-                                    )}
-                                </Tbody>
-                            </Table>
-                        </TableContainer>
+                            </Flex>
+                        )}
                     </Stack>
                 </Stack>
             </Stack>

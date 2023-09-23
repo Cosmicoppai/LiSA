@@ -34,6 +34,7 @@ import {
 
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
+import { AddToWatchList } from "src/components/AddToWatchList";
 
 const { shell } = window.require("electron");
 
@@ -139,29 +140,40 @@ export default function AnimeDetailsScreen() {
                         alignItems="flex-start"
                         p={1}
                         pt={2}>
-                        <Box>
-                            <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
-                                {data.jp_name ? `${data.jp_name}` : ""}{" "}
-                                {data.title ? `${data.title}` : ""}
-                            </Heading>
+                        <Box
+                            width={'100%'}
+                        >
+                            <div style={{
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'space-between'
+                            }}>
+                                <div>
+                                    <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
+                                        {data.jp_name ? `${data.jp_name}` : ""}{" "}
+                                        {data.title ? `${data.title}` : ""}
+                                    </Heading>
 
-                            <Text
-                                fontWeight={600}
-                                color={"gray.500"}
-                                size="sm"
-                                display="inline"
-                                ml={1}>
-                                {!ep_loading ? (
-                                    `by ${details?.description?.studio}`
-                                ) : (
-                                    <Skeleton
-                                        height={"18px"}
-                                        width={"100px"}
-                                        alignSelf={"baseline"}
-                                        display={"inline-block"}
-                                    />
-                                )}
-                            </Text>
+                                    <Text
+                                        fontWeight={600}
+                                        color={"gray.500"}
+                                        size="sm"
+                                        display="inline"
+                                        ml={1}>
+                                        {!ep_loading ? (
+                                            `by ${details?.description?.studio}`
+                                        ) : (
+                                            <Skeleton
+                                                height={"18px"}
+                                                width={"100px"}
+                                                alignSelf={"baseline"}
+                                                display={"inline-block"}
+                                            />
+                                        )}
+                                    </Text>
+                                </div>
+                                <AddToWatchList {...data} {...details} />
+                            </div>
                             {!ep_loading ? (
                                 <Heading fontSize={"xl"} fontFamily={"body"} display="block">
                                     {details?.description?.eng_name
@@ -176,6 +188,7 @@ export default function AnimeDetailsScreen() {
                                     display={"block"}
                                 />
                             )}
+
                         </Box>
                         <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
                             No of episodes{" "}
@@ -206,6 +219,7 @@ export default function AnimeDetailsScreen() {
                                     <Text ml={"5px"}>{data.score}</Text>
                                 </Box>
                             </Badge>
+
                         </Stack>
                         <Text color={"gray.400"} px={3} pl={0} width="100%">
                             {details?.description?.synopsis && !ep_loading ? (
