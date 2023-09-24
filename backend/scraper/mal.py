@@ -127,7 +127,7 @@ class MyAL(Scraper):
             if rank == "-":
                 rank = "na"
             item = {"rank": rank, "poster": imgs[idx], "title": title[idx].text, "type": a_type[idx],
-                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={typ}&query={title[idx].text}&total_res=1'}
+                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={media}&query={title[idx].text}&total_res=1'}
 
             match media:
                 case "anime":
