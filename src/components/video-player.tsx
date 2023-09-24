@@ -7,6 +7,7 @@ import "videojs-contrib-quality-levels";
 import qualitySelector from "videojs-hls-quality-selector";
 import "video.js/dist/video-js.css";
 import "videojs-hotkeys";
+import 'videojs-pip/videojs-pip';
 import ExternalPlayerPopup from "./externalPopup";
 import { useDispatch, useSelector } from "react-redux";
 // function getWindowSize() {
@@ -77,7 +78,7 @@ export default function VideoPlayer({
             controls: true,
             poster: epDetails?.details?.snapshot,
             controlBar: {
-                pictureInPictureToggle: false,
+                pictureInPictureToggle: true,
             },
             fluid: true,
             sources: [
@@ -92,6 +93,7 @@ export default function VideoPlayer({
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
+            pipButton: {}
         };
 
         const plyer = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
@@ -104,6 +106,9 @@ export default function VideoPlayer({
         var fullscreen = plyer.controlBar.getChild("FullscreenToggle");
         var index = plyer.controlBar.children().indexOf(fullscreen);
         var externalPlayerButton = plyer.controlBar.addChild("button", {}, index);
+
+        console.log(plyer.controlBar.pictureInPictureToggle);
+
 
         var externalPlayerButtonDom = externalPlayerButton.el();
         if (externalPlayerButtonDom) {
@@ -184,6 +189,7 @@ export default function VideoPlayer({
                             setCallFinishVideoAPI(true);
                         }
                     }}
+                    controls
                     className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
                     id="my-video"></video>
             </div>

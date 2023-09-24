@@ -4,7 +4,6 @@ import { FaPlay } from "react-icons/fa";
 import { formatBytes } from "../utils/formatBytes";
 
 export default function DownloadItem({
-    key,
     data,
     cancelDownloadHandler,
     pauseDownloadHandler,

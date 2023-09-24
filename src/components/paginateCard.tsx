@@ -50,7 +50,7 @@ export default function PaginateCard({
     const { session } = useSelector((state) => state.animeDetails.details);
     let currentEp = parseInt(epDetails?.details?.current_ep);
     const { loading: downloadLoading } = useSelector((state) => state.animeDownloadDetails);
-    console.log(epsLoading);
+    // console.log(epsLoading);
     const [isDownloadButtonAvailable, setIsDownloadButtonAvailable] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -85,7 +85,7 @@ export default function PaginateCard({
     };
     let coloredIdx;
 
-    console.log(ep_details);
+    // console.log(ep_details);
 
     if (!loading && ep_details) {
         let current_page_eps = ep_details.ep_details;

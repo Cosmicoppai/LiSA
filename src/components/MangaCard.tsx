@@ -6,7 +6,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { addAnimeDetails } from "../store/actions/animeActions";
 
-export default function Card({ data, query }) {
+export function MangaCard({ data, query }) {
     const navigate = useNavigate();
     const toast = useToast();
 
@@ -14,8 +14,8 @@ export default function Card({ data, query }) {
 
     const exploreCardHandler = () => {
         if (query !== "upcoming") {
-            dispatch(addAnimeDetails(data));
-            navigate("/anime-details");
+            // dispatch(addAnimeDetails(data));
+            navigate("/manga-details");
         } else {
             toast({
                 title: "Anime has not been aired yet! ❤️",
@@ -27,7 +27,8 @@ export default function Card({ data, query }) {
     return (
         <Box
             sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}
-            onClick={exploreCardHandler}>
+            onClick={exploreCardHandler}
+        >
             <Box
                 sx={{ cursor: "pointer" }}
                 role={"group"}
@@ -114,13 +115,8 @@ export default function Card({ data, query }) {
                         direction={"row"}
                         justifyContent={"space-between"}
                         flex={1}
-                        width={"100%"}>
-                        <Box display={"flex"} alignItems="center" justifyContent={"center"}>
-                            <AiFillStar color="#FDCC0D" fontSize={"20px"} />
-                            <Text ml={"5px"} fontWeight={800} fontSize={"sm"} mt={0}>
-                                {data.score}
-                            </Text>
-                        </Box>
+                        width={"100%"}
+                    >
                         <Badge
                             sx={{
                                 display: "flex",
@@ -130,7 +126,7 @@ export default function Card({ data, query }) {
                                 p: 1,
                             }}>
                             <Text color={"gray.300"}>
-                                {data.episodes !== "?" ? "Ep " + data.episodes : "Running"}
+                                {data.volumes !== "?" ? `Volumes ${data.volumes}` : "Running"}
                             </Text>
                         </Badge>
                     </Flex>

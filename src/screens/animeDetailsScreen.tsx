@@ -34,6 +34,7 @@ import {
 
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
+import { AddToWatchList } from "src/components/AddToWatchList";
 
 const { shell } = window.require("electron");
 
@@ -63,6 +64,7 @@ export default function AnimeDetailsScreen() {
     function ytToEmbeded(input) {
         return input.split("?")[1].slice(2);
     }
+    console.log({ data, details })
 
     return (
         <Center py={6} w="100%">
@@ -73,7 +75,7 @@ export default function AnimeDetailsScreen() {
                 w={{ sm: "90%" }}
                 margin={"0 auto"}>
                 <Box
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate(-1)}
                     alignSelf={"flex-start"}
                     _hover={{
                         cursor: "pointer",
@@ -139,29 +141,42 @@ export default function AnimeDetailsScreen() {
                         alignItems="flex-start"
                         p={1}
                         pt={2}>
-                        <Box>
-                            <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
-                                {data.jp_name ? `${data.jp_name}` : ""}{" "}
-                                {data.title ? `${data.title}` : ""}
-                            </Heading>
+                        <Box
+                            width={'100%'}
+                        >
+                            <div style={{
+                                width: '100%',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                            }}>
+                                <div>
+                                    <Heading fontSize={"2xl"} fontFamily={"body"} display="inline">
+                                        {data.jp_name ? `${data.jp_name}` : ""}{" "}
+                                        {data.title ? `${data.title}` : ""}
+                                    </Heading>
 
-                            <Text
-                                fontWeight={600}
-                                color={"gray.500"}
-                                size="sm"
-                                display="inline"
-                                ml={1}>
-                                {!ep_loading ? (
-                                    `by ${details?.description?.studio}`
-                                ) : (
-                                    <Skeleton
-                                        height={"18px"}
-                                        width={"100px"}
-                                        alignSelf={"baseline"}
-                                        display={"inline-block"}
-                                    />
-                                )}
-                            </Text>
+                                    {!ep_loading ? (
+                                        <Text
+                                            fontWeight={600}
+                                            color={"gray.500"}
+                                            size="sm"
+                                            display="inline"
+                                            ml={1}
+                                        >
+                                            by {details?.description?.studio}
+                                        </Text>
+                                    ) : (
+                                        <Skeleton
+                                            height={"18px"}
+                                            width={"100px"}
+                                            alignSelf={"baseline"}
+                                            display={"inline-block"}
+                                        />
+                                    )}
+                                </div>
+                                <AddToWatchList {...data} {...details} />
+                            </div>
                             {!ep_loading ? (
                                 <Heading fontSize={"xl"} fontFamily={"body"} display="block">
                                     {details?.description?.eng_name
@@ -176,6 +191,7 @@ export default function AnimeDetailsScreen() {
                                     display={"block"}
                                 />
                             )}
+
                         </Box>
                         <Text fontWeight={600} color={"gray.500"} size="sm" mb={4}>
                             No of episodes{" "}
@@ -206,23 +222,24 @@ export default function AnimeDetailsScreen() {
                                     <Text ml={"5px"}>{data.score}</Text>
                                 </Box>
                             </Badge>
+
                         </Stack>
-                        <Text color={"gray.400"} px={3} pl={0} width="100%">
-                            {details?.description?.synopsis && !ep_loading ? (
-                                details?.description?.synopsis
-                            ) : (
-                                <Stack align={"center"} justify={"center"} direction={"row"}>
-                                    <Text color={"gray.400"} width="100%" px={3} pl={0}>
-                                        <SkeletonText
-                                            mt="2"
-                                            noOfLines={20}
-                                            spacing="2"
-                                            width={"100%"}
-                                        />
-                                    </Text>
-                                </Stack>
-                            )}
-                        </Text>
+                        {details?.description?.synopsis && !ep_loading ? (
+                            <Text color={"gray.400"} px={3} pl={0} width="100%">
+                                {details?.description?.synopsis}
+                            </Text>
+                        ) : (
+                            <Stack align={"center"} justify={"center"} direction={"row"}>
+                                <Text color={"gray.400"} width="100%" px={3} pl={0}>
+                                    <SkeletonText
+                                        mt="2"
+                                        noOfLines={20}
+                                        spacing="2"
+                                        width={"100%"}
+                                    />
+                                </Text>
+                            </Stack>
+                        )}
                         <div>
                             <PaginateCard
                                 recommendationLoading={recommendationLoading}
@@ -238,17 +255,17 @@ export default function AnimeDetailsScreen() {
                             </Text>
                             <Box>
                                 {details?.description &&
-                                    Object.entries(details?.description?.external_links).map(
-                                        ([key, value]) => {
-                                            return (
-                                                <Tag
-                                                    onClick={() => shell.openExternal(value)}
-                                                    mr={2}
-                                                    sx={{ cursor: "pointer" }}>
-                                                    {key}
-                                                </Tag>
-                                            );
-                                        }
+                                    Object.entries(details?.description?.external_links).map(([key, value], index) => {
+                                        return (
+                                            <Tag
+                                                key={index}
+                                                onClick={() => shell.openExternal(value)}
+                                                mr={2}
+                                                sx={{ cursor: "pointer" }}>
+                                                {key}
+                                            </Tag>
+                                        );
+                                    }
                                     )}
                             </Box>
                         </div>
@@ -322,9 +339,10 @@ export default function AnimeDetailsScreen() {
                                             flexWrap: "wrap",
                                         }}>
                                         {recommendations
-                                            ? recommendations.map((anime) => {
+                                            ? recommendations.map((anime, index) => {
                                                 return (
                                                     <SearchResultCard
+                                                        key={index}
                                                         data={anime}
                                                         cardWidth={"270px"}
                                                         cardMargin={"10px 40px"}
@@ -333,8 +351,9 @@ export default function AnimeDetailsScreen() {
                                             })
                                             : Array(30)
                                                 .fill(0)
-                                                .map(() => (
+                                                .map((data, index) => (
                                                     <Skeleton
+                                                        key={index}
                                                         width={"200px"}
                                                         height={"300px"}
                                                         sx={{

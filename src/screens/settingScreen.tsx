@@ -1,10 +1,49 @@
-import { Link } from "react-router-dom";
+import { Flex, Icon, Image, Text, Tooltip } from "@chakra-ui/react";
+
+import { RxGithubLogo } from "react-icons/rx";
+
+// @ts-ignore
+import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
+
+// @ts-ignore
+import pkg from '../../package.json';
+
+const { shell } = window.require("electron");
 
 export default function SettingScreen() {
     return (
-        <main style={{ padding: "1rem 0" }}>
-            <h2>Setting</h2>
-            <Link to="/">BACK</Link>
-        </main>
+        <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
+            <Flex
+                align="center"
+                justify="center"
+                direction="column"
+                w="100%"
+                h="100%"
+                rowGap={8}
+            >
+                <Image
+                    objectFit="cover"
+                    src={HomeScreenLogoImg}
+                    alt="logo"
+                />
+                <Text
+                    color={"gray.500"}
+                >Version {pkg.version}</Text>
+                <Tooltip label={'Github'} placement="bottom">
+                    <div
+                        style={{
+                            cursor: 'pointer'
+                        }}
+                        onClick={() => shell.openExternal(pkg.homepage)}
+                    >
+                        <Icon
+                            as={RxGithubLogo}
+                            w={8} h={8}
+                            color={true ? "white" : "#9c9c9c"}
+                        />
+                    </div>
+                </Tooltip>
+            </Flex>
+        </Flex>
     );
 }

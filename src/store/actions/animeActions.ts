@@ -123,7 +123,7 @@ export const getStreamDetails = (stream_detail) => async (dispatch) => {
 export const getExploreDetails = (query) => async (dispatch) => {
     try {
         dispatch({ type: ANIME_EXPLORE_DETAILS_REQUEST });
-        const { data } = await server.get(`top_anime?type=${query}&limit=0`);
+        const { data } = await server.get(`top?type=anime&c=${query}&limit=0`);
 
         dispatch({ type: ANIME_EXPLORE_DETAILS_SUCCESS, payload: data });
         // dispatch({ type: ANIME_EXPLORE_QUERY, payload: query });
