@@ -137,8 +137,8 @@ async def get_ep_details(request: Request):
     scraper = Animepahe()
 
     if anime_id:
-        resp = await scraper.get(f"{Animepahe.site_url}/a/{anime_id}")
-        anime_session = resp.headers["location"].strip(f"{Animepahe.site_url}/anime/")
+        redirected_url = (await scraper.get(f"{Animepahe.site_url}/a/{anime_id}")).url
+        anime_session = str(redirected_url).strip(f"{Animepahe.site_url}/anime/")
 
     page = request.query_params.get("page", "1")
 

@@ -165,7 +165,7 @@ class Animepahe(Anime):
         description_header = get_headers({"referer": "{}/{}".format(self.site_url, anime_session)})
 
         description_bs = BeautifulSoup(
-            (await self.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)),
+            await (await self.get(f"{self.site_url}/anime/{anime_session}", headers=description_header)).text(),
             'html.parser')
 
         bookmark_href = description_bs.find("a", {"class": "fa-link"}).get("href", "0")
@@ -223,7 +223,9 @@ class Animepahe(Anime):
         resp: Dict[Any, List] = {}
 
         streaming_page = await self.get(f"{self.site_url}/play/{anime_session}/{episode_session}",
-                                        headers=get_headers({"referer": "{}/{}".format(self.site_url, anime_session)}))
+                                        headers=get_headers({"referer": "{}/{}".format(self.site_url,
+                                                                                       anime_session)}))
+        streaming_page = await streaming_page.text()
 
         for data in BeautifulSoup(streaming_page, 'html.parser').find("div", {"id": "resolutionMenu"}).find_all(
                 "button"):
@@ -241,8 +243,9 @@ class Animepahe(Anime):
 
         uwu_url = hls_data["manifest_url"]
 
-        return await self.get(uwu_url,
-                              headers=get_headers(extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"})), \
+        return await (await self.get(uwu_url,
+                                     headers=get_headers(
+                                         extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"}))).text(), \
             uwu_url.split("/uwu.m3u8")[0], \
             [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 
@@ -252,6 +255,8 @@ class Animepahe(Anime):
 
             resp = await self.get(f"{self.site_url}/anime/{anime_session}", {"anime_session": anime_session},
                                   headers=get_headers(extra={"referer": self.site_url}))
+
+            resp = await resp.text()
 
         except aiohttp.ClientResponseError:
             raise ValueError("Invalid anime session")
@@ -344,6 +349,7 @@ class Animepahe(Anime):
     async def get_hls_playlist(self, kwik_url: str) -> dict:
         try:
             stream_response = await self.get(kwik_url, headers=get_headers(extra={"referer": self.site_url}))
+            stream_response = await stream_response.text()
         except aiohttp.ClientResponseError:
             raise ValueError("Invalid Kwik URL")
 
