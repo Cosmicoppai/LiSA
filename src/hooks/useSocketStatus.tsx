@@ -4,7 +4,7 @@ const useSocketStatus = () => {
     const [isSocketConnected, setIsSocketConnected] = useState(false);
 
     useEffect(() => {
-        console.log("useSocketStatus", isSocketConnected);
+        // console.log("useSocketStatus", isSocketConnected);
 
         const interval = setInterval(() => {
             fetch("http://localhost:6969/", {

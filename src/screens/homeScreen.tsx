@@ -59,8 +59,6 @@ export const HomeScreen = () => {
         return () => clearTimeout(c);
     }, [tempQuery])
 
-    console.log(data, error, 123);
-
     return (
         <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
             {isOnline ? (

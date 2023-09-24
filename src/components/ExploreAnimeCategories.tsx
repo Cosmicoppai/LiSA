@@ -1,5 +1,5 @@
 import { Skeleton } from "@chakra-ui/react";
-import Card from "../components/card";
+import Card from "./card";
 import server from "src/utils/axios";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,8 +23,6 @@ export function ExploreAnimeCategories({
 
     // @ts-ignore
     if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
-    console.log(data);
-
 
     return (
         <ul

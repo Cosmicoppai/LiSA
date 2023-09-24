@@ -1,22 +1,23 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 
-import Navbar from "./components/navbar";
+import './styles/App.css';
 
 import { useSocketContext } from "./context/socket";
 import useSocketStatus from "./hooks/useSocketStatus";
 
-import AnimeDetailsScreen from "./screens/animeDetailsScreen";
-import SettingScreen from "./screens/settingScreen";
-import { HomeScreen } from "./screens/homeScreen";
-import DownloadScreen from "./screens/downloadsScreen";
-import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
+import { Navbar } from "./components/navbar";
 
-import './styles/App.css';
 import { NotFoundScreen } from "./screens/NotFoundScreen";
-import { MyListScreen } from "./screens/MyListScreen";
+import { HomeScreen } from "./screens/homeScreen";
 import { ExploreScreen } from "./screens/exploreScreen";
+import { DownloadScreen } from "./screens/DownloadsScreen";
+import { MyListScreen } from "./screens/MyListScreen";
+import SettingScreen from "./screens/settingScreen";
+
+import AnimeDetailsScreen from "./screens/animeDetailsScreen";
+import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 
 export default function App() {
 
@@ -75,12 +76,13 @@ export default function App() {
                     <Box sx={{ width: "100%", height: "100%" }}>
                         <Routes>
                             <Route path="/" element={<HomeScreen />} />
-                            <Route path="anime-details" element={<AnimeDetailsScreen />} />
-                            <Route path="setting" element={<SettingScreen />} />
-                            <Route path="download" element={<DownloadScreen />} />
-                            <Route path="play" element={<InbuiltPlayerScreen />} />
                             <Route path="explore" element={<ExploreScreen />} />
+                            <Route path="download" element={<DownloadScreen />} />
                             <Route path="mylist" element={<MyListScreen />} />
+                            <Route path="setting" element={<SettingScreen />} />
+
+                            <Route path="anime-details" element={<AnimeDetailsScreen />} />
+                            <Route path="play" element={<InbuiltPlayerScreen />} />
                             <Route path="*" element={<NotFoundScreen />} />
                         </Routes>
                     </Box>

@@ -21,7 +21,6 @@ export function AddToWatchList({
     poster,
     anime_id,
 }) {
-    console.log(anime_id, poster, mylist, score);
 
     const [isAdded, setIsAdded] = useState(false);
 

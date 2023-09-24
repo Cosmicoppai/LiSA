@@ -60,7 +60,7 @@ export default function Card({ data, query }) {
 
                         top: 2,
                         left: 0,
-                        backgroundImage: `url(${data.img_url})`,
+                        backgroundImage: `url(${data.poster || data.img_url})`,
                         filter: "blur(10px)",
                         zIndex: -1,
                     }}
@@ -74,7 +74,7 @@ export default function Card({ data, query }) {
                         // height={230}
                         // width={282}
                         objectFit={"fill"}
-                        src={data.img_url}
+                        src={data.poster || data.img_url}
                         minWidth={"222px"}
                         minHeight={"316px"}
                     />
