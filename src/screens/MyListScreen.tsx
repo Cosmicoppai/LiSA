@@ -1,22 +1,29 @@
-import { Box, Center, Flex, Heading, Stack, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+// @ts-nocheck
+
+import { Box, Center, Flex, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { TbMoodSad } from "react-icons/tb";
 import SearchResultCard from "src/components/search-result-card";
 import server from "src/utils/axios";
 
+async function getMyList() {
+    const { data } = await server.get(`/watchlist`);
+    return data;
+}
+
 export function MyListScreen() {
 
-    const [list, setList] = useState([]);
+    const {
+        data,
+        error,
+        isLoading,
+    } = useQuery({
+        queryKey: ["anime-list"],
+        queryFn: getMyList,
+    });
 
-    useEffect(() => {
-        getMyList();
-    }, [])
-
-    async function getMyList() {
-        const { data } = await server.get(`/watchlist`);
-        console.log(data);
-        setList([...data.data])
-    }
+    // @ts-ignore
+    if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
 
     return (
         <Center py={6} w="100%">
@@ -26,29 +33,41 @@ export function MyListScreen() {
                         My List
                     </Heading>
                 </Stack>
-
-                {list.length ?
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: "wrap",
-                            justifyContent: "center",
-                        }}
-                    >
-                        {list.map((anime, index: number) => {
-                            return (
-                                <SearchResultCard
+                <ul
+                    style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        listStyle: "none",
+                        margin: 0,
+                        padding: 0,
+                        marginTop: "20px",
+                    }}
+                >
+                    {isLoading ?
+                        Array(15).fill(0)
+                            .map((data, index: number) =>
+                                <Skeleton
                                     key={index}
-                                    data={anime}
-                                    cardWidth={"250px"}
-                                    cardMargin={"10px 30px"}
-                                    maxImgWidth={"180px"}
+                                    width={"300px"}
+                                    height={"450px"}
+                                    sx={{ padding: "1rem", margin: "10px auto" }}
+                                    padding={6}
                                 />
-                            );
-                        }
-                        )}
-                    </div>
-                    :
+                            ) :
+
+                        data?.data?.map((anime, index) =>
+                            <SearchResultCard
+                                key={index}
+                                data={anime}
+                                cardWidth={"250px"}
+                                cardMargin={"10px 30px"}
+                                maxImgWidth={"180px"}
+                            />
+                        )
+                    }
+                </ul>
+                {/* @ts-ignore */}
+                {!isLoading && data.data.length === 0 ?
                     <Flex
                         minHeight={200}
                         alignItems={"center"}
@@ -67,7 +86,7 @@ export function MyListScreen() {
                             textAlign={"center"}>
                             Your List is Empty
                         </Text>
-                    </Flex>
+                    </Flex> : null
                 }
             </Stack>
         </Center>

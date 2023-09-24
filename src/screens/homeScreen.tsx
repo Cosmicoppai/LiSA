@@ -1,8 +1,5 @@
-// @ts-nocheck
-
 import React, { useEffect } from "react";
 
-import { useDispatch, useSelector } from "react-redux";
 import {
     Box,
     Flex,
@@ -12,45 +9,57 @@ import {
     InputRightElement,
     Kbd,
     Text,
+    Image
 } from "@chakra-ui/react";
-import { Image } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
-import { clearEp, clearSearch, searchAnimeList } from "../store/actions/animeActions";
 import SearchResultCard from "../components/search-result-card";
 import NetworkError from "../components/network-error";
 import useNetworkStatus from "../hooks/useNetworkStatus";
 
+// @ts-ignore
 import NotFoundImg from "src/assets/img/not-found.png";
+// @ts-ignore
 import LoaderSearchGif from "src/assets/img/loader-serch.gif";
+// @ts-ignore
 import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
+
+import server from "src/utils/axios";
+import { useQuery } from "@tanstack/react-query";
+
+async function getAnimeList({ query }) {
+    if (!query) return null;
+    const { data } = await server.get(`/search?type=anime&query=${query}`);
+    return data;
+}
 
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
-    const dispatch = useDispatch();
     const [query, setQuery] = React.useState("");
+    const [tempQuery, setTempQuery] = React.useState("");
     const handleSearchChange = (event) => {
-        setQuery(event.target.value);
+        setTempQuery(event.target.value);
     };
 
-    const { animes, loading, error } = useSelector((state) => state.animeSearchList);
-
-    const handleKeyDown = (event) => {
-        if (event.key === "Enter" && query) {
-            dispatch(searchAnimeList(query));
-            dispatch(clearEp());
-        }
-        if (!query) {
-            dispatch(clearSearch());
-        }
-    };
+    const {
+        data,
+        error,
+        isLoading,
+    } = useQuery({
+        queryKey: ["anime-list", query],
+        queryFn: () => getAnimeList({ query })
+    });
 
     useEffect(() => {
-        return () => {
-            dispatch(clearSearch());
-        };
-    }, []);
+        const c = setTimeout(() => {
+            setQuery(tempQuery);
+        }, 350)
+
+        return () => clearTimeout(c);
+    }, [tempQuery])
+
+    console.log(data, error, 123);
 
     return (
         <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
@@ -71,14 +80,6 @@ export const HomeScreen = () => {
                     <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
                     <Box w="50%" sx={{ position: "relative" }}>
                         <InputGroup>
-                            <InputRightElement
-                                pointerEvents="none"
-                                children={
-                                    <Box mr="10" p={1} px={2}>
-                                        <Kbd fontSize={"1.2rem"}>Enter</Kbd>
-                                    </Box>
-                                }
-                            />
                             <InputLeftElement
                                 pointerEvents="none"
                                 children={<SearchIcon color="gray.300" />}
@@ -88,13 +89,20 @@ export const HomeScreen = () => {
                                 sx={{ position: "relative" }}
                                 color={"font.main"}
                                 placeholder="Search Anime"
-                                onKeyDown={handleKeyDown}
-                                value={query}
+                                value={tempQuery}
                                 onChange={handleSearchChange}
                             />
+                            {/* <InputRightElement
+                                pointerEvents="none"
+                                children={
+                                    <Box mr="10" p={1} px={2}>
+                                        <Kbd fontSize={"1.2rem"}>Enter</Kbd>
+                                    </Box>
+                                }
+                            /> */}
                         </InputGroup>
                     </Box>
-                    {!loading && animes && (
+                    {!isLoading && data && (
                         <Box
                             sx={{
                                 marginTop: "10px",
@@ -116,7 +124,7 @@ export const HomeScreen = () => {
                                 display: "flex",
                                 flexWrap: "wrap",
                             }}>
-                            {animes.map((anime, index: number) => {
+                            {data.map((anime, index: number) => {
                                 return (
                                     <SearchResultCard
                                         key={index}
@@ -129,7 +137,7 @@ export const HomeScreen = () => {
                             })}
                         </Box>
                     )}
-                    {!loading && error && (
+                    {!isLoading && error && (
                         <Box textAlign="center" py={10} px={6}>
                             <Image
                                 src={NotFoundImg}
@@ -147,7 +155,7 @@ export const HomeScreen = () => {
                             </Text>
                         </Box>
                     )}
-                    {loading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
+                    {isLoading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
                 </Flex>
             ) : (
                 <NetworkError />
