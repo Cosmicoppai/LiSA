@@ -1,6 +1,6 @@
 from __future__ import annotations
 from bs4 import BeautifulSoup
-from typing import Dict, List, Tuple, Any
+from typing import Dict, Any
 from config import ServerConfig
 from utils.headers import get_headers
 from .base import Scraper
@@ -8,6 +8,7 @@ from .base import Scraper
 
 class MyAL(Scraper):
     site_url: str = "https://myanimelist.net"
+    cache: Dict[str, Dict[str, Any]] = {}
 
     anime_types_dict = {
         "all_anime": "",
@@ -37,10 +38,12 @@ class MyAL(Scraper):
 
     types_dict = {"anime": anime_types_dict, "manga": manga_types_dict}
 
-    async def get_top_mange(self, manga_type: str, limit: int = 0):
-        return await self.get_top(manga_type, limit, "manga")
+    @classmethod
+    async def get_top_mange(cls, manga_type: str, limit: int = 0):
+        return await cls.get_top(manga_type, limit, "manga")
 
-    async def get_top_anime(self, anime_type: str, limit: int = 0):
+    @classmethod
+    async def get_top_anime(cls, anime_type: str, limit: int = 0):
         """request to scrape top anime from MAL website
         Args:
             anime_type (str): either of ['airing', 'upcoming', 'tv', 'movie', 'ova', 'ona', 'special', 'by_popularity', 'favorite']
@@ -58,17 +61,23 @@ class MyAL(Scraper):
                 "next_top":"api_server_address/top_anime?type=anime_type&limit=limit"
             }
         """
-        return await self.get_top(anime_type, limit, "anime")
+        return await cls.get_top(anime_type, limit, "anime")
 
-    async def get_top(self, typ: str, limit: int = 0, media: str = "anime"):
+    @classmethod
+    async def get_top(cls, typ: str, limit: int = 0, media: str = "anime") -> Dict[str, Any]:
+        key = f"{media}_{typ}_{limit}"
+
+        if cls.cache.get(key, None):
+            return cls.cache[key]
+
         top_headers = get_headers()
 
         top_anime_params = {
-            'type': self.types_dict[media][typ],
+            'type': cls.types_dict[media][typ],
             'limit': limit,
         }
 
-        resp = await self.get(f'{self.site_url}/top{media}.php', top_anime_params, top_headers)
+        resp = await cls.get(f'{cls.site_url}/top{media}.php', top_anime_params, top_headers)
 
         bs_top = BeautifulSoup(await resp.text(), 'html.parser')
 
@@ -143,4 +152,5 @@ class MyAL(Scraper):
         except AttributeError:
             response["prev_top"] = None
 
+        cls.cache[key] = response
         return response
