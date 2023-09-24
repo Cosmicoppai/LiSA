@@ -50,6 +50,8 @@ class MangaKatana(Manga):
 
         resp_text = await self.get(f"{self.site_url}/page/{page_no}", data={"search": manga_name, "search_by": search_by})
 
+        resp_text = await resp_text.text()
+
         resp = {"response": List[Dict[str, str]]}
 
         search_bs = BeautifulSoup(resp_text, 'html.parser')
@@ -133,7 +135,7 @@ class MangaKatana(Manga):
     async def get_chp_session(self, manga_session: str) -> dict[str, list[Any] | dict[Any, Any] | str]:
         res = {"chapters": [], "description": {}}
 
-        resp_text = await self.get(manga_session)
+        resp_text = await (await self.get(manga_session)).text()
 
         detail_bs = BeautifulSoup(resp_text, 'html.parser')
 
@@ -162,7 +164,7 @@ class MangaKatana(Manga):
         return (await self.get_manifest_file(chp_session))[0]
 
     async def get_recommendation(self, manga_session: str) -> List[Dict[str, str]]:
-        resp_text = await self.get(manga_session)
+        resp_text = await (await self.get(manga_session)).text()
 
         rec_bs = BeautifulSoup(resp_text, 'html.parser')
 
@@ -200,7 +202,7 @@ class MangaKatana(Manga):
         It is implemented as get_manifest_file to provide uniform interface
 
         """
-        resp_text = await self.get(chp_url)
+        resp_text = await (await self.get(chp_url)).text()
         p = re.compile("var thzq=(.*);")  # get all image links from variable inside the script tag
         m = p.search(resp_text)
         if m:
@@ -213,7 +215,7 @@ class MangaKatana(Manga):
         return [], None, "", ""
 
     async def get_links(self, manga_session: str, page: int = 1) -> List[str]:
-        resp_text = await self.get(manga_session)
+        resp_text = await (await self.get(manga_session)).text()
         resp_bs = BeautifulSoup(resp_text, 'html.parser')
         res = []
         for tr in resp_bs.find("div", {"class": "chapters"}).find_all("tr"):
