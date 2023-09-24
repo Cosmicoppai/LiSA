@@ -129,12 +129,12 @@ class MyAL(Scraper):
             item = {"rank": rank, "poster": imgs[idx], "title": title[idx].text, "type": a_type[idx],
                     f"{typ}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={typ}&query={title[idx].text}&total_res=1'}
 
-            match typ:
+            match media:
                 case "anime":
                     item["episodes"] = segments[idx].replace('eps', '')
-                    item["score"] = score[idx * 2].text,
+                    item["score"] = score[idx * 2].text
                 case "manga":
-                    item["volumes"] = segments[idx].replace('vols', ''),
+                    item["volumes"] = segments[idx].replace('vols', '')
 
             top.append(item)
 
