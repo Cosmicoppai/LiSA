@@ -149,12 +149,15 @@ class Animepahe(Anime):
             Dict[str, str]: description {
                 'Synopsis': str, 
                 'eng_anime_name': str, 
-                'Type': str, 
-                'Episodes': str, 
+                'Type': str,
                 'Status': str, 
                 'Aired': str, 
                 'Season': str, 
                 'Duration': str,
+                'Studio': str,
+                'Youtube url': str,
+                'External Links': Dict[str, str]
+
             }
         """
 
@@ -202,8 +205,14 @@ class Animepahe(Anime):
             key, value = info.text.replace("\n", "").split(":", 1)
             details[key.lower()] = value
 
-        description['eng_name'] = details.get("english", details.get("synonyms", "-"))
-        description["studio"] = details.get("studio", "-")
+        description["eng_name"] = details.get("english", details.get("synonyms", None))
+        description["type"] = details.get("type", "TV")
+        description["status"] = details.get("status", "Finished Airing")
+        description["aired"] = details.get("aired", None).replace("to", " to")
+        description['season'], description["year"] = details.get("season", "None None").split()
+        description["duration"] = details.get("duration", 0).strip()
+        description["themes"] = details.get("themes", "None").split()
+        description["studio"] = details.get("studio", None)
 
         return description
 
@@ -312,7 +321,7 @@ class Animepahe(Anime):
 
         for anime_detail in anime_details:
             search_response.append({
-                "jp_name": anime_detail.get("title", None),
+                "title": anime_detail.get("title", None),
                 "no_of_episodes": anime_detail.get("episodes", 0),
                 "type": anime_detail.get("type", None),
                 "status": anime_detail.get("status", None),
