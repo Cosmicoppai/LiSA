@@ -138,7 +138,7 @@ async def get_ep_details(request: Request):
 
     if anime_id:
         redirected_url = (await scraper.get(f"{Animepahe.site_url}/a/{anime_id}")).url
-        anime_session = str(redirected_url).strip(f"{Animepahe.site_url}/anime/")
+        anime_session = str(redirected_url).replace(f"{Animepahe.site_url}/anime/", "")
 
     page = request.query_params.get("page", "1")
 
