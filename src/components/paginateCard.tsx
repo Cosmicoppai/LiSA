@@ -89,7 +89,7 @@ export default function PaginateCard({
 
     if (!loading && ep_details) {
         let current_page_eps = ep_details.ep_details;
-        current_page_eps.map((single_ep, idx) => {
+        current_page_eps?.map((single_ep, idx) => {
             if (Object.keys(single_ep)[0] == currentEp) {
                 coloredIdx = idx;
             }
@@ -142,7 +142,7 @@ export default function PaginateCard({
             <Box mt={5}>
                 {!loading && ep_details ? (
                     <Flex direction={"row"} flexWrap="wrap" width={"100%"} justifyContent="center">
-                        {ep_details?.ep_details.map((item, key) => {
+                        {ep_details?.ep_details?.map((item, key) => {
                             return (
                                 <Flex
                                     cursor={"pointer"}
@@ -243,7 +243,7 @@ export default function PaginateCard({
                             </MenuButton>
                             <MenuList>
                                 <MenuGroup title="Select quality">
-                                    {qualityOptions.map(({ id, height }) => {
+                                    {qualityOptions?.map(({ id, height }) => {
                                         return (
                                             <MenuItem
                                                 onClick={() => singleDownloadHandler(id)}

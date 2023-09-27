@@ -34,7 +34,7 @@ export default function SettingScreen() {
                         style={{
                             cursor: 'pointer'
                         }}
-                        onClick={() => shell.openExternal(pkg.homepage)}
+                        onClick={() => shell.openExternal(pkg.repository.url)}
                     >
                         <Icon
                             as={RxGithubLogo}
