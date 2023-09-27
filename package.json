@@ -4,9 +4,13 @@
   "author": "",
   "description": "",
   "private": true,
-  "homepage": "https://github.com/Cosmicoppai/LiSA",
+  "homepage": "./",
   "main": "main.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cosmicoppai/LiSA"
+  },
   "browserslist": {
     "production": [
       ">0.2%",
