@@ -1,10 +1,14 @@
-# Contributing
+# 🤝 Contributing
 
 Thank you for help improving LiSA. All kinds of contributions are welcome. We are open to suggestions!
 
 Please submit an Issue or even better a PR and We'll review :)
 
 ## 📖 Installation
+
+### Environment Tested on
+
+-   Tested on Windows 8, 10 & 11.
 
 ### Building From Source
 
@@ -14,9 +18,11 @@ Please submit an Issue or even better a PR and We'll review :)
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
 
-#### Prerequisites
+#### Prerequisites / Dependencies
 
 -   Make sure python 3.10 and node 18 are installed.
+
+-   [ffmpeg](https://ffmpeg.org/download.html)
 
 #### Installing
 
@@ -58,9 +64,3 @@ Please submit an Issue or even better a PR and We'll review :)
 Note:
 
 > Make sure to allow app to run as admin and allow incomming port forwarding on (`6969`, `9000`).
-
-<br>
-
-### Environment Tested on
-
--   Tested on Windows 8, 10 & 11.

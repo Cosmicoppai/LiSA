@@ -14,9 +14,7 @@
 
 </div>
 
-# LiSA
-
-> A Desktop application, for streaming and downloading your favourite anime.
+A Desktop application, for streaming and downloading your favourite anime.
 
 ## CONTENTS OF THE FILE
 
@@ -46,12 +44,6 @@
 -   Download Manager
 -   Library to view pre-downloaded episodes and active downloads
 -   Recommendation System
-
-<br>
-
-## Dependencies
-
--   [ffmpeg](https://ffmpeg.org/download.html)
 
 <br>
 
@@ -160,7 +152,7 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## 🤝 CONTRIBUTING
 
-Contributions, issues, and feature requests are welcome! See [Check Contribution Guide.](./contributing.md)
+Contributions, issues, and feature requests are welcome! See [See Contribution Guide.](./CONTRIBUTING.md)
 
 ## ⭐ SUPPORT
 
