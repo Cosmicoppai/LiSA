@@ -1,7 +1,6 @@
 import {
     Flex,
     Icon,
-    Text,
     Tooltip,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";

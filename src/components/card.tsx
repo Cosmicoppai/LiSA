@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Box, Heading, Text, Stack, Image, Flex, Badge, Spacer, useToast } from "@chakra-ui/react";
 import { AiFillStar } from "react-icons/ai";
 import { useDispatch } from "react-redux";
@@ -14,6 +12,7 @@ export default function Card({ data, query }) {
 
     const exploreCardHandler = () => {
         if (query !== "upcoming") {
+            // @ts-ignore
             dispatch(addAnimeDetails(data));
             navigate("/anime-details");
         } else {
@@ -82,7 +81,7 @@ export default function Card({ data, query }) {
                 <Stack pt={5} align={"center"}>
                     <Flex flex={1} width={"100%"}>
                         <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
-                            {data.anime_type}
+                            {data.anime_type || data.type}
                         </Text>
                         <Spacer />
                         <Box sx={{ display: "flex" }}>

@@ -20,6 +20,7 @@ export function ExploreAnimeCategories({
         queryKey: ["anime-list", category],
         queryFn: () => getAnimeList({ category }),
     });
+    // console.log(data);
 
     // @ts-ignore
     if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
