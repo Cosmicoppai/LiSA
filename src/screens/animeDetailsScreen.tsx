@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { useEffect } from "react";
 import {
     Badge,
@@ -42,13 +40,17 @@ export default function AnimeDetailsScreen() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    // @ts-ignore
     const { details: data } = useSelector((state) => state.animeDetails);
+    // @ts-ignore
     const { details, loading: ep_loading } = useSelector((state) => state.animeEpisodesDetails);
 
     const { details: recommendations, loading: recommendationLoading } = useSelector(
+        // @ts-ignore
         (state) => state.animeRecommendations
     );
 
+    // @ts-ignore
     const { loading } = useSelector((state) => state.animeSearchList);
 
     useEffect(() => {
@@ -57,6 +59,7 @@ export default function AnimeDetailsScreen() {
         }
 
         if (details.recommendation) {
+            // @ts-ignore
             dispatch(getRecommendations(details.recommendation));
         }
     }, [details]);
@@ -64,7 +67,9 @@ export default function AnimeDetailsScreen() {
     function ytToEmbeded(input) {
         return input.split("?")[1].slice(2);
     }
-    console.log({ data, details })
+
+    console.log({ data, details });
+
 
     return (
         <Center py={6} w="100%">
@@ -175,7 +180,19 @@ export default function AnimeDetailsScreen() {
                                         />
                                     )}
                                 </div>
-                                <AddToWatchList {...data} {...details} />
+                                <AddToWatchList
+                                    key={details?.description?.anime_id}
+                                    anime_id={details?.description?.anime_id}
+                                    jp_name={data.jp_name || data.title}
+                                    poster={data?.poster || data?.img_url}
+                                    mylist={details.mylist}
+                                    no_of_episodes={data.no_of_episodes || data.episodes}
+                                    type={details?.description?.type || data.type}
+                                    status={details?.description?.status || ""}
+                                    season={details?.description?.season || ""}
+                                    year={details?.description?.year || ""}
+                                    score={data.score}
+                                />
                             </div>
                             {!ep_loading ? (
                                 <Heading fontSize={"xl"} fontFamily={"body"} display="block">
@@ -241,6 +258,7 @@ export default function AnimeDetailsScreen() {
                             </Stack>
                         )}
                         <div>
+                            {/* @ts-ignore */}
                             <PaginateCard
                                 recommendationLoading={recommendationLoading}
                                 data={data}
@@ -341,6 +359,7 @@ export default function AnimeDetailsScreen() {
                                         {recommendations
                                             ? recommendations.map((anime, index) => {
                                                 return (
+                                                    // @ts-ignore
                                                     <SearchResultCard
                                                         key={index}
                                                         data={anime}

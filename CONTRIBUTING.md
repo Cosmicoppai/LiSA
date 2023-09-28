@@ -1,12 +1,12 @@
-# Contributing
+# 🤝 Contributing
 
 Thank you for help improving LiSA. All kinds of contributions are welcome. We are open to suggestions!
 
 Please submit an Issue or even better a PR and We'll review :)
 
-## 📖 Installation
+## 📖 Development Setup
 
-### Building From Source
+### Clone Repo
 
 -   Clone the project using
 
@@ -14,17 +14,23 @@ Please submit an Issue or even better a PR and We'll review :)
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
 
-#### Prerequisites
+### Prerequisites / Dependencies
 
 -   Make sure python 3.10 and node 18 are installed.
 
-#### Installing
+-   Download [ffmpeg](https://ffmpeg.org/download.html).
+
+-   Run all commands in root folder.
+
+-   Powershell is recommended.
+
+### Backend
 
 1. Create and activate the virtual environment
 
     ```cli
     python -m venv ./env
-    env/Script/activate
+    ./env/Script/activate
     ```
 
 2. Install the dependencies using the `requirements.txt` and `build_requirements.txt` files.
@@ -34,33 +40,36 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./build_requirements.txt
     ```
 
-3. Create `.env` & paste the following content
+3. Add `ffmpeg` executable to root folder or in `PATH` Var.
+
+### Frontend
+
+1. Install Node modules
+
+    ```
+    npm i
+    ```
+
+2. Create `.env` & paste the following content
 
     ```dotenv
     REACT_APP_SERVER_URL=http://localhost:6969
     REACT_APP_SOCKET_URL=ws://localhost:9000
     ```
 
-4. Install Node modules
-
+3. Start dev app using
     ```
-    npm install
+    npm start
     ```
 
-5. Add `ffmpeg` executable to `root folder` or in `PATH` Var.
+### Build package
 
-6. Build package using
+-   For Windows
 
-    ```cli
-    npm run build:package:windows
-    ```
+        ```cli
+        npm run build:package:windows
+        ```
 
 Note:
 
 > Make sure to allow app to run as admin and allow incomming port forwarding on (`6969`, `9000`).
-
-<br>
-
-### Environment Tested on
-
--   Tested on Windows 8, 10 & 11.

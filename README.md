@@ -14,16 +14,17 @@
 
 </div>
 
-# LiSA
+A Desktop application, for streaming and downloading your favourite anime.
 
-> A Desktop application, for streaming and downloading your favourite anime.
+## ⚠️ Alert
+
+We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0).
 
 ## CONTENTS OF THE FILE
 
 -   [Features](#-features)
 -   [Dependencies](#dependencies)
 -   [Download](#-download)
--   [Installation](#-installation)
 -   [Demo](#-demo)
 -   [Future Plans](#future-plans)
 -   [FAQ](#-faq)
@@ -32,6 +33,7 @@
     -   [Supported External Video Player](#-supported-external-players)
     -   [Filters](#filters)
 -   [Contributing](#-contributing)
+    -   [Setup](./CONTRIBUTING.md#-development-setup)
 -   [Support](#-support)
 -   [License](#-license)
 -   [Disclaimer](#disclaimer)
@@ -49,19 +51,17 @@
 
 <br>
 
-## Dependencies
-
--   [ffmpeg](https://ffmpeg.org/download.html)
-
-<br>
-
 ## 🤗 Download
 
-[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases)
+[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0)
 
 > Note: Currently only windows executables are provided.
 
-Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from here and extract the zip file.
+Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0) from here and extract the zip file.
+
+### Tested on
+
+-   Windows 8, 10 & 11.
 
 ## 😁 Demo
 
@@ -160,7 +160,7 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## 🤝 CONTRIBUTING
 
-Contributions, issues, and feature requests are welcome! See [Check Contribution Guide.](./contributing.md)
+Contributions, issues, and feature requests are welcome! See [See Contribution Guide.](./CONTRIBUTING.md)
 
 ## ⭐ SUPPORT
 
@@ -171,8 +171,6 @@ If this project is helpful to you and love our work and feels like showing love/
 ## 📄 LICENSE
 
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/Cosmicoppai/LiSA/blob/main/LICENSE) file for details.
-
-<br>
 
 ## DISCLAIMER
 

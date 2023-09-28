@@ -123,7 +123,7 @@ export default function SearchResultCard({ data, cardWidth, cardMargin, maxImgWi
                             textAlign={"left"}
                             alignSelf={"flex-start"}
                             noOfLines={2}>
-                            {data.jp_name ? `${data.jp_name}` : ""}
+                            {data.jp_name || data.title || " "}
                             {data.eng_name ? ` | ${data.eng_name}` : ""}
                         </Heading>
                         <Flex

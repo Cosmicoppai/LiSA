@@ -118,6 +118,7 @@ export function DownloadScreen() {
             }
         });
     };
+    console.log(historyDetails);
 
     return (
         <Center py={6} w="100%">

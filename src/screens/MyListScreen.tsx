@@ -24,6 +24,7 @@ export function MyListScreen() {
 
     // @ts-ignore
     if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
+    console.log(data);
 
     return (
         <Center py={6} w="100%">
