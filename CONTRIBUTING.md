@@ -18,11 +18,11 @@ Please submit an Issue or even better a PR and We'll review :)
 
 -   Make sure python 3.10 and node 18 are installed.
 
--   [ffmpeg](https://ffmpeg.org/download.html)
+-   Download [ffmpeg](https://ffmpeg.org/download.html).
 
--   Run all commands in root folder
+-   Run all commands in root folder.
 
--   Powershell is recommended
+-   Powershell is recommended.
 
 ### Backend
 
@@ -47,21 +47,28 @@ Please submit an Issue or even better a PR and We'll review :)
 1. Install Node modules
 
     ```
-    npm install
+    npm i
     ```
 
-2. Build package using
-
-    ```cli
-    npm run build:package:windows
-    ```
-
-3. Create `.env` & paste the following content
+2. Create `.env` & paste the following content
 
     ```dotenv
     REACT_APP_SERVER_URL=http://localhost:6969
     REACT_APP_SOCKET_URL=ws://localhost:9000
     ```
+
+3. Start dev app using
+    ```
+    npm start
+    ```
+
+### Build package
+
+-   For Windows
+
+        ```cli
+        npm run build:package:windows
+        ```
 
 Note:
 
