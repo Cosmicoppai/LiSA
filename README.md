@@ -16,7 +16,7 @@
 
 A Desktop application, for streaming and downloading your favourite anime.
 
-# ⚠️ Alert
+## ⚠️ Alert
 
 We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0).
 
@@ -25,7 +25,6 @@ We are adding new features, so the current main branch is unstable. We recommend
 -   [Features](#-features)
 -   [Dependencies](#dependencies)
 -   [Download](#-download)
--   [Installation](#-installation)
 -   [Demo](#-demo)
 -   [Future Plans](#future-plans)
 -   [FAQ](#-faq)
@@ -34,6 +33,7 @@ We are adding new features, so the current main branch is unstable. We recommend
     -   [Supported External Video Player](#-supported-external-players)
     -   [Filters](#filters)
 -   [Contributing](#-contributing)
+    -   [Setup](./CONTRIBUTING.md#-development-setup)
 -   [Support](#-support)
 -   [License](#-license)
 -   [Disclaimer](#disclaimer)
@@ -58,6 +58,10 @@ We are adding new features, so the current main branch is unstable. We recommend
 > Note: Currently only windows executables are provided.
 
 Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0) from here and extract the zip file.
+
+### Tested on
+
+-   Windows 8, 10 & 11.
 
 ## 😁 Demo
 

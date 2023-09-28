@@ -4,13 +4,9 @@ Thank you for help improving LiSA. All kinds of contributions are welcome. We ar
 
 Please submit an Issue or even better a PR and We'll review :)
 
-## 📖 Installation
+## 📖 Development Setup
 
-### Environment Tested on
-
--   Tested on Windows 8, 10 & 11.
-
-### Building From Source
+### Clone Repo
 
 -   Clone the project using
 
@@ -18,19 +14,23 @@ Please submit an Issue or even better a PR and We'll review :)
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
 
-#### Prerequisites / Dependencies
+### Prerequisites / Dependencies
 
 -   Make sure python 3.10 and node 18 are installed.
 
 -   [ffmpeg](https://ffmpeg.org/download.html)
 
-#### Installing
+-   Run all commands in root folder
+
+-   Powershell is recommended
+
+### Backend
 
 1. Create and activate the virtual environment
 
     ```cli
     python -m venv ./env
-    env/Script/activate
+    ./env/Script/activate
     ```
 
 2. Install the dependencies using the `requirements.txt` and `build_requirements.txt` files.
@@ -40,25 +40,27 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./build_requirements.txt
     ```
 
-3. Create `.env` & paste the following content
+3. Add `ffmpeg` executable to root folder or in `PATH` Var.
 
-    ```dotenv
-    REACT_APP_SERVER_URL=http://localhost:6969
-    REACT_APP_SOCKET_URL=ws://localhost:9000
-    ```
+### Frontend
 
-4. Install Node modules
+1. Install Node modules
 
     ```
     npm install
     ```
 
-5. Add `ffmpeg` executable to `root folder` or in `PATH` Var.
-
-6. Build package using
+2. Build package using
 
     ```cli
     npm run build:package:windows
+    ```
+
+3. Create `.env` & paste the following content
+
+    ```dotenv
+    REACT_APP_SERVER_URL=http://localhost:6969
+    REACT_APP_SOCKET_URL=ws://localhost:9000
     ```
 
 Note:
