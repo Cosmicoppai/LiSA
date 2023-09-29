@@ -216,7 +216,7 @@ class Animepahe(Anime):
 
         return description
 
-    async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[Any, List[Dict[str, str]]]:
+    async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[str, List[Tuple[str, str]]]:
         """getting the streaming details
 
         Args:
@@ -229,7 +229,7 @@ class Animepahe(Anime):
             }
         """
 
-        resp: Dict[Any, List] = {}
+        resp: Dict[str, List[Tuple[str, str]] | List] = {}
 
         streaming_page = await self.get(f"{self.site_url}/play/{anime_session}/{episode_session}",
                                         headers=get_headers({"referer": "{}/{}".format(self.site_url,
@@ -242,9 +242,9 @@ class Animepahe(Anime):
             """
                 stream_dt (dict): {'quality': stream url (str)}
             """
-            if not resp.get(aud, None):
-                resp[aud] = []
-            resp[aud].append((quality, kwik_url))
+
+            # assign empty list if aud not present else append (quality, kwik_url)
+            resp.setdefault(aud, []).append((quality, kwik_url))
         return resp
 
     async def get_manifest_file(self, kwik_url: str) -> ('manifest_file', 'uwu_root_domain', 'file_name'):
@@ -255,7 +255,7 @@ class Animepahe(Anime):
         return await (await self.get(uwu_url,
                                      headers=get_headers(
                                          extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"}))).text(), \
-            uwu_url.split("/uwu.m3u8")[0], \
+            re.split(r'(owo|uwu)\.m3u8', uwu_url)[0], \
             [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 
     async def get_recommendation(self, anime_session: str) -> List[Dict[str, str]]:
@@ -369,7 +369,7 @@ class Animepahe(Anime):
         r = rx.findall(data)
         x = r[-1]
         unpacked = self.js_unpack(x[0], x[1], x[2], x[3])
-        stream_re = re.compile(r"https://(.*?)uwu.m3u8")
+        stream_re = re.compile(r"https://(.*?)(owo|uwu).m3u8")
         return {"file_name": title, "manifest_url": stream_re.search(unpacked).group(0)}
 
     @staticmethod

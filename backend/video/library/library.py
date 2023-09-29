@@ -4,30 +4,31 @@ This file will handle the saving and extraction of metadata about downloaded fil
 
 """
 from __future__ import annotations
-
-from abc import ABC, abstractmethod
+from abc import ABC
 from typing import Dict, List, Any
-import json
-from pathlib import Path
 from utils import DB
 from sqlite3 import IntegrityError
 
 
 class Library(ABC):
-    data: Dict[int, Dict[str, Any]] = {}
-    _libraries: List[Library] = []
+    data: Dict[str, Dict[str, Any]] = {}
+    _libraries: Dict[str, List[Library]] = {}
     table_name: str
     fields: str = ""
     oid: str = "id"
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls: Library, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls._libraries.append(cls)
+        cls._libraries.setdefault(cls.table_name, []).append(cls)
 
     @classmethod
     def load_datas(cls):
-        for lib in cls._libraries:
-            lib.load_data()
+        """
+        Load ALL Data from particular type of tables
+        """
+        for _, lib in cls._libraries.items():
+            for table in lib:
+                table.load_data()
 
     @classmethod
     def update(cls, _id: int, data: Dict[str, Any]) -> None:
@@ -55,7 +56,7 @@ class Library(ABC):
         cur.close()
 
     @classmethod
-    def get_all(cls) -> List[Dict[int, Dict[str, Any]]]:
+    def get_all(cls) -> list[dict[str, Any]]:
         return [data for data in cls.data.values()]
 
     @classmethod
@@ -119,9 +120,11 @@ class DBLibrary(Library):
     table_name: str = "progress_tracker"
     fields: str = "id, type, series_name, file_name, status, created_on, total_size, file_location"
     oid: str = "id"
+    data: Dict[int, Dict[str, Any]] = {}
 
 
 class WatchList(Library):
     table_name: str = "watchlist"
     fields: str = "anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details, created_on"
     oid: str = "anime_id"
+    data: Dict[int, Dict[str, Any]] = {}

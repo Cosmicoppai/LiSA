@@ -15,16 +15,21 @@ from video.library import DBLibrary, Library
 from time import perf_counter
 from utils import DB, remove_folder
 import logging
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List, Dict, Any, Tuple
 from utils.headers import get_headers
 from utils import validate_path
-from sys import modules, exc_info
+from sys import exc_info
 from abc import ABC, abstractmethod
 import traceback
 from yarl import URL
 
 
-def _parse_resume_info(raw_file_data):
+def _parse_resume_info(raw_file_data: str = "", file_path: str | Path = None):
+
+    if file_path:
+        with open(file_path, "r") as f:
+            raw_file_data = f.read()
+
     lines = raw_file_data.split("\n")
     lines = filter(lambda line: line.startswith("SEGMENT"), lines)
     return tuple(int(line.split(" ")[1]) for line in lines)
@@ -46,9 +51,9 @@ def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
 
         segment, key, file_name, segment_number, speed = pipe_message
         if key != b"":
-            decrypted_segment = AES.new(key, AES.MODE_CBC).decrypt(segment)
+            decrypted_segment = segment[0] + AES.new(key, AES.MODE_CBC).decrypt(segment[1])
         else:
-            decrypted_segment = segment
+            decrypted_segment = segment[0] + segment[1]
 
         with open(file_name, "wb+") as file:
             file.write(decrypted_segment)
@@ -67,7 +72,7 @@ class ProgressTracker:
         self.file_data = file_data
         self.send_update()
 
-    def increment_done(self, speed: int = 0) -> None:
+    def increment_done(self, speed: int | float = 0) -> None:
         self.done += 1
         self.file_data["downloaded"] = self.done
         self.file_data["speed"] = speed
@@ -80,14 +85,14 @@ class ProgressTracker:
 
 
 class Downloader(ABC):
-    
+
     SEGMENT_EXTENSION: str
     OUTPUT_EXTENSION: str
     MANIFEST_FILE_NAME: str = "uwu"
     MANIFEST_FILE_EXTENSION: str
     SEGMENT_DIR: Path = Path(__file__).resolve().parent.parent.joinpath("segments")
     OUTPUT_LOC: Path = FileConfig.DEFAULT_DOWNLOAD_LOCATION
-    RESUME_EXTENSION: str = ".resumeinfo.yuk"
+    RESUME_FILENAME: str = "resumeinfo.yuk"
 
     def __init__(
             self,
@@ -100,7 +105,6 @@ class Downloader(ABC):
             headers: dict = get_headers()
     ) -> None:
 
-        self.resume_file_path: str = None
         self._max_workers = max_workers
         self.file_data = file_data  # {id: int, file_name: str, total_size: None, downloaded: None}
         self.library, self.lib_data = library_data
@@ -108,6 +112,7 @@ class Downloader(ABC):
         self.SEGMENT_DIR: Path = Path(file_data["segment_dir"])
         self.msg_system_in_pipe = msg_system_in_pipe
         self._resume_code = resume_code or self.file_data["file_name"]
+        self.resume_file_path = os.path.join(self.SEGMENT_DIR, f"{self.RESUME_FILENAME}")
         self._hooks = hooks
         self.key: bytes | None = None
         self.headers = headers
@@ -131,16 +136,12 @@ class Downloader(ABC):
     async def _download_worker(self, download_queue: asyncio.Queue, client: aiohttp.ClientSession,
                                decrypt_pipe_input=None, downloader: Downloader = None):
         ...
-    
+
     @abstractmethod
     async def _run(self):
         ...
 
     def parse_resume_info(self) -> List[str]:
-
-        self.resume_file_path = os.path.join(
-            self.SEGMENT_DIR, f"{self._resume_code}{self.RESUME_EXTENSION}"
-        )
 
         if os.path.isfile(self.resume_file_path):
             with open(self.resume_file_path) as file:
@@ -195,7 +196,7 @@ class MangaDownloader(Downloader):
 
         self.img_urls = img_urls
         super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
-        self.progress_tracker: ProgressTracker = None
+        self.progress_tracker: ProgressTracker
         self.num_of_segments: int = len(img_urls)
         self.total_size = 0
 
@@ -319,24 +320,32 @@ class VideoDownloader(Downloader):
             hooks: dict = None,
             headers: dict = get_headers()
     ) -> None:
-        self._m3u8: m3u8.M3U8 = m3u8.M3U8(m3u8_str)
+        self._m3u8: m3u8.M3U8 = m3u8.loads(m3u8_str)
         super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
         self._output_file = self.OUTPUT_LOC.joinpath(f"{self.file_data['file_name']}{self.OUTPUT_EXTENSION}")
+        self.seg_maps: Dict[str, bytes] = {}
+
+    async def _get_map_seg(self, client: aiohttp.ClientSession, segment: m3u8.model.Segment) -> bytes:
+        if segment.init_section:
+            "return media segment (EXT-X-MAP)"
+            return self.seg_maps.setdefault(segment.init_section.uri, await (await client.get(segment.init_section.uri)).read())
+        return b''
 
     async def _download_worker(self, download_queue: asyncio.Queue, client: aiohttp.ClientSession,
                                decrypt_pipe_input=None, downloader: Downloader = None):
         while True:
             segment_data = await download_queue.get()
             file_name, segment, segment_number = segment_data
-            _key = downloader.get_key(client, segment)  # get key to decrypt segment
-            start_time = perf_counter()
             try:
+                _key = self.get_key(client, segment)  # get key to decrypt segment
+                _map_seg = self._get_map_seg(client, segment)  # get the media segment data
+                start_time = perf_counter()
+
                 async with client.get(segment.uri) as resp:
                     resp_data: bytes = await resp.read()
-                    key = await _key
 
                     decrypt_pipe_input.send(
-                        (resp_data, key, file_name, segment_number,
+                        ((await _map_seg, resp_data), await _key, file_name, segment_number,
                          resp.content_length // (perf_counter() - start_time)))
 
             except asyncio.TimeoutError:
@@ -385,8 +394,8 @@ class VideoDownloader(Downloader):
         download_queue: asyncio.Queue = asyncio.Queue()
 
         # Pipe that will be used to the download workers to send the downloaded
-        # data to the decrypt process for decryption and for writing to the
-        # disk.
+        # data to the decrypt process for decryption and for writing to the disk.
+
         decrypt_pipe_output, decrypt_pipe_input = Pipe()
         timeout = aiohttp.ClientTimeout(25)
         client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
@@ -401,7 +410,7 @@ class VideoDownloader(Downloader):
                     *self._m3u8.playlists, key=lambda p: p.stream_info.bandwidth
                 ).uri
             resp = await client.get(stream_uri)
-            stream = m3u8.M3U8(await resp.text())
+            stream = m3u8.loads(await resp.text())
         else:
             stream = self._m3u8
 
@@ -410,6 +419,8 @@ class VideoDownloader(Downloader):
         resume_info = self.parse_resume_info()
 
         assert self.num_of_segments != 0  # no of streams is not equal to 0
+
+        self.SEGMENT_EXTENSION = f".{stream.segments.uri[0].split('.')[-1]}"  # parse the segment extension from the link
 
         segment_list = tuple(
             filter(lambda seg: seg[0] not in resume_info, enumerate(stream.segments))
@@ -479,7 +490,7 @@ class VideoDownloader(Downloader):
         if self.key:
             return self.key
 
-        if segment.key is not None and segment.key != "":
+        if segment.key:
             key_resp = await client.get(segment.key.uri)
             self.key = await key_resp.read()
         else:
@@ -552,7 +563,8 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                 raise KeyError("Invalid id")
 
     @staticmethod
-    async def __get_manifest__(scraper: Anime | Manga, session: str, manifest_url: str, page: int = 1) -> str:
+    async def __get_manifest__(scraper: Anime | Manga, session: str, manifest_url: str, page: int = 1) -> tuple[Any] | List[Any]:
+
         if session:
             manifest_data = await asyncio.gather(*[scraper.get_manifest_file(link) for link in await scraper.get_links(session, page)])
         else:
@@ -561,14 +573,14 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         return manifest_data
 
     @classmethod
-    async def workers(cls) -> bool:
+    async def workers(cls):
         while True:
             task_id = await DownloadManager.DownloadTaskQueue.get()
             manifest, file_data, headers = cls._TaskData[task_id]["task_data"]
 
             task_status = cls._TaskData[task_id]["status"]
-            if task_status != Status.scheduled:  # if task is in paused state
-                if task_status == status.cancelled:  # if task is in cancelled state, remove from the _Task Dict
+            if task_status != Status.scheduled:  # if task is in not in scheduled state
+                if task_status == Status.cancelled:  # if task is in cancelled state, remove from the _Task Dict
                     del cls._TaskData[file_data["id"]]
 
             else:
@@ -578,7 +590,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                 try:
 
                     target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data, msg_system_in_pipe=MsgSystem.in_pipe,
-                                                                headers=headers, library_data=(DBLibrary, Library.data))
+                                                                headers=headers, library_data=(DBLibrary, DBLibrary.data))
 
                     p = Process(target=target.run)
                     p.start()
@@ -604,7 +616,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         for row in _tasks:
             file_data = {"id": row["id"], "type": row["type"], "status": row["status"], "file_name": row["file_name"],
                          "total_size": row["total_size"],
-                         "downloaded": len(_parse_resume_info(f"{row['file_name']}{Downloader.RESUME_EXTENSION}"))}
+                         "downloaded": 0}
 
             scraper_typ = cls._Scrapers[row["type"]]
 
@@ -653,7 +665,9 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         ext = downloader.OUTPUT_EXTENSION if typ == "video" else ""
         output_dir: Path = downloader.OUTPUT_LOC.joinpath(series_name).joinpath(f"{seg_name}")
 
-        if not file_data:
+        if file_data:
+            file_data["downloaded"] = len(_parse_resume_info(file_path=seg_dir.joinpath(downloader.RESUME_FILENAME)))
+        else:
             file_data = cls.create_data(_file_name, typ, manifest_file_path.__str__(),
                                         output_dir.joinpath(f"{_file_name[1]}{ext}").__str__())
 

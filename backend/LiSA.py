@@ -36,7 +36,11 @@ if __name__ == "__main__":
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
 
-        Library.data = Manager().dict()  # update the dict into manager dict
+        # Library.data = Manager().dict()  # update the dict into manager dict
+        for _, lib in Library._libraries.items():
+            for table in lib:
+                table.data = Manager().dict()
+
         Library.load_datas()  # load data of all tables in-mem
 
         """
