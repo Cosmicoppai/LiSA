@@ -58,6 +58,7 @@ const createMainWindow = () => {
              */
 
             mainWindow.show();
+            mainWindow.maximize();
             loadingWindow.hide();
             loadingWindow.close();
         }

@@ -33,8 +33,7 @@ import {
 import PaginateCard from "../components/paginateCard";
 import SearchResultCard from "../components/search-result-card";
 import { AddToWatchList } from "src/components/AddToWatchList";
-
-const { shell } = window.require("electron");
+import { openExternalUrl } from "src/utils/fn";
 
 export default function AnimeDetailsScreen() {
     const dispatch = useDispatch();
@@ -277,7 +276,7 @@ export default function AnimeDetailsScreen() {
                                         return (
                                             <Tag
                                                 key={index}
-                                                onClick={() => shell.openExternal(value)}
+                                                onClick={() => openExternalUrl(value as string)}
                                                 mr={2}
                                                 sx={{ cursor: "pointer" }}>
                                                 {key}

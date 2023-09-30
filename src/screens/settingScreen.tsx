@@ -8,7 +8,7 @@ import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
 // @ts-ignore
 import pkg from '../../package.json';
 
-const { shell } = window.require("electron");
+import { openExternalUrl } from "src/utils/fn";
 
 export default function SettingScreen() {
     return (
@@ -34,7 +34,7 @@ export default function SettingScreen() {
                         style={{
                             cursor: 'pointer'
                         }}
-                        onClick={() => shell.openExternal(pkg.repository.url)}
+                        onClick={() => openExternalUrl(pkg.repository.url)}
                     >
                         <Icon
                             as={RxGithubLogo}
