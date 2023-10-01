@@ -10,7 +10,7 @@ Please submit an Issue or even better a PR and We'll review :)
 
 -   Clone the project using
 
-    ```cli
+    ```bash
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
 
@@ -28,14 +28,14 @@ Please submit an Issue or even better a PR and We'll review :)
 
 1. Create and activate the virtual environment
 
-    ```cli
+    ```bash
     python -m venv ./env
     ./env/Script/activate
     ```
 
 2. Install the dependencies using the `requirements.txt` and `build_requirements.txt` files.
 
-    ```cli
+    ```bash
     pip install -r ./requirements.txt
     pip install -r ./build_requirements.txt
     ```
@@ -46,29 +46,29 @@ Please submit an Issue or even better a PR and We'll review :)
 
 1. Install Node modules
 
-    ```
+    ```bash
     npm i
     ```
 
 2. Create `.env` & paste the following content
 
-    ```dotenv
+    ```bash
     REACT_APP_SERVER_URL=http://localhost:6969
     REACT_APP_SOCKET_URL=ws://localhost:9000
     ```
 
 3. Start dev app using
-    ```
+    ```bash
     npm start
     ```
 
 ### Build package
 
 -   For Windows
-
-        ```cli
-        npm run build:package:windows
-        ```
+  
+    ```bash
+    npm run build:package:windows
+    ```
 
 Note:
 
