@@ -1,0 +1,43 @@
+name: Python Version Testing
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.7, 3.10, 3.11]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt  # Replace with your actual requirements file
+
+    - name: Run tests
+      run: |
+        python -m unittest discover -s tests  # Replace with your test command
+
+    - name: Cleanup
+      run: |
+        python -m pip freeze > requirements.txt  # Update requirements file with new dependencies
+      if: success()
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: test-results
+        path: test-results  # Replace with the directory containing test results
