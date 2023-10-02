@@ -51,9 +51,12 @@ def _decrypt_worker(pipe_output, resume_file_path: str, progress_tracker):
 
         segment, key, file_name, segment_number, speed = pipe_message
         if key != b"":
-            decrypted_segment = segment[0] + AES.new(key, AES.MODE_CBC).decrypt(segment[1])
+            decrypted_segment = AES.new(key, AES.MODE_CBC).decrypt(segment[1])
         else:
-            decrypted_segment = segment[0] + segment[1]
+            decrypted_segment = segment[1]
+
+        if segment_number == 0 or segment_number == "0":
+            decrypted_segment = segment[0] + decrypted_segment
 
         with open(file_name, "wb+") as file:
             file.write(decrypted_segment)
