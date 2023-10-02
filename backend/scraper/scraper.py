@@ -210,7 +210,7 @@ class Animepahe(Anime):
         description["status"] = details.get("status", "Finished Airing")
         description["aired"] = details.get("aired", None).replace("to", " to")
         description['season'], description["year"] = details.get("season", "None None").split()
-        description["duration"] = details.get("duration", 0).strip()
+        description["duration"] = details.get("duration", "0").strip()
         description["themes"] = details.get("themes", "None").split()
         description["studio"] = details.get("studio", None)
 
