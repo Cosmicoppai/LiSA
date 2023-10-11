@@ -7,6 +7,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/cosmicoppai/LiSA?color=lightgrey)](https://github.com/Cosmicoppai/LiSA/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/Cosmicoppai/LiSA?color=lightgrey)](https://github.com/Cosmicoppai/LiSA/issues)
 [![MIT License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
+[![Open Source Helpers](https://www.codetriage.com/cosmicoppai/lisa/badges/users.svg)](https://www.codetriage.com/cosmicoppai/lisa)
 
 ![image](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)
 ![image](https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=9FEAF9)
