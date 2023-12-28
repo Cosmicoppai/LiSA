@@ -54,7 +54,7 @@ We are adding new features, so the current main branch is unstable. We recommend
 
 ## 🤗 Download
 
-[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0)
+[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1)
 
 > Note: Currently only windows executables are provided.
 
