@@ -2,7 +2,7 @@ import random
 
 
 def get_random_agent():
-    return user_agents[random.randint(0, 9999)]
+    return user_agents[random.randint(0, len(user_agents)-1)]
 
 
 user_agents = [
