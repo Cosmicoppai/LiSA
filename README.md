@@ -83,6 +83,12 @@ _Download Manager and Library_
 ![Explore Page](demo_images/ss_explore.png)
 _Explore Page with filters_
 
+![Explore Page Manga](demo_images/explore_page_manga.png)
+_Explore Page Manga_
+
+![My List](demo_images/my_list.png)
+_My List_
+
 https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4
 
 ## Future Plans
