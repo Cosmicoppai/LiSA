@@ -19,7 +19,7 @@ A Desktop application, for streaming and downloading your favourite anime.
 
 ## ⚠️ Alert
 
-We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0).
+We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1).
 
 ## CONTENTS OF THE FILE
 
