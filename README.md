@@ -94,7 +94,6 @@ https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-
 ## Future Plans
 
 -   UI Improvement
--   Watchlist
 -   Continue Watching
 -   Download episodes with custom range
 
