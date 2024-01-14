@@ -1,36 +1,44 @@
 // @ts-nocheck
 
-import { Box, Heading, Text, Stack, Image, Flex, Badge, Spacer, useToast } from "@chakra-ui/react";
-import { AiFillStar } from "react-icons/ai";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { addAnimeDetails } from "../store/actions/animeActions";
+import React, { useState } from "react"
+import {
+    Box,
+    Heading,
+    Text,
+    Stack,
+    Image,
+    Flex,
+    Badge,
+    Spacer,
+    AlertDialog,
+    AlertDialogOverlay,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogBody,
+    AlertDialogFooter,
+    Button,
+    Link,
+} from "@chakra-ui/react";
+const { shell } = window.require("electron");
 
 export function MangaCard({ data, query }) {
-    const navigate = useNavigate();
-    const toast = useToast();
-
-    const dispatch = useDispatch();
+    const [isOpen, setIsOpen] = useState(false);
+    const onClose = () => setIsOpen(false);
+    const cancelRef = React.useRef();
 
     const exploreCardHandler = () => {
-        if (query !== "upcoming") {
-            // dispatch(addAnimeDetails(data));
-            navigate("/manga-details");
-        } else {
-            toast({
-                title: "Anime has not been aired yet! ❤️",
-                status: "error",
-                duration: 2000,
-            });
-        }
+        setIsOpen(true);
     };
+    const openExternalLink = (url) => {
+    shell.openExternal(url);  // Open the link in the user's default browser
+  };
     return (
         <Box
             sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}
             onClick={exploreCardHandler}
         >
             <Box
-                sx={{ cursor: "pointer" }}
+                sx={{cursor: "pointer"}}
                 role={"group"}
                 p={6}
                 maxW={"270px"}
@@ -40,9 +48,6 @@ export function MangaCard({ data, query }) {
                 rounded={"lg"}
                 pos={"relative"}
                 zIndex={1}>
-                {/* <div class="card_image">
-          <img src={data.img_url} />
-        </div> */}
                 <Box
                     rounded={"lg"}
                     mt={-12}
@@ -85,8 +90,8 @@ export function MangaCard({ data, query }) {
                         <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
                             {data.anime_type}
                         </Text>
-                        <Spacer />
-                        <Box sx={{ display: "flex" }}>
+                        <Spacer/>
+                        <Box sx={{display: "flex"}}>
                             <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
                                 Rank
                             </Text>
@@ -132,6 +137,38 @@ export function MangaCard({ data, query }) {
                     </Flex>
                 </Stack>
             </Box>
-        </Box>
-    );
+        {/* AlertDialog for "Manga Not Published yet" message */}
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Work in Progress ❤️
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+            The manga reader and downloader will be rolled out in the next release :)
+            <div style={{ marginTop: "10px" }}>
+              {/* Use onClick to open the link in the default browser */}
+              <Link
+                color="teal.500"
+                _hover={{ color: "teal.600" }}
+                cursor="pointer"
+                onClick={() => openExternalLink("https://github.com/cosmicoppai/LiSA")}
+              >
+                Check Home Page of LiSA for the latest release
+              </Link>
+            </div>
+          </AlertDialogBody>
+
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                Close
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    </Box>
+  );
 }

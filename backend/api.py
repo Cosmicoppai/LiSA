@@ -78,7 +78,8 @@ async def _search_anime(request: Request):
     except KeyError:
         return await not_found_404(request, msg="anime not found")
 
-    except ValueError:
+    except ValueError as err:
+        logging.error(err)
         return await bad_request_400(request, msg="invalid query parameter: total_res should be type int")
 
 

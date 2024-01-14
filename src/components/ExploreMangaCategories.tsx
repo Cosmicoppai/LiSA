@@ -24,7 +24,6 @@ export function ExploreMangaCategories({
 
     // @ts-ignore
     if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
-    console.log(data);
 
     return (
         <ul

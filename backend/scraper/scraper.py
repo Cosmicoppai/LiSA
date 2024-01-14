@@ -157,7 +157,6 @@ class Animepahe(Anime):
                 'Studio': str,
                 'Youtube url': str,
                 'External Links': Dict[str, str]
-
             }
         """
 
@@ -252,9 +251,7 @@ class Animepahe(Anime):
 
         uwu_url = hls_data["manifest_url"]
 
-        return await (await self.get(uwu_url,
-                                     headers=get_headers(
-                                         extra={"origin": "https://kwik.cx", "referer": "https://kwik.cx/"}))).text(), \
+        return await (await self.get(uwu_url, headers=self.manifest_header)).text(), \
             re.split(r'(owo|uwu)\.m3u8', uwu_url)[0], \
             [hls_data["file_name"].split("_-")[0].lstrip("AnimePahe_"), hls_data["file_name"].strip(".mp4")]
 

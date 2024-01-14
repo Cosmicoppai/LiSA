@@ -19,7 +19,7 @@ A Desktop application, for streaming and downloading your favourite anime.
 
 ## ⚠️ Alert
 
-We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0).
+We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1).
 
 ## CONTENTS OF THE FILE
 
@@ -54,7 +54,7 @@ We are adding new features, so the current main branch is unstable. We recommend
 
 ## 🤗 Download
 
-[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0)
+[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1)
 
 > Note: Currently only windows executables are provided.
 
@@ -83,12 +83,17 @@ _Download Manager and Library_
 ![Explore Page](demo_images/ss_explore.png)
 _Explore Page with filters_
 
+![Explore Page Manga](demo_images/explore_page_manga.png)
+_Explore Page Manga_
+
+![My List](demo_images/my_list.png)
+_My List_
+
 https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4
 
 ## Future Plans
 
 -   UI Improvement
--   Watchlist
 -   Continue Watching
 -   Download episodes with custom range
 
