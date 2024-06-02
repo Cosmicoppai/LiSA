@@ -1,0 +1,525 @@
+{
+  "version": 6,
+  "entities": [
+    {
+      "entity": {
+        "type": "Project",
+        "id": "189759a7-d140-4269-85b5-17bd0be27c48",
+        "name": "gg"
+      },
+      "children": [
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+              "name": "DELETE"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "anime_id",
+                    "value": "284"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/watchlist"
+            },
+            "id": "b7e1ea46-416b-451a-a554-ef3aaca1c020",
+            "name": "DELETE FROM WATCHLIST",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.5",
+              "name": "DELETE"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\n\"jp_name\": \"Bakuman.\",\n\"no_of_episodes\": 25,\n\"type\": \"TV\",\n\"status\": \"Finished Airing\",\n\"season\": \"Fall\",\n\"year\": 2010,\n\"score\": 8.19,\n\"poster\": \"https://i.animepahe.com/posters/a3c956767c931b8f9c027c083d474308.jpg\",\n\"id\": 284\n}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "anime_id",
+                    "value": "284"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/watchlist"
+            },
+            "id": "1741a2aa-6b94-4699-85ae-5440697cb817",
+            "name": "Delete from watch-list",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\"manifest_url\":\"http://localhost:6969/manifest?kwik_url=https://kwik.cx/e/D95PKWQvsTNC\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/download"
+            },
+            "id": "3ae81358-c25c-41bc-82d4-7fa7ff0e6543",
+            "name": "Download Single File",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "anime_session",
+                    "value": "162824b3-df30-9045-6b87-46b32ca29ff9"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/ep_details"
+            },
+            "id": "471594ad-ea7f-45d1-9c26-d1812d1151e5",
+            "name": "Episode Details",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/watchlist"
+            },
+            "id": "da178333-bfc7-4aaa-9cdf-fe3cf13d4673",
+            "name": "GET WATCHLIST",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\"pahewin_url\":\"https://pahe.win/OVHgK\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/library"
+            },
+            "id": "b731c0ce-8859-4fb6-9902-0f17a62a7564",
+            "name": "List of Downloaded Anime",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "kwik_url",
+                    "value": "http://localhost:6969/manifest?kwik_url=https://kwik.cx/e/D95PKWQvsTNC-360,http://localhost:6969/manifest?kwik_url=https://kwik.cx/e/jX0C7YTE1SOH-720,http://localhost:6969/manifest?kwik_url=https://kwik.cx/e/37VpQVlTHbY0-1080,"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/master_manifest"
+            },
+            "id": "24128785-d1b8-40c9-a734-29605d3f7cdc",
+            "name": "Master Manifest",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\"pahewin_url\":\"https://pahe.win/OVHgK\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "type",
+                    "value": "anime"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "query",
+                    "value": "attack"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/search"
+            },
+            "id": "8b1cef24-d0da-45dc-a344-6d624a38e9bb",
+            "name": "Search Anime",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBody": "{\"manifest_url\": \"http://localhost:6969/manifest?kwik_url=https://kwik.cx/e/D95PKWQvsTNC\",\n \"player\":\"vlc\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/stream"
+            },
+            "id": "a213a67c-a318-4e19-99b6-eae8f5e19754",
+            "name": "Stream",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\"pahewin_url\":\"https://pahe.win/OVHgK\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "ep_session",
+                    "value": "ba44d4beafc4decfd031345f6860c336afc0dbb1c4357f019ff8278049f71e14"
+                  },
+                  {
+                    "enabled": true,
+                    "name": "anime_session",
+                    "value": "162824b3-df30-9045-6b87-46b32ca29ff9"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/stream_detail"
+            },
+            "id": "637060cb-9ce3-4bcb-b09f-823b95d8126c",
+            "name": "Stream Details",
+            "headers": []
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\"local_url\":\"T://downloads//test.mp4\"}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/stream"
+            },
+            "id": "6ef081f7-8c6d-4613-8967-163a9412f7a7",
+            "name": "Stream Downloaded File",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "requestBody": true,
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+              "name": "POST"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text",
+              "textBodyEditorHeight": 233,
+              "textBody": "{\n\"jp_name\": \"Bakuman.\",\n\"no_of_episodes\": 25,\n\"type\": \"TV\",\n\"status\": \"Finished Airing\",\n\"season\": \"Fall\",\n\"year\": 2010,\n\"score\": 8.19,\n\"poster\": \"https://i.animepahe.com/posters/a3c956767c931b8f9c027c083d474308.jpg\",\n\"anime_id\": 284\n}"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": []
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/watchlist"
+            },
+            "id": "801fbaac-c397-4a82-b8d3-c2d16392d48d",
+            "name": "WatchList",
+            "headers": [
+              {
+                "enabled": true,
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "entity": {
+            "type": "Request",
+            "method": {
+              "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+              "name": "GET"
+            },
+            "body": {
+              "formBody": {
+                "overrideContentType": true,
+                "encoding": "application/x-www-form-urlencoded",
+                "items": []
+              },
+              "bodyType": "Text"
+            },
+            "uri": {
+              "query": {
+                "delimiter": "&",
+                "items": [
+                  {
+                    "enabled": true,
+                    "name": "kwik_url",
+                    "value": "https://kwik.cx/e/D95PKWQvsTNC"
+                  }
+                ]
+              },
+              "scheme": {
+                "name": "http",
+                "version": "V11"
+              },
+              "host": "localhost:6969",
+              "path": "/manifest"
+            },
+            "id": "89f33538-02a2-4410-b531-c37825082afa",
+            "name": "get Manifest",
+            "headers": []
+          }
+        }
+      ]
+    }
+  ]
+}

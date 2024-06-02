@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 
-import './styles/App.css';
+import "./styles/App.css";
 
 import { useSocketContext } from "./context/socket";
 import useSocketStatus from "./hooks/useSocketStatus";
@@ -19,8 +19,15 @@ import SettingScreen from "./screens/settingScreen";
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
 
-export default function App() {
+type TCookieReq = {
+    data: {
+        type: "cookie_request";
+        site_url: string;
+        user_agent: string;
+    };
+};
 
+export default function App() {
     const { isSocketConnected } = useSocketStatus();
 
     const client = useSocketContext();
@@ -28,12 +35,28 @@ export default function App() {
     console.log("client", client);
 
     useEffect(() => {
-
         if (!client) return;
         else if (client.readyState === 1) {
             client.send(JSON.stringify({ type: "connect" }));
             console.log("WebSocket Client Connected");
+            //@ts-ignore
+            client.onmessage = (message) => {
+                const msg: TCookieReq = message?.data;
 
+                console.log("eee", msg);
+
+                // @ts-ignore
+                window.electronAPI?.requestData(msg).then((response) => {
+                    console.log("apisss", response);
+
+                    client.send(
+                        JSON.stringify({
+                            type: "cookie_request",
+                            data: response,
+                        })
+                    );
+                });
+            };
             // client.onopen = () => {
             //   console.log("WebSocket Client Connected");
             //   client.send(JSON.stringify({ type: "connect" }));
@@ -41,8 +64,7 @@ export default function App() {
         }
 
         () => client.close();
-
-    }, [isSocketConnected, client]);
+    }, [isSocketConnected, client, window]);
 
     return (
         <HashRouter>

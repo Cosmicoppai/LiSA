@@ -1,6 +1,4 @@
-// @ts-nocheck
-
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
     Box,
     Heading,
@@ -19,8 +17,8 @@ import {
     Button,
     Link,
 } from "@chakra-ui/react";
-const { shell } = window.require("electron");
 
+import { openExternalUrl } from "src/utils/fn";
 export function MangaCard({ data, query }) {
     const [isOpen, setIsOpen] = useState(false);
     const onClose = () => setIsOpen(false);
@@ -29,16 +27,13 @@ export function MangaCard({ data, query }) {
     const exploreCardHandler = () => {
         setIsOpen(true);
     };
-    const openExternalLink = (url) => {
-    shell.openExternal(url);  // Open the link in the user's default browser
-  };
+
     return (
         <Box
             sx={{ display: "flex", padding: "1rem", margin: "10px auto" }}
-            onClick={exploreCardHandler}
-        >
+            onClick={exploreCardHandler}>
             <Box
-                sx={{cursor: "pointer"}}
+                sx={{ cursor: "pointer" }}
                 role={"group"}
                 p={6}
                 maxW={"270px"}
@@ -90,8 +85,8 @@ export function MangaCard({ data, query }) {
                         <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
                             {data.anime_type}
                         </Text>
-                        <Spacer/>
-                        <Box sx={{display: "flex"}}>
+                        <Spacer />
+                        <Box sx={{ display: "flex" }}>
                             <Text color={"gray.500"} fontSize={"sm"} textTransform={"uppercase"}>
                                 Rank
                             </Text>
@@ -120,8 +115,7 @@ export function MangaCard({ data, query }) {
                         direction={"row"}
                         justifyContent={"space-between"}
                         flex={1}
-                        width={"100%"}
-                    >
+                        width={"100%"}>
                         <Badge
                             sx={{
                                 display: "flex",
@@ -137,38 +131,39 @@ export function MangaCard({ data, query }) {
                     </Flex>
                 </Stack>
             </Box>
-        {/* AlertDialog for "Manga Not Published yet" message */}
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Work in Progress ❤️
-            </AlertDialogHeader>
+            {/* AlertDialog for "Manga Not Published yet" message */}
+            <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Work in Progress ❤️
+                        </AlertDialogHeader>
 
-            <AlertDialogBody>
-            The manga reader and downloader will be rolled out in the next release :)
-            <div style={{ marginTop: "10px" }}>
-              {/* Use onClick to open the link in the default browser */}
-              <Link
-                color="teal.500"
-                _hover={{ color: "teal.600" }}
-                cursor="pointer"
-                onClick={() => openExternalLink("https://github.com/cosmicoppai/LiSA")}
-              >
-                Check Home Page of LiSA for the latest release
-              </Link>
-            </div>
-          </AlertDialogBody>
+                        <AlertDialogBody>
+                            The manga reader and downloader will be rolled out in the next release
+                            :)
+                            <div style={{ marginTop: "10px" }}>
+                                {/* Use onClick to open the link in the default browser */}
+                                <Link
+                                    color="teal.500"
+                                    _hover={{ color: "teal.600" }}
+                                    cursor="pointer"
+                                    onClick={() =>
+                                        openExternalUrl("https://github.com/cosmicoppai/LiSA")
+                                    }>
+                                    Check Home Page of LiSA for the latest release
+                                </Link>
+                            </div>
+                        </AlertDialogBody>
 
-
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
-                Close
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </Box>
-  );
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onClose}>
+                                Close
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+        </Box>
+    );
 }
