@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import io
 from abc import ABC, abstractmethod
-from os import system
 from typing import Dict, List
 import subprocess
 import asyncio
