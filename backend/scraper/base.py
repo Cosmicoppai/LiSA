@@ -4,24 +4,26 @@ import aiohttp
 from utils.headers import get_headers
 import logging
 from random import choice
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from multidict import CIMultiDictProxy
 from video.downloader.msg_system import MsgSystem
 
 
 class Scraper(ABC):
     session: aiohttp.ClientSession = None
+    cookies: Dict[str, str] = {}
     site_url: str = None
     api_url: str = None
     content: bytes = None
 
     @classmethod
-    async def set_session(cls, headers: List[dict]):
+    async def set_session(cls, cookies: List[dict]):
         if not cls.session:
-            cls.session = aiohttp.ClientSession()
-            for i in range(1, len(headers)):
-                if headers[i].get("name", None) and headers[i].get("value", None):
-                    cls.session.headers[headers[i]["name"]] = headers[i]["value"]
+            for cookie in cookies:
+                if cookie.get("name", None) and cookie.get("value", None):
+                    cls.cookies[cookie["name"]] = cookie["value"]
+        cls.session = aiohttp.ClientSession()
+        cls.session.cookie_jar.update_cookies(cls.cookies)
 
     async def __aenter__(self):
         return self
@@ -47,13 +49,10 @@ class Scraper(ABC):
                         cookies = MsgSystem.in_pipe.recv()
                         if cookies:
                             await cls.set_session(cookies)
-                            for k, v in headers:
-                                cls.session.headers[k] = v
-                            break
+                        break
 
         data = {} or data
         err, tries = None, 0
-
         while tries < 10:
             try:
                 async with cls.session.get(url=url, params=data, headers=headers) as resp:
