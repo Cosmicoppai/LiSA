@@ -147,12 +147,12 @@ app.whenReady().then(async () => {
     browserWindows.mainWindow = new BrowserWindow({
         show: false,
         webPreferences: {
-            contextIsolation: false,
+            contextIsolation: true,
             enableRemoteModule: true,
             autoHideMenuBar: true,
             show: false,
             nodeIntegration: true,
-            preload: path.join(app.getAppPath(), "preload.js"),
+            preload: path.join(isDevMode ? __dirname : app.getAppPath(), "preload.js"),
         },
     });
 
@@ -282,4 +282,37 @@ app.whenReady().then(async () => {
             console.log("after quit");
         }
     });
+});
+
+const puppeteer = require("puppeteer");
+
+// IPC handler to respond to messages from the renderer process
+ipcMain.handle("request-data", async (event, args) => {
+    console.log("sss", event, args);
+
+    // Prepare data to send to the renderer process
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    // Set User-Agent and other headers if necessary
+    await page.setUserAgent(
+        "Mozilla/5.0 (Windows NT 6.2; WOW64; rv:20.0) Gecko/20100101 Firefox/20.0"
+    );
+
+    // Go to the website
+    await page.goto("https://animepahe.ru", { waitUntil: "networkidle2" });
+
+    // Wait for the challenge to be solved and the page to navigate
+    await page.waitForNavigation({ waitUntil: "networkidle0" });
+
+    // Get cookies after the challenge is solved
+    const cookies = await page.cookies();
+
+    // Print cookies
+    console.log(JSON.stringify(cookies));
+
+    await browser.close();
+
+    return cookies;
 });

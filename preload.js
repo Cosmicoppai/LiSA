@@ -12,3 +12,11 @@ window.addEventListener("DOMContentLoaded", () => {
         replaceText(`${type}-version`, process.versions[type]);
     }
 });
+
+const { contextBridge, ipcRenderer } = require("electron");
+
+contextBridge.exposeInMainWorld("electronAPI", {
+    requestData: async () => {
+        return await ipcRenderer.invoke("request-data");
+    },
+});
