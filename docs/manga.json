@@ -1,0 +1,225 @@
+{
+  "version": 6,
+  "entities": [
+    {
+      "entity": {
+        "type": "Project",
+        "id": "189759a7-d140-4269-85b5-17bd0be27c48",
+        "name": "gg"
+      },
+      "children": [
+        {
+          "entity": {
+            "type": "Service",
+            "id": "84a80472-88d4-4180-95de-4155716ffbb3",
+            "name": "MANGA"
+          },
+          "children": [
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": [
+                      {
+                        "enabled": true,
+                        "name": "chp_session",
+                        "value": "https://mangakatana.com/manga/boku-no-hero-academia-smash.518/c20.5"
+                      }
+                    ]
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:6969",
+                  "path": "/read"
+                },
+                "id": "984ab08c-afa8-4204-81f2-d876edba5cd3",
+                "name": "CHAPTER DETAILS",
+                "headers": []
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "requestBody": true,
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.3",
+                  "name": "POST"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text",
+                  "textBody": "{\"chp_url\":\"https://mangakatana.com/manga/boku-no-hero-academia-smash.518/c20.5\"}"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": []
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:6969",
+                  "path": "/download"
+                },
+                "id": "c6613474-b80a-4c61-8405-d3e4393fb328",
+                "name": "DOWNLOAD MANGA",
+                "headers": [
+                  {
+                    "enabled": true,
+                    "name": "Content-Type",
+                    "value": "application/json"
+                  }
+                ]
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": [
+                      {
+                        "enabled": true,
+                        "name": "session",
+                        "value": "https://mangakatana.com/manga/boku-no-hero-academia-smash.518"
+                      }
+                    ]
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:6969",
+                  "path": "/manga_detail"
+                },
+                "id": "8a9e54b2-cca4-4a2a-965e-fe1a3f08a667",
+                "name": "MANGA DETAILS",
+                "headers": []
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": [
+                      {
+                        "enabled": true,
+                        "name": "type",
+                        "value": "manga"
+                      },
+                      {
+                        "enabled": true,
+                        "name": "manga_session",
+                        "value": "https://mangakatana.com/manga/boku-no-hero-academia-smash.518"
+                      }
+                    ]
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:6969",
+                  "path": "/recommendation"
+                },
+                "id": "f4d2ec13-12c6-44f9-bdd8-3ebfd5feb984",
+                "name": "MANGA RECOMMENDATION",
+                "headers": []
+              }
+            },
+            {
+              "entity": {
+                "type": "Request",
+                "method": {
+                  "link": "http://tools.ietf.org/html/rfc7231#section-4.3.1",
+                  "name": "GET"
+                },
+                "body": {
+                  "formBody": {
+                    "overrideContentType": true,
+                    "encoding": "application/x-www-form-urlencoded",
+                    "items": []
+                  },
+                  "bodyType": "Text"
+                },
+                "uri": {
+                  "query": {
+                    "delimiter": "&",
+                    "items": [
+                      {
+                        "enabled": true,
+                        "name": "type",
+                        "value": "manga"
+                      },
+                      {
+                        "enabled": true,
+                        "name": "query",
+                        "value": "boku no hero academia"
+                      }
+                    ]
+                  },
+                  "scheme": {
+                    "name": "http",
+                    "version": "V11"
+                  },
+                  "host": "localhost:6969",
+                  "path": "/search"
+                },
+                "id": "76f7bba0-6702-484c-bce1-f40450b2fd49",
+                "name": "SEARCH MANGA",
+                "headers": []
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
