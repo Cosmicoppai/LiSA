@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
-    requestData: async () => {
-        return await ipcRenderer.invoke("request-data");
+    getACookies: async (args) => {
+        return await ipcRenderer.invoke("get-a-cookies", args);
     },
 });

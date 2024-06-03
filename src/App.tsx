@@ -18,14 +18,7 @@ import SettingScreen from "./screens/settingScreen";
 
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
-
-type TCookieReq = {
-    data: {
-        type: "cookie_request";
-        site_url: string;
-        user_agent: string;
-    };
-};
+import { TCookieReq } from "./types";
 
 export default function App() {
     const { isSocketConnected } = useSocketStatus();
@@ -41,21 +34,23 @@ export default function App() {
             console.log("WebSocket Client Connected");
             //@ts-ignore
             client.onmessage = (message) => {
-                const msg: TCookieReq = message?.data;
+                const msg: TCookieReq =
+                    typeof message?.data === "string" ? JSON.parse(message?.data) : null;
 
                 console.log("eee", msg);
+                if (msg?.data?.type === "cookie_request") {
+                    // @ts-ignore
+                    window.electronAPI?.getACookies(msg).then((response) => {
+                        console.log("apisss", response);
 
-                // @ts-ignore
-                window.electronAPI?.requestData(msg).then((response) => {
-                    console.log("apisss", response);
-
-                    client.send(
-                        JSON.stringify({
-                            type: "cookie_request",
-                            data: response,
-                        })
-                    );
-                });
+                        client.send(
+                            JSON.stringify({
+                                type: "cookie_request",
+                                data: response,
+                            })
+                        );
+                    });
+                }
             };
             // client.onopen = () => {
             //   console.log("WebSocket Client Connected");
