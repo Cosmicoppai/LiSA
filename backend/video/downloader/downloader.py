@@ -3,7 +3,7 @@ from __future__ import annotations
 import aiohttp
 import asyncio
 import m3u8
-import os
+from os import path, makedirs
 from Crypto.Cipher import AES
 from multiprocessing import connection, Process, Pipe
 import subprocess
@@ -13,7 +13,7 @@ from config import FileConfig
 from .msg_system import MsgSystem
 from video.library import DBLibrary, Library
 from time import perf_counter
-from utils import DB, remove_folder
+from utils import DB, remove_folder, get_path
 import logging
 from typing import List, Dict, Any, Tuple
 from utils.headers import get_headers
@@ -115,14 +115,14 @@ class Downloader(ABC):
         self.SEGMENT_DIR: Path = Path(file_data["segment_dir"])
         self.msg_system_in_pipe = msg_system_in_pipe
         self._resume_code = resume_code or self.file_data["file_name"]
-        self.resume_file_path = os.path.join(self.SEGMENT_DIR, f"{self.RESUME_FILENAME}")
+        self.resume_file_path = path.join(self.SEGMENT_DIR, f"{self.RESUME_FILENAME}")
         self._hooks = hooks
         self.key: bytes | None = None
         self.headers = headers
         self.num_of_segments: int = 0
 
         if not self.OUTPUT_LOC.exists():
-            os.makedirs(self.OUTPUT_LOC)
+            makedirs(self.OUTPUT_LOC)
 
         # remove output_dir and seg_dir from file_data
         del self.file_data["output_dir"]
@@ -146,7 +146,7 @@ class Downloader(ABC):
 
     def parse_resume_info(self) -> List[str]:
 
-        if os.path.isfile(self.resume_file_path):
+        if path.isfile(self.resume_file_path):
             with open(self.resume_file_path) as file:
                 resume_info = _parse_resume_info(file.read())
             logging.info(f"Resume data found for {self._resume_code}.")
@@ -367,7 +367,7 @@ class VideoDownloader(Downloader):
             output_file = self._output_file
 
         # check if exe present in backend folder else fallback to default option
-        ffmpeg_loc = os.environ.get("ffmpeg", "ffmpeg")
+        ffmpeg_loc = get_path("ffmpeg", "./ffmpeg")
 
         cmd = f'"{ffmpeg_loc}" -f concat -safe 0 -i "{input_file}" -c copy "{output_file}" -hide_banner -loglevel warning'
 
@@ -376,7 +376,7 @@ class VideoDownloader(Downloader):
         )
         remove_folder(self.SEGMENT_DIR)  # remove segments
         logging.info("Merging completed")
-        return os.path.getsize(output_file)
+        return path.getsize(output_file)
 
     def _write_concat_info(self, segment_count: int) -> int:
         logging.info("merging started")
@@ -447,7 +447,7 @@ class VideoDownloader(Downloader):
         for segment_number, segment in segment_list:
             await download_queue.put(
                 (
-                    os.path.join(
+                    path.join(
                         self.SEGMENT_DIR,
                         f"segment-{segment_number}{self.SEGMENT_EXTENSION}",
                     ),
@@ -658,7 +658,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         manifest_file_path: Path = seg_dir.joinpath(f"{downloader.MANIFEST_FILE_NAME}{downloader.MANIFEST_FILE_EXTENSION}")
 
         if not seg_dir.exists():
-            os.makedirs(seg_dir)  # create seg directory
+            makedirs(seg_dir)  # create seg directory
             downloader.write_manifest(manifest_file_path, manifest)
 
         """
