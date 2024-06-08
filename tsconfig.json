@@ -11,7 +11,6 @@
         "outDir": "dist",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-
         "baseUrl": ".",
         "paths": {
             "@public/*": ["./public/*"]

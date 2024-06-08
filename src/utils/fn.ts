@@ -1,5 +1,4 @@
 export function sleep(milliseconds) {
-
     const date = Date.now();
     let currentDate = null;
 
@@ -9,17 +8,11 @@ export function sleep(milliseconds) {
 }
 
 export function openFileExplorer(file_location: string) {
+    if (!file_location || !window) return;
+    window?.electronAPI?.showItemInFolder(file_location);
+}
 
-    if (!file_location || !window.require) return;
-
-    const { shell } = window.require("electron");
-    shell.showItemInFolder(file_location);
-};
-
-export function openExternalUrl(link: string) {
-
-    if (!link || !window.require) return;
-
-    const { shell } = window.require("electron");
-    shell.openExternal(link)
+export function openExternalUrl(url: string) {
+    if (!url || !window) return;
+    window?.electronAPI?.openExternal(url);
 }

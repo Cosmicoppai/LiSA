@@ -12,7 +12,6 @@ export function useHandleInitialSocketConnection() {
 
             console.log('socket event', msg);
             if (msg?.data?.type === 'cookie_request') {
-                // @ts-ignore
                 window?.electronAPI?.getDomainCookies(msg).then((response) => {
                     socket.send(
                         JSON.stringify({

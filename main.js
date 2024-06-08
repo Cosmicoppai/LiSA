@@ -1,16 +1,15 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
-const isDev = require("electron-is-dev");
-const { spawn, fork } = require("child_process");
-const isDevMode = require("electron-is-dev");
-const psTree = require("ps-tree");
+const { spawn } = require('child_process');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const isDevMode = require('electron-is-dev');
+const path = require('path');
+const psTree = require('ps-tree');
 
 /**
  * @namespace BrowserWindow
  * @description - Electron browser windows.
  */
 const browserWindows = {};
-let pids = [];
+const pids = [];
 
 /**
  * @description - Creates main window.
@@ -71,7 +70,7 @@ const createMainWindow = () => {
     // executeOnWindow(isPageLoaded, handleLoad);
 
     if (isDevMode) {
-        mainWindow.loadURL("http://localhost:3000");
+        mainWindow.loadURL('http://localhost:3000');
 
         mainWindow.hide();
 
@@ -79,7 +78,7 @@ const createMainWindow = () => {
          * Hide loading window and show main window
          * once the main window is ready.
          */
-        mainWindow.webContents.on("did-finish-load", () => {
+        mainWindow.webContents.on('did-finish-load', () => {
             /**
              * Checks page for errors that may have occurred
              * during the hot-loading process.
@@ -97,10 +96,10 @@ const createMainWindow = () => {
 
         mainWindow.removeMenu(true);
 
-        mainWindow.loadFile(path.join(__dirname, "build/index.html"));
+        mainWindow.loadFile(path.join(__dirname, 'build/index.html'));
         // mainWindow.webContents.openDevTools({ mode: "undocked" });
 
-        mainWindow.webContents.on("did-finish-load", () => {
+        mainWindow.webContents.on('did-finish-load', () => {
             executeOnWindow(isPageLoaded, handleLoad);
         });
     }
@@ -116,14 +115,14 @@ const createLoadingWindow = () => {
 
         // Variants of developer loading screen
         const loaderConfig = {
-            main: "public/loader.html",
+            main: 'public/loader.html',
         };
 
         try {
             loadingWindow.loadFile(path.join(__dirname, loaderConfig.main));
             loadingWindow.removeMenu(true);
 
-            loadingWindow.webContents.on("did-finish-load", () => {
+            loadingWindow.webContents.on('did-finish-load', () => {
                 loadingWindow.show();
                 resolve();
             });
@@ -152,7 +151,7 @@ app.whenReady().then(async () => {
             autoHideMenuBar: true,
             show: false,
             nodeIntegration: true,
-            preload: path.join(isDevMode ? __dirname : app.getAppPath(), "preload.js"),
+            preload: path.join(isDevMode ? __dirname : app.getAppPath(), 'preload.js'),
         },
     });
 
@@ -175,7 +174,7 @@ app.whenReady().then(async () => {
         //   shell: true,
         //   stdio: "inherit",
         // });
-        var devProc = spawn("python backend/LiSA.py", {
+        const devProc = spawn('python backend/LiSA.py', {
             detached: true,
             shell: true,
         });
@@ -194,17 +193,17 @@ app.whenReady().then(async () => {
         });
         // Dynamic script assignment for starting Python in production
         const runPython = {
-            darwin: `open -gj "${path.join(app.getAppPath(), "resources", "app.app")}" --args`,
-            linux: "./resources/main/main",
+            darwin: `open -gj "${path.join(app.getAppPath(), 'resources', 'app.app')}" --args`,
+            linux: './resources/main/main',
             win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
         }[process.platform];
 
-        var proc = spawn(`${runPython}`, {
+        const proc = spawn(`${runPython}`, {
             shell: true,
         });
     }
 
-    app.on("activate", () => {
+    app.on('activate', () => {
         /**
          * On macOS it's common to re-create a window in the app when the
          * dock icon is clicked and there are no other windows open.
@@ -220,7 +219,7 @@ app.whenReady().then(async () => {
     const initialInstance = app.requestSingleInstanceLock();
     if (!initialInstance) app.quit();
     else {
-        app.on("second-instance", () => {
+        app.on('second-instance', () => {
             if (browserWindows.mainWindow?.isMinimized()) browserWindows.mainWindow?.restore();
             browserWindows.mainWindow?.focus();
         });
@@ -246,10 +245,10 @@ app.whenReady().then(async () => {
     //   });
     // });
 
-    app.on("window-all-closed", () => {
-        console.log("inside close");
+    app.on('window-all-closed', () => {
+        console.log('inside close');
 
-        if (process.platform !== "darwin") {
+        if (process.platform !== 'darwin') {
             // console.log("killing");
             // console.log(devProc.pid);
 
@@ -272,21 +271,21 @@ app.whenReady().then(async () => {
             //   );
             // });
 
-            spawn("taskkill /IM LiSA.exe /F", {
+            spawn('taskkill /IM LiSA.exe /F', {
                 shell: true,
                 detached: true,
             });
 
             app.quit();
-            console.log("after quit");
+            console.log('after quit');
         }
     });
 });
 
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
 
 // IPC handler to respond to messages from the renderer process
-ipcMain.handle("getDomainCookies", async (event, args) => {
+ipcMain.handle('getDomainCookies', async (event, args) => {
     try {
         // Prepare data to send to the renderer process
 
@@ -297,12 +296,12 @@ ipcMain.handle("getDomainCookies", async (event, args) => {
         await page.setUserAgent(args.data.user_agent);
 
         // Go to the website
-        await page.goto(args.data.site_url ?? "https://animepahe.ru", {
-            waitUntil: "networkidle2",
+        await page.goto(args.data.site_url ?? 'https://animepahe.ru', {
+            waitUntil: 'networkidle2',
         });
 
         // Wait for the challenge to be solved and the page to navigate
-        await page.waitForNavigation({ waitUntil: "networkidle0" });
+        await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
         // Get cookies after the challenge is solved
         const cookies = await page.cookies();
@@ -313,4 +312,12 @@ ipcMain.handle("getDomainCookies", async (event, args) => {
     } catch (error) {
         return [];
     }
+});
+
+// IPC handler to open external URLs
+ipcMain.handle('open-external', (event, url) => {
+    shell.openExternal(url);
+});
+ipcMain.handle('show-item-in-folder', (event, file_location) => {
+    shell.showItemInFolder(file_location);
 });
