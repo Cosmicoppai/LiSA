@@ -1,11 +1,7 @@
-import { useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 
 import "./styles/App.css";
-
-import { useSocketContext } from "./context/socket";
-import useSocketStatus from "./hooks/useSocketStatus";
 
 import { Navbar } from "./components/navbar";
 
@@ -18,40 +14,10 @@ import SettingScreen from "./screens/settingScreen";
 
 import AnimeDetailsScreen from "./screens/animeDetailsScreen";
 import InbuiltPlayerScreen from "./screens/inbuiltPlayerScreen";
-import { TCookieReq } from "./types";
+import { useHandleInitialSocketConnection } from "./hooks/useHandleInitialSocketConnection";
 
 export default function App() {
-    const { isSocketConnected } = useSocketStatus();
-
-    const { socket } = useSocketContext();
-
-    useEffect(() => {
-        if (!socket) return;
-        else if (socket.readyState === 1) {
-            socket.send(JSON.stringify({ type: "connect" }));
-            console.log("WebSocket Client Connected");
-
-            socket.onmessage = (message) => {
-                const msg: TCookieReq =
-                    typeof message?.data === "string" ? JSON.parse(message?.data) : null;
-
-                console.log("socket event", msg);
-                if (msg?.data?.type === "cookie_request") {
-                    // @ts-ignore
-                    window?.electronAPI?.getDomainCookies(msg).then((response) => {
-                        socket.send(
-                            JSON.stringify({
-                                type: "cookie_request",
-                                data: response,
-                            })
-                        );
-                    });
-                }
-            };
-        }
-
-        () => socket.close();
-    }, [isSocketConnected, socket, window]);
+    useHandleInitialSocketConnection();
 
     return (
         <HashRouter>

@@ -258,7 +258,6 @@ app.whenReady().then(async () => {
             // devProc.kill("SIGHUP");
 
             // psTree(devProc.pid, function (err, children) {
-            //   console.log(`asdasdasdasdasd`)
             //   console.log(err)
             //   console.log(children)
             //   devProc.spawn(
@@ -287,9 +286,7 @@ app.whenReady().then(async () => {
 const puppeteer = require("puppeteer");
 
 // IPC handler to respond to messages from the renderer process
-ipcMain.handle("get-a-cookies", async (event, args) => {
-    console.log("sss", { k: 123, data: args.data });
-
+ipcMain.handle("getDomainCookies", async (event, args) => {
     try {
         // Prepare data to send to the renderer process
 
@@ -309,9 +306,6 @@ ipcMain.handle("get-a-cookies", async (event, args) => {
 
         // Get cookies after the challenge is solved
         const cookies = await page.cookies();
-
-        // Print cookies
-        console.log(JSON.stringify(cookies));
 
         await browser.close();
 
