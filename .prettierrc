@@ -1,6 +1,6 @@
 {
     "tabWidth": 4,
     "printWidth": 100,
-    "proseWrap": "preserve",
+    "singleQuote": true,
     "bracketSameLine": true
 }
