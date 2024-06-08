@@ -6,7 +6,6 @@ import logging
 from random import choice
 from typing import Tuple, List, Dict
 from multidict import CIMultiDictProxy
-from video.downloader.msg_system import MsgSystem
 
 
 class Scraper(ABC):
@@ -17,7 +16,7 @@ class Scraper(ABC):
     content: bytes = None
 
     @classmethod
-    async def set_session(cls, cookies: List[dict]):
+    async def set_session(cls, cookies: List[dict] = ()):
         if not cls.session:
             for cookie in cookies:
                 if cookie.get("name", None) and cookie.get("value", None):
@@ -39,17 +38,7 @@ class Scraper(ABC):
     @classmethod
     async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
         if not cls.session:
-
-            data = {"type": "cookie_request", "site_url": cls.site_url, "user_agent": headers["user-agent"]}
-            if MsgSystem.in_pipe:
-                MsgSystem.in_pipe.send({"data": data})
-                while True:
-                    await asyncio.sleep(0.25)
-                    if MsgSystem.in_pipe.poll():
-                        cookies = MsgSystem.in_pipe.recv()
-                        if cookies:
-                            await cls.set_session(cookies)
-                        break
+            await cls.set_session()
 
         data = {} or data
         err, tries = None, 0

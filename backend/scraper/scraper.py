@@ -11,6 +11,7 @@ import string
 from json import JSONDecodeError
 from .base import Scraper
 from utils import DB
+from video.downloader.msg_system import MsgSystem
 
 
 class Anime(Scraper):
@@ -51,6 +52,23 @@ class Animepahe(Anime):
     site_url: str = "https://animepahe.ru"
     api_url: str = "https://animepahe.ru/api"
     manifest_header = get_headers({"referer": "https://kwik.cx", "origin": "https://kwik.cx"})
+
+    @classmethod
+    async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
+        if not cls.session:
+
+            cookie_req_data = {"type": "cookie_request", "site_url": cls.site_url, "user_agent": headers["user-agent"]}
+            if MsgSystem.in_pipe:
+                MsgSystem.in_pipe.send({"data": cookie_req_data})
+                while True:
+                    await asyncio.sleep(0.25)
+                    if MsgSystem.in_pipe.poll():
+                        cookies = MsgSystem.in_pipe.recv()
+                        if cookies:
+                            await cls.set_session(cookies)
+                        break
+
+        return await super().get(url, data, headers)
 
     @staticmethod
     def __minify_text(text: str) -> str:
