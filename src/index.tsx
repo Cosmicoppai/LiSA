@@ -10,13 +10,11 @@ import App from "./App";
 
 import store from "./store/store";
 
-import { client, SocketContext } from "src/context/socket";
+import { SocketContextProvider } from "src/context/socket";
 import { theme } from "./styles/theme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-function ForceDarkMode({ children }: {
-    children: ReactNode
-}) {
+function ForceDarkMode({ children }: { children: ReactNode }) {
     const { colorMode, toggleColorMode } = useColorMode();
 
     useEffect(() => {
@@ -29,19 +27,16 @@ function ForceDarkMode({ children }: {
 
 const queryClient = new QueryClient();
 
-ReactDOM
-    .createRoot(document.getElementById("root"))
-    .render(
-
-        <ChakraProvider theme={theme}>
-            <ForceDarkMode>
-                <SocketContext.Provider value={client}>
-                    <QueryClientProvider client={queryClient}>
-                        <Provider store={store}>
-                            <App />
-                        </Provider>
-                    </QueryClientProvider>
-                </SocketContext.Provider>
-            </ForceDarkMode>
-        </ChakraProvider>
-    );
+ReactDOM.createRoot(document.getElementById("root")).render(
+    <ChakraProvider theme={theme}>
+        <ForceDarkMode>
+            <SocketContextProvider>
+                <QueryClientProvider client={queryClient}>
+                    <Provider store={store}>
+                        <App />
+                    </Provider>
+                </QueryClientProvider>
+            </SocketContextProvider>
+        </ForceDarkMode>
+    </ChakraProvider>
+);

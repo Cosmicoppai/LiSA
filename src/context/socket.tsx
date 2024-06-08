@@ -1,17 +1,21 @@
-import { createContext, useContext } from "react";
+import { ReactNode, createContext, useContext } from "react";
 
-const W3CWebSocket = require("websocket").w3cwebsocket;
+const socket: WebSocket = new WebSocket(process.env.REACT_APP_SOCKET_URL);
 
-export const client = new W3CWebSocket(process.env.REACT_APP_SOCKET_URL);
+interface SocketContextType {
+    socket: WebSocket;
+}
 
-export const SocketContext = createContext<{
-    readyState?: any,
-    send?: any,
-    close?: any
-}>({});
+export const SocketContext = createContext<SocketContextType>({
+    socket,
+});
+
+export function SocketContextProvider({ children }: { children: ReactNode }) {
+    return <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>;
+}
 
 export function useSocketContext() {
-    const context = useContext(SocketContext)
-    if (!context) throw Error('useSocketContext must be used inside an SocketContextProvider')
-    return context
+    const context = useContext(SocketContext);
+    if (!context) throw new Error("useSocketContext must be used inside a SocketContextProvider");
+    return context;
 }

@@ -1,33 +1,26 @@
-import {
-    Center,
-    Stack
-} from "@chakra-ui/react";
-import { useState, useEffect, useContext } from "react";
+import { Center, Stack } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import {
-    cancelLiveDownload,
-    getDownloadHistory
-} from "../store/actions/animeActions";
-import { SocketContext } from "../context/socket";
+import { cancelLiveDownload, getDownloadHistory } from "../store/actions/animeActions";
+import { useSocketContext } from "../context/socket";
 import { ActiveDownloads } from "../components/ActiveDownloads";
 import { DownloadsHistory } from "../components/DownloadsHistory";
 
 export function DownloadScreen() {
-
     const dispatch = useDispatch();
     const [filesStatus, setFilesStatus] = useState({});
     const [connected, setConnected] = useState(false);
 
     // @ts-ignore
     const historyDetails = useSelector((state) => state.animeLibraryDetails);
-    const client = useContext(SocketContext);
 
+    const { socket } = useSocketContext();
 
     useEffect(() => {
         // @ts-ignore
         dispatch(getDownloadHistory());
 
-        if (!client) return;
+        if (!socket) return;
 
         // client.onopen = () => {
         //   console.log("WebSocket Client Connected");
@@ -39,11 +32,10 @@ export function DownloadScreen() {
         return () => {
             setConnected(false);
         };
-    }, [client]);
+    }, [socket]);
 
     const onMessageListner = () => {
-        // @ts-ignore
-        client.onmessage = (message) => {
+        socket.onmessage = (message) => {
             let packet = JSON.parse(message.data);
             let { data } = packet;
 
@@ -99,7 +91,7 @@ export function DownloadScreen() {
     }, [historyDetails]);
 
     useEffect(() => {
-        if (!client) return;
+        if (!socket) return;
         onMessageListner();
     }, [filesStatus]);
 
@@ -127,9 +119,7 @@ export function DownloadScreen() {
                     filesStatus={filesStatus}
                     cancelDownloadHandler={cancelDownloadHandler}
                 />
-                <DownloadsHistory
-                    historyDetails={historyDetails}
-                />
+                <DownloadsHistory historyDetails={historyDetails} />
             </Stack>
         </Center>
     );

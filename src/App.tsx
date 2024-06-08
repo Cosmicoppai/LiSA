@@ -23,27 +23,23 @@ import { TCookieReq } from "./types";
 export default function App() {
     const { isSocketConnected } = useSocketStatus();
 
-    const client = useSocketContext();
-
-    console.log("client", client);
+    const { socket } = useSocketContext();
 
     useEffect(() => {
-        if (!client) return;
-        else if (client.readyState === 1) {
-            client.send(JSON.stringify({ type: "connect" }));
+        if (!socket) return;
+        else if (socket.readyState === 1) {
+            socket.send(JSON.stringify({ type: "connect" }));
             console.log("WebSocket Client Connected");
-            //@ts-ignore
-            client.onmessage = (message) => {
+
+            socket.onmessage = (message) => {
                 const msg: TCookieReq =
                     typeof message?.data === "string" ? JSON.parse(message?.data) : null;
 
-                console.log("eee", msg);
+                console.log("socket event", msg);
                 if (msg?.data?.type === "cookie_request") {
                     // @ts-ignore
-                    window.electronAPI?.getACookies(msg).then((response) => {
-                        console.log("apisss", response);
-
-                        client.send(
+                    window?.electronAPI?.getDomainCookies(msg).then((response) => {
+                        socket.send(
                             JSON.stringify({
                                 type: "cookie_request",
                                 data: response,
@@ -52,14 +48,10 @@ export default function App() {
                     });
                 }
             };
-            // client.onopen = () => {
-            //   console.log("WebSocket Client Connected");
-            //   client.send(JSON.stringify({ type: "connect" }));
-            // };
         }
 
-        () => client.close();
-    }, [isSocketConnected, client, window]);
+        () => socket.close();
+    }, [isSocketConnected, socket, window]);
 
     return (
         <HashRouter>
