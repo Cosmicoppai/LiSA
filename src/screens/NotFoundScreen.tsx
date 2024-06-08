@@ -7,12 +7,11 @@ export function NotFoundScreen() {
     return (
         <div
             style={{
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center'
-            }}
-        >
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }}>
             <Box textAlign="center" py={10} px={6}>
                 <Image
                     src={NotFoundImg}
@@ -29,7 +28,6 @@ export function NotFoundScreen() {
                     The result you're looking for does not seem to exist
                 </Text>
             </Box>
-            {/* <h2>Not Found - 404</h2> */}
         </div>
-    )
+    );
 }

@@ -9,13 +9,13 @@ import {
     InputRightElement,
     Kbd,
     Text,
-    Image
+    Image,
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
 import SearchResultCard from "../components/search-result-card";
-import NetworkError from "../components/network-error";
-import useNetworkStatus from "../hooks/useNetworkStatus";
+import { NetworkError } from "../components/network-error";
+import { useNetworkStatus } from "../hooks/useNetworkStatus";
 
 // @ts-ignore
 import NotFoundImg from "src/assets/img/not-found.png";
@@ -42,22 +42,18 @@ export const HomeScreen = () => {
         setTempQuery(event.target.value);
     };
 
-    const {
-        data,
-        error,
-        isLoading,
-    } = useQuery({
+    const { data, error, isLoading } = useQuery({
         queryKey: ["anime-list", query],
-        queryFn: () => getAnimeList({ query })
+        queryFn: () => getAnimeList({ query }),
     });
 
     useEffect(() => {
         const c = setTimeout(() => {
             setQuery(tempQuery);
-        }, 350)
+        }, 350);
 
         return () => clearTimeout(c);
-    }, [tempQuery])
+    }, [tempQuery]);
 
     return (
         <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
@@ -157,8 +153,7 @@ export const HomeScreen = () => {
                 </Flex>
             ) : (
                 <NetworkError />
-            )
-            }
-        </Flex >
+            )}
+        </Flex>
     );
 };

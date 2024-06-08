@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
 
-const useNetworkStatus = () => {
+export function useNetworkStatus() {
     const [isOnline, setIsOnline] = useState(true);
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetch("https://www.google.com/", {
-                mode: "no-cors",
-            })
-                .then(() => !isOnline && setIsOnline(true))
-                .catch(() => isOnline && setIsOnline(false));
-        }, 5000);
+    function updateOnlineStatus() {
+        setIsOnline(navigator.onLine);
+    }
 
-        return () => clearInterval(interval);
-    }, [isOnline]);
+    useEffect(() => {
+        if (!window) return;
+
+        window.addEventListener("online", updateOnlineStatus);
+        window.addEventListener("offline", updateOnlineStatus);
+
+        return () => {
+            window.removeEventListener("online", updateOnlineStatus);
+            window.removeEventListener("offline", updateOnlineStatus);
+        };
+    }, [window]);
 
     return { isOnline };
-};
-
-export default useNetworkStatus;
+}

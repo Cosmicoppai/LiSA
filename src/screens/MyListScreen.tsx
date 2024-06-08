@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Box, Center, Flex, Heading, Skeleton, Stack, Text } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { TbMoodSad } from "react-icons/tb";
@@ -12,18 +10,18 @@ async function getMyList() {
 }
 
 export function MyListScreen() {
-
-    const {
-        data,
-        error,
-        isLoading,
-    } = useQuery({
+    const { data, error, isLoading } = useQuery({
         queryKey: ["anime-list"],
         queryFn: getMyList,
     });
 
-    // @ts-ignore
-    if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
+    if (error)
+        return (
+            <span style={{ textAlign: "center", marginTop: 100 }}>
+                {/* @ts-ignore */}
+                An error occurred: {error.message}
+            </span>
+        );
     console.log(data);
 
     return (
@@ -42,54 +40,47 @@ export function MyListScreen() {
                         margin: 0,
                         padding: 0,
                         marginTop: "20px",
-                    }}
-                >
-                    {isLoading ?
-                        Array(15).fill(0)
-                            .map((data, index: number) =>
-                                <Skeleton
-                                    key={index}
-                                    width={"300px"}
-                                    height={"450px"}
-                                    sx={{ padding: "1rem", margin: "10px auto" }}
-                                    padding={6}
-                                />
-                            ) :
-
-                        data?.data?.map((anime, index) =>
-                            <SearchResultCard
-                                key={index}
-                                data={anime}
-                                cardWidth={"250px"}
-                                cardMargin={"10px 30px"}
-                                maxImgWidth={"180px"}
-                            />
-                        )
-                    }
+                    }}>
+                    {isLoading
+                        ? Array(15)
+                              .fill(0)
+                              .map((data, index: number) => (
+                                  <Skeleton
+                                      key={index}
+                                      width={"300px"}
+                                      height={"450px"}
+                                      sx={{ padding: "1rem", margin: "10px auto" }}
+                                      padding={6}
+                                  />
+                              ))
+                        : data?.data?.map((anime, index) => (
+                              <SearchResultCard
+                                  key={index}
+                                  data={anime}
+                                  cardWidth={"250px"}
+                                  cardMargin={"10px 30px"}
+                                  maxImgWidth={"180px"}
+                              />
+                          ))}
                 </ul>
-                {/* @ts-ignore */}
-                {!isLoading && data.data.length === 0 ?
+
+                {!isLoading && data?.data?.length === 0 ? (
                     <Flex
                         minHeight={200}
                         alignItems={"center"}
                         justifyContent="center"
                         p={3}
                         pt={2}
-                        width={"100%"}
-                    >
+                        width={"100%"}>
                         <Box color="gray.500" mr="2">
                             <TbMoodSad size={24} />
                         </Box>
-                        <Text
-                            fontWeight={600}
-                            color={"gray.500"}
-                            size="lg"
-                            textAlign={"center"}>
+                        <Text fontWeight={600} color={"gray.500"} size="lg" textAlign={"center"}>
                             Your List is Empty
                         </Text>
-                    </Flex> : null
-                }
+                    </Flex>
+                ) : null}
             </Stack>
         </Center>
-    )
+    );
 }
