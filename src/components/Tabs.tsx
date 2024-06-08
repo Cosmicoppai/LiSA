@@ -1,20 +1,13 @@
-import { Icon, Text } from "@chakra-ui/react";
+import { Icon, Text } from '@chakra-ui/react';
 
-export function Tabs({
-    currentValue,
-    onChange,
-    config = []
-}) {
+export function Tabs({ currentValue, onChange, config = [] }) {
     return (
-        <div style={{
-            display: 'flex',
-            columnGap: 10
-        }}>
-            {config.map(({
-                Icon: IIcon,
-                title,
-                ...rest
-            }, index) =>
+        <div
+            style={{
+                display: 'flex',
+                columnGap: 10,
+            }}>
+            {config.map(({ Icon: IIcon, title, ...rest }, index) => (
                 <div
                     key={index}
                     style={{
@@ -27,14 +20,20 @@ export function Tabs({
                         display: 'flex',
                         alignItems: 'center',
                         columnGap: 10,
-                        cursor: 'pointer'
-                    }} onClick={() => {
-                        onChange(rest)
+                        cursor: 'pointer',
+                    }}
+                    onClick={() => {
+                        onChange(rest);
                     }}>
-                    <Icon as={IIcon} w={4} h={4} color={currentValue === rest.value ? '#1A202C' : '#CBD5E0'} />
+                    <Icon
+                        as={IIcon}
+                        w={4}
+                        h={4}
+                        color={currentValue === rest.value ? '#1A202C' : '#CBD5E0'}
+                    />
                     <Text fontWeight={'bold'}>{title}</Text>
                 </div>
-            )}
+            ))}
         </div>
     );
 }

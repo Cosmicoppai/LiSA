@@ -10,19 +10,18 @@ import {
     Text,
     Heading,
     Skeleton,
-} from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+import { BiArrowBack } from 'react-icons/bi';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
-import { useNavigate } from "react-router-dom";
-import { BiArrowBack } from "react-icons/bi";
+import { PaginateCard } from '../components/paginateCard';
+import { VideoPlayer } from '../components/video-player';
+import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/actions/animeActions';
+import server from '../utils/axios';
 
-import { addCurrentEp, addEpisodesDetails, getStreamDetails } from "../store/actions/animeActions";
-import VideoPlayer from "../components/video-player";
-import PaginateCard from "../components/paginateCard";
-import server from "../utils/axios";
-
-const InbuiltPlayerScreen = () => {
+export function InbuiltPlayerScreen() {
     const dispatch = useDispatch();
     const { details, loading: streamLoading } = useSelector((state) => state.animeStreamDetails);
     const navigate = useNavigate();
@@ -34,10 +33,10 @@ const InbuiltPlayerScreen = () => {
     const { details: anime } = useSelector((state) => state.animeDetails);
 
     const { details: eps_details, loading: eps_loading } = useSelector(
-        (state) => state.animeEpisodesDetails
+        (state) => state.animeEpisodesDetails,
     );
 
-    const [language, setLanguage] = useState("jpn");
+    const [language, setLanguage] = useState('jpn');
     const [qualityOptions, setQualityOptions] = useState([]);
     const [test, setTest] = useState({});
     const [prevTime, setPrevTime] = useState(null);
@@ -48,7 +47,7 @@ const InbuiltPlayerScreen = () => {
         setPrevTime(player.currentTime());
         setLanguage(e.target.value);
     };
-    let ep_no = parseInt(epDetails?.details?.current_ep);
+    const ep_no = parseInt(epDetails?.details?.current_ep);
 
     const pageChangeHandler = async (url) => {
         if (url) {
@@ -56,7 +55,7 @@ const InbuiltPlayerScreen = () => {
             dispatch(addEpisodesDetails({ ...data, current_ep: ep_no + 1 }));
         }
     };
-    let current_page_eps = eps_details?.ep_details;
+    const current_page_eps = eps_details?.ep_details;
 
     const nextEpHandler = () => {
         setToogleRefresh(null);
@@ -79,13 +78,13 @@ const InbuiltPlayerScreen = () => {
         });
 
         if (item) {
-            console.log("item", item);
+            console.log('item', item);
             dispatch(getStreamDetails(item.stream_detail));
             dispatch(
                 addCurrentEp({
                     ...item,
                     current_ep: ep_no + 1,
-                })
+                }),
             );
             console.log(item);
 
@@ -115,7 +114,7 @@ const InbuiltPlayerScreen = () => {
                 addCurrentEp({
                     ...item,
                     current_ep: ep_no - 1,
-                })
+                }),
             );
         }
     };
@@ -125,13 +124,13 @@ const InbuiltPlayerScreen = () => {
         if (!details[language]) return;
         player.src({
             src: details[language],
-            type: "application/x-mpegURL",
+            type: 'application/x-mpegURL',
             withCredentials: false,
         });
-        player.poster("");
+        player.poster('');
     }, [details, streamLoading]);
-    console.log("streamLoading", streamLoading);
-    console.log("player", player);
+    console.log('streamLoading', streamLoading);
+    console.log('player', player);
 
     useEffect(() => {
         if (window) {
@@ -142,41 +141,41 @@ const InbuiltPlayerScreen = () => {
     return (
         <Center py={6} w="100%">
             <Flex
-                flexDirection={"column"}
+                flexDirection={'column'}
                 justifyContent="center"
-                alignItems={"center"}
+                alignItems={'center'}
                 w="90%"
-                margin={"0 auto"}>
+                margin={'0 auto'}>
                 {epDetails && anime && (
                     <Box w="100%">
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <Box
-                                onClick={() => navigate("/anime-details")}
-                                alignSelf={"flex-start"}
+                                onClick={() => navigate('/anime-details')}
+                                alignSelf={'flex-start'}
                                 _hover={{
-                                    cursor: "pointer",
+                                    cursor: 'pointer',
                                 }}
                                 display="flex"
-                                justifyContent={"center"}
-                                alignItems={"center"}
+                                justifyContent={'center'}
+                                alignItems={'center'}
                                 mr={6}
-                                height={"fit-content"}
+                                height={'fit-content'}
                                 mt={1}>
                                 <BiArrowBack />
                                 <Text ml={1}>Back</Text>
                             </Box>
                             <Box
                                 sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    flexDirection: "row",
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    flexDirection: 'row',
                                 }}>
-                                <Heading fontSize={"2xl"} fontFamily={"body"}>
-                                    {anime.jp_name ? `${anime.jp_name}` : ""}{" "}
-                                    {anime.eng_name ? ` | ${anime.eng_name}` : ""}
-                                    {anime.title ? `${anime.title}` : ""}
+                                <Heading fontSize={'2xl'} fontFamily={'body'}>
+                                    {anime.jp_name ? `${anime.jp_name}` : ''}{' '}
+                                    {anime.eng_name ? ` | ${anime.eng_name}` : ''}
+                                    {anime.title ? `${anime.title}` : ''}
                                 </Heading>
-                                <Text fontWeight={600} color={"gray.500"} size="sm" ml={2} mt={1}>
+                                <Text fontWeight={600} color={'gray.500'} size="sm" ml={2} mt={1}>
                                     {`| Episode ${epDetails?.details?.current_ep}`}
                                 </Text>
                             </Box>
@@ -195,7 +194,7 @@ const InbuiltPlayerScreen = () => {
                                 qualityOptions={qualityOptions}
                             />
                         ) : (
-                            <Skeleton width={"100%"} height={"660px"} mt={3} />
+                            <Skeleton width={'100%'} height={'660px'} mt={3} />
                         )}
                     </Box>
                 )}
@@ -204,19 +203,19 @@ const InbuiltPlayerScreen = () => {
                     borderWidth="1px"
                     borderRadius="lg"
                     justifyContent="space-between"
-                    direction={"column"}
-                    bg={"gray.900"}
-                    boxShadow={"2xl"}
+                    direction={'column'}
+                    bg={'gray.900'}
+                    boxShadow={'2xl'}
                     padding={3}
                     w="100%">
                     <Flex
                         flex={1}
-                        justifyContent={"space-between"}
-                        alignItems={"center"}
+                        justifyContent={'space-between'}
+                        alignItems={'center'}
                         p={1}
                         pt={2}
                         gap={6}>
-                        <Button onClick={prevEpHandler} width={"max-content"}>
+                        <Button onClick={prevEpHandler} width={'max-content'}>
                             Previous
                         </Button>
                         <Select
@@ -224,20 +223,20 @@ const InbuiltPlayerScreen = () => {
                             size="md"
                             value={language}
                             onChange={languageChangeHandler}
-                            width={"max-content"}>
+                            width={'max-content'}>
                             {Object.keys(details || {}).map((language, idx) => {
                                 return (
                                     <option key={idx} value={language}>
-                                        {language === "jpn"
-                                            ? "Japanese"
-                                            : language === "eng"
-                                                ? "English"
-                                                : ""}
+                                        {language === 'jpn'
+                                            ? 'Japanese'
+                                            : language === 'eng'
+                                              ? 'English'
+                                              : ''}
                                     </option>
                                 );
                             })}
                         </Select>
-                        <Button onClick={nextEpHandler} width={"max-content"}>
+                        <Button onClick={nextEpHandler} width={'max-content'}>
                             Next
                         </Button>
                     </Flex>
@@ -256,6 +255,4 @@ const InbuiltPlayerScreen = () => {
             </Flex>
         </Center>
     );
-};
-
-export default InbuiltPlayerScreen;
+}

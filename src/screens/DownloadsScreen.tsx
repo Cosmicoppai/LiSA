@@ -1,10 +1,11 @@
-import { Center, Stack } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { cancelLiveDownload, getDownloadHistory } from "../store/actions/animeActions";
-import { useSocketContext } from "../context/socket";
-import { ActiveDownloads } from "../components/ActiveDownloads";
-import { DownloadsHistory } from "../components/DownloadsHistory";
+import { Center, Stack } from '@chakra-ui/react';
+import { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { ActiveDownloads } from '../components/ActiveDownloads';
+import { DownloadsHistory } from '../components/DownloadsHistory';
+import { useSocketContext } from '../context/socket';
+import { cancelLiveDownload, getDownloadHistory } from '../store/actions/animeActions';
 
 export function DownloadScreen() {
     const dispatch = useDispatch();
@@ -36,13 +37,13 @@ export function DownloadScreen() {
 
     const onMessageListner = () => {
         socket.onmessage = (message) => {
-            let packet = JSON.parse(message.data);
-            let { data } = packet;
+            const packet = JSON.parse(message.data);
+            const { data } = packet;
 
-            let tempData = data;
+            const tempData = data;
 
             setFilesStatus((prev) => {
-                let temp = filesStatus;
+                const temp = filesStatus;
 
                 if (tempData.downloaded === tempData.total_size && tempData.total_size > 0) {
                     if (!filesStatus) return {};
@@ -56,10 +57,10 @@ export function DownloadScreen() {
                     return restObject;
                 } else {
                     temp[tempData.id] = tempData;
-                    let sec = {};
+                    const sec = {};
                     if (historyDetails?.details) {
                         historyDetails?.details?.forEach((history_item) => {
-                            if (history_item.status !== "downloaded")
+                            if (history_item.status !== 'downloaded')
                                 sec[history_item.id] = history_item;
                         });
                         return { ...sec, ...temp };
@@ -80,9 +81,9 @@ export function DownloadScreen() {
 
     useEffect(() => {
         setFilesStatus(() => {
-            let sec = {};
+            const sec = {};
             historyDetails?.details?.forEach((history_item) => {
-                if (history_item.status !== "downloaded") {
+                if (history_item.status !== 'downloaded') {
                     sec[history_item.id] = history_item;
                 }
             });
@@ -114,7 +115,7 @@ export function DownloadScreen() {
 
     return (
         <Center py={6} w="100%">
-            <Stack flex={1} flexDirection="column" p={1} pt={2} maxWidth={"90%"}>
+            <Stack flex={1} flexDirection="column" p={1} pt={2} maxWidth={'90%'}>
                 <ActiveDownloads
                     filesStatus={filesStatus}
                     cancelDownloadHandler={cancelDownloadHandler}

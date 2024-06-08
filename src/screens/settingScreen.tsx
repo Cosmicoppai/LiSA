@@ -6,7 +6,7 @@ import { openExternalUrl } from 'src/utils/fn';
 
 import pkg from '../../package.json';
 
-export default function SettingScreen() {
+export function SettingScreen() {
     return (
         <Flex w="100%" h="100%" direction="column" bg={'gray.900'}>
             <Flex align="center" justify="center" direction="column" w="100%" h="100%" rowGap={8}>
@@ -18,7 +18,7 @@ export default function SettingScreen() {
                             cursor: 'pointer',
                         }}
                         onClick={() => openExternalUrl(pkg.repository.url)}>
-                        <Icon as={RxGithubLogo} w={8} h={8} color={true ? 'white' : '#9c9c9c'} />
+                        <Icon as={RxGithubLogo} w={8} h={8} color={'white'} />
                     </div>
                 </Tooltip>
             </Flex>

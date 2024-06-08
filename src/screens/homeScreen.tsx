@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-
+import { SearchIcon } from '@chakra-ui/icons';
 import {
     Box,
     Flex,
@@ -10,22 +9,20 @@ import {
     Kbd,
     Text,
     Image,
-} from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
-
-import SearchResultCard from "../components/search-result-card";
-import { NetworkError } from "../components/network-error";
-import { useNetworkStatus } from "../hooks/useNetworkStatus";
-
+} from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import React, { useEffect } from 'react';
 // @ts-ignore
-import NotFoundImg from "src/assets/img/not-found.png";
+import HomeScreenLogoImg from 'src/assets/img/home_screen_logo.png';
 // @ts-ignore
-import LoaderSearchGif from "src/assets/img/loader-serch.gif";
+import LoaderSearchGif from 'src/assets/img/loader-serch.gif';
 // @ts-ignore
-import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
+import NotFoundImg from 'src/assets/img/not-found.png';
+import server from 'src/utils/axios';
 
-import server from "src/utils/axios";
-import { useQuery } from "@tanstack/react-query";
+import { NetworkError } from '../components/network-error';
+import { SearchResultCard } from '../components/search-result-card';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
 async function getAnimeList({ query }) {
     if (!query) return null;
@@ -36,14 +33,14 @@ async function getAnimeList({ query }) {
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
-    const [query, setQuery] = React.useState("");
-    const [tempQuery, setTempQuery] = React.useState("");
+    const [query, setQuery] = React.useState('');
+    const [tempQuery, setTempQuery] = React.useState('');
     const handleSearchChange = (event) => {
         setTempQuery(event.target.value);
     };
 
     const { data, error, isLoading } = useQuery({
-        queryKey: ["anime-list", query],
+        queryKey: ['anime-list', query],
         queryFn: () => getAnimeList({ query }),
     });
 
@@ -56,7 +53,7 @@ export const HomeScreen = () => {
     }, [tempQuery]);
 
     return (
-        <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
+        <Flex w="100%" h="100%" direction="column" bg={'gray.900'}>
             {isOnline ? (
                 <Flex
                     align="center"
@@ -64,15 +61,16 @@ export const HomeScreen = () => {
                     direction="column"
                     w="100%"
                     h="100%"
-                    pt={"20px"}>
+                    pt={'20px'}>
                     {/* <Text
                         fontWeight='extrabold'
                         letterSpacing={3}
                         fontSize={150}
                         color={'white'}
                     >LiSA</Text> */}
+
                     <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
-                    <Box w="50%" sx={{ position: "relative" }}>
+                    <Box w="50%" sx={{ position: 'relative' }}>
                         <InputGroup>
                             <InputLeftElement
                                 pointerEvents="none"
@@ -80,8 +78,8 @@ export const HomeScreen = () => {
                             />
 
                             <Input
-                                sx={{ position: "relative" }}
-                                color={"font.main"}
+                                sx={{ position: 'relative' }}
+                                color={'font.main'}
                                 placeholder="Search Anime"
                                 value={tempQuery}
                                 onChange={handleSearchChange}
@@ -99,33 +97,33 @@ export const HomeScreen = () => {
                     {!isLoading && data && (
                         <Box
                             sx={{
-                                marginTop: "10px",
-                                maxWidth: "100%",
-                                maxHeight: "100%",
+                                marginTop: '10px',
+                                maxWidth: '100%',
+                                maxHeight: '100%',
 
-                                height: "100%",
-                                width: "100%",
-                                overflowX: "auto",
-                                "&::-webkit-scrollbar": {
-                                    width: "8px",
-                                    borderRadius: "8px",
+                                height: '100%',
+                                width: '100%',
+                                overflowX: 'auto',
+                                '&::-webkit-scrollbar': {
+                                    width: '8px',
+                                    borderRadius: '8px',
                                     backgroundColor: `rgba(255, 255, 255, 0.2)`,
                                 },
-                                "&::-webkit-scrollbar-thumb": {
+                                '&::-webkit-scrollbar-thumb': {
                                     backgroundColor: `rgba(255, 255, 255, 0.2)`,
                                 },
-                                justifyContent: "center",
-                                display: "flex",
-                                flexWrap: "wrap",
+                                justifyContent: 'center',
+                                display: 'flex',
+                                flexWrap: 'wrap',
                             }}>
                             {data.map((anime, index: number) => {
                                 return (
                                     <SearchResultCard
                                         key={index}
                                         data={anime}
-                                        cardWidth={"250px"}
-                                        cardMargin={"10px 30px"}
-                                        maxImgWidth={"180px"}
+                                        cardWidth={'250px'}
+                                        cardMargin={'10px 30px'}
+                                        maxImgWidth={'180px'}
                                     />
                                 );
                             })}
@@ -137,14 +135,14 @@ export const HomeScreen = () => {
                                 src={NotFoundImg}
                                 alt="not-found"
                                 height={200}
-                                display={"flex"}
-                                justifyContent={"center"}
-                                margin={"0 auto"}
+                                display={'flex'}
+                                justifyContent={'center'}
+                                margin={'0 auto'}
                             />
                             <Text fontSize="18px" mt={3} mb={2}>
                                 Anime Not Found
                             </Text>
-                            <Text color={"gray.500"} mb={6}>
+                            <Text color={'gray.500'} mb={6}>
                                 The result you're looking for does not seem to exist
                             </Text>
                         </Box>

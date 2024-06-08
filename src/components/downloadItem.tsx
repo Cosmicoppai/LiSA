@@ -1,9 +1,10 @@
-import { Box, Progress, Td, Text, Tr } from "@chakra-ui/react";
-import { AiOutlineClose, AiOutlinePause } from "react-icons/ai";
-import { FaPlay } from "react-icons/fa";
-import { formatBytes } from "../utils/formatBytes";
+import { Box, Progress, Td, Text, Tr } from '@chakra-ui/react';
+import { AiOutlineClose, AiOutlinePause } from 'react-icons/ai';
+import { FaPlay } from 'react-icons/fa';
 
-export default function DownloadItem({
+import { formatBytes } from '../utils/formatBytes';
+
+export function DownloadItem({
     data,
     cancelDownloadHandler,
     pauseDownloadHandler,
@@ -12,8 +13,7 @@ export default function DownloadItem({
     return (
         <Tr>
             <Td>
-                {" "}
-                {data.status === "paused" && (
+                {data.status === 'paused' && (
                     <Box>
                         <FaPlay
                             color="white"
@@ -22,7 +22,7 @@ export default function DownloadItem({
                         />
                     </Box>
                 )}
-                {(data.status === "started" || data.status === "scheduled") && (
+                {(data.status === 'started' || data.status === 'scheduled') && (
                     <Box>
                         <AiOutlinePause
                             color="white"
@@ -33,13 +33,12 @@ export default function DownloadItem({
                 )}
             </Td>
             <Td>
-                <Text fontWeight={500} flex={1.5} color={"gray.300"} size="sm">
+                <Text fontWeight={500} flex={1.5} color={'gray.300'} size="sm">
                     {data.file_name}
                 </Text>
             </Td>
             <Td>
-                {" "}
-                {data.status === "started" ? (
+                {data.status === 'started' ? (
                     <Progress
                         flex={1.5}
                         size="xs"
@@ -50,29 +49,26 @@ export default function DownloadItem({
                 )}
             </Td>
             <Td>
-                {" "}
-                {data.status === "started" && (
-                    <Text fontWeight={600} flex={1} color={"gray.300"} size="sm" pr={5}>
-                        {data.speed ? `${formatBytes(data.speed)}/ sec` : "--"}
+                {data.status === 'started' && (
+                    <Text fontWeight={600} flex={1} color={'gray.300'} size="sm" pr={5}>
+                        {data.speed ? `${formatBytes(data.speed)}/ sec` : '--'}
                     </Text>
                 )}
             </Td>
             <Td>
-                {" "}
-                {data.status === "started" ? (
-                    <Text fontWeight={600} flex={1} color={"gray.300"} size="sm" pr={5}>
+                {data.status === 'started' ? (
+                    <Text fontWeight={600} flex={1} color={'gray.300'} size="sm" pr={5}>
                         {!data.downloaded
                             ? `-- / ${formatBytes(data.total_size)}`
                             : `${formatBytes(data.downloaded)} / ${formatBytes(data.total_size)}`}
                     </Text>
                 ) : (
-                    <Text fontWeight={600} flex={1} color={"gray.300"} size="sm" pr={5}>
+                    <Text fontWeight={600} flex={1} color={'gray.300'} size="sm" pr={5}>
                         {formatBytes(data.total_size)}
                     </Text>
                 )}
             </Td>
             <Td>
-                {" "}
                 <Box>
                     <AiOutlineClose
                         color="white"
@@ -83,4 +79,4 @@ export default function DownloadItem({
             </Td>
         </Tr>
     );
-};
+}

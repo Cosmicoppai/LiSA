@@ -1,6 +1,6 @@
-import DownloadItem from "./downloadItem";
+import { DownloadItem } from './downloadItem';
 
-export default function DownloadList(props) {
+export function DownloadList(props) {
     return (
         <>
             {props?.filesStatus &&
@@ -14,8 +14,7 @@ export default function DownloadList(props) {
                             resumeDownloadHandler={props.resumeDownloadHandler}
                         />
                     );
-                })
-            }
+                })}
         </>
     );
-};
+}

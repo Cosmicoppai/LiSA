@@ -16,21 +16,22 @@ import {
     Text,
     useDisclosure,
     useToast,
-} from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+} from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+
+import { MetaDataPopup } from './metadata-popup';
 import {
     addCurrentEp,
     addEpisodesDetails,
     getRecommendations,
     getStreamDetails,
-} from "../store/actions/animeActions";
-import { useNavigate } from "react-router-dom";
-import server from "../utils/axios";
-import { downloadVideo } from "../store/actions/downloadActions";
-import MetaDataPopup from "./metadata-popup";
+} from '../store/actions/animeActions';
+import { downloadVideo } from '../store/actions/downloadActions';
+import server from '../utils/axios';
 
-export default function PaginateCard({
+export function PaginateCard({
     data,
     loading,
     ep_details,
@@ -41,14 +42,13 @@ export default function PaginateCard({
     setTest,
     recommendationLoading,
 }) {
-
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const { loading: epsLoading } = useSelector((state) => state.animeEpisodesDetails);
     const epDetails = useSelector((state) => state.animeCurrentEp);
     const { session } = useSelector((state) => state.animeDetails.details);
-    let currentEp = parseInt(epDetails?.details?.current_ep);
+    const currentEp = parseInt(epDetails?.details?.current_ep);
     const { loading: downloadLoading } = useSelector((state) => state.animeDownloadDetails);
     // console.log(epsLoading);
     const [isDownloadButtonAvailable, setIsDownloadButtonAvailable] = useState(false);
@@ -62,7 +62,7 @@ export default function PaginateCard({
             addCurrentEp({
                 ...item,
                 current_ep: ep_no,
-            })
+            }),
         );
         // sleep(2000).then(() => {
         //   setIsDownloadButtonAvailable(true);
@@ -70,7 +70,7 @@ export default function PaginateCard({
         // });
         // dispatch(getRecommendations(ep_details.recommendation));
         if (redirect) {
-            navigate("/play");
+            navigate('/play');
         }
     };
     const pageChangeHandler = async (url) => {
@@ -88,7 +88,7 @@ export default function PaginateCard({
     // console.log(ep_details);
 
     if (!loading && ep_details) {
-        let current_page_eps = ep_details.ep_details;
+        const current_page_eps = ep_details.ep_details;
         current_page_eps?.map((single_ep, idx) => {
             if (Object.keys(single_ep)[0] == currentEp) {
                 coloredIdx = idx;
@@ -108,7 +108,7 @@ export default function PaginateCard({
         dispatch(
             downloadVideo({
                 anime_session: session,
-            })
+            }),
         );
     };
 
@@ -116,17 +116,17 @@ export default function PaginateCard({
         dispatch(
             downloadVideo({
                 manifest_url: url.slice(2),
-            })
+            }),
         );
     };
 
     useEffect(() => {
         if (!isSingleAvailable) return;
-        setTest({ asda: "asdasd" });
+        setTest({ asda: 'asdasd' });
 
         sleep(2000).then(() => {
             setIsDownloadButtonAvailable(true);
-            setTest({ assdfda: "assdfdasd" });
+            setTest({ assdfda: 'assdfdasd' });
         });
     }, [isSingleAvailable]);
     useEffect(() => {
@@ -141,36 +141,36 @@ export default function PaginateCard({
         <>
             <Box mt={5}>
                 {!loading && ep_details ? (
-                    <Flex direction={"row"} flexWrap="wrap" width={"100%"} justifyContent="center">
+                    <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
                         {ep_details?.ep_details?.map((item, key) => {
                             return (
                                 <Flex
-                                    cursor={"pointer"}
+                                    cursor={'pointer'}
                                     key={key}
                                     p={1}
                                     mr={2}
                                     mt={2}
-                                    width={"100%"}
-                                    maxWidth={"45px"}
-                                    minWidth={"45px"}
-                                    maxHeight={"45px"}
-                                    minHeight={"45px"}
+                                    width={'100%'}
+                                    maxWidth={'45px'}
+                                    minWidth={'45px'}
+                                    maxHeight={'45px'}
+                                    minHeight={'45px'}
                                     justifyContent="center"
                                     alignItems="center"
-                                    bg={coloredIdx == key && !redirect ? "#10495F" : "brand.900"}
+                                    bg={coloredIdx == key && !redirect ? '#10495F' : 'brand.900'}
                                     onClick={() =>
                                         episodeClickHandler(
                                             Object.values(item)[0],
-                                            Object.keys(item)[0]
+                                            Object.keys(item)[0],
                                         )
                                     }>
-                                    <Text textAlign={"center"}>{Object.keys(item)[0]}</Text>
+                                    <Text textAlign={'center'}>{Object.keys(item)[0]}</Text>
                                 </Flex>
                             );
                         })}
                     </Flex>
                 ) : (
-                    <Flex direction={"row"} flexWrap="wrap" width={"100%"} justifyContent="center">
+                    <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
                         {Array(25)
                             .fill(0)
                             .map((item, key) => {
@@ -179,18 +179,18 @@ export default function PaginateCard({
                                         p={2}
                                         mr={2}
                                         mt={2}
-                                        width={"100%"}
-                                        maxWidth={"50px"}
+                                        width={'100%'}
+                                        maxWidth={'50px'}
                                         justifyContent="center"
                                         key={key}>
                                         <Flex
-                                            width={"100%"}
-                                            maxWidth={"50px"}
+                                            width={'100%'}
+                                            maxWidth={'50px'}
                                             backgroundColor={
-                                                currentEp === key + 1 ? "while" : "inherit"
+                                                currentEp === key + 1 ? 'while' : 'inherit'
                                             }
                                             justifyContent="center">
-                                            <Text textAlign={"center"}>{key + 1}</Text>
+                                            <Text textAlign={'center'}>{key + 1}</Text>
                                         </Flex>
                                     </Skeleton>
                                 );
@@ -200,7 +200,7 @@ export default function PaginateCard({
                 {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
             </Box>
 
-            <Flex sx={{ marginTop: "20px !important" }}>
+            <Flex sx={{ marginTop: '20px !important' }}>
                 {data && (
                     <Flex>
                         <Fade in={ep_details?.prev_page_url}>
@@ -238,7 +238,7 @@ export default function PaginateCard({
                             <MenuButton
                                 disabled={!isDownloadButtonAvailable}
                                 as={Button}
-                                onClick={() => setTest({ sdf: "asdaasdsd" })}>
+                                onClick={() => setTest({ sdf: 'asdaasdsd' })}>
                                 Download
                             </MenuButton>
                             <MenuList>
@@ -257,10 +257,10 @@ export default function PaginateCard({
                             </MenuList>
                         </Menu>
                     </>
-                )}{" "}
+                )}{' '}
             </Flex>
 
             <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </>
     );
-};
+}

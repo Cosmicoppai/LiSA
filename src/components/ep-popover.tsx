@@ -1,6 +1,5 @@
 // @ts-nocheck
 
-import { useState } from "react";
 import {
     Button,
     Modal,
@@ -12,15 +11,14 @@ import {
     ModalOverlay,
     Select,
     Stack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { useSelector, useDispatch } from "react-redux";
+import { playVideoExternal } from '../store/actions/animeActions';
+import { downloadVideo } from '../store/actions/downloadActions';
 
-import { playVideoExternal } from "../store/actions/animeActions";
-import { downloadVideo } from "../store/actions/downloadActions";
-
-export default function EpPopover({ isOpen, onOpen, onClose }) {
-
+export function EpPopover({ isOpen, onOpen, onClose }) {
     const dispatch = useDispatch();
     const { details, loading } = useSelector((state) => state.animeStreamDetails);
     const [language, setLanguage] = useState(null);
@@ -53,7 +51,7 @@ export default function EpPopover({ isOpen, onOpen, onClose }) {
                                     {Object.keys(details).map((language, idx) => {
                                         return (
                                             <option key={idx} value={language}>
-                                                {language}{" "}
+                                                {language}{' '}
                                             </option>
                                         );
                                     })}
@@ -90,4 +88,4 @@ export default function EpPopover({ isOpen, onOpen, onClose }) {
             )}
         </>
     );
-};
+}

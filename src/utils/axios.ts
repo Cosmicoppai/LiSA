@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 const server = axios.create({
     baseURL: process.env.REACT_APP_SERVER_URL,
@@ -12,7 +12,7 @@ server.interceptors.request.use(
             return null;
         }
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
 );
 
 export default server;
