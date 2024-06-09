@@ -20,7 +20,7 @@ export function ExploreMangaCategories({ category }) {
     const exploreCardHandler = (data) => {
         navigate(
             `/manga-details?${new URLSearchParams({
-                manga_detail: data.manga_detail,
+                q: JSON.stringify(data),
             })}`,
         );
     };
@@ -46,8 +46,8 @@ export function ExploreMangaCategories({ category }) {
                             onClick={() => exploreCardHandler(item)}
                             cardType="manga"
                             data={{
-                                poster: item.poster || item.img_url,
-                                type: item.anime_type || item.type,
+                                poster: item.poster,
+                                type: item.type,
                                 rank: item.rank,
                                 episodes: item.volumes,
                                 score: item.score,

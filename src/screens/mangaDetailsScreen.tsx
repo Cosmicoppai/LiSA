@@ -18,7 +18,7 @@ import {
     Tag,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
@@ -26,16 +26,22 @@ import { AddToWatchList } from 'src/components/AddToWatchList';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { YoutubeVideo } from 'src/components/YoutubeVideo';
 import server from 'src/utils/axios';
-import { openExternalUrl } from 'src/utils/fn';
 
 import { MangaRecommendations } from '../components/MangaRecommendations';
 import { PaginateCard } from '../components/paginateCard';
-import { SearchResultCard } from '../components/search-result-card';
+
+type TMangaChapters = {
+    [chp_no: string]: {
+        chp_link: string;
+        chp_name: string;
+        chp_session: string;
+    };
+}[];
 
 async function getMangaDetails({ url }) {
     const { data } = await server.get(url);
 
-    const detailUrl = data?.response[0].manga_detail;
+    const detailUrl = String(url).includes('/search?') ? data?.response[0].manga_detail : url;
 
     const { data: details } = await server.get(detailUrl);
 
@@ -53,13 +59,7 @@ async function getMangaDetails({ url }) {
             session: string;
         };
         details: {
-            chapters: {
-                [chp_no: string]: {
-                    chp_link: string;
-                    chp_name: string;
-                    chp_session: string;
-                };
-            }[];
+            chapters: TMangaChapters;
             description: {
                 alt_name: string;
                 author: string;
@@ -74,16 +74,34 @@ async function getMangaDetails({ url }) {
 export function MangaDetailsScreen() {
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const query = useMemo(() => {
+        const q = searchParams.get('q');
+
+        return JSON.parse(q) as {
+            manga_detail: string;
+            poster: string;
+            rank: string;
+            title: string;
+            type: string;
+            volumes: string;
+            score: string;
+        };
+    }, [searchParams]);
+
     const {
         data: d1,
         error,
         isLoading,
     } = useQuery({
-        queryKey: ['manga-details', searchParams.get('manga_detail')],
-        queryFn: () => getMangaDetails({ url: searchParams.get('manga_detail') }),
+        queryKey: ['manga-details', query.manga_detail],
+        queryFn: () => getMangaDetails({ url: query.manga_detail }),
     });
 
-    const data = d1?.data;
+    const data = {
+        ...d1?.data,
+        ...query,
+    };
+
     const details = d1?.details;
 
     useEffect(() => {
@@ -93,6 +111,15 @@ export function MangaDetailsScreen() {
     }, [details]);
 
     console.log({ data, details });
+
+    const volTxt = useMemo(() => {
+        if (typeof data?.total_chps === 'string' || typeof data?.total_chps === 'number') {
+            if (data?.total_chps === '?') return 'running';
+            return `VOLUMES ${data?.total_chps}`;
+        }
+
+        return '';
+    }, [data]);
 
     return (
         <Center py={6} w="100%">
@@ -204,7 +231,7 @@ export function MangaDetailsScreen() {
                             </div>
                         </Box>
                         <Text fontWeight={600} color={'gray.500'} size="sm" mb={4}>
-                            No of Volumes {data?.total_chps !== '?' ? data?.total_chps : 'running'}
+                            {volTxt}
                         </Text>
                         <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
                             <Badge
@@ -217,7 +244,7 @@ export function MangaDetailsScreen() {
                                     alignItems: 'center',
                                 }}>
                                 <Icon as={FiMonitor} />
-                                {/* <Text ml="1">{data?.type}</Text> */}
+                                <Text ml="1">{data?.type}</Text>
                             </Badge>
                             {data?.status && (
                                 <Badge px={2} py={1} fontWeight={'400'}>
@@ -227,7 +254,7 @@ export function MangaDetailsScreen() {
                             <Badge px={2} py={1} fontWeight={'400'}>
                                 <Box display={'flex'} alignItems="center" justifyContent={'center'}>
                                     <AiFillStar color="#FDCC0D" />
-                                    {/* <Text ml={'5px'}>{data?.score}</Text> */}
+                                    <Text ml={'5px'}>{data?.score ?? 'N/A'}</Text>
                                 </Box>
                             </Badge>
                         </Stack>
@@ -256,27 +283,24 @@ export function MangaDetailsScreen() {
                                 redirect
                             /> */}
                         </div>
-                        <div>
-                            <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
-                                External Links
-                            </Text>
-                            {/* <Box>
-                                {details?.description &&
-                                    Object.entries(details?.description?.external_links).map(
-                                        ([key, value], index) => {
+                        {data.genres?.length ? (
+                            <div>
+                                <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
+                                    Genre
+                                </Text>
+                                <Box>
+                                    {data.genres &&
+                                        data.genres.map((item, index) => {
                                             return (
-                                                <Tag
-                                                    key={index}
-                                                    onClick={() => openExternalUrl(value as string)}
-                                                    mr={2}
-                                                    sx={{ cursor: 'pointer' }}>
-                                                    {key}
+                                                <Tag key={index} mr={2}>
+                                                    {item}
                                                 </Tag>
                                             );
-                                        },
-                                    )}
-                            </Box> */}
-                        </div>
+                                        })}
+                                </Box>
+                            </div>
+                        ) : null}
+                        <MangaChapters isLoading={isLoading} data={details.chapters} />
                     </Stack>
                 </Stack>
                 <Tabs width={'100%'} variant="enclosed" mt={5}>
@@ -302,8 +326,6 @@ export function MangaDetailsScreen() {
                                     w="100%">
                                     <Box
                                         sx={{
-                                            // position: "absolute",
-                                            // top: 0,
                                             marginTop: '10px',
 
                                             justifyContent: 'center',
@@ -311,21 +333,6 @@ export function MangaDetailsScreen() {
                                             flexWrap: 'wrap',
                                         }}>
                                         <MangaRecommendations url={details?.recommendation} />
-                                        {/* {recommendations ? (
-                                            recommendations.map((anime, index) => {
-                                                return (
-                                                    // @ts-ignore
-                                                    <SearchResultCard
-                                                        key={index}
-                                                        data={anime}
-                                                        cardWidth={'270px'}
-                                                        cardMargin={'10px 40px'}
-                                                    />
-                                                );
-                                            })
-                                        ) : (
-                                            <SkeletonCards />
-                                        )} */}
                                     </Box>
                                 </Stack>
                             </Box>
@@ -334,5 +341,55 @@ export function MangaDetailsScreen() {
                 </Tabs>
             </Flex>
         </Center>
+    );
+}
+
+function MangaChapters({ data }: { isLoading: boolean; data: TMangaChapters }) {
+    return (
+        <Box mt={5}>
+            {data.length ? (
+                <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
+                    {data?.map((item) => (
+                        <>
+                            {Object.entries(item).map(([key, value], idx) => (
+                                <Flex
+                                    key={key}
+                                    cursor={'pointer'}
+                                    p={1}
+                                    mr={2}
+                                    mt={2}
+                                    width={'100%'}
+                                    maxWidth={'45px'}
+                                    minWidth={'45px'}
+                                    maxHeight={'45px'}
+                                    minHeight={'45px'}
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    bg={'brand.900'}
+                                    onClick={() => alert('Under Development')}>
+                                    <Text textAlign={'center'}>{key}</Text>
+                                </Flex>
+                            ))}
+                        </>
+                    ))}
+                </Flex>
+            ) : (
+                <EpisodeSkeletons />
+            )}
+        </Box>
+    );
+}
+
+function EpisodeSkeletons() {
+    return (
+        <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
+            {Array(18)
+                .fill(0)
+                .map((item, index) => {
+                    return (
+                        <Skeleton p={2} m={2} width={'48px'} height={'48px'} key={index}></Skeleton>
+                    );
+                })}
+        </Flex>
     );
 }

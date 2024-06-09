@@ -12,7 +12,7 @@ async function getMangaRecommendations({ url }) {
         title: string;
         total_chps: string;
         genres: string[];
-        cover: string;
+        poster: string;
         status: string;
         manga_detail: string;
         session: string;
@@ -31,7 +31,7 @@ export function MangaRecommendations({ url }) {
     const exploreCardHandler = (data) => {
         navigate(
             `/manga-details?${new URLSearchParams({
-                manga_detail: data.manga_detail,
+                q: JSON.stringify(data),
             })}`,
         );
     };
@@ -49,7 +49,7 @@ export function MangaRecommendations({ url }) {
                             onClick={() => exploreCardHandler(item)}
                             data={
                                 {
-                                    poster: item.cover,
+                                    poster: item.poster,
                                     title: item.title,
                                     episodes: item.total_chps,
                                 } as any
