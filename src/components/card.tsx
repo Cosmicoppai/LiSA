@@ -30,7 +30,9 @@ export function AnimeCard({
     }, [cardType, data]);
 
     return (
-        <Box sx={{ display: 'flex', padding: '1rem', margin: '10px auto' }} onClick={onClick}>
+        <Box
+            sx={{ display: 'flex', padding: '1rem', margin: '18px auto', height: 'max-content' }}
+            onClick={onClick}>
             <Box
                 sx={{ cursor: 'pointer' }}
                 role={'group'}
@@ -77,9 +79,10 @@ export function AnimeCard({
                         src={data.poster}
                         minWidth={'222px'}
                         minHeight={'316px'}
+                        maxHeight={'316px'}
                     />
                 </Box>
-                <Stack pt={5} align={'center'}>
+                <Stack pt={10} align={'center'}>
                     <Flex flex={1} width={'100%'}>
                         <Text color={'gray.500'} fontSize={'sm'} textTransform={'uppercase'}>
                             {data.type}
@@ -118,16 +121,9 @@ export function AnimeCard({
                         pt={2}
                         direction={'row'}
                         justifyContent={'space-between'}
+                        alignItems={'center'}
                         flex={1}
                         width={'100%'}>
-                        {data.score ? (
-                            <Box display={'flex'} alignItems="center" justifyContent={'center'}>
-                                <AiFillStar color="#FDCC0D" fontSize={'20px'} />
-                                <Text ml={'5px'} fontWeight={800} fontSize={'sm'} mt={0}>
-                                    {data.score}
-                                </Text>
-                            </Box>
-                        ) : null}
                         <Badge
                             sx={{
                                 display: 'flex',
@@ -138,6 +134,14 @@ export function AnimeCard({
                             }}>
                             <Text color={'gray.300'}>{epTxt}</Text>
                         </Badge>
+                        {data.score ? (
+                            <Box display={'flex'} alignItems="center" justifyContent={'center'}>
+                                <AiFillStar color="#FDCC0D" fontSize={'20px'} />
+                                <Text ml={'5px'} fontWeight={800} fontSize={'sm'} mt={0}>
+                                    {data.score}
+                                </Text>
+                            </Box>
+                        ) : null}
                     </Flex>
                 </Stack>
             </Box>

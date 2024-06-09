@@ -70,7 +70,7 @@ export const HomeScreen = () => {
                     >LiSA</Text> */}
 
                     <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
-                    <Box w="50%" sx={{ position: 'relative' }}>
+                    <Box w="50%" sx={{ position: 'relative', marginBottom: 8 }}>
                         <InputGroup>
                             <InputLeftElement
                                 pointerEvents="none"
@@ -116,17 +116,9 @@ export const HomeScreen = () => {
                                 display: 'flex',
                                 flexWrap: 'wrap',
                             }}>
-                            {data.map((anime, index: number) => {
-                                return (
-                                    <SearchResultCard
-                                        key={index}
-                                        data={anime}
-                                        cardWidth={'250px'}
-                                        cardMargin={'10px 30px'}
-                                        maxImgWidth={'180px'}
-                                    />
-                                );
-                            })}
+                            {data.map((anime, index: number) => (
+                                <SearchResultCard key={index} data={anime} />
+                            ))}
                         </Box>
                     )}
                     {!isLoading && error && (

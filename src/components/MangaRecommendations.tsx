@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { ErrorMessage } from 'src/components/ErrorMessage';
 import { SkeletonCards } from 'src/components/SkeletonCards';
 import { AnimeCard } from 'src/components/card';
@@ -17,6 +18,7 @@ async function getMangaRecommendations({ url }) {
         session: string;
     }[];
 }
+
 export function MangaRecommendations({ url }) {
     const { data, error, isLoading } = useQuery({
         queryKey: ['manga-recommendations', url],
@@ -24,24 +26,32 @@ export function MangaRecommendations({ url }) {
         enabled: Boolean(url),
     });
 
-    console.log(data);
+    const navigate = useNavigate();
+
+    const exploreCardHandler = (data) => {
+        navigate(
+            `/manga-details?${new URLSearchParams({
+                manga_detail: data.manga_detail,
+            })}`,
+        );
+    };
 
     if (error) return <ErrorMessage error={error} />;
 
     if (data?.length) {
         return (
             <>
-                {data?.map?.((anime, index) => {
+                {data?.map?.((item, index) => {
                     return (
                         <AnimeCard
-                            cardType="manga"
                             key={index}
-                            onClick={() => {}}
+                            cardType="manga"
+                            onClick={() => exploreCardHandler(item)}
                             data={
                                 {
-                                    poster: anime.cover,
-                                    title: anime.title,
-                                    episodes: anime.total_chps,
+                                    poster: item.cover,
+                                    title: item.title,
+                                    episodes: item.total_chps,
                                 } as any
                             }
                         />

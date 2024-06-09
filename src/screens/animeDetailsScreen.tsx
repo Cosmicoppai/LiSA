@@ -24,6 +24,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AddToWatchList } from 'src/components/AddToWatchList';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { SkeletonCards } from 'src/components/SkeletonCards';
+import { YoutubeVideo } from 'src/components/YoutubeVideo';
 import { openExternalUrl } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
@@ -38,13 +39,10 @@ export function AnimeDetailsScreen() {
     // @ts-ignore
     const { details, loading: ep_loading } = useSelector((state) => state.animeEpisodesDetails);
 
-    const { details: recommendations, loading: recommendationLoading } = useSelector(
+    const { details: recommendations } = useSelector(
         // @ts-ignore
         (state) => state.animeRecommendations,
     );
-
-    // @ts-ignore
-    const { loading } = useSelector((state) => state.animeSearchList);
 
     useEffect(() => {
         if (window) {
@@ -56,10 +54,6 @@ export function AnimeDetailsScreen() {
             dispatch(getRecommendations(details.recommendation));
         }
     }, [details]);
-
-    function ytToEmbeded(input) {
-        return input.split('?')[1].slice(2);
-    }
 
     console.log({ data, details });
 
@@ -158,19 +152,28 @@ export function AnimeDetailsScreen() {
                                         />
                                     )}
                                 </div>
-                                <AddToWatchList
-                                    key={details?.description?.anime_id}
-                                    anime_id={details?.description?.anime_id}
-                                    jp_name={data.jp_name || data.title}
-                                    poster={data?.poster || data?.img_url}
-                                    mylist={details.mylist}
-                                    no_of_episodes={data.no_of_episodes || data.episodes}
-                                    type={details?.description?.type || data.type}
-                                    status={details?.description?.status || ''}
-                                    season={details?.description?.season || ''}
-                                    year={details?.description?.year || ''}
-                                    score={data.score}
-                                />
+                                {ep_loading ? (
+                                    <Skeleton
+                                        height={'30px'}
+                                        width={'30px'}
+                                        alignSelf={'baseline'}
+                                        display={'inline-block'}
+                                    />
+                                ) : (
+                                    <AddToWatchList
+                                        key={details?.description?.anime_id}
+                                        anime_id={details?.description?.anime_id}
+                                        jp_name={data.jp_name || data.title}
+                                        poster={data?.poster || data?.img_url}
+                                        mylist={details.mylist}
+                                        no_of_episodes={data.no_of_episodes || data?.episodes}
+                                        type={details?.description?.type || data?.type}
+                                        status={details?.description?.status || ''}
+                                        season={details?.description?.season || ''}
+                                        year={details?.description?.year || ''}
+                                        score={data?.score}
+                                    />
+                                )}
                             </div>
                             {!ep_loading ? (
                                 <Heading fontSize={'xl'} fontFamily={'body'} display="block">
@@ -236,7 +239,6 @@ export function AnimeDetailsScreen() {
                         <div>
                             {/* @ts-ignore */}
                             <PaginateCard
-                                recommendationLoading={recommendationLoading}
                                 data={data}
                                 ep_details={details}
                                 loading={ep_loading}
@@ -273,43 +275,7 @@ export function AnimeDetailsScreen() {
                     </TabList>
                     <TabPanels>
                         <TabPanel>
-                            {details?.description?.youtube_url ? (
-                                <Stack
-                                    borderWidth="1px"
-                                    borderRadius="lg"
-                                    w={'100%'}
-                                    justifyContent="space-between"
-                                    boxShadow={'2xl'}>
-                                    <div
-                                        style={{
-                                            overflow: 'hidden',
-                                            paddingBottom: '56.25%',
-                                            position: 'relative',
-                                            height: 0,
-                                        }}>
-                                        <iframe
-                                            width="853"
-                                            style={{
-                                                left: 0,
-                                                top: 0,
-                                                height: '100%',
-                                                width: '100%',
-                                                position: 'absolute',
-                                            }}
-                                            height="480"
-                                            src={`https://www.youtube.com/embed/${ytToEmbeded(
-                                                details?.description?.youtube_url,
-                                            )}`}
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
-                                        />
-                                    </div>
-                                </Stack>
-                            ) : (
-                                <Box>
-                                    <Text>No trailer available</Text>
-                                </Box>
-                            )}
+                            <YoutubeVideo url={details?.description?.youtube_url} />
                         </TabPanel>
                         <TabPanel>
                             <Box>
@@ -334,17 +300,9 @@ export function AnimeDetailsScreen() {
                                             flexWrap: 'wrap',
                                         }}>
                                         {recommendations ? (
-                                            recommendations.map((anime, index) => {
-                                                return (
-                                                    // @ts-ignore
-                                                    <SearchResultCard
-                                                        key={index}
-                                                        data={anime}
-                                                        cardWidth={'270px'}
-                                                        cardMargin={'10px 40px'}
-                                                    />
-                                                );
-                                            })
+                                            recommendations.map((anime, index) => (
+                                                <SearchResultCard key={index} data={anime} />
+                                            ))
                                         ) : (
                                             <SkeletonCards />
                                         )}

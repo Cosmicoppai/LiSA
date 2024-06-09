@@ -27,7 +27,7 @@ export function MyListScreen() {
                         My List
                     </Heading>
                 </Stack>
-                <ul
+                <div
                     style={{
                         display: 'flex',
                         flexWrap: 'wrap',
@@ -40,16 +40,10 @@ export function MyListScreen() {
                         <SkeletonCards />
                     ) : (
                         data?.data?.map((anime, index) => (
-                            <SearchResultCard
-                                key={index}
-                                data={anime}
-                                cardWidth={'250px'}
-                                cardMargin={'10px 30px'}
-                                maxImgWidth={'180px'}
-                            />
+                            <SearchResultCard key={index} data={anime} />
                         ))
                     )}
-                </ul>
+                </div>
 
                 {!isLoading && data?.data?.length === 0 ? (
                     <Flex

@@ -40,18 +40,18 @@ export function ExploreMangaCategories({ category }) {
                 {isLoading ? (
                     <SkeletonCards />
                 ) : (
-                    data?.data?.map((data, index) => (
+                    data?.data?.map((item, index) => (
                         <AnimeCard
                             key={index}
-                            onClick={() => exploreCardHandler(data)}
+                            onClick={() => exploreCardHandler(item)}
                             cardType="manga"
                             data={{
-                                poster: data.poster || data.img_url,
-                                type: data.anime_type || data.type,
-                                rank: data.rank,
-                                episodes: data.volumes,
-                                score: data.score,
-                                title: data.title,
+                                poster: item.poster || item.img_url,
+                                type: item.anime_type || item.type,
+                                rank: item.rank,
+                                episodes: item.volumes,
+                                score: item.score,
+                                title: item.title,
                             }}
                         />
                     ))

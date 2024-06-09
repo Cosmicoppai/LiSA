@@ -56,12 +56,9 @@ export function AddToWatchList({
                 justifyContent="center"
                 alignItems="center"
                 p={2}
-                _hover={{
-                    bg: '#E2E8F029',
-                }}
-                bg={isAdded ? '#10495F' : 'brand.900'}
+                bg={'brand.900'}
                 onClick={isAdded ? removefromMyList : addToMyList}>
-                <Icon as={isAdded ? LuListX : LuListPlus} w={8} h={8} color={'white'} />
+                <Icon as={isAdded ? LuListX : LuListPlus} w={8} h={8} />
             </Flex>
         </Tooltip>
     );

@@ -24,6 +24,7 @@ import { FiMonitor } from 'react-icons/fi';
 import { useSearchParams } from 'react-router-dom';
 import { AddToWatchList } from 'src/components/AddToWatchList';
 import { GoBackBtn } from 'src/components/GoBackBtn';
+import { YoutubeVideo } from 'src/components/YoutubeVideo';
 import server from 'src/utils/axios';
 import { openExternalUrl } from 'src/utils/fn';
 
@@ -46,7 +47,7 @@ async function getMangaDetails({ url }) {
             title: string;
             total_chps: string;
             genres: string[];
-            cover: string;
+            poster: string;
             status: string;
             manga_detail: string;
             session: string;
@@ -91,10 +92,6 @@ export function MangaDetailsScreen() {
         }
     }, [details]);
 
-    function ytToEmbeded(input) {
-        return input.split('?')[1].slice(2);
-    }
-
     console.log({ data, details });
 
     return (
@@ -135,7 +132,7 @@ export function MangaDetailsScreen() {
 
                             top: 5,
                             left: 0,
-                            backgroundImage: `url(${data?.cover})`,
+                            backgroundImage: `url(${data?.poster})`,
                             filter: 'blur(15px)',
                             zIndex: 1,
                         }}
@@ -148,7 +145,7 @@ export function MangaDetailsScreen() {
                             rounded={'lg'}
                             objectFit="contain"
                             boxSize="100%"
-                            src={data?.cover}
+                            src={data?.poster}
                             zIndex={2}
                         />
                     </Box>
@@ -253,7 +250,6 @@ export function MangaDetailsScreen() {
                         <div>
                             {/* @ts-ignore */}
                             {/* <PaginateCard
-                                recommendationLoading={false}
                                 data={data}
                                 ep_details={details}
                                 loading={isLoading}
@@ -290,43 +286,7 @@ export function MangaDetailsScreen() {
                     </TabList>
                     <TabPanels>
                         <TabPanel>
-                            {details?.description?.youtube_url ? (
-                                <Stack
-                                    borderWidth="1px"
-                                    borderRadius="lg"
-                                    w={'100%'}
-                                    justifyContent="space-between"
-                                    boxShadow={'2xl'}>
-                                    <div
-                                        style={{
-                                            overflow: 'hidden',
-                                            paddingBottom: '56.25%',
-                                            position: 'relative',
-                                            height: 0,
-                                        }}>
-                                        <iframe
-                                            width="853"
-                                            style={{
-                                                left: 0,
-                                                top: 0,
-                                                height: '100%',
-                                                width: '100%',
-                                                position: 'absolute',
-                                            }}
-                                            height="480"
-                                            src={`https://www.youtube.com/embed/${ytToEmbeded(
-                                                details?.description?.youtube_url,
-                                            )}`}
-                                            frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;"
-                                        />
-                                    </div>
-                                </Stack>
-                            ) : (
-                                <Box>
-                                    <Text>No trailer available</Text>
-                                </Box>
-                            )}
+                            <YoutubeVideo url={details?.description?.youtube_url} />
                         </TabPanel>
                         <TabPanel>
                             <Box>

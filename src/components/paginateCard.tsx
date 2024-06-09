@@ -40,7 +40,6 @@ export function PaginateCard({
     qualityOptions,
     player,
     setTest,
-    recommendationLoading,
 }) {
     const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -206,12 +205,7 @@ export function PaginateCard({
                         <Fade in={ep_details?.prev_page_url}>
                             <Button
                                 onClick={() => pageChangeHandler(ep_details?.prev_page_url)}
-                                disabled={
-                                    loading ||
-                                    !ep_details?.prev_page_url ||
-                                    epsLoading ||
-                                    recommendationLoading
-                                }>
+                                disabled={loading || !ep_details?.prev_page_url || epsLoading}>
                                 Previous Page
                             </Button>
                         </Fade>
@@ -222,14 +216,14 @@ export function PaginateCard({
                             <Button
                                 ml={5}
                                 onClick={() => pageChangeHandler(ep_details?.next_page_url)}
-                                disabled={loading || epsLoading || recommendationLoading}>
+                                disabled={loading || epsLoading}>
                                 Next Page
                             </Button>
                         )}
                     </Flex>
                 )}
                 {!isSingleAvailable && <Spacer />}
-                <Button disabled={epsLoading || recommendationLoading}>Download all</Button>
+                <Button disabled={epsLoading}>Download all</Button>
                 {isSingleAvailable && (
                     <>
                         <Spacer />
