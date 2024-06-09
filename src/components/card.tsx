@@ -1,33 +1,36 @@
-import { Box, Heading, Text, Stack, Image, Flex, Badge, Spacer, useToast } from '@chakra-ui/react';
+import { Box, Heading, Text, Stack, Image, Flex, Spacer, Badge } from '@chakra-ui/react';
+import { useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 
-import { addAnimeDetails } from '../store/actions/animeActions';
+export function AnimeCard({
+    onClick,
+    data,
+    cardType,
+}: {
+    onClick: () => void;
+    cardType: 'manga' | 'anime';
+    data: {
+        poster: string;
+        type: string;
+        rank?: number | string;
+        episodes: string | number;
 
-export function Card({ data, query }) {
-    const navigate = useNavigate();
-    const toast = useToast();
-
-    const dispatch = useDispatch();
-
-    const exploreCardHandler = () => {
-        if (query !== 'upcoming') {
-            // @ts-ignore
-            dispatch(addAnimeDetails(data));
-            navigate('/anime-details');
-        } else {
-            toast({
-                title: 'Anime has not been aired yet! ❤️',
-                status: 'error',
-                duration: 2000,
-            });
-        }
+        score?: string | number;
+        title: string;
     };
+}) {
+    const epTxt = useMemo(() => {
+        if (data.episodes !== '?') return 'Running';
+
+        if (cardType === 'anime') return `Ep ${data.episodes}`;
+
+        if (cardType === 'manga') return `Volumes ${data.episodes}`;
+
+        return '';
+    }, [cardType, data]);
+
     return (
-        <Box
-            sx={{ display: 'flex', padding: '1rem', margin: '10px auto' }}
-            onClick={exploreCardHandler}>
+        <Box sx={{ display: 'flex', padding: '1rem', margin: '10px auto' }} onClick={onClick}>
             <Box
                 sx={{ cursor: 'pointer' }}
                 role={'group'}
@@ -39,9 +42,6 @@ export function Card({ data, query }) {
                 rounded={'lg'}
                 pos={'relative'}
                 zIndex={1}>
-                {/* <div class="card_image">
-          <img src={data.img_url} />
-        </div> */}
                 <Box
                     rounded={'lg'}
                     mt={-12}
@@ -60,7 +60,7 @@ export function Card({ data, query }) {
 
                         top: 2,
                         left: 0,
-                        backgroundImage: `url(${data.poster || data.img_url})`,
+                        backgroundImage: `url(${data.poster})`,
                         filter: 'blur(10px)',
                         zIndex: -1,
                     }}
@@ -74,7 +74,7 @@ export function Card({ data, query }) {
                         // height={230}
                         // width={282}
                         objectFit={'fill'}
-                        src={data.poster || data.img_url}
+                        src={data.poster}
                         minWidth={'222px'}
                         minHeight={'316px'}
                     />
@@ -82,22 +82,27 @@ export function Card({ data, query }) {
                 <Stack pt={5} align={'center'}>
                     <Flex flex={1} width={'100%'}>
                         <Text color={'gray.500'} fontSize={'sm'} textTransform={'uppercase'}>
-                            {data.anime_type || data.type}
+                            {data.type}
                         </Text>
                         <Spacer />
-                        <Box sx={{ display: 'flex' }}>
-                            <Text color={'gray.500'} fontSize={'sm'} textTransform={'uppercase'}>
-                                Rank
-                            </Text>
-                            <Text
-                                fontWeight={500}
-                                ml={1}
-                                // color={"gray.500"}
-                                fontSize={'sm'}
-                                textTransform={'uppercase'}>
-                                #{data.rank}
-                            </Text>
-                        </Box>
+                        {data.rank ? (
+                            <Box sx={{ display: 'flex' }}>
+                                <Text
+                                    color={'gray.500'}
+                                    fontSize={'sm'}
+                                    textTransform={'uppercase'}>
+                                    Rank
+                                </Text>
+                                <Text
+                                    fontWeight={500}
+                                    ml={1}
+                                    // color={"gray.500"}
+                                    fontSize={'sm'}
+                                    textTransform={'uppercase'}>
+                                    #{data.rank}
+                                </Text>
+                            </Box>
+                        ) : null}
                     </Flex>
 
                     <Heading
@@ -115,12 +120,14 @@ export function Card({ data, query }) {
                         justifyContent={'space-between'}
                         flex={1}
                         width={'100%'}>
-                        <Box display={'flex'} alignItems="center" justifyContent={'center'}>
-                            <AiFillStar color="#FDCC0D" fontSize={'20px'} />
-                            <Text ml={'5px'} fontWeight={800} fontSize={'sm'} mt={0}>
-                                {data.score}
-                            </Text>
-                        </Box>
+                        {data.score ? (
+                            <Box display={'flex'} alignItems="center" justifyContent={'center'}>
+                                <AiFillStar color="#FDCC0D" fontSize={'20px'} />
+                                <Text ml={'5px'} fontWeight={800} fontSize={'sm'} mt={0}>
+                                    {data.score}
+                                </Text>
+                            </Box>
+                        ) : null}
                         <Badge
                             sx={{
                                 display: 'flex',
@@ -129,9 +136,7 @@ export function Card({ data, query }) {
                                 borderRadius: '5px',
                                 p: 1,
                             }}>
-                            <Text color={'gray.300'}>
-                                {data.episodes !== '?' ? 'Ep ' + data.episodes : 'Running'}
-                            </Text>
+                            <Text color={'gray.300'}>{epTxt}</Text>
                         </Badge>
                     </Flex>
                 </Stack>
