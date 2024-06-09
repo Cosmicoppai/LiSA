@@ -12,6 +12,7 @@ import { AnimeDetailsScreen } from './screens/animeDetailsScreen';
 import { ExploreScreen } from './screens/exploreScreen';
 import { HomeScreen } from './screens/homeScreen';
 import { InbuiltPlayerScreen } from './screens/inbuiltPlayerScreen';
+import { MangaDetailsScreen } from './screens/mangaDetailsScreen';
 import { SettingScreen } from './screens/settingScreen';
 
 export function App() {
@@ -55,6 +56,7 @@ export function App() {
                             <Route path="setting" element={<SettingScreen />} />
 
                             <Route path="anime-details" element={<AnimeDetailsScreen />} />
+                            <Route path="manga-details" element={<MangaDetailsScreen />} />
                             <Route path="play" element={<InbuiltPlayerScreen />} />
                             <Route path="*" element={<NotFoundScreen />} />
                         </Routes>

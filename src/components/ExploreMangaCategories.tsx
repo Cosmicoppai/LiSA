@@ -1,17 +1,6 @@
-import {
-    AlertDialog,
-    AlertDialogOverlay,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogBody,
-    AlertDialogFooter,
-    Button,
-    Link,
-} from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import server from 'src/utils/axios';
-import { openExternalUrl } from 'src/utils/fn';
 
 import { ErrorMessage } from './ErrorMessage';
 import { SkeletonCards } from './SkeletonCards';
@@ -26,12 +15,14 @@ export function ExploreMangaCategories({ category }) {
         queryKey: ['manga-list', category],
         queryFn: () => getMangaList({ category }),
     });
-    const [isOpen, setIsOpen] = useState(false);
-    const onClose = () => setIsOpen(false);
-    const cancelRef = React.useRef();
+    const navigate = useNavigate();
 
-    const exploreCardHandler = () => {
-        setIsOpen(true);
+    const exploreCardHandler = (data) => {
+        navigate(
+            `/manga-details?${new URLSearchParams({
+                manga_detail: data.manga_detail,
+            })}`,
+        );
     };
     if (error) return <ErrorMessage error={error} />;
 
@@ -52,13 +43,13 @@ export function ExploreMangaCategories({ category }) {
                     data?.data?.map((data, index) => (
                         <AnimeCard
                             key={index}
-                            onClick={exploreCardHandler}
+                            onClick={() => exploreCardHandler(data)}
                             cardType="manga"
                             data={{
                                 poster: data.poster || data.img_url,
                                 type: data.anime_type || data.type,
                                 rank: data.rank,
-                                episodes: data.episodes,
+                                episodes: data.volumes,
                                 score: data.score,
                                 title: data.title,
                             }}
@@ -66,39 +57,6 @@ export function ExploreMangaCategories({ category }) {
                     ))
                 )}
             </ul>
-            {/* AlertDialog for "Manga Not Published yet" message */}
-            <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-                <AlertDialogOverlay>
-                    <AlertDialogContent>
-                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            Work in Progress ❤️
-                        </AlertDialogHeader>
-
-                        <AlertDialogBody>
-                            The manga reader and downloader will be rolled out in the next release
-                            :)
-                            <div style={{ marginTop: '10px' }}>
-                                {/* Use onClick to open the link in the default browser */}
-                                <Link
-                                    color="teal.500"
-                                    _hover={{ color: 'teal.600' }}
-                                    cursor="pointer"
-                                    onClick={() =>
-                                        openExternalUrl('https://github.com/cosmicoppai/LiSA')
-                                    }>
-                                    Check Home Page of LiSA for the latest release
-                                </Link>
-                            </div>
-                        </AlertDialogBody>
-
-                        <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={onClose}>
-                                Close
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog>
         </>
     );
 }

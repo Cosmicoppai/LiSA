@@ -20,7 +20,7 @@ export function AnimeCard({
     };
 }) {
     const epTxt = useMemo(() => {
-        if (data.episodes !== '?') return 'Running';
+        if (data.episodes === '?') return 'Running';
 
         if (cardType === 'anime') return `Ep ${data.episodes}`;
 
