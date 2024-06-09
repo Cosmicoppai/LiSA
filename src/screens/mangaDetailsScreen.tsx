@@ -20,10 +20,10 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
-import { BiArrowBack } from 'react-icons/bi';
 import { FiMonitor } from 'react-icons/fi';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { AddToWatchList } from 'src/components/AddToWatchList';
+import { GoBackBtn } from 'src/components/GoBackBtn';
 import server from 'src/utils/axios';
 import { openExternalUrl } from 'src/utils/fn';
 
@@ -82,8 +82,6 @@ export function MangaDetailsScreen() {
         queryFn: () => getMangaDetails({ url: searchParams.get('manga_detail') }),
     });
 
-    const navigate = useNavigate();
-
     const data = d1?.data;
     const details = d1?.details;
 
@@ -107,19 +105,7 @@ export function MangaDetailsScreen() {
                 alignItems={'center'}
                 w={{ sm: '90%' }}
                 margin={'0 auto'}>
-                <Box
-                    onClick={() => navigate(-1)}
-                    alignSelf={'flex-start'}
-                    _hover={{
-                        cursor: 'pointer',
-                    }}
-                    mb={2}
-                    display="flex"
-                    justifyContent={'center'}
-                    alignItems={'center'}>
-                    <BiArrowBack />
-                    <Text ml={1}>Back</Text>
-                </Box>
+                <GoBackBtn />
                 <Stack
                     borderWidth="1px"
                     borderRadius="lg"

@@ -19,11 +19,10 @@ import {
 } from '@chakra-ui/react';
 import { useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
-import { BiArrowBack } from 'react-icons/bi';
 import { FiMonitor } from 'react-icons/fi';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import { AddToWatchList } from 'src/components/AddToWatchList';
+import { GoBackBtn } from 'src/components/GoBackBtn';
 import { SkeletonCards } from 'src/components/SkeletonCards';
 import { openExternalUrl } from 'src/utils/fn';
 
@@ -33,7 +32,6 @@ import { getRecommendations } from '../store/actions/animeActions';
 
 export function AnimeDetailsScreen() {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     // @ts-ignore
     const { details: data } = useSelector((state) => state.animeDetails);
@@ -73,19 +71,7 @@ export function AnimeDetailsScreen() {
                 alignItems={'center'}
                 w={{ sm: '90%' }}
                 margin={'0 auto'}>
-                <Box
-                    onClick={() => navigate(-1)}
-                    alignSelf={'flex-start'}
-                    _hover={{
-                        cursor: 'pointer',
-                    }}
-                    mb={2}
-                    display="flex"
-                    justifyContent={'center'}
-                    alignItems={'center'}>
-                    <BiArrowBack />
-                    <Text ml={1}>Back</Text>
-                </Box>
+                <GoBackBtn />
                 <Stack
                     borderWidth="1px"
                     borderRadius="lg"

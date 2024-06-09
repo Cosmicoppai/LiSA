@@ -12,9 +12,8 @@ import {
     Skeleton,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { BiArrowBack } from 'react-icons/bi';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { GoBackBtn } from 'src/components/GoBackBtn';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
@@ -24,7 +23,6 @@ import server from '../utils/axios';
 export function InbuiltPlayerScreen() {
     const dispatch = useDispatch();
     const { details, loading: streamLoading } = useSelector((state) => state.animeStreamDetails);
-    const navigate = useNavigate();
 
     const { animes: data, loading } = useSelector((state) => state.animeSearchList);
 
@@ -149,21 +147,7 @@ export function InbuiltPlayerScreen() {
                 {epDetails && anime && (
                     <Box w="100%">
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Box
-                                onClick={() => navigate('/anime-details')}
-                                alignSelf={'flex-start'}
-                                _hover={{
-                                    cursor: 'pointer',
-                                }}
-                                display="flex"
-                                justifyContent={'center'}
-                                alignItems={'center'}
-                                mr={6}
-                                height={'fit-content'}
-                                mt={1}>
-                                <BiArrowBack />
-                                <Text ml={1}>Back</Text>
-                            </Box>
+                            <GoBackBtn />
                             <Box
                                 sx={{
                                     display: 'flex',
