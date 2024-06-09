@@ -1,4 +1,4 @@
 module.exports = {
     root: true,
-    extends: ['universe/node'],
+    extends: ['plugin:@tanstack/eslint-plugin-query/recommended', 'universe/node'],
 };
