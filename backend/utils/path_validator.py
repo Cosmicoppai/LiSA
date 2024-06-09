@@ -6,8 +6,8 @@ _WINDOWS_INVALID_CHAR = ["/", "\\", "<", ">", ".", ":", '"', "|", "?", "*"]
 _WINDOWS_INVALID_ENDINGS = ". "
 _LINUX_INVALID_CHAR = ["/", ]
 _LINUX_INVALID_ENDINGS = ""
-_MAC_INVALID_CHAR = [":", "/"]
-_MAC_INVALID_ENDINGS = ":/"
+_DARWIN_INVALID_CHAR = [":", "/"]
+_DARWIN_INVALID_ENDINGS = ":/"
 
 
 def validate_path(paths: List[str]) -> List[str]:

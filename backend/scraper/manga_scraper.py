@@ -99,7 +99,7 @@ class MangaKatana(Manga):
 
             media = title_bs.find("div", {"class": "media"})
             media_a = media.find("div", {"class": "wrap_img"}).find("a")
-            manga["cover"] = media_a.find("img")["src"]
+            manga["poster"] = media_a.find("img")["src"]
             manga["status"] = media.find("div", {"class": "status"}).text.strip().capitalize()
 
             manga_session = media_a['href']
@@ -124,7 +124,7 @@ class MangaKatana(Manga):
         for genre in meta_data.find("div", {"class": "genres"}).find_all("a"):
             manga["genres"].append(genre.string)
 
-        manga["cover"] = search_bs.find("div", {"class": "cover"}).find("img")["src"]
+        manga["poster"] = search_bs.find("div", {"class": "cover"}).find("img")["src"]
         manga["status"] = meta_data.find("div", {"class": "status"}).text.capitalize()
         manga_url = search_bs.find("meta", property="og:url")["content"]
         manga["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_url}"
@@ -177,13 +177,13 @@ class MangaKatana(Manga):
 
                 for rec in widget.find_all("div", {"class": "item"}):
 
-                    recommendation = {"title": str, "total_eps": float, "cover": str, "status": str, "manga_detail": str}  # noqa
+                    recommendation = {"title": str, "total_chps": float, "poster": str, "status": str, "manga_detail": str}  # noqa
 
-                    recommendation["cover"] = rec.find("div", {"class": "wrap_img"}).find("a")["href"]
+                    recommendation["poster"] = rec.find("div", {"class": "wrap_img"}).find("img")["data-src"]
                     rec_data = rec.find("div", {"class": "text"})
                     title_data = rec_data.find("h3")
                     recommendation["title"] = title_data.text
-                    recommendation["total_eps"] = float(rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0])
+                    recommendation["total_chps"] = float(rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0])
                     recommendation["status"] = rec_data.find("div", {"class": "status"}).text
                     manga_session = title_data.find('a')['href']
                     recommendation["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_session}"
