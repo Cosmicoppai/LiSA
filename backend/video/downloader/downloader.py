@@ -369,11 +369,19 @@ class VideoDownloader(Downloader):
         # check if exe present in backend folder else fallback to default option
         ffmpeg_loc = get_path("ffmpeg", "./ffmpeg")
 
-        cmd = f'"{ffmpeg_loc}" -f concat -safe 0 -i "{input_file}" -c copy "{output_file}" -hide_banner -loglevel warning'
+        cmd = [
+            ffmpeg_loc,
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', str(input_file),
+            '-c', 'copy',
+            str(output_file),
+            '-hide_banner',
+            '-loglevel', 'warning'
+        ]
 
-        subprocess.run(
-            cmd, check=True, shell=False
-        )
+        subprocess.run(cmd, check=True, shell=False)
+
         remove_folder(self.SEGMENT_DIR)  # remove segments
         logging.info("Merging completed")
         return path.getsize(output_file)
