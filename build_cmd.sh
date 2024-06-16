@@ -2,5 +2,5 @@
 
 pip install -r ./build_requirements.txt || exit
 
-pyinstaller lisa.spec --clean
+pyinstaller spec/LiSA.spec --clean
 
