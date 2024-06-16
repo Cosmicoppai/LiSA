@@ -73,7 +73,7 @@ class MangaKatana(Manga):
 
         manga_list = scrape_func(search_bs)
 
-        resp["response"] = (await manga_list)[:total_res]
+        resp = (await manga_list)[:total_res]
         return resp
 
     @staticmethod

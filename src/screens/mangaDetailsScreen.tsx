@@ -41,7 +41,7 @@ type TMangaChapters = {
 async function getMangaDetails({ url }) {
     const { data } = await server.get(url);
 
-    const detailUrl = String(url).includes('/search?') ? data?.response[0].manga_detail : url;
+    const detailUrl = String(url).includes('/search?') ? data?.[0].manga_detail : url;
 
     const { data: details } = await server.get(detailUrl);
 

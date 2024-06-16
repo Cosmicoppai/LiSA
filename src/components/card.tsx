@@ -24,7 +24,7 @@ export function AnimeCard({
 
         if (cardType === 'anime') return `Ep ${data.episodes}`;
 
-        if (cardType === 'manga') return `Volumes ${data.episodes}`;
+        if (cardType === 'manga') return `Chapters ${data.episodes}`;
 
         return '';
     }, [cardType, data]);

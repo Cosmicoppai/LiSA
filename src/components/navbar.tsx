@@ -49,7 +49,7 @@ function NavBarItem({ label, to, Icon: IIcon }) {
     const { pathname } = useLocation();
 
     return (
-        <Tooltip label={label} placement="right-end">
+        <Tooltip label={label} placement="right">
             <Link to={to}>
                 <Icon as={IIcon} w={8} h={8} color={pathname === to ? 'white' : '#9c9c9c'} />
             </Link>
