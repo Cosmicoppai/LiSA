@@ -90,7 +90,7 @@ class Animepahe(Anime):
             'q': input_anime,
         }
 
-        return {"response": (await self.get_api(search_params))["data"], "prev": None, "next": None}
+        return (await self.get_api(search_params))["data"]
 
     async def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> dict:
         """scraping the sessions of all the episodes of an anime
@@ -330,7 +330,7 @@ class Animepahe(Anime):
     def _strip_split(_data: str, strip_chr: str = " ", split_chr: str = " ") -> List[str]:
         return _data.strip(strip_chr).split(split_chr)
 
-    def build_search_resp(self, anime_details: List[Dict]) -> List[Dict]:
+    def build_search_resp(self, anime_details: List[Dict]) -> Dict[str, Any]:
 
         search_response: List[Dict[str, str | int]] = []
 
@@ -350,7 +350,7 @@ class Animepahe(Anime):
                 "anime_id": anime_detail.get("id", None)
             })
 
-        return search_response
+        return {"response": search_response, "prev": None, "next": None}
 
     async def __get_episodes(self, anime_session: str, page: int = 1) -> list:
         return [x["session"] for x in

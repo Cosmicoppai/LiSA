@@ -607,4 +607,4 @@ app = Starlette(
 
 
 def start_api_server(port: int):
-    uvicorn.run(app, port=port)
+    uvicorn.run(app, port=port, reload=True)
