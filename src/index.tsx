@@ -7,6 +7,7 @@ import { SocketContextProvider } from 'src/context/socket';
 import './styles/index.css';
 
 import { App } from './App';
+import { AppContextProvider } from './context/app';
 import store from './store/store';
 import { theme } from './styles/theme';
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <SocketContextProvider>
             <QueryClientProvider client={queryClient}>
                 <Provider store={store}>
-                    <App />
+                    <AppContextProvider>
+                        <App />
+                    </AppContextProvider>
                 </Provider>
             </QueryClientProvider>
         </SocketContextProvider>

@@ -1,19 +1,26 @@
 import { Center, Flex, Spacer, Stack, Select } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { AiFillFilter } from 'react-icons/ai';
-import { BsBookHalf } from 'react-icons/bs';
-import { RiMovieFill } from 'react-icons/ri';
+import { AppModeSwitch } from 'src/components/AppModeSwitch';
 import { ExploreAnimeCategories } from 'src/components/ExploreAnimeCategories';
 import { ExploreMangaCategories } from 'src/components/ExploreMangaCategories';
-import { Tabs } from 'src/components/Tabs';
+import { useAppContext } from 'src/context/app';
+
+const defaultAnimeCategory = 'airing';
+const defaultMangaCategory = 'by_popularity';
 
 export function ExploreScreen() {
-    const [type, setType] = useState<'anime' | 'manga'>('anime');
-    const [category, setCategory] = useState('airing');
+    const [category, setCategory] = useState(defaultAnimeCategory);
+
+    const { mode } = useAppContext();
 
     useEffect(() => {
         window?.scrollTo(0, 0);
     }, []);
+
+    useEffect(() => {
+        setCategory(mode === 'manga' ? defaultMangaCategory : defaultAnimeCategory);
+    }, [mode]);
 
     return (
         <Center py={6} w="100%">
@@ -24,34 +31,14 @@ export function ExploreScreen() {
                     w={'100%'}
                     zIndex={1000}
                     backgroundColor={'var(--chakra-colors-gray-900)'}>
-                    <Tabs
-                        config={[
-                            {
-                                title: 'Anime',
-                                Icon: RiMovieFill,
-                                value: 'anime',
-                                defaultCategoryValue: 'airing',
-                            },
-                            {
-                                title: 'Manga',
-                                Icon: BsBookHalf,
-                                value: 'manga',
-                                defaultCategoryValue: 'by_popularity',
-                            },
-                        ]}
-                        currentValue={type}
-                        onChange={({ value, defaultCategoryValue }) => {
-                            setType(value);
-                            setCategory(defaultCategoryValue);
-                        }}
-                    />
+                    <AppModeSwitch />
                     <Spacer />
                     <Select
                         maxWidth={180}
                         onChange={(e) => setCategory(e.target.value)}
                         icon={<AiFillFilter />}
                         value={category}>
-                        {type === 'manga' ? (
+                        {mode === 'manga' ? (
                             <>
                                 <option value="manga">Manga</option>
                                 <option value="oneshots">One Shots</option>
@@ -79,7 +66,7 @@ export function ExploreScreen() {
                         )}
                     </Select>
                 </Flex>
-                {type === 'manga' ? (
+                {mode === 'manga' ? (
                     <ExploreMangaCategories category={category} />
                 ) : (
                     <ExploreAnimeCategories category={category} />
