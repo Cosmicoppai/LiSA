@@ -90,7 +90,7 @@ class Animepahe(Anime):
             'q': input_anime,
         }
 
-        return (await self.get_api(search_params))["data"]
+        return {"response": (await self.get_api(search_params))["data"], "prev": None, "next": None}
 
     async def get_episode_sessions(self, anime_session: str, page_no: str = "1") -> dict:
         """scraping the sessions of all the episodes of an anime
