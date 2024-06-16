@@ -16,63 +16,23 @@ import {
     TabPanels,
     TabPanel,
     Tag,
+    Button,
 } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AddToWatchList } from 'src/components/AddToWatchList';
 import { GoBackBtn } from 'src/components/GoBackBtn';
-import { YoutubeVideo } from 'src/components/YoutubeVideo';
-import server from 'src/utils/axios';
 
+import { getMangaDetails } from './getMangaDetails';
 import { MangaRecommendations } from '../components/MangaRecommendations';
-import { PaginateCard } from '../components/paginateCard';
-
-type TMangaChapters = {
-    [chp_no: string]: {
-        chp_link: string;
-        chp_name: string;
-        chp_session: string;
-    };
-}[];
-
-async function getMangaDetails({ url }) {
-    const { data } = await server.get(url);
-
-    const detailUrl = String(url).includes('/search?') ? data?.response[0].manga_detail : url;
-
-    const { data: details } = await server.get(detailUrl);
-
-    return {
-        data: data?.response?.[0] ?? {},
-        details,
-    } as {
-        data: {
-            title: string;
-            total_chps: string;
-            genres: string[];
-            poster: string;
-            status: string;
-            manga_detail: string;
-            session: string;
-        };
-        details: {
-            chapters: TMangaChapters;
-            description: {
-                alt_name: string;
-                author: string;
-                summary: string;
-                youtube_url: string;
-            };
-            recommendation: string;
-        };
-    };
-}
 
 export function MangaDetailsScreen() {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
+
+    const [searchParams] = useSearchParams();
 
     const query = useMemo(() => {
         const q = searchParams.get('q');
@@ -88,11 +48,7 @@ export function MangaDetailsScreen() {
         };
     }, [searchParams]);
 
-    const {
-        data: d1,
-        error,
-        isLoading,
-    } = useQuery({
+    const { data: d1, isLoading } = useQuery({
         queryKey: ['manga-details', query.manga_detail],
         queryFn: () => getMangaDetails({ url: query.manga_detail }),
     });
@@ -120,6 +76,14 @@ export function MangaDetailsScreen() {
 
         return '';
     }, [data]);
+
+    const handleRead = () => {
+        navigate(
+            `/manga-reader?${new URLSearchParams({
+                q: JSON.stringify(query),
+            })}`,
+        );
+    };
 
     return (
         <Center py={6} w="100%">
@@ -274,15 +238,7 @@ export function MangaDetailsScreen() {
                                 </Text>
                             </Stack>
                         )}
-                        <div>
-                            {/* @ts-ignore */}
-                            {/* <PaginateCard
-                                data={data}
-                                ep_details={details}
-                                loading={isLoading}
-                                redirect
-                            /> */}
-                        </div>
+
                         {data.genres?.length ? (
                             <div>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
@@ -300,7 +256,18 @@ export function MangaDetailsScreen() {
                                 </Box>
                             </div>
                         ) : null}
-                        <MangaChapters isLoading={isLoading} data={details?.chapters} />
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexGrow: 1,
+                                alignItems: 'flex-end',
+                            }}>
+                            {isLoading ? (
+                                <Skeleton p={2} m={2} width={'48px'} height={'48px'}></Skeleton>
+                            ) : (
+                                <Button onClick={handleRead}>Read</Button>
+                            )}
+                        </div>
                     </Stack>
                 </Stack>
                 <Tabs width={'100%'} variant="enclosed" mt={5}>
@@ -337,60 +304,5 @@ export function MangaDetailsScreen() {
                 </Tabs>
             </Flex>
         </Center>
-    );
-}
-
-function MangaChapters({ data }: { isLoading: boolean; data: TMangaChapters }) {
-    return (
-        <Box mt={5}>
-            {data?.length ? (
-                <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
-                    {data?.map((item) => (
-                        <>
-                            {Object.entries(item).map(([chp_no, chap_detail]) => (
-                                <Flex
-                                    key={chp_no}
-                                    cursor={'pointer'}
-                                    p={1}
-                                    mr={2}
-                                    mt={2}
-                                    width={'100%'}
-                                    maxWidth={'45px'}
-                                    minWidth={'45px'}
-                                    maxHeight={'45px'}
-                                    minHeight={'45px'}
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    bg={'brand.900'}
-                                    onClick={() => alert('Under Development')}>
-                                    <Text textAlign={'center'}>
-                                        {chp_no}
-                                        {chap_detail?.chp_name
-                                            ? ` : ${chap_detail?.chp_name}`
-                                            : null}
-                                    </Text>
-                                </Flex>
-                            ))}
-                        </>
-                    ))}
-                </Flex>
-            ) : (
-                <EpisodeSkeletons />
-            )}
-        </Box>
-    );
-}
-
-function EpisodeSkeletons() {
-    return (
-        <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
-            {Array(18)
-                .fill(0)
-                .map((item, index) => {
-                    return (
-                        <Skeleton p={2} m={2} width={'48px'} height={'48px'} key={index}></Skeleton>
-                    );
-                })}
-        </Flex>
     );
 }
