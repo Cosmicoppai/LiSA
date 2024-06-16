@@ -90,12 +90,7 @@ function DownloadsHistoryItem({
                     alignItems: 'center',
                 }}
                 onClick={() => playClickHandler(data.id)}>
-                <Icon
-                    as={FaPlay}
-                    w={6}
-                    h={6}
-                    onClick={() => openFileExplorer(data.file_location)}
-                />
+                <Icon as={FaPlay} w={6} h={6} />
             </Box>
             <div
                 style={{

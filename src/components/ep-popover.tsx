@@ -51,7 +51,7 @@ export function EpPopover({ isOpen, onOpen, onClose }) {
                                     {Object.keys(details).map((language, idx) => {
                                         return (
                                             <option key={idx} value={language}>
-                                                {language}{' '}
+                                                {language}
                                             </option>
                                         );
                                     })}

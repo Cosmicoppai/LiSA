@@ -179,7 +179,7 @@ export function AnimeDetailsScreen() {
                                 <Heading fontSize={'xl'} fontFamily={'body'} display="block">
                                     {details?.description?.eng_name
                                         ? `${details?.description?.eng_name}`
-                                        : ''}{' '}
+                                        : ''}
                                 </Heading>
                             ) : (
                                 <Skeleton

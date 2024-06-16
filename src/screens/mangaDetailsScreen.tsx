@@ -300,18 +300,14 @@ export function MangaDetailsScreen() {
                                 </Box>
                             </div>
                         ) : null}
-                        <MangaChapters isLoading={isLoading} data={details.chapters} />
+                        <MangaChapters isLoading={isLoading} data={details?.chapters} />
                     </Stack>
                 </Stack>
                 <Tabs width={'100%'} variant="enclosed" mt={5}>
                     <TabList>
-                        <Tab>Trailer </Tab>
                         <Tab>Recommendations</Tab>
                     </TabList>
                     <TabPanels>
-                        <TabPanel>
-                            <YoutubeVideo url={details?.description?.youtube_url} />
-                        </TabPanel>
                         <TabPanel>
                             <Box>
                                 <Stack
@@ -347,13 +343,13 @@ export function MangaDetailsScreen() {
 function MangaChapters({ data }: { isLoading: boolean; data: TMangaChapters }) {
     return (
         <Box mt={5}>
-            {data.length ? (
+            {data?.length ? (
                 <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
                     {data?.map((item) => (
                         <>
-                            {Object.entries(item).map(([key, value], idx) => (
+                            {Object.entries(item).map(([chp_no, chap_detail]) => (
                                 <Flex
-                                    key={key}
+                                    key={chp_no}
                                     cursor={'pointer'}
                                     p={1}
                                     mr={2}
@@ -367,7 +363,12 @@ function MangaChapters({ data }: { isLoading: boolean; data: TMangaChapters }) {
                                     alignItems="center"
                                     bg={'brand.900'}
                                     onClick={() => alert('Under Development')}>
-                                    <Text textAlign={'center'}>{key}</Text>
+                                    <Text textAlign={'center'}>
+                                        {chp_no}
+                                        {chap_detail?.chp_name
+                                            ? ` : ${chap_detail?.chp_name}`
+                                            : null}
+                                    </Text>
                                 </Flex>
                             ))}
                         </>

@@ -12,11 +12,9 @@ export function NetworkError() {
                 size="2xl"
                 bgGradient="linear(to-r, teal.400, teal.600)"
                 backgroundClip="text">
-                500
-            </Heading>
-            <Text fontSize="18px" mt={3} mb={2}>
                 No Internet Connection
-            </Text>
+            </Heading>
+
             <Text color={'gray.500'} mb={6}>
                 You dont seem to have an active internet connection. Please check your connection
                 and try again

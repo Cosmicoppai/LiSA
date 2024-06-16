@@ -251,7 +251,7 @@ export function PaginateCard({
                             </MenuList>
                         </Menu>
                     </>
-                )}{' '}
+                )}
             </Flex>
 
             <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
