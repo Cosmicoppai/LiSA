@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import server from "../../utils/axios";
+import server from '../../utils/axios';
 import {
     ANIME_CURRENT_EP_FAIL,
     ANIME_CURRENT_EP_REQUEST,
@@ -35,7 +35,7 @@ import {
     DOWNLOAD_LIBRARY_FAIL,
     DOWNLOAD_LIBRARY_REQUEST,
     DOWNLOAD_LIBRARY_SUCCESS,
-} from "../constants/animeConstants";
+} from '../constants/animeConstants';
 
 export const searchAnimeList = (query) => async (dispatch) => {
     try {
@@ -61,7 +61,7 @@ export const addAnimeDetails = (data) => async (dispatch) => {
 
             const searchRes = await server.get(data.anime_detail);
 
-            ep_details = await server.get(searchRes.data[0].ep_details);
+            ep_details = await server.get(searchRes.data.response[0].ep_details);
             dispatch({
                 type: ANIME_DETAILS_SUCCESS,
                 payload: { ...data, ...ep_details.data },
@@ -81,7 +81,7 @@ export const addAnimeDetails = (data) => async (dispatch) => {
 export const addEpisodesDetails = (data) => async (dispatch, getState) => {
     try {
         dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
-        let { details } = getState().animeEpisodesDetails;
+        const { details } = getState().animeEpisodesDetails;
         let allDetails;
         if (details) {
             allDetails = { ...details, ...data };
@@ -136,7 +136,7 @@ export const playVideoExternal = (payload) => async (dispatch) => {
     try {
         dispatch({ type: ANIME_STREAM_EXTERNAL_REQUEST });
         await server.post(`/stream`, payload, {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
         });
 
         dispatch({ type: ANIME_STREAM_EXTERNAL_SUCCESS });
@@ -163,8 +163,8 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
                 pahewin_url,
             },
             {
-                "Content-Type": "application/json",
-            }
+                'Content-Type': 'application/json',
+            },
         );
 
         dispatch({ type: ANIME_STREAM_URL_SUCCESS, payload: data });
@@ -180,8 +180,8 @@ export const cancelLiveDownload = async (id) => {
                 id: [id],
             },
             {
-                "Content-Type": "application/json",
-            }
+                'Content-Type': 'application/json',
+            },
         );
     } catch (error) {
         console.log(error);
@@ -195,8 +195,8 @@ export const pauseLiveDownload = async (id) => {
                 id: [id],
             },
             {
-                "Content-Type": "application/json",
-            }
+                'Content-Type': 'application/json',
+            },
         );
     } catch (error) {
         console.log(error);
@@ -210,8 +210,8 @@ export const resumeLiveDownload = async (id) => {
                 id: [id],
             },
             {
-                "Content-Type": "application/json",
-            }
+                'Content-Type': 'application/json',
+            },
         );
     } catch (error) {
         console.log(error);

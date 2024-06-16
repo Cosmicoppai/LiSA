@@ -32,7 +32,7 @@ export const HomeScreen = () => {
     async function getAnimeList({ query }) {
         if (!query) return null;
         const { data } = await server.get(`/search?type=${mode}&query=${query}`);
-        return data;
+        return data?.response ?? [];
     }
 
     const { data, error, isError, isLoading } = useQuery({
