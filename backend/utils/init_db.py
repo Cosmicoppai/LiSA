@@ -29,7 +29,7 @@ class DB(metaclass=MetaDB):
             DB._highest_ids[table_name] = _highestId
 
     @classmethod
-    def migrate(cls, files: List[str] = ("progress_tracker.sql", "watchlist.sql")):
+    def migrate(cls, files: List[str] = ("progress_tracker.sql", "watchlist.sql", "readlist.sql")):
         cur = cls.connection.cursor()
         for fil in files:
             file_ = DBConfig.DEFAULT_SQL_DIR.joinpath(fil).__str__()

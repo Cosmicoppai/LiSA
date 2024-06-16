@@ -1,10 +1,11 @@
+import json
 from json import JSONDecodeError
 from video.library import DBLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple
+from typing import Tuple, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -513,28 +514,45 @@ async def readlist(request: Request):
         if request.method == "GET":
             cur = DB.connection.cursor()
             cur.execute("SELECT * FROM readlist ORDER BY created_on DESC")
-            return JSONResponse({"data": [dict(row) for row in cur.fetchall()]})
+            resp = []
+            for row in cur.fetchall():
+                data = dict(row)
+                data["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={data['session']}"
+                data["genres"] = json.loads(data["genres"])
+                resp.append(data)
+
+            return JSONResponse({"data": resp})
 
         elif request.method == "POST":
             jb = request.state.body
 
             manga_session = jb["manga_id"]
-            ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+            chps = jb["chps"]
+            status = jb["status"]
+            genres = json.dumps(jb["genres"])
+            poster = jb["poster"]
 
+            """
+            manga_session format will be https://mangakatana.com/manga/cheese-in-the-trap.1
+            """
+            meta_data: List[str] = manga_session.split("/manga/")
+            if len(meta_data) != 2 or "." not in meta_data[-1]:
+                return await bad_request_400(request, msg="Invalid Manga ID")
+
+            title, manga_id = meta_data[-1].split(".")
             cur = DB.connection.cursor()
 
             cur.execute(
-                "INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
-                 jb["year"], jb["score"], jb["poster"], ep_details))
+                "INSERT INTO readlist (manga_id, title, chps, status, genres, poster, session)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)", (manga_id, title, chps, status, genres, poster, manga_session)
+            )
 
             DB.connection.commit()
             return JSONResponse(content="Anime successfully added in watch later", status_code=201)
 
         cur = DB.connection.cursor()
         # id validation is bypassed by choice
-        cur.execute("DELETE FROM watchlist where manga_id=?", (request.query_params["manga_id"],))
+        cur.execute("DELETE FROM readlist where manga_id=?", (request.query_params["manga_id"],))
         DB.connection.commit()
         return Response(status_code=204)
     except KeyError as _msg:
