@@ -385,11 +385,11 @@ async def top(request: Request):
         case "manga":
             if _category.lower() not in MyAL.manga_types_dict:
                 return await bad_request_400(request, msg="Pass valid Manga Category")
-            top_resp = await MyAL().get_top_mange(manga_type=_category, limit=_limit)
+            top_resp = await MyAL().get_top_manga(manga_type=_category, limit=_limit)
         case _:
             return await bad_request_400(request, msg="Pass valid type")
 
-    if not top_resp["next_top"] and not top_resp["prev_top"]:
+    if not top_resp["data"]:
         return await not_found_404(request, msg="limit out of range")
 
     return JSONResponse(top_resp)
@@ -508,6 +508,42 @@ async def watchlist(request: Request):
         return await bad_request_400(request, msg=f"Record already exists")
 
 
+async def readlist(request: Request):
+    try:
+        if request.method == "GET":
+            cur = DB.connection.cursor()
+            cur.execute("SELECT * FROM readlist ORDER BY created_on DESC")
+            return JSONResponse({"data": [dict(row) for row in cur.fetchall()]})
+
+        elif request.method == "POST":
+            jb = request.state.body
+
+            manga_session = jb["manga_id"]
+            ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+
+            cur = DB.connection.cursor()
+
+            cur.execute(
+                "INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
+                 jb["year"], jb["score"], jb["poster"], ep_details))
+
+            DB.connection.commit()
+            return JSONResponse(content="Anime successfully added in watch later", status_code=201)
+
+        cur = DB.connection.cursor()
+        # id validation is bypassed by choice
+        cur.execute("DELETE FROM watchlist where manga_id=?", (request.query_params["manga_id"],))
+        DB.connection.commit()
+        return Response(status_code=204)
+    except KeyError as _msg:
+        return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
+    except IntegrityError as err:
+        print(err)
+        return await bad_request_400(request, msg=f"Record already exists")
+
+
 routes = [
     Route("/", endpoint=LiSA, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
@@ -527,6 +563,7 @@ routes = [
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route("/proxy", endpoint=proxy, methods=["GET"]),
     Route("/watchlist", endpoint=watchlist, methods=["GET", "POST", "DELETE"]),
+    Route("/readlist", endpoint=readlist, methods=["GET", "POST", "DELETE"]),
     Mount('/default', app=CustomStaticFiles(directory=FileConfig.DEFAULT_DIR), name="static"),
     Mount("/image", app=CustomStaticFiles(directory=FileConfig.DEFAULT_DOWNLOAD_LOCATION), name="image-router"),
 ]

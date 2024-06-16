@@ -388,7 +388,7 @@ class Animepahe(Anime):
         return {"file_name": title, "manifest_url": stream_re.search(unpacked).group(0)}
 
     @staticmethod
-    def int2base(x, base):
+    def int2base(x, base) -> str:
         digs = string.digits + string.ascii_letters
         if x < 0:
             sign = -1
@@ -406,7 +406,7 @@ class Animepahe(Anime):
         digits.reverse()
         return "".join(digits)
 
-    def js_unpack(self, p, a, c, k):
+    def js_unpack(self, p, a, c, k) -> str:
         k = k.split("|")
         a = int(a)
         c = int(c)
