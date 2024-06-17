@@ -12,10 +12,11 @@ function startPythonServer() {
             shell: true,
         });
     } else {
+        const linux = `${path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA')}`;
         // Dynamic script assignment for starting Python in production
         const runPython = {
-            darwin: `open -gj "${path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA')}" --args`,
-            linux: './resources/main/main',
+            darwin: linux,
+            linux,
             win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
         }[process.platform];
 
@@ -26,16 +27,14 @@ function startPythonServer() {
 }
 
 function killPythonServer() {
-    console.log("Killing python server: ", pythonServer?.pid)
-    if (pythonServer) {
-        if (process.platform === 'win32') {
-            spawn('taskkill', ['/PID', pythonServer.pid, '/F', '/T']);
-        } else {
-            pythonServer.kill('SIGINT');
-        }
-        pythonServer = null;
-        console.log('Python server killed');
-    }
+    if (!pythonServer) return;
+
+    if (process.platform === 'win32') spawn('taskkill', ['/PID', pythonServer.pid, '/F', '/T']);
+    else pythonServer.kill('SIGINT');
+
+    console.log('Killed python server, PID: ', pythonServer.pid);
+
+    pythonServer = null;
 }
 
 /**

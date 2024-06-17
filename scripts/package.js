@@ -66,7 +66,7 @@ class Packager {
 
         const options = {
             build: [
-                'app',
+                'LiSA',
                 '--extra-resource=./resources',
                 '--icon ./public/favicon.ico',
                 '--win32',
@@ -76,12 +76,12 @@ class Packager {
             ].join(' '),
 
             package: [
-                path('../dist/mac/app-darwin-arm64/app.app'),
+                path('../dist/mac/LiSA-darwin-arm64/LiSA.app'),
                 'LiSA',
                 `--out=${path('../dist/mac/setup')}`,
                 `--icon=${path('../utilities/dmg/images/icon.icns')}`,
                 `--background=${path('../utilities/dmg/images/background.png')}`,
-                '--title="Example app"',
+                '--title="LiSA"',
                 '--overwrite',
             ].join(' '),
 
@@ -89,6 +89,7 @@ class Packager {
         };
 
         spawnSync(`electron-packager . ${options.build}`, options.spawn);
+        console.log('Creating DMG...');
         spawnSync(`electron-installer-dmg ${options.package}`, options.spawn);
     };
 
