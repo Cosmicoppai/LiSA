@@ -191,9 +191,10 @@ app.whenReady().then(async () => {
         createLoadingWindow().then(() => {
             createMainWindow();
         });
+
         // Dynamic script assignment for starting Python in production
         const runPython = {
-            darwin: `open -gj "${path.join(app.getAppPath(), 'resources', 'app.app')}" --args`,
+            darwin: `open -gj "${path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA')}" --args`,
             linux: './resources/main/main',
             win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
         }[process.platform];
@@ -287,6 +288,8 @@ const puppeteer = require('puppeteer');
 // IPC handler to respond to messages from the renderer process
 ipcMain.handle('getDomainCookies', async (event, args) => {
     try {
+        // TODO: auto remove this log statements while building
+        console.log('Getting cookies');
         // Prepare data to send to the renderer process
 
         const browser = await puppeteer.launch();
@@ -305,11 +308,12 @@ ipcMain.handle('getDomainCookies', async (event, args) => {
 
         // Get cookies after the challenge is solved
         const cookies = await page.cookies();
-
+        console.log('Cookies generated');
         await browser.close();
 
         return cookies;
     } catch (error) {
+        console.log('Domain Cookies Error', error);
         return [];
     }
 });
