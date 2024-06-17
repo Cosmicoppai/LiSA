@@ -69,7 +69,6 @@ class Packager {
                 'LiSA',
                 '--extra-resource=./resources',
                 '--icon ./public/favicon.ico',
-                '--win32',
                 '--out',
                 './dist/mac',
                 '--overwrite',
