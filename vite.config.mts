@@ -15,5 +15,9 @@ export default defineConfig({
                 format: 'cjs',
             },
         },
+        chunkSizeWarningLimit: Infinity, //Suppress Warning: Some chunks are larger than 500 kB after minification.
+    },
+    esbuild: {
+        drop: ['console', 'debugger'],
     },
 });
