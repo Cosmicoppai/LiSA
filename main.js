@@ -26,12 +26,16 @@ function startPythonServer() {
 }
 
 function killPythonServer() {
-    console.log('Killing Python Server');
-
-    pythonServer?.kill('SIGINT');
-    pythonServer = null;
-
-    process.exit();
+    console.log("Killing python server: ", pythonServer?.pid)
+    if (pythonServer) {
+        if (process.platform === 'win32') {
+            spawn('taskkill', ['/PID', pythonServer.pid, '/F', '/T']);
+        } else {
+            pythonServer.kill('SIGINT');
+        }
+        pythonServer = null;
+        console.log('Python server killed');
+    }
 }
 
 /**
