@@ -210,7 +210,7 @@ async def stream(request: Request):
     if not video_src:
         return await bad_request_400(request, msg="pass valid manifest url or video id")
     if _id:
-        res = DBLibrary.get(filters={"id": _id, "type": "anime"}, query=["file_location"])
+        res = DBLibrary.get(filters={"id": _id, "type": "video"}, query=["file_location"])
         if not res:
             return JSONResponse({"error": "Invalid Id"}, status_code=400)
         video_src = res[0]["file_location"]
