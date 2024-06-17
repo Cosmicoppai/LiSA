@@ -2,14 +2,43 @@ const { spawn } = require('child_process');
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const isDevMode = require('electron-is-dev');
 const path = require('path');
-const psTree = require('ps-tree');
+
+let pythonServer;
+
+function startPythonServer() {
+    if (isDevMode) {
+        pythonServer = spawn('python backend/LiSA.py', {
+            detached: true,
+            shell: true,
+        });
+    } else {
+        // Dynamic script assignment for starting Python in production
+        const runPython = {
+            darwin: `open -gj "${path.join(app.getAppPath(), 'resources', 'app.app')}" --args`,
+            linux: './resources/main/main',
+            win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
+        }[process.platform];
+
+        pythonServer = spawn(`${runPython}`, {
+            shell: true,
+        });
+    }
+}
+
+function killPythonServer() {
+    console.log('Killing Python Server');
+
+    pythonServer?.kill('SIGINT');
+    pythonServer = null;
+
+    process.exit();
+}
 
 /**
  * @namespace BrowserWindow
  * @description - Electron browser windows.
  */
 const browserWindows = {};
-const pids = [];
 
 /**
  * @description - Creates main window.
@@ -157,7 +186,6 @@ app.whenReady().then(async () => {
 
     /**
      * If not using in production, use the loading window
-     * and run Python in shell.
      */
     if (isDevMode) {
         // await installExtensions(); // React, Redux devTools
@@ -169,15 +197,6 @@ app.whenReady().then(async () => {
             height: 300,
         });
         createLoadingWindow().then(() => createMainWindow());
-        // var devProc = spawn(`python backend/LiSA.py`, {
-        //   detached: true,
-        //   shell: true,
-        //   stdio: "inherit",
-        // });
-        const devProc = spawn('python backend/LiSA.py', {
-            detached: true,
-            shell: true,
-        });
     } else {
         /**
          * If using in production, use the main window
@@ -191,17 +210,8 @@ app.whenReady().then(async () => {
         createLoadingWindow().then(() => {
             createMainWindow();
         });
-        // Dynamic script assignment for starting Python in production
-        const runPython = {
-            darwin: `open -gj "${path.join(app.getAppPath(), 'resources', 'app.app')}" --args`,
-            linux: './resources/main/main',
-            win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
-        }[process.platform];
-
-        const proc = spawn(`${runPython}`, {
-            shell: true,
-        });
     }
+    startPythonServer();
 
     app.on('activate', () => {
         /**
@@ -231,54 +241,14 @@ app.whenReady().then(async () => {
      * explicitly with Cmd + Q.
      */
 
-    // app.on('before-quit', function() {
-    //   pids.forEach(function(pid) {
-    //     // A simple pid lookup
-    //     ps.kill( pid, function( err ) {
-    //         if (err) {
-    //             throw new Error( err );
-    //         }
-    //         else {
-    //             console.log( 'Process %s has been killed!', pid );
-    //         }
-    //     });
-    //   });
-    // });
-
     app.on('window-all-closed', () => {
-        console.log('inside close');
+        console.log('all windows closed.');
+        if (process.platform !== 'darwin') app.quit();
+    });
 
-        if (process.platform !== 'darwin') {
-            // console.log("killing");
-            // console.log(devProc.pid);
-
-            // // spawn(`powershell.exe -Command kill ${devProc.pid}`);
-
-            // devProc.kill("SIGHUP");
-
-            // psTree(devProc.pid, function (err, children) {
-            //   console.log(err)
-            //   console.log(children)
-            //   devProc.spawn(
-            //     "kill",
-            //     ["-9"].concat(
-            //       children.map(function (p) {
-            //         console.log(`inside map child`)
-            //         console.log(children)
-            //         return p.PID;
-            //       })
-            //     )
-            //   );
-            // });
-
-            spawn('taskkill /IM LiSA.exe /F', {
-                shell: true,
-                detached: true,
-            });
-
-            app.quit();
-            console.log('after quit');
-        }
+    app.on('quit', function () {
+        // Clean up the Python server when the app quits
+        killPythonServer();
     });
 });
 
