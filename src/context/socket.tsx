@@ -1,4 +1,5 @@
 import { ReactNode, createContext, useContext, useEffect, useState, useRef } from 'react';
+import { envVariables } from 'src/constants/env';
 
 interface SocketContextType {
     socket: WebSocket | null;
@@ -20,7 +21,7 @@ export function SocketContextProvider({ children }: { children: ReactNode }) {
     const retryCountRef = useRef(0);
 
     const connectWebSocket = () => {
-        const websocket = new WebSocket(process.env.REACT_APP_SOCKET_URL);
+        const websocket = new WebSocket(envVariables.SOCKET_URL);
 
         websocket.onopen = () => {
             setSocket(websocket);

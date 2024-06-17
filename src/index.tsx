@@ -13,7 +13,7 @@ import { theme } from './styles/theme';
 
 const queryClient = new QueryClient();
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
     <ChakraProvider theme={theme}>
         <SocketContextProvider>
             <QueryClientProvider client={queryClient}>

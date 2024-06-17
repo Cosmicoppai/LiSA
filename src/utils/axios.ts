@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { envVariables } from 'src/constants/env';
 
 const server = axios.create({
-    baseURL: process.env.REACT_APP_SERVER_URL,
+    baseURL: envVariables.SERVER_URL,
 });
 
 server.interceptors.request.use(
