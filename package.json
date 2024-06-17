@@ -32,10 +32,9 @@
     "build:package:mac": "node ./scripts/dispatch package mac",
     "build:package:windows": "node ./scripts/dispatch package windows",
     "clean": "node ./scripts/dispatch clean",
-    "eject": "react-scripts eject",
     "start": "node ./scripts/dispatch start",
     "start:electron": "electron .",
-    "start:react": "react-scripts start"
+    "start:react": "vite"
   },
   "build": {
     "appId": "com.lisa.desktop",
@@ -48,7 +47,9 @@
   },
   "devDependencies": {
     "@tanstack/eslint-plugin-query": "^5.35.6",
-    "cross-env": "^7.0.3",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
     "electron": "^26.2.2",
     "electron-builder": "^22.9.1",
     "electron-devtools-installer": "^3.2.0",
@@ -58,7 +59,8 @@
     "eslint": "^8.57.0",
     "eslint-config-universe": "^13.0.0",
     "prettier": "^3.3.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
@@ -75,7 +77,6 @@
     "react-icons": "^5.2.1",
     "react-redux": "^8.0.2",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
     "redux": "^4.2.0",
     "redux-devtools-extension": "^2.13.9",
     "redux-thunk": "^2.4.1",

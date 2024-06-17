@@ -103,7 +103,7 @@ const createMainWindow = () => {
     // executeOnWindow(isPageLoaded, handleLoad);
 
     if (isDevMode) {
-        mainWindow.loadURL('http://localhost:3000');
+        mainWindow.loadURL('http://localhost:5173');
 
         mainWindow.hide();
 

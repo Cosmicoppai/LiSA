@@ -3,14 +3,9 @@ import { Box, Flex, Input, InputGroup, InputLeftElement, Text, Image } from '@ch
 import { useQuery } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// @ts-ignore
-import HomeScreenLogoImg from 'src/assets/img/home_screen_logo.png';
-// @ts-ignore
-import LoaderSearchGif from 'src/assets/img/loader-serch.gif';
-// @ts-ignore
-import NotFoundImg from 'src/assets/img/not-found.png';
 import { AppModeSwitch } from 'src/components/AppModeSwitch';
 import { AnimeCard } from 'src/components/card';
+import { localImagesPath } from 'src/constants/images';
 import { useAppContext } from 'src/context/app';
 import server from 'src/utils/axios';
 
@@ -76,7 +71,7 @@ export const HomeScreen = () => {
                         w="100%"
                         h="100%"
                         pt={'20px'}>
-                        <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
+                        <Image objectFit="cover" src={localImagesPath.homeScreenLogo} alt="logo" />
                         <Box w="50%" sx={{ position: 'relative', marginBottom: 8 }}>
                             <InputGroup>
                                 <InputLeftElement
@@ -136,7 +131,13 @@ export const HomeScreen = () => {
                             </Box>
                         )}
                         {isError && !isLoading && error && <NotFound />}
-                        {isLoading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
+                        {isLoading && (
+                            <Image
+                                src={localImagesPath.loaderSearchGif}
+                                alt="loader"
+                                boxSize="150px"
+                            />
+                        )}
                     </Flex>
                 ) : (
                     <NetworkError />
@@ -152,7 +153,7 @@ function NotFound() {
     return (
         <Box textAlign="center" py={10} px={6}>
             <Image
-                src={NotFoundImg}
+                src={localImagesPath.notFound}
                 alt="not-found"
                 height={200}
                 display={'flex'}

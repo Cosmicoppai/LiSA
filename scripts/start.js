@@ -30,7 +30,7 @@ class Starter {
         // spawnSync('npx kill-port 3000', spawnOptions.hideLogs);
 
         // Start & identify React & Electron processes
-        spawn('cross-env BROWSER=none react-scripts start', spawnOptions.showLogs);
+        spawn('vite', spawnOptions.showLogs);
         spawn('electron .', spawnOptions.showLogs);
 
         // Kill processes on exit
