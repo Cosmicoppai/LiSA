@@ -1,6 +1,5 @@
 import { Box, Image, Text } from '@chakra-ui/react';
-// @ts-ignore
-import NotFoundImg from 'src/assets/img/not-found.png';
+import { localImagesPath } from 'src/constants/images';
 
 export function NotFoundScreen() {
     return (
@@ -13,7 +12,7 @@ export function NotFoundScreen() {
             }}>
             <Box textAlign="center" py={10} px={6}>
                 <Image
-                    src={NotFoundImg}
+                    src={localImagesPath.notFound}
                     alt="not-found"
                     height={200}
                     display={'flex'}

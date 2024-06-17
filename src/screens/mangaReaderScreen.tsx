@@ -2,9 +2,8 @@ import { Box, Center, Flex, Heading, Image, Skeleton, Text } from '@chakra-ui/re
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-// @ts-ignore
-import LoaderSearchGif from 'src/assets/img/loader-serch.gif';
 import { GoBackBtn } from 'src/components/GoBackBtn';
+import { localImagesPath } from 'src/constants/images';
 import server from 'src/utils/axios';
 
 import { TMangaChapters, getMangaDetails } from './getMangaDetails';
@@ -237,7 +236,7 @@ function MangaChapterImages({
                     justifyContent: 'center',
                     alignItems: 'center',
                 }}>
-                <Image src={LoaderSearchGif} alt="loader" boxSize="250px" />
+                <Image src={localImagesPath.loaderSearchGif} alt="loader" boxSize="250px" />
                 <span
                     style={{
                         fontWeight: 'bold',

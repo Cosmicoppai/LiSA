@@ -7,7 +7,13 @@ export default defineConfig({
     resolve: {
         alias: [{ find: 'src', replacement: '/src' }],
     },
+    base: './',
     build: {
         outDir: 'build',
+        rollupOptions: {
+            output: {
+                format: 'cjs',
+            },
+        },
     },
 });
