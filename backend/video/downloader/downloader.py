@@ -367,7 +367,7 @@ class VideoDownloader(Downloader):
             output_file = self._output_file
 
         # check if exe present in backend folder else fallback to default option
-        ffmpeg_loc = get_path("ffmpeg", "./ffmpeg")
+        ffmpeg_loc = get_path("ffmpeg", Path(__file__).parent.parent.parent.parent.joinpath("./ffmpeg"))
 
         cmd = [
             ffmpeg_loc,

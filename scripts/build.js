@@ -34,7 +34,7 @@ class Builder {
         ].join(" ");
         // TODO: Check if python is installed.. If not, prompt user
         // "Python is required but not installed, install it? (y/n)"
-        spawnSync(`pyinstaller spec/lisa.spec --clean`, spawnOptions);
+        spawnSync(`pyinstaller spec/windows.spec --clean`, spawnOptions);
     };
 
     /**
