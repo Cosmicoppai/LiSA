@@ -27,16 +27,16 @@ function startPythonServer() {
 }
 
 function killPythonServer() {
-	if (!pythonServer) return;
+    if (!pythonServer) return;
 
-	if (process.platform === "win32") {
-		const killCmd = `taskkill /pid ${pythonServer.pid} /f /t`;
-		spawn("cmd.exe", ["/c", killCmd]);
-	} else pythonServer.kill("SIGINT");
+    if (process.platform === 'win32') {
+        const killCmd = `taskkill /pid ${pythonServer.pid} /f /t`;
+        spawn('cmd.exe', ['/c', killCmd]);
+    } else pythonServer.kill('SIGINT');
 
-	console.log("Killed python server, PID: ", pythonServer.pid);
+    console.log('Killed python server, PID: ', pythonServer.pid);
 
-	pythonServer = null;
+    pythonServer = null;
 }
 
 /**
@@ -86,10 +86,9 @@ const createMainWindow = () => {
     const handleLoad = (isLoaded) => {
         if (isLoaded) {
             /**
-             * Keep show() & hide() in this order to prevent
-             * unresponsive behavior during page load.
+             * Hide loading window and show main window
+             * once the main window is ready.
              */
-
             mainWindow.show();
             mainWindow.maximize();
             loadingWindow.hide();
@@ -97,46 +96,27 @@ const createMainWindow = () => {
         }
     };
 
-    /**
-     * Checks if the page has been populated with
-     * React project. if so, shows the main page.
-     */
-    // executeOnWindow(isPageLoaded, handleLoad);
+    mainWindow.hide();
 
-    if (isDevMode) {
-        mainWindow.loadURL('http://localhost:5173');
-
-        mainWindow.hide();
-
-        /**
-         * Hide loading window and show main window
-         * once the main window is ready.
-         */
-        mainWindow.webContents.on('did-finish-load', () => {
-            /**
-             * Checks page for errors that may have occurred
-             * during the hot-loading process.
-             */
-            // mainWindow.webContents.openDevTools({ mode: "undocked" });
-
-            /**
-             * Checks if the page has been populated with
-             * React project. if so, shows the main page.
-             */
-            executeOnWindow(isPageLoaded, handleLoad);
-        });
-    } else {
-        mainWindow.hide();
-
+    if (isDevMode) mainWindow.loadURL('http://localhost:5173');
+    else {
         mainWindow.removeMenu(true);
-
         mainWindow.loadFile(path.join(__dirname, 'build/index.html'));
+    }
+
+    mainWindow.webContents.on('did-finish-load', () => {
+        /**
+         * Checks page for errors that may have occurred
+         * during the hot-loading process.
+         */
         // mainWindow.webContents.openDevTools({ mode: "undocked" });
 
-        mainWindow.webContents.on('did-finish-load', () => {
-            executeOnWindow(isPageLoaded, handleLoad);
-        });
-    }
+        /**
+         * Checks if the page has been populated with
+         * React project. if so, shows the main page.
+         */
+        executeOnWindow(isPageLoaded, handleLoad);
+    });
 };
 
 /**
@@ -147,13 +127,8 @@ const createLoadingWindow = () => {
     return new Promise((resolve, reject) => {
         const { loadingWindow } = browserWindows;
 
-        // Variants of developer loading screen
-        const loaderConfig = {
-            main: 'public/loader.html',
-        };
-
         try {
-            loadingWindow.loadFile(path.join(__dirname, loaderConfig.main));
+            loadingWindow.loadFile(path.join(__dirname, 'public/loader.html'));
             loadingWindow.removeMenu(true);
 
             loadingWindow.webContents.on('did-finish-load', () => {
@@ -169,14 +144,16 @@ const createLoadingWindow = () => {
 
 app.whenReady().then(async () => {
     /**
-     * Method to set port in range of 3001-3999,
-     * based on availability.
-     */
-
-    /**
-     * Assigns the main browser window on the
+     * Assigns the loading && main browser window on the
      * browserWindows object.
      */
+
+    browserWindows.loadingWindow = new BrowserWindow({
+        frame: false,
+        transparent: true,
+        alwaysOnTop: true,
+    });
+
     browserWindows.mainWindow = new BrowserWindow({
         show: false,
         webPreferences: {
@@ -189,33 +166,10 @@ app.whenReady().then(async () => {
         },
     });
 
-    /**
-     * If not using in production, use the loading window
-     */
-    if (isDevMode) {
-        // await installExtensions(); // React, Redux devTools
-        browserWindows.loadingWindow = new BrowserWindow({
-            frame: false,
-            transparent: true,
-            alwaysOnTop: true,
-            width: 300,
-            height: 300,
-        });
-        createLoadingWindow().then(() => createMainWindow());
-    } else {
-        /**
-         * If using in production, use the main window
-         * and run bundled app (dmg, elf, or exe) file.
-         */
-        browserWindows.loadingWindow = new BrowserWindow({
-            frame: false,
-            transparent: true,
-            alwaysOnTop: true,
-        });
-        createLoadingWindow().then(() => {
-            createMainWindow();
-        });
-    }
+    createLoadingWindow().then(() => {
+        createMainWindow();
+    });
+
     startPythonServer();
 
     app.on('activate', () => {
@@ -239,22 +193,22 @@ app.whenReady().then(async () => {
             browserWindows.mainWindow?.focus();
         });
     }
+});
 
-    /**
-     * Quit when all windows are closed, except on macOS. There, it's common
-     * for applications and their menu bar to stay active until the user quits
-     * explicitly with Cmd + Q.
-     */
+/**
+ * Quit when all windows are closed, except on macOS. There, it's common
+ * for applications and their menu bar to stay active until the user quits
+ * explicitly with Cmd + Q.
+ */
 
-    app.on('window-all-closed', () => {
-        console.log('all windows closed.');
-        if (process.platform !== 'darwin') app.quit();
-    });
+app.on('window-all-closed', () => {
+    console.log('all windows closed.');
+    if (process.platform !== 'darwin') app.quit();
+});
 
-    app.on('quit', function () {
-        // Clean up the Python server when the app quits
-        killPythonServer();
-    });
+app.on('quit', function () {
+    // Clean up the Python server when the app quits
+    killPythonServer();
 });
 
 const puppeteer = require('puppeteer');
@@ -262,7 +216,6 @@ const puppeteer = require('puppeteer');
 // IPC handler to respond to messages from the renderer process
 ipcMain.handle('getDomainCookies', async (event, args) => {
     try {
-        // TODO: auto remove this log statements while building
         console.log('Getting cookies');
         // Prepare data to send to the renderer process
 
