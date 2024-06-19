@@ -55,7 +55,7 @@ class Animepahe(Anime):
 
     @classmethod
     async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
-        if not cls.session:
+        if not cls.session or not cls.cookies:
 
             cookie_req_data = {"type": "cookie_request", "site_url": cls.site_url, "user_agent": headers["user-agent"]}
             if MsgSystem.in_pipe:
