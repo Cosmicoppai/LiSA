@@ -5,25 +5,32 @@ const path = require('path');
 
 let pythonServer;
 
-function startPythonServer() {
-    if (isDevMode) {
-        pythonServer = spawn('python backend/LiSA.py', {
-            detached: true,
-            shell: true,
-        });
-    } else {
-        const linux = `${path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA')}`;
-        // Dynamic script assignment for starting Python in production
-        const runPython = {
-            darwin: linux,
-            linux,
-            win32: `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`,
-        }[process.platform];
+function getPythonServerCMD() {
+    if (isDevMode) return 'python backend/LiSA.py';
 
-        pythonServer = spawn(`${runPython}`, {
-            shell: true,
-        });
+    switch (process.platform) {
+        case 'win32':
+            return `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`;
+        case 'linux':
+        case 'darwin':
+            return path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA');
+        default:
+            // Unknown Platform.
+            return null;
     }
+}
+
+function startPythonServer() {
+    const cmd = getPythonServerCMD();
+    if (!cmd) {
+        console.error('Unsupported platform or failed to get the command to run python server.');
+        return;
+    }
+
+    pythonServer = spawn(cmd, {
+        shell: true,
+        detached: isDevMode,
+    });
 }
 
 function killPythonServer() {
@@ -45,12 +52,6 @@ function killPythonServer() {
  */
 const browserWindows = {};
 
-/**
- * @description - Creates main window.
- * @param {number} port - Port that Python server is running on.
- *
- * @memberof BrowserWindow
- */
 const createMainWindow = () => {
     const { loadingWindow, mainWindow } = browserWindows;
 
@@ -72,12 +73,12 @@ const createMainWindow = () => {
      * the app and developer server compile.
      */
     const isPageLoaded = `
-   var isBodyFull = document.body.innerHTML !== "";
-   var isHeadFull = document.head.innerHTML !== "";
-   var isLoadSuccess = isBodyFull && isHeadFull;
+    var isBodyFull = document.body.innerHTML !== "";
+    var isHeadFull = document.head.innerHTML !== "";
+    var isLoadSuccess = isBodyFull && isHeadFull;
 
-   isLoadSuccess || Boolean(location.reload());
- `;
+    isLoadSuccess || Boolean(location.reload());
+    `;
 
     /**
      * @description Updates windows if page is loaded
@@ -89,14 +90,10 @@ const createMainWindow = () => {
              * Hide loading window and show main window
              * once the main window is ready.
              */
-            mainWindow.show();
-            mainWindow.maximize();
-            loadingWindow.hide();
             loadingWindow.close();
+            mainWindow.show();
         }
     };
-
-    mainWindow.hide();
 
     if (isDevMode) mainWindow.loadURL('http://localhost:5173');
     else {
@@ -142,7 +139,7 @@ const createLoadingWindow = () => {
     });
 };
 
-app.whenReady().then(async () => {
+function createWindow() {
     /**
      * Assigns the loading && main browser window on the
      * browserWindows object.
@@ -156,29 +153,26 @@ app.whenReady().then(async () => {
 
     browserWindows.mainWindow = new BrowserWindow({
         show: false,
+        autoHideMenuBar: true,
         webPreferences: {
             contextIsolation: true,
-            enableRemoteModule: true,
-            autoHideMenuBar: true,
-            show: false,
             nodeIntegration: true,
             preload: path.join(isDevMode ? __dirname : app.getAppPath(), 'preload.js'),
         },
     });
 
+    browserWindows.mainWindow.once('ready-to-show', () => {
+        browserWindows.mainWindow.maximize();
+    });
+
     createLoadingWindow().then(() => {
         createMainWindow();
     });
+}
 
+app.whenReady().then(async () => {
+    createWindow();
     startPythonServer();
-
-    app.on('activate', () => {
-        /**
-         * On macOS it's common to re-create a window in the app when the
-         * dock icon is clicked and there are no other windows open.
-         */
-        if (BrowserWindow.getAllWindows().length === 0) createMainWindow();
-    });
 
     /**
      * Ensures that only a single instance of the app
@@ -195,14 +189,20 @@ app.whenReady().then(async () => {
     }
 });
 
+app.on('activate', () => {
+    /**
+     * On macOS it's common to re-create a window in the app when the
+     * dock icon is clicked and there are no other windows open.
+     */
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+});
+
 /**
  * Quit when all windows are closed, except on macOS. There, it's common
  * for applications and their menu bar to stay active until the user quits
  * explicitly with Cmd + Q.
  */
-
 app.on('window-all-closed', () => {
-    console.log('all windows closed.');
     if (process.platform !== 'darwin') app.quit();
 });
 

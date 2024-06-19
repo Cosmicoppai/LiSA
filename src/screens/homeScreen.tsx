@@ -33,6 +33,7 @@ export const HomeScreen = () => {
     const { data, error, isError, isLoading } = useQuery({
         queryKey: ['search-list', query, mode],
         queryFn: () => getAnimeList({ query }),
+        enabled: query.length > 0,
     });
 
     useEffect(() => {
