@@ -27,14 +27,16 @@ function startPythonServer() {
 }
 
 function killPythonServer() {
-    if (!pythonServer) return;
+	if (!pythonServer) return;
 
-    if (process.platform === 'win32') spawn('taskkill', ['/PID', pythonServer.pid, '/F', '/T']);
-    else pythonServer.kill('SIGINT');
+	if (process.platform === "win32") {
+		const killCmd = `taskkill /pid ${pythonServer.pid} /f /t`;
+		spawn("cmd.exe", ["/c", killCmd]);
+	} else pythonServer.kill("SIGINT");
 
-    console.log('Killed python server, PID: ', pythonServer.pid);
+	console.log("Killed python server, PID: ", pythonServer.pid);
 
-    pythonServer = null;
+	pythonServer = null;
 }
 
 /**
