@@ -46,7 +46,7 @@
     "electron-installer-debian": "^3.2.0"
   },
   "devDependencies": {
-    "@electron/packager": "^18.3.2",
+    "@electron/packager": "^18.3.3",
     "@tanstack/eslint-plugin-query": "^5.43.1",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
@@ -70,8 +70,8 @@
     "@tanstack/react-query": "^5.45.1",
     "axios": "^1.7.2",
     "electron-is-dev": "^2.0.0",
-    "framer-motion": "^11.2.10",
-    "puppeteer": "^22.11.1",
+    "framer-motion": "^11.2.11",
+    "puppeteer": "^22.11.2",
     "react": "18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.2.1",
