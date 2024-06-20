@@ -39,7 +39,7 @@ Please submit an Issue or even better a PR and We'll review :)
 
     ```bash
     # For Windows
-    ./venv/Script/activate
+    ./venv/Scripts/activate
 
     # For Linux & macOS
     source ./venv/bin/activate
@@ -83,4 +83,4 @@ Please submit an Issue or even better a PR and We'll review :)
 
 Note:
 
-> Make sure to allow app to run as admin and allow incomming port forwarding on (`6969`, `9000`).
+> Make sure to allow app to run as admin and allow incoming port forwarding on (`6969`, `9000`).

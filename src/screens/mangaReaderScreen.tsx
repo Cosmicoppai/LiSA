@@ -101,20 +101,61 @@ function MangaReader({ chapters, isLoading }: { chapters: TMangaChapters; isLoad
                 columnGap: 20,
                 margin: '0 20px',
             }}>
-            <MangaChapters
-                isLoading={isLoading}
-                data={chapters}
-                currentChapter={currentChapter}
-                setCurrentChapter={setCurrentChapter}
-            />
-            <Box
-                // backgroundColor={'gray.800'}
+            <div
                 style={{
+                    width: '20%',
+                    height: '100%',
+                    display: 'flex',
+                    flexGrow: 1,
+                    flexDirection: 'column',
+                }}>
+                <Text p={2} fontSize="large" fontWeight={'bold'} position={'sticky'}>
+                    Chapters
+                </Text>
+
+                <Flex
+                    direction={'column'}
+                    p={2}
+                    rowGap={3}
+                    overflowY={'auto'}
+                    overflowX={'hidden'}
+                    sx={{
+                        display: 'flex',
+                        flexGrow: 1,
+
+                        overflowY: 'auto',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                            borderRadius: '8px',
+                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                        },
+                    }}>
+                    <MangaChapters
+                        isLoading={isLoading}
+                        data={chapters}
+                        currentChapter={currentChapter}
+                        setCurrentChapter={setCurrentChapter}
+                    />
+                </Flex>
+            </div>
+            <Box
+                sx={{
                     width: '100%',
                     display: 'flex',
                     flexGrow: 1,
-                    padding: 8,
-                    borderRadius: 16,
+
+                    overflowY: 'auto',
+                    '&::-webkit-scrollbar': {
+                        width: '8px',
+                        borderRadius: '8px',
+                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                    },
                 }}>
                 <MangaChapterImages currentChapter={currentChapter} />
             </Box>
@@ -143,30 +184,29 @@ function MangaChapters({
     return (
         <>
             {data?.length ? (
-                <Flex direction={'column'} p={2} rowGap={3} overflowY={'auto'} overflowX={'hidden'}>
+                <>
                     {data?.map((item, idx) => (
                         <>
                             {Object.entries(item).map(([chp_no, chap_detail]) => (
                                 <Flex
                                     key={chp_no}
                                     cursor={'pointer'}
-                                    width={'100%'}
                                     p={2}
                                     title={` ${chp_no} ${
                                         chap_detail?.chp_name ? ` : ${chap_detail?.chp_name}` : null
                                     }`}
-                                    minWidth={'80px'}
-                                    maxWidth={'250px'}
                                     borderRadius={10}
                                     alignItems="center"
-                                    bg={idx === currentChapter.idx ? 'gray.800' : undefined}
+                                    bg={idx === currentChapter.idx ? '#CBD5E0' : '#1A202C'}
                                     onClick={() =>
                                         setCurrentChapter({
                                             idx,
                                             chp_link: chap_detail.chp_link,
                                         })
                                     }>
-                                    <Text noOfLines={1}>
+                                    <Text
+                                        noOfLines={1}
+                                        color={idx === currentChapter.idx ? '#1A202C' : '#CBD5E0'}>
                                         {chp_no}
                                         {chap_detail?.chp_name
                                             ? ` : ${chap_detail?.chp_name}`
@@ -176,7 +216,7 @@ function MangaChapters({
                             ))}
                         </>
                     ))}
-                </Flex>
+                </>
             ) : (
                 <EpisodeSkeletons />
             )}
@@ -251,7 +291,6 @@ function MangaChapterImages({
         <div
             style={{
                 width: '100%',
-                overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
