@@ -6,6 +6,7 @@ from config import ServerConfig
 from utils.headers import get_headers
 import re
 from .base import Scraper
+from utils import DB
 
 
 class Manga(Scraper):
@@ -157,6 +158,13 @@ class MangaKatana(Manga):
 
         res["description"]["summary"] = detail_bs.find("div", {"class": "summary"}).find("p").text
         res["recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?type=manga&manga_session={manga_session}"
+
+        meta_data: List[str] = manga_session.split("/manga/")
+        _, manga_id = meta_data[-1].split(".")
+
+        cur = DB.connection.cursor()
+        read_list = cur.execute("SELECT * FROM readlist WHERE manga_id=?", (manga_id,))
+        res["description"]["mylist"] = True if read_list.fetchone() else False
 
         return res
 

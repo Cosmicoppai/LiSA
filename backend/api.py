@@ -548,7 +548,7 @@ async def readlist(request: Request):
             )
 
             DB.connection.commit()
-            return JSONResponse(content="Anime successfully added in watch later", status_code=201)
+            return JSONResponse(content="Manga successfully added in Read later", status_code=201)
 
         cur = DB.connection.cursor()
         # id validation is bypassed by choice

@@ -113,8 +113,7 @@ class Animepahe(Anime):
 
         return await self.get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[
-                                                                                 str, str] | TypeError | JSONDecodeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
         episodes = {"ep_details": []}
 
         try:
