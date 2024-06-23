@@ -10,24 +10,19 @@ import {
     Thead,
     Tr,
 } from '@chakra-ui/react';
+import { useMemo } from 'react';
 import { TbMoodSad } from 'react-icons/tb';
-import { useDispatch } from 'react-redux';
-import { pauseLiveDownload, resumeLiveDownload } from 'src/store/actions/animeActions';
 
-import { DownloadList } from './downloadList';
+import { DownloadItem } from './downloadItem';
+import { useGetDownloads } from './useGetDownloads';
 
-export function ActiveDownloads({ filesStatus, cancelDownloadHandler }) {
-    const dispatch = useDispatch();
+export function ActiveDownloads() {
+    const { data } = useGetDownloads();
 
-    const pauseDownloadHandler = (id) => {
-        pauseLiveDownload(id);
-        // sleep(5000);
-        // @ts-ignore
-        dispatch(getDownloadHistory());
-    };
-    const resumeDownloadHandler = (id) => {
-        resumeLiveDownload(id);
-    };
+    const downloadingList = useMemo(() => {
+        const library = data?.length ? data : [];
+        return library.filter((i) => i.status !== 'downloaded');
+    }, [data]);
 
     return (
         <Stack flex={1} flexDirection="column">
@@ -48,7 +43,7 @@ export function ActiveDownloads({ filesStatus, cancelDownloadHandler }) {
                         width: '100%',
                         p: 3,
                     }}>
-                    {filesStatus && Object.entries(filesStatus).length === 0 ? (
+                    {downloadingList.length === 0 ? (
                         <Flex alignItems={'center'} justifyContent="center">
                             <Box color="gray.500" mr="2">
                                 <TbMoodSad size={24} />
@@ -74,12 +69,9 @@ export function ActiveDownloads({ filesStatus, cancelDownloadHandler }) {
                                         <Th></Th>
                                     </Tr>
                                 </Thead>
-                                <DownloadList
-                                    filesStatus={filesStatus}
-                                    cancelDownloadHandler={cancelDownloadHandler}
-                                    pauseDownloadHandler={pauseDownloadHandler}
-                                    resumeDownloadHandler={resumeDownloadHandler}
-                                />
+                                {downloadingList.map((item, index) => (
+                                    <DownloadItem key={index} data={item} />
+                                ))}
                             </Table>
                         </TableContainer>
                     )}

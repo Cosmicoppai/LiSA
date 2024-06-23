@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, Icon, Stack, Text, Tooltip, useDisclosure } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { TbMoodSad } from 'react-icons/tb';
@@ -7,9 +7,18 @@ import { openFileExplorer } from 'src/utils/fn';
 import { timeHourMin } from 'src/utils/time';
 
 import { ExternalPlayerPopup } from './externalPopup';
+import { TDownload, useGetDownloads } from './useGetDownloads';
 import { formatBytes } from '../utils/formatBytes';
 
-export function DownloadsHistory({ historyDetails }) {
+export function DownloadsHistory() {
+    const { data } = useGetDownloads();
+
+    const downloadedList = useMemo(() => {
+        const library = data?.length ? data : [];
+
+        return library.filter((i) => i.status === 'downloaded');
+    }, [data]);
+
     const [playId, setPlayId] = useState(null);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -31,7 +40,7 @@ export function DownloadsHistory({ historyDetails }) {
                 pt={2}
                 bg={'gray.900'}
                 minWidth={'400px'}>
-                {historyDetails?.details?.length !== 0 ? (
+                {downloadedList.length ? (
                     <div
                         style={{
                             display: 'flex',
@@ -39,15 +48,13 @@ export function DownloadsHistory({ historyDetails }) {
                             width: '100%',
                             rowGap: 20,
                         }}>
-                        {historyDetails?.details?.map((item, index: number) =>
-                            item.status === 'downloaded' ? (
-                                <DownloadsHistoryItem
-                                    key={index}
-                                    data={item}
-                                    playClickHandler={playClickHandler}
-                                />
-                            ) : null,
-                        )}
+                        {downloadedList.map((item, index: number) => (
+                            <DownloadsHistoryItem
+                                key={index}
+                                data={item}
+                                playClickHandler={playClickHandler}
+                            />
+                        ))}
                     </div>
                 ) : (
                     <DownloadsHistoryEmpty />
@@ -68,8 +75,8 @@ function DownloadsHistoryItem({
     data,
     playClickHandler,
 }: {
-    data: any;
-    playClickHandler: (id: string) => void;
+    data: TDownload;
+    playClickHandler: (id: TDownload['id']) => void;
 }) {
     return (
         <section

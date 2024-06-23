@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import server from '../../utils/axios';
 import {
     ANIME_CURRENT_EP_FAIL,
@@ -50,7 +48,6 @@ export const searchAnimeList = (query) => async (dispatch) => {
 
 export const addAnimeDetails = (data) => async (dispatch) => {
     try {
-        let url;
         let ep_details;
         dispatch({ type: ANIME_DETAILS_REQUEST });
         dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
@@ -136,6 +133,7 @@ export const playVideoExternal = (payload) => async (dispatch) => {
     try {
         dispatch({ type: ANIME_STREAM_EXTERNAL_REQUEST });
         await server.post(`/stream`, payload, {
+            // @ts-ignore
             'Content-Type': 'application/json',
         });
 
@@ -163,6 +161,7 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
                 pahewin_url,
             },
             {
+                // @ts-ignore
                 'Content-Type': 'application/json',
             },
         );
@@ -170,51 +169,6 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
         dispatch({ type: ANIME_STREAM_URL_SUCCESS, payload: data });
     } catch (error) {
         dispatch({ type: ANIME_STREAM_URL_FAIL, payload: error });
-    }
-};
-export const cancelLiveDownload = async (id) => {
-    try {
-        const { data } = await server.post(
-            `/download/cancel`,
-            {
-                id: [id],
-            },
-            {
-                'Content-Type': 'application/json',
-            },
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
-export const pauseLiveDownload = async (id) => {
-    try {
-        const { data } = await server.post(
-            `/download/pause`,
-            {
-                id: [id],
-            },
-            {
-                'Content-Type': 'application/json',
-            },
-        );
-    } catch (error) {
-        console.log(error);
-    }
-};
-export const resumeLiveDownload = async (id) => {
-    try {
-        const { data } = await server.post(
-            `/download/resume`,
-            {
-                id: [id],
-            },
-            {
-                'Content-Type': 'application/json',
-            },
-        );
-    } catch (error) {
-        console.log(error);
     }
 };
 
