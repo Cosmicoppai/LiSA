@@ -1,8 +1,8 @@
 import { SearchIcon } from '@chakra-ui/icons';
 import { Box, Flex, Input, InputGroup, InputLeftElement, Text, Image } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppModeSwitch } from 'src/components/AppModeSwitch';
 import { AnimeCard } from 'src/components/card';
 import { localImagesPath } from 'src/constants/images';
@@ -13,37 +13,53 @@ import { NetworkError } from '../components/network-error';
 import { SearchResultCard } from '../components/search-result-card';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
+function useSearchQuery() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
+
+    const [search, setSearch] = useState(searchQuery);
+
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setSearchParams({ search });
+        }, 450);
+        return () => clearTimeout(timeoutId);
+    }, [search, setSearchParams]);
+
+    return {
+        searchQuery,
+        search,
+        setSearch,
+    };
+}
+
+async function getAnimeList({ query, type }) {
+    if (!query) return null;
+
+    const { data } = await server.get(
+        `/search?${new URLSearchParams({
+            type,
+            query,
+        })}`,
+    );
+    return data?.response ?? [];
+}
+
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
     const { mode } = useAppContext();
 
-    const [query, setQuery] = React.useState('');
-    const [tempQuery, setTempQuery] = React.useState('');
-    const handleSearchChange = (event) => {
-        setTempQuery(event.target.value);
-    };
+    const { search, searchQuery, setSearch } = useSearchQuery();
 
-    async function getAnimeList({ query }) {
-        if (!query) return null;
-        const { data } = await server.get(`/search?type=${mode}&query=${query}`);
-        return data?.response ?? [];
-    }
-
-    const { data, error, isError, isLoading } = useQuery({
-        queryKey: ['search-list', query, mode],
-        queryFn: () => getAnimeList({ query }),
-        enabled: query.length > 0,
+    const { data, error, isError, isLoading, isFetching } = useQuery({
+        queryKey: ['search-list', searchQuery, mode],
+        queryFn: () => getAnimeList({ query: searchQuery, type: mode }),
+        enabled: searchQuery.length > 0,
     });
 
-    useEffect(() => {
-        const c = setTimeout(() => {
-            setQuery(tempQuery);
-        }, 350);
-
-        return () => clearTimeout(c);
-    }, [tempQuery]);
     const navigate = useNavigate();
+
     const exploreCardHandler = (data) => {
         navigate(
             `/manga-details?${new URLSearchParams({
@@ -83,8 +99,8 @@ export const HomeScreen = () => {
                                     sx={{ position: 'relative' }}
                                     color={'font.main'}
                                     placeholder={`Search ${mode === 'manga' ? 'Manga' : 'Anime'}`}
-                                    value={tempQuery}
-                                    onChange={handleSearchChange}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
                                 />
                             </InputGroup>
                         </Box>
@@ -131,7 +147,7 @@ export const HomeScreen = () => {
                                 )}
                             </Box>
                         )}
-                        {isError && !isLoading && error && <NotFound />}
+                        {isError && error && !isLoading && !isFetching ? <NotFound /> : null}
                         {isLoading && (
                             <Image
                                 src={localImagesPath.loaderSearchGif}

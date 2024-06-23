@@ -9,16 +9,9 @@ import {
     ANIME_EPISODES_ADD_FAIL,
     ANIME_EPISODES_ADD_REQUEST,
     ANIME_EPISODES_ADD_SUCCESS,
-    ANIME_EXPLORE_DETAILS_FAIL,
-    ANIME_EXPLORE_DETAILS_REQUEST,
-    ANIME_EXPLORE_DETAILS_SUCCESS,
     ANIME_RECOMMENDATION_FAIL,
     ANIME_RECOMMENDATION_REQUEST,
     ANIME_RECOMMENDATION_SUCCESS,
-    ANIME_SEARCH_CLEAR,
-    ANIME_SEARCH_FAIL,
-    ANIME_SEARCH_REQUEST,
-    ANIME_SEARCH_SUCCESS,
     ANIME_STREAM_DETAILS_FAIL,
     ANIME_STREAM_DETAILS_REQUEST,
     ANIME_STREAM_DETAILS_SUCCESS,
@@ -30,21 +23,7 @@ import {
     ANIME_STREAM_URL_FAIL,
     ANIME_STREAM_URL_REQUEST,
     ANIME_STREAM_URL_SUCCESS,
-    DOWNLOAD_LIBRARY_FAIL,
-    DOWNLOAD_LIBRARY_REQUEST,
-    DOWNLOAD_LIBRARY_SUCCESS,
 } from '../constants/animeConstants';
-
-export const searchAnimeList = (query) => async (dispatch) => {
-    try {
-        dispatch({ type: ANIME_SEARCH_REQUEST, payload: {} });
-
-        const { data } = await server.get(`/search?type=anime&query=${query}`);
-        dispatch({ type: ANIME_SEARCH_SUCCESS, payload: data });
-    } catch (error) {
-        dispatch({ type: ANIME_SEARCH_FAIL, payload: error.response.data });
-    }
-};
 
 export const addAnimeDetails = (data) => async (dispatch) => {
     try {
@@ -99,9 +78,7 @@ export const addCurrentEp = (data) => async (dispatch) => {
         dispatch({ type: ANIME_CURRENT_EP_FAIL, payload: error });
     }
 };
-export const clearSearch = () => async (dispatch) => {
-    dispatch({ type: ANIME_SEARCH_CLEAR });
-};
+
 export const clearEp = () => async (dispatch) => {
     dispatch({ type: ANIME_STREAM_URL_CLEAR });
 };
@@ -114,18 +91,6 @@ export const getStreamDetails = (stream_detail) => async (dispatch) => {
         dispatch({ type: ANIME_STREAM_DETAILS_SUCCESS, payload: data });
     } catch (error) {
         dispatch({ type: ANIME_STREAM_DETAILS_FAIL, payload: error });
-    }
-};
-
-export const getExploreDetails = (query) => async (dispatch) => {
-    try {
-        dispatch({ type: ANIME_EXPLORE_DETAILS_REQUEST });
-        const { data } = await server.get(`top?type=anime&c=${query}&limit=0`);
-
-        dispatch({ type: ANIME_EXPLORE_DETAILS_SUCCESS, payload: data });
-        // dispatch({ type: ANIME_EXPLORE_QUERY, payload: query });
-    } catch (error) {
-        dispatch({ type: ANIME_EXPLORE_DETAILS_FAIL, payload: error });
     }
 };
 
@@ -172,17 +137,6 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
     }
 };
 
-export const getDownloadHistory = () => async (dispatch) => {
-    try {
-        dispatch({ type: DOWNLOAD_LIBRARY_REQUEST });
-
-        const { data } = await server.get(`/library`);
-
-        dispatch({ type: DOWNLOAD_LIBRARY_SUCCESS, payload: data });
-    } catch (error) {
-        dispatch({ type: DOWNLOAD_LIBRARY_FAIL, payload: error });
-    }
-};
 export const getRecommendations = (url) => async (dispatch) => {
     try {
         dispatch({ type: ANIME_RECOMMENDATION_REQUEST });
