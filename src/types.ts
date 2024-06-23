@@ -1,6 +1,6 @@
 export type TCookieReq = {
+    type: 'cookie_request';
     data: {
-        type: 'cookie_request';
         site_url: string;
         user_agent: string;
     };

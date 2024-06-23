@@ -16,13 +16,19 @@ import { TbMoodSad } from 'react-icons/tb';
 import { DownloadItem } from './downloadItem';
 import { useGetDownloads } from './useGetDownloads';
 
-export function ActiveDownloads() {
+export function useGetDownloadingList() {
     const { data } = useGetDownloads();
 
     const downloadingList = useMemo(() => {
         const library = data?.length ? data : [];
         return library.filter((i) => i.status !== 'downloaded');
     }, [data]);
+
+    return { downloadingList };
+}
+
+export function ActiveDownloads() {
+    const { downloadingList } = useGetDownloadingList();
 
     return (
         <Stack flex={1} flexDirection="column">

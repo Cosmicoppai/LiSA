@@ -1,4 +1,6 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
+import { RQKEY_GET_DOWNLOADS, TSocketEventDownloading } from 'src/components/useGetDownloads';
 
 import { useSocketContext } from '../context/socket';
 import { TCookieReq } from '../types';
@@ -6,12 +8,16 @@ import { TCookieReq } from '../types';
 export function useHandleInitialSocketConnection() {
     const { socket, isSocketConnected } = useSocketContext();
 
+    // Get QueryClient from the context
+    const queryClient = useQueryClient();
+
     const handleSocketConnection = useCallback(
         (ev: MessageEvent<any>) => {
-            const msg: TCookieReq = typeof ev?.data === 'string' ? JSON.parse(ev?.data) : null;
+            const msg: TCookieReq | TSocketEventDownloading =
+                typeof ev?.data === 'string' ? JSON.parse(ev?.data) : null;
 
             console.log('socket event', msg);
-            if (msg?.data?.type === 'cookie_request') {
+            if (msg?.type === 'cookie_request') {
                 window?.electronAPI?.getDomainCookies(msg).then((response) => {
                     socket.send(
                         JSON.stringify({
@@ -19,6 +25,12 @@ export function useHandleInitialSocketConnection() {
                             data: response,
                         }),
                     );
+                });
+            }
+
+            if (msg?.type === 'downloaded') {
+                queryClient.invalidateQueries({
+                    queryKey: [RQKEY_GET_DOWNLOADS],
                 });
             }
         },

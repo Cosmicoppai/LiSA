@@ -1,16 +1,11 @@
 import { Box, Progress, Td, Text, Tr } from '@chakra-ui/react';
-import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { AiOutlineClose, AiOutlinePause } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { useSocketContext } from 'src/context/socket';
 import { formatBytes } from 'src/utils/formatBytes';
 
-import {
-    RQKEY_GET_DOWNLOADS,
-    TSocketEventDownloading,
-    useDownloadingActions,
-} from './useGetDownloads';
+import { TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
 
 export function DownloadItem({ data: fetchedData }) {
     const { cancelDownload, pauseDownload, resumeDownload } = useDownloadingActions([
@@ -39,9 +34,6 @@ export function DownloadItem({ data: fetchedData }) {
 
     const { socket, isSocketConnected } = useSocketContext();
 
-    // Get QueryClient from the context
-    const queryClient = useQueryClient();
-
     const handleSocketConnection = useCallback(
         (ev: MessageEvent<any>) => {
             const msg: TSocketEventDownloading =
@@ -52,11 +44,6 @@ export function DownloadItem({ data: fetchedData }) {
                 setSocketData({
                     ...fetchedData,
                     ...msg.data,
-                });
-            }
-            if (msg?.type === 'downloaded' && msg.data.id === fetchedData.id) {
-                queryClient.invalidateQueries({
-                    queryKey: [RQKEY_GET_DOWNLOADS],
                 });
             }
         },

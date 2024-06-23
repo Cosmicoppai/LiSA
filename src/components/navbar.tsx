@@ -1,4 +1,4 @@
-import { Flex, Icon, Tooltip } from '@chakra-ui/react';
+import { Badge, Box, Flex, Icon, Tooltip } from '@chakra-ui/react';
 import {
     AiOutlineCompass,
     AiOutlineDownload,
@@ -7,6 +7,8 @@ import {
 } from 'react-icons/ai';
 import { LuListVideo } from 'react-icons/lu';
 import { Link, useLocation } from 'react-router-dom';
+
+import { useGetDownloadingList } from './ActiveDownloads';
 
 export function Navbar() {
     return (
@@ -30,7 +32,7 @@ export function Navbar() {
                 <NavBarItem label="Search" to={'/'} Icon={AiOutlineSearch} />
                 <NavBarItem label="Explore" to={'/explore'} Icon={AiOutlineCompass} />
                 <NavBarItem label="My List" to={'/mylist'} Icon={LuListVideo} />
-                <NavBarItem label="Downloads" to={'/download'} Icon={AiOutlineDownload} />
+                <NavBarDownloadItem label="Downloads" to={'/download'} Icon={AiOutlineDownload} />
             </div>
             <div
                 style={{
@@ -45,13 +47,45 @@ export function Navbar() {
     );
 }
 
-function NavBarItem({ label, to, Icon: IIcon }) {
+function NavBarItem({ label, to, Icon: IconAs }) {
     const { pathname } = useLocation();
 
     return (
         <Tooltip label={label} placement="right">
             <Link to={to}>
-                <Icon as={IIcon} w={8} h={8} color={pathname === to ? 'white' : '#9c9c9c'} />
+                <Icon as={IconAs} w={8} h={8} color={pathname === to ? 'white' : '#9c9c9c'} />
+            </Link>
+        </Tooltip>
+    );
+}
+
+function NavBarDownloadItem({ label, to, Icon: IconAs }) {
+    const { pathname } = useLocation();
+
+    const { downloadingList } = useGetDownloadingList();
+
+    const totalItems = downloadingList.length;
+
+    const countText = totalItems > 9 ? '9+' : totalItems;
+
+    return (
+        <Tooltip label={label} placement="right">
+            <Link to={to}>
+                <Box pos="relative">
+                    {totalItems > 0 ? (
+                        <Badge
+                            pos="absolute"
+                            variant="solid"
+                            borderRadius={12}
+                            px={1}
+                            bgColor="red"
+                            right={-1}
+                            bottom={-0.2}>
+                            {countText}
+                        </Badge>
+                    ) : null}
+                    <Icon as={IconAs} w={8} h={8} color={pathname === to ? 'white' : '#9c9c9c'} />
+                </Box>
             </Link>
         </Tooltip>
     );
