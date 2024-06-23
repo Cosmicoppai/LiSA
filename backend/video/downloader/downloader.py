@@ -84,7 +84,7 @@ class ProgressTracker:
 
     def send_update(self) -> None:
         if self.msg_pipe_input:  # if pipe exists, pass the msg
-            self.msg_pipe_input.send({"data": self.file_data, "type": "downloading"})
+            self.msg_pipe_input.send({"data": self.file_data, "type": "downloads"})
 
 
 class Downloader(ABC):
@@ -167,7 +167,7 @@ class Downloader(ABC):
         self.library.update(self.file_data["id"], {"status": self.file_data["status"], "total_size": total_size})
         if status == "started":
             self.file_data["speed"] = 0
-        self.msg_system_in_pipe.send({"data": self.file_data, "type": "downloaded"})
+        self.msg_system_in_pipe.send({"data": self.file_data, "type": "downloads"})
 
     @staticmethod
     def read_manifest(file_path: str) -> str | List[str]:
@@ -683,7 +683,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                                         output_dir.joinpath(f"{_file_name[1]}{ext}").__str__())
 
         if MsgSystem.in_pipe:
-            MsgSystem.in_pipe.send({"data": file_data})  # send msg to update about the status
+            MsgSystem.in_pipe.send({"data": file_data, "type": "downloads"})  # send msg to update about the status
 
         file_data["output_dir"] = output_dir.__str__()
         file_data["segment_dir"] = seg_dir.__str__()

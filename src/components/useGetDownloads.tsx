@@ -17,7 +17,7 @@ export type TDownload = {
 
 export type TSocketEventDownloading = {
     data: TDownload;
-    type: 'downloading' | 'downloaded';
+    type: 'downloads';
 };
 
 async function getDownloads(): Promise<TDownload[]> {

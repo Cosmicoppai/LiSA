@@ -28,8 +28,8 @@ export function DownloadsHistory() {
     };
 
     return (
-        <Stack flex={1} flexDirection="column" pt={2}>
-            <Heading fontSize={'xl'} fontFamily={'body'}>
+        <Stack flex={1} flexDirection="column">
+            <Heading fontSize={'xl'} py={2} fontFamily={'body'}>
                 History
             </Heading>
             <Stack
@@ -86,25 +86,28 @@ function DownloadsHistoryItem({
                 columnGap: 20,
                 alignItems: 'center',
             }}>
-            <Box
-                style={{
-                    cursor: 'pointer',
-                    borderWidth: 1,
-                    borderColor: 'white',
-                    borderRadius: 20,
-                    padding: 16,
-                    display: 'flex',
-                    alignItems: 'center',
-                }}
-                onClick={() => playClickHandler(data.id)}>
-                <Icon as={FaPlay} w={6} h={6} />
-            </Box>
+            <Tooltip label={'Play'} placement="top">
+                <Box
+                    style={{
+                        cursor: 'pointer',
+                        borderWidth: 1,
+                        borderColor: 'white',
+                        borderRadius: 20,
+                        padding: 16,
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                    onClick={() => playClickHandler(data.id)}>
+                    <Icon as={FaPlay} w={6} h={6} />
+                </Box>
+            </Tooltip>
             <div
                 style={{
                     flexGrow: 1,
                     flexShrink: 1,
                     display: 'flex',
                     flexDirection: 'column',
+                    rowGap: 6,
                 }}>
                 <div
                     style={{

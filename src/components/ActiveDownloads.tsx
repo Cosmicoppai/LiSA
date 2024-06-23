@@ -1,15 +1,4 @@
-import {
-    Box,
-    Flex,
-    Heading,
-    Stack,
-    Table,
-    TableContainer,
-    Text,
-    Th,
-    Thead,
-    Tr,
-} from '@chakra-ui/react';
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { TbMoodSad } from 'react-icons/tb';
 
@@ -32,7 +21,7 @@ export function ActiveDownloads() {
 
     return (
         <Stack flex={1} flexDirection="column">
-            <Heading fontSize={'xl'} fontFamily={'body'}>
+            <Heading fontSize={'xl'} py={2} fontFamily={'body'}>
                 Active Downloads
             </Heading>
 
@@ -44,45 +33,35 @@ export function ActiveDownloads() {
                 pt={2}
                 bg={'gray.900'}
                 minWidth={'400px'}>
-                <Box
-                    sx={{
-                        width: '100%',
-                        p: 3,
-                    }}>
-                    {downloadingList.length === 0 ? (
-                        <Flex alignItems={'center'} justifyContent="center">
-                            <Box color="gray.500" mr="2">
-                                <TbMoodSad size={24} />
-                            </Box>
-                            <Text
-                                fontWeight={600}
-                                color={'gray.500'}
-                                size="lg"
-                                textAlign={'center'}>
-                                No Active Downloads
-                            </Text>
-                        </Flex>
-                    ) : (
-                        <TableContainer width={'100%'}>
-                            <Table>
-                                <Thead>
-                                    <Tr>
-                                        <Th></Th>
-                                        <Th fontSize={'16px'}>FILE NAME</Th>
-                                        <Th fontSize={'16px'}>STATUS</Th>
-                                        <Th fontSize={'16px'}>SPEED</Th>
-                                        <Th fontSize={'16px'}>SIZE</Th>
-                                        <Th></Th>
-                                    </Tr>
-                                </Thead>
-                                {downloadingList.map((item, index) => (
-                                    <DownloadItem key={index} data={item} />
-                                ))}
-                            </Table>
-                        </TableContainer>
-                    )}
-                </Box>
+                {downloadingList.length ? (
+                    <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            width: '100%',
+                            rowGap: 20,
+                        }}>
+                        {downloadingList.map((item, index: number) => (
+                            <DownloadItem key={index} data={item} />
+                        ))}
+                    </div>
+                ) : (
+                    <ActiveDownloadsEmpty />
+                )}
             </Stack>
         </Stack>
+    );
+}
+
+function ActiveDownloadsEmpty() {
+    return (
+        <Flex alignItems={'center'} justifyContent="center">
+            <Box color="gray.500" mr="2">
+                <TbMoodSad size={24} />
+            </Box>
+            <Text fontWeight={600} color={'gray.500'} size="lg" textAlign={'center'}>
+                No Active Downloads
+            </Text>
+        </Flex>
     );
 }

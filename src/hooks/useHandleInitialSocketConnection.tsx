@@ -28,7 +28,8 @@ export function useHandleInitialSocketConnection() {
                 });
             }
 
-            if (msg?.type === 'downloaded') {
+            // Refetch the downloading count when any download item finished downloading.
+            if (msg?.type === 'downloads' && msg.data?.status === 'downloaded') {
                 queryClient.invalidateQueries({
                     queryKey: [RQKEY_GET_DOWNLOADS],
                 });
