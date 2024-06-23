@@ -6,7 +6,7 @@ import server from 'src/utils/axios';
 
 import { ErrorMessage } from './ErrorMessage';
 import { SkeletonCards } from './SkeletonCards';
-import { AnimeCard } from './card';
+import { SearchResultCard } from './search-result-card';
 import { addAnimeDetails } from '../store/actions/animeActions';
 
 async function getAnimeList({ category }) {
@@ -55,13 +55,13 @@ export function ExploreAnimeCategories({ category }) {
                 <SkeletonCards />
             ) : (
                 data?.data?.map((data, index) => (
-                    <AnimeCard
+                    <SearchResultCard
                         key={index}
                         cardType="anime"
                         onClick={() => exploreCardHandler(data)}
                         data={{
-                            poster: data.poster || data.img_url,
-                            type: data.anime_type || data.type,
+                            poster: data.poster,
+                            type: data.type,
                             rank: data.rank,
                             episodes: data.episodes,
                             score: data.score,

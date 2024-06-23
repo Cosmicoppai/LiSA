@@ -1,12 +1,11 @@
 import { Box, Center, Flex, Stack, Text } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { TbMoodSad } from 'react-icons/tb';
-import { useNavigate } from 'react-router-dom';
+import { AnimeCard } from 'src/components/AnimeCard';
 import { AppModeSwitch } from 'src/components/AppModeSwitch';
 import { ErrorMessage } from 'src/components/ErrorMessage';
+import { MangaCard } from 'src/components/MangaCard';
 import { SkeletonCards } from 'src/components/SkeletonCards';
-import { AnimeCard } from 'src/components/card';
-import { SearchResultCard } from 'src/components/search-result-card';
 import { useAppContext } from 'src/context/app';
 import server from 'src/utils/axios';
 
@@ -22,15 +21,6 @@ export function MyListScreen() {
         queryKey: [mode === 'manga' ? 'read-list' : 'watch-list', mode],
         queryFn: () => getMyList({ url: mode === 'manga' ? 'readlist' : '/watchlist' }),
     });
-
-    const navigate = useNavigate();
-    const exploreCardHandler = (data) => {
-        navigate(
-            `/manga-details?${new URLSearchParams({
-                q: JSON.stringify(data),
-            })}`,
-        );
-    };
 
     if (error) return <ErrorMessage error={error} />;
 
@@ -61,21 +51,9 @@ export function MyListScreen() {
                         ) : (
                             data?.data?.map((item, index) =>
                                 mode === 'manga' ? (
-                                    <AnimeCard
-                                        key={index}
-                                        onClick={() => exploreCardHandler(item)}
-                                        cardType="manga"
-                                        data={{
-                                            poster: item.poster,
-                                            type: item.type,
-                                            rank: item.rank,
-                                            episodes: item.total_chps,
-                                            score: item.score,
-                                            title: item.title,
-                                        }}
-                                    />
+                                    <MangaCard key={index} data={item} />
                                 ) : (
-                                    <SearchResultCard key={index} data={item} />
+                                    <AnimeCard key={index} data={item} />
                                 ),
                             )
                         )}

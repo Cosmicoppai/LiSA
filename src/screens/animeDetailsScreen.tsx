@@ -22,13 +22,13 @@ import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
 import { useSelector, useDispatch } from 'react-redux';
 import { AddToWatchList } from 'src/components/AddToWatchList';
+import { AnimeCard } from 'src/components/AnimeCard';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { SkeletonCards } from 'src/components/SkeletonCards';
 import { YoutubeVideo } from 'src/components/YoutubeVideo';
 import { openExternalUrl } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
-import { SearchResultCard } from '../components/search-result-card';
 import { getRecommendations } from '../store/actions/animeActions';
 
 export function AnimeDetailsScreen() {
@@ -301,7 +301,7 @@ export function AnimeDetailsScreen() {
                                         }}>
                                         {recommendations ? (
                                             recommendations.map((anime, index) => (
-                                                <SearchResultCard key={index} data={anime} />
+                                                <AnimeCard key={index} data={anime} />
                                             ))
                                         ) : (
                                             <SkeletonCards />

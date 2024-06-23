@@ -1,10 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import server from 'src/utils/axios';
 
 import { ErrorMessage } from './ErrorMessage';
+import { MangaCard } from './MangaCard';
 import { SkeletonCards } from './SkeletonCards';
-import { AnimeCard } from './card';
 
 async function getMangaList({ category }) {
     const { data } = await server.get(`top?type=manga&c=${category}&limit=0`);
@@ -15,15 +14,7 @@ export function ExploreMangaCategories({ category }) {
         queryKey: ['manga-list', category],
         queryFn: () => getMangaList({ category }),
     });
-    const navigate = useNavigate();
 
-    const exploreCardHandler = (data) => {
-        navigate(
-            `/manga-details?${new URLSearchParams({
-                q: JSON.stringify(data),
-            })}`,
-        );
-    };
     if (error) return <ErrorMessage error={error} />;
 
     return (
@@ -40,21 +31,7 @@ export function ExploreMangaCategories({ category }) {
                 {isLoading ? (
                     <SkeletonCards />
                 ) : (
-                    data?.data?.map((item, index) => (
-                        <AnimeCard
-                            key={index}
-                            onClick={() => exploreCardHandler(item)}
-                            cardType="manga"
-                            data={{
-                                poster: item.poster,
-                                type: item.type,
-                                rank: item.rank,
-                                episodes: item.volumes,
-                                score: item.score,
-                                title: item.title,
-                            }}
-                        />
-                    ))
+                    data?.data?.map((item, index) => <MangaCard key={index} data={item} />)
                 )}
             </ul>
         </>
