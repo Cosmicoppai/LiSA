@@ -136,15 +136,3 @@ export const getVideoUrl = (pahewin_url) => async (dispatch) => {
         dispatch({ type: ANIME_STREAM_URL_FAIL, payload: error });
     }
 };
-
-export const getRecommendations = (url) => async (dispatch) => {
-    try {
-        dispatch({ type: ANIME_RECOMMENDATION_REQUEST });
-
-        const { data } = await server.get(url);
-
-        dispatch({ type: ANIME_RECOMMENDATION_SUCCESS, payload: data });
-    } catch (error) {
-        dispatch({ type: ANIME_RECOMMENDATION_FAIL, payload: error });
-    }
-};

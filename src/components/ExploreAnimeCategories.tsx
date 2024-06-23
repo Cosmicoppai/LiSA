@@ -1,13 +1,10 @@
 import { useToast } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import server from 'src/utils/axios';
 
+import { AnimeCard } from './AnimeCard';
 import { ErrorMessage } from './ErrorMessage';
 import { SkeletonCards } from './SkeletonCards';
-import { SearchResultCard } from './search-result-card';
-import { addAnimeDetails } from '../store/actions/animeActions';
 
 async function getAnimeList({ category }) {
     const { data } = await server.get(`top?type=anime&c=${category}&limit=0`);
@@ -20,23 +17,14 @@ export function ExploreAnimeCategories({ category }) {
         queryFn: () => getAnimeList({ category }),
     });
 
-    const navigate = useNavigate();
     const toast = useToast();
 
-    const dispatch = useDispatch();
-
-    const exploreCardHandler = (data) => {
-        if (category === 'upcoming') {
-            toast({
-                title: 'Anime has not been aired yet! ❤️',
-                status: 'error',
-                duration: 2000,
-            });
-        } else {
-            // @ts-ignore
-            dispatch(addAnimeDetails(data));
-            navigate('/anime-details');
-        }
+    const handleUpcomingAnimes = () => {
+        toast({
+            title: 'Anime has not been aired yet! ❤️',
+            status: 'error',
+            duration: 2000,
+        });
     };
 
     if (error) return <ErrorMessage error={error} />;
@@ -54,19 +42,11 @@ export function ExploreAnimeCategories({ category }) {
             {isLoading ? (
                 <SkeletonCards />
             ) : (
-                data?.data?.map((data, index) => (
-                    <SearchResultCard
+                data?.data?.map((item, index) => (
+                    <AnimeCard
                         key={index}
-                        cardType="anime"
-                        onClick={() => exploreCardHandler(data)}
-                        data={{
-                            poster: data.poster,
-                            type: data.type,
-                            rank: data.rank,
-                            episodes: data.episodes,
-                            score: data.score,
-                            title: data.title,
-                        }}
+                        onClick={category === 'upcoming' ? handleUpcomingAnimes : undefined}
+                        data={item}
                     />
                 ))
             )}

@@ -1,34 +1,22 @@
 import { Box, Heading, Text, Stack, Image, Flex, Spacer, Badge } from '@chakra-ui/react';
-import { useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
+
+export type TSearchResultCardData = {
+    poster: string;
+    type: string;
+    rank?: number | string;
+    episodes: string | number;
+    score?: string | number;
+    title: string;
+};
 
 export function SearchResultCard({
     onClick,
     data,
-    cardType,
 }: {
     onClick: () => void;
-    cardType: 'manga' | 'anime';
-    data: {
-        poster: string;
-        type: string;
-        rank?: number | string;
-        episodes: string | number;
-
-        score?: string | number;
-        title: string;
-    };
+    data: TSearchResultCardData;
 }) {
-    const epTxt = useMemo(() => {
-        if (data.episodes === '?') return 'Running';
-
-        if (cardType === 'anime') return `Ep ${data.episodes}`;
-
-        if (cardType === 'manga') return `Chapters ${data.episodes}`;
-
-        return '';
-    }, [cardType, data]);
-
     return (
         <Box
             sx={{ display: 'flex', padding: '1rem', margin: '18px auto', height: 'max-content' }}
@@ -132,7 +120,7 @@ export function SearchResultCard({
                                 borderRadius: '5px',
                                 p: 1,
                             }}>
-                            <Text color={'gray.300'}>{epTxt}</Text>
+                            <Text color={'gray.300'}>{data.episodes}</Text>
                         </Badge>
                         {data.score ? (
                             <Box display={'flex'} alignItems="center" justifyContent={'center'}>

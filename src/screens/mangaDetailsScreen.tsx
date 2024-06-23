@@ -27,7 +27,7 @@ import { AddToWatchListManga } from 'src/components/AddToWatchListManga';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 
 import { getMangaDetails } from './getMangaDetails';
-import { MangaRecommendations } from '../components/MangaRecommendations';
+import { Recommendations } from '../components/Recommendations';
 
 export function MangaDetailsScreen() {
     const navigate = useNavigate();
@@ -301,7 +301,10 @@ export function MangaDetailsScreen() {
                                             display: 'flex',
                                             flexWrap: 'wrap',
                                         }}>
-                                        <MangaRecommendations url={details?.recommendation} />
+                                        <Recommendations
+                                            type="manga"
+                                            url={details?.recommendation}
+                                        />
                                     </Box>
                                 </Stack>
                             </Box>

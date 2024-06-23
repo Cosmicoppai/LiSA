@@ -20,38 +20,24 @@ import {
 import { useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { AddToWatchList } from 'src/components/AddToWatchList';
-import { AnimeCard } from 'src/components/AnimeCard';
 import { GoBackBtn } from 'src/components/GoBackBtn';
-import { SkeletonCards } from 'src/components/SkeletonCards';
+import { Recommendations } from 'src/components/Recommendations';
 import { YoutubeVideo } from 'src/components/YoutubeVideo';
 import { openExternalUrl } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
-import { getRecommendations } from '../store/actions/animeActions';
 
 export function AnimeDetailsScreen() {
-    const dispatch = useDispatch();
-
     // @ts-ignore
     const { details: data } = useSelector((state) => state.animeDetails);
     // @ts-ignore
     const { details, loading: ep_loading } = useSelector((state) => state.animeEpisodesDetails);
 
-    const { details: recommendations } = useSelector(
-        // @ts-ignore
-        (state) => state.animeRecommendations,
-    );
-
     useEffect(() => {
         if (window) {
             window?.scrollTo(0, 0);
-        }
-
-        if (details.recommendation) {
-            // @ts-ignore
-            dispatch(getRecommendations(details.recommendation));
         }
     }, [details]);
 
@@ -299,13 +285,10 @@ export function AnimeDetailsScreen() {
                                             display: 'flex',
                                             flexWrap: 'wrap',
                                         }}>
-                                        {recommendations ? (
-                                            recommendations.map((anime, index) => (
-                                                <AnimeCard key={index} data={anime} />
-                                            ))
-                                        ) : (
-                                            <SkeletonCards />
-                                        )}
+                                        <Recommendations
+                                            type="anime"
+                                            url={details?.recommendation}
+                                        />
                                     </Box>
                                 </Stack>
                             </Box>

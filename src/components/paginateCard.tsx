@@ -15,19 +15,13 @@ import {
     Spacer,
     Text,
     useDisclosure,
-    useToast,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { MetaDataPopup } from './metadata-popup';
-import {
-    addCurrentEp,
-    addEpisodesDetails,
-    getRecommendations,
-    getStreamDetails,
-} from '../store/actions/animeActions';
+import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/actions/animeActions';
 import { downloadVideo } from '../store/actions/downloadActions';
 import server from '../utils/axios';
 
@@ -41,7 +35,6 @@ export function PaginateCard({
     player,
     setTest,
 }) {
-    const toast = useToast();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const { loading: epsLoading } = useSelector((state) => state.animeEpisodesDetails);
@@ -67,7 +60,6 @@ export function PaginateCard({
         //   setIsDownloadButtonAvailable(true);
         //   setTest({ assdfda: "assdfdasd" });
         // });
-        // dispatch(getRecommendations(ep_details.recommendation));
         if (redirect) {
             navigate('/play');
         }
