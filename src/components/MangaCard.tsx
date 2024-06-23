@@ -34,16 +34,10 @@ export function MangaCard({ data }: { data: TManga }) {
     return (
         <SearchResultCard
             onClick={exploreCardHandler}
-            data={
-                {
-                    poster: data.poster,
-                    title: data.title,
-                    episodes,
-                    type: data.type,
-                    rank: data.rank,
-                    score: data.score,
-                } as any
-            }
+            data={{
+                ...data,
+                episodes,
+            }}
         />
     );
 }

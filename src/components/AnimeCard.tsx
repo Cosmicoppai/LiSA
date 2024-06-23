@@ -27,7 +27,7 @@ export function AnimeCard({ data, onClick }: { data: any; onClick?: () => void }
         <SearchResultCard
             onClick={onClick || detailsClickHandler}
             data={{
-                ...(data as any),
+                ...data,
                 episodes,
                 title: data.title ?? data.jp_name,
             }}

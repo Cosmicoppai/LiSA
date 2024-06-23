@@ -204,18 +204,20 @@ export function MangaDetailsScreen() {
                             {volTxt}
                         </Text>
                         <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
-                            <Badge
-                                px={2}
-                                py={1}
-                                fontWeight={'400'}
-                                sx={{
-                                    display: 'flex',
-                                    justifyContent: 'content',
-                                    alignItems: 'center',
-                                }}>
-                                <Icon as={FiMonitor} />
-                                <Text ml="1">{data?.type}</Text>
-                            </Badge>
+                            {data?.type ? (
+                                <Badge
+                                    px={2}
+                                    py={1}
+                                    fontWeight={'400'}
+                                    sx={{
+                                        display: 'flex',
+                                        justifyContent: 'content',
+                                        alignItems: 'center',
+                                    }}>
+                                    <Icon as={FiMonitor} />
+                                    <Text ml="1">{data?.type}</Text>
+                                </Badge>
+                            ) : null}
                             {data?.status && (
                                 <Badge px={2} py={1} fontWeight={'400'}>
                                     {data?.status}
@@ -247,18 +249,15 @@ export function MangaDetailsScreen() {
 
                         {data.genres?.length ? (
                             <div>
-                                <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
+                                <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                                     Genre
                                 </Text>
                                 <Box>
-                                    {data.genres &&
-                                        data.genres.map((item, index) => {
-                                            return (
-                                                <Tag key={index} mr={2}>
-                                                    {item}
-                                                </Tag>
-                                            );
-                                        })}
+                                    {data.genres?.map((item, index) => (
+                                        <Tag key={index} mr={2}>
+                                            {item}
+                                        </Tag>
+                                    ))}
                                 </Box>
                             </div>
                         ) : null}
@@ -269,7 +268,7 @@ export function MangaDetailsScreen() {
                                 alignItems: 'flex-end',
                             }}>
                             {isLoading ? (
-                                <Skeleton p={2} m={2} width={'48px'} height={'48px'}></Skeleton>
+                                <Skeleton p={2} m={2} width={'48px'} height={'48px'} />
                             ) : (
                                 <Button onClick={handleRead}>Read</Button>
                             )}

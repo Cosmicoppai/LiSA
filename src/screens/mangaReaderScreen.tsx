@@ -1,12 +1,14 @@
-import { Box, Center, Flex, Heading, Image, Skeleton, Text } from '@chakra-ui/react';
+import { Box, Center, Flex, Heading, Icon, Image, Skeleton, Text, Tooltip } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
+import { GoScreenFull, GoScreenNormal } from 'react-icons/go';
 import { useSearchParams } from 'react-router-dom';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { localImagesPath } from 'src/constants/images';
 import server from 'src/utils/axios';
 
 import { TMangaChapters, getMangaDetails } from './getMangaDetails';
+import { useFullScreenMode } from '../hooks/useFullScreenMode';
 
 export function MangaReaderScreen() {
     const [searchParams] = useSearchParams();
@@ -93,8 +95,11 @@ function MangaReader({ chapters, isLoading }: { chapters: TMangaChapters; isLoad
         }
     }, [chapters]);
 
+    const { isFullScreen, fullScreenRef, handleFullScreen } = useFullScreenMode();
+
     return (
         <div
+            ref={fullScreenRef}
             style={{
                 display: 'flex',
                 flexGrow: 1,
@@ -110,7 +115,7 @@ function MangaReader({ chapters, isLoading }: { chapters: TMangaChapters; isLoad
                     flexGrow: 1,
                     flexDirection: 'column',
                 }}>
-                <Text p={2} fontSize="large" fontWeight={'bold'} position={'sticky'}>
+                <Text p={2} fontSize="large" fontWeight={'bold'}>
                     Chapters
                 </Text>
 
@@ -142,24 +147,50 @@ function MangaReader({ chapters, isLoading }: { chapters: TMangaChapters; isLoad
                     />
                 </Flex>
             </div>
-            <Box
-                sx={{
+            <div
+                style={{
                     width: '100%',
                     display: 'flex',
                     flexGrow: 1,
-
-                    overflowY: 'auto',
-                    '&::-webkit-scrollbar': {
-                        width: '8px',
-                        borderRadius: '8px',
-                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                    },
+                    flexDirection: 'column',
+                    rowGap: 10,
                 }}>
-                <MangaChapterImages currentChapter={currentChapter} />
-            </Box>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                    }}>
+                    <Tooltip
+                        label={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+                        placement="top">
+                        <Box
+                            style={{
+                                cursor: 'pointer',
+                            }}
+                            onClick={handleFullScreen}>
+                            <Icon as={isFullScreen ? GoScreenNormal : GoScreenFull} w={8} h={8} />
+                        </Box>
+                    </Tooltip>
+                </div>
+                <Box
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        flexGrow: 1,
+
+                        overflowY: 'auto',
+                        '&::-webkit-scrollbar': {
+                            width: '8px',
+                            borderRadius: '8px',
+                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                        },
+                        '&::-webkit-scrollbar-thumb': {
+                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
+                        },
+                    }}>
+                    <MangaChapterImages currentChapter={currentChapter} />
+                </Box>
+            </div>
         </div>
     );
 }
@@ -307,6 +338,12 @@ function MangaChapterImages({
                     alt={`manga-chapter-${idx}-image`}
                     width={'65%'}
                     style={{
+                        userSelect: 'none',
+                        msUserSelect: 'none',
+                        MozUserSelect: 'none',
+                        WebkitUserSelect: 'none',
+                        msTouchSelect: 'none',
+                        pointerEvents: 'none',
                         borderRadius: 20,
                         objectFit: 'contain',
                     }}
