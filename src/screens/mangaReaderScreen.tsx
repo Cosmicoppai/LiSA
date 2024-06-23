@@ -7,6 +7,7 @@ import { localImagesPath } from 'src/constants/images';
 import server from 'src/utils/axios';
 
 import { TMangaChapters, getMangaDetails } from './getMangaDetails';
+
 export function MangaReaderScreen() {
     const [searchParams] = useSearchParams();
 
@@ -197,7 +198,7 @@ function MangaChapters({
                                     }`}
                                     borderRadius={10}
                                     alignItems="center"
-                                    bg={idx === currentChapter.idx ? '#CBD5E0' : '#1A202C'}
+                                    bg={idx === currentChapter.idx ? '#CBD5E0' : undefined}
                                     onClick={() =>
                                         setCurrentChapter({
                                             idx,
@@ -218,22 +219,25 @@ function MangaChapters({
                     ))}
                 </>
             ) : (
-                <EpisodeSkeletons />
+                <ChaptersSkeletons />
             )}
         </>
     );
 }
 
-function EpisodeSkeletons() {
+function ChaptersSkeletons() {
     return (
-        <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
+        <Flex
+            direction={'column'}
+            rowGap={4}
+            flexWrap="wrap"
+            width={'100%'}
+            justifyContent="center">
             {Array(18)
                 .fill(0)
-                .map((item, index) => {
-                    return (
-                        <Skeleton p={2} m={2} width={'48px'} height={'48px'} key={index}></Skeleton>
-                    );
-                })}
+                .map((_, index) => (
+                    <Skeleton key={index} p={2} width={'90%'} borderRadius={6} height={'30px'} />
+                ))}
         </Flex>
     );
 }

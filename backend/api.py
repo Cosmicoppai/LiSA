@@ -526,8 +526,8 @@ async def readlist(request: Request):
         elif request.method == "POST":
             jb = request.state.body
 
-            manga_session = jb["manga_id"]
-            chps = jb["chps"]
+            manga_session = jb["session"]
+            total_chps = jb["total_chps"]
             status = jb["status"]
             genres = json.dumps(jb["genres"])
             poster = jb["poster"]
@@ -543,8 +543,8 @@ async def readlist(request: Request):
             cur = DB.connection.cursor()
 
             cur.execute(
-                "INSERT INTO readlist (manga_id, title, chps, status, genres, poster, session)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?)", (manga_id, title, chps, status, genres, poster, manga_session)
+                "INSERT INTO readlist (manga_id, title, total_chps, status, genres, poster, session)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)", (manga_id, title, total_chps, status, genres, poster, manga_session)
             )
 
             DB.connection.commit()

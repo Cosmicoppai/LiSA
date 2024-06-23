@@ -34,8 +34,9 @@ export async function getMangaDetails({ url }) {
                 alt_name: string;
                 author: string;
                 summary: string;
-                youtube_url: string;
             };
+            mylist: boolean;
+            manga_id: string | number;
             recommendation: string;
         };
     };

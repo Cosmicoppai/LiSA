@@ -164,7 +164,9 @@ class MangaKatana(Manga):
 
         cur = DB.connection.cursor()
         read_list = cur.execute("SELECT * FROM readlist WHERE manga_id=?", (manga_id,))
-        res["description"]["mylist"] = True if read_list.fetchone() else False
+        res["mylist"] = True if read_list.fetchone() else False
+        
+        res["manga_id"] = manga_id
 
         return res
 

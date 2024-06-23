@@ -23,7 +23,7 @@ import { useEffect, useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AddToWatchList } from 'src/components/AddToWatchList';
+import { AddToWatchListManga } from 'src/components/AddToWatchListManga';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 
 import { getMangaDetails } from './getMangaDetails';
@@ -71,7 +71,7 @@ export function MangaDetailsScreen() {
     const volTxt = useMemo(() => {
         if (typeof data?.total_chps === 'string' || typeof data?.total_chps === 'number') {
             if (data?.total_chps === '?') return 'running';
-            return `VOLUMES ${data?.total_chps}`;
+            return `CHAPTERS ${data?.total_chps}`;
         }
 
         return '';
@@ -179,19 +179,25 @@ export function MangaDetailsScreen() {
                                         />
                                     )}
                                 </div>
-                                {/* <AddToWatchList
-                                    key={details?.description?.anime_id}
-                                    anime_id={details?.description?.anime_id}
-                                    jp_name={data.jp_name || data.title}
-                                    poster={data?.poster || data?.img_url}
-                                    mylist={details.mylist}
-                                    no_of_episodes={data.no_of_episodes || data.episodes}
-                                    type={details?.description?.type || data.type}
-                                    status={details?.description?.status || ''}
-                                    season={details?.description?.season || ''}
-                                    year={details?.description?.year || ''}
-                                    score={data.score}
-                                /> */}
+                                {isLoading ? (
+                                    <Skeleton
+                                        height={'30px'}
+                                        width={'30px'}
+                                        alignSelf={'baseline'}
+                                        display={'inline-block'}
+                                    />
+                                ) : (
+                                    <AddToWatchListManga
+                                        key={details?.manga_id}
+                                        manga_id={details?.manga_id}
+                                        session={data?.session}
+                                        total_chps={data?.total_chps}
+                                        poster={data?.poster}
+                                        mylist={details?.mylist}
+                                        genres={data?.genres}
+                                        status={data?.status || ''}
+                                    />
+                                )}
                             </div>
                         </Box>
                         <Text fontWeight={600} color={'gray.500'} size="sm" mb={4}>

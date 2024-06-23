@@ -29,8 +29,8 @@ export function Navbar() {
                 }}>
                 <NavBarItem label="Search" to={'/'} Icon={AiOutlineSearch} />
                 <NavBarItem label="Explore" to={'/explore'} Icon={AiOutlineCompass} />
-                <NavBarItem label="Downloads" to={'/download'} Icon={AiOutlineDownload} />
                 <NavBarItem label="My List" to={'/mylist'} Icon={LuListVideo} />
+                <NavBarItem label="Downloads" to={'/download'} Icon={AiOutlineDownload} />
             </div>
             <div
                 style={{
