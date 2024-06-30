@@ -1,4 +1,8 @@
 from __future__ import annotations
+
+from datetime import datetime
+import json
+
 import aiohttp
 import asyncio
 from abc import abstractmethod
@@ -56,17 +60,27 @@ class Animepahe(Anime):
     @classmethod
     async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
         if not cls.session or not cls.cookies:
+            cur = DB.connection.cursor()
+            res = cur.execute(f"SELECT * from site_state where site_name = ?", (cls._SITE_NAME, )).fetchone()
+            if res:
+                res = dict(res)
+                if datetime.fromisoformat(res["created_on"]) < datetime.now():
+                    await cls.set_session(json.loads(res["session_info"]))
 
-            cookie_req_data = {"site_url": cls.site_url, "user_agent": headers["user-agent"]}
-            if MsgSystem.in_pipe:
-                MsgSystem.in_pipe.send({"type": "cookie_request", "data": cookie_req_data})
-                while True:
-                    await asyncio.sleep(0.25)
-                    if MsgSystem.in_pipe.poll():
-                        cookies = MsgSystem.in_pipe.recv()
-                        if cookies:
-                            await cls.set_session(cookies)
-                        break
+            else:
+                cookie_req_data = {"site_url": cls.site_url, "user_agent": headers["user-agent"]}
+                if MsgSystem.in_pipe:
+                    MsgSystem.in_pipe.send({"type": "cookie_request", "data": cookie_req_data})
+                    while True:
+                        await asyncio.sleep(0.25)
+                        if MsgSystem.in_pipe.poll():
+                            cookies = MsgSystem.in_pipe.recv()
+                            if cookies:
+                                await cls.set_session(cookies)
+                                cur.execute("INSERT INTO site_state (site_name, session_info)" "VALUES (?, ?)", (cls._SITE_NAME, json.dumps(cookies)))
+                                DB.connection.commit()
+                                cur.close()
+                            break
 
         return await super().get(url, data, headers)
 

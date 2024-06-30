@@ -29,10 +29,11 @@ class DB(metaclass=MetaDB):
             DB._highest_ids[table_name] = _highestId
 
     @classmethod
-    def migrate(cls, files: List[str] = ("progress_tracker.sql", "watchlist.sql", "readlist.sql")):
+    def migrate(cls, sql_files: List[str] = ()):
+        files = sql_files or DBConfig.DEFAULT_SQL_DIR.glob("*.sql")
         cur = cls.connection.cursor()
-        for fil in files:
-            file_ = DBConfig.DEFAULT_SQL_DIR.joinpath(fil).__str__()
+        for file_path in files:
+            file_ = DBConfig.DEFAULT_SQL_DIR.joinpath(file_path).__str__()
             with open(file_) as file:
                 try:
                     sql_queries = file.read()

@@ -133,6 +133,13 @@ class WatchList(Library):
     data: Dict[int, Dict[str, Any]] = {}
 
 
+class SiteState(Library):
+    table_name: str = "site_state"
+    fields: str = "site_name, session_info, created_on"
+    oid: str = "site_name"
+    data: Dict[str, Dict[str, Any]] = {}
+
+
 # class ReadList(Library):
 #     ...
 #
