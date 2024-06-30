@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 import aiohttp
 import asyncio
 import m3u8
@@ -124,10 +123,6 @@ class Downloader(ABC):
 
         if not self.OUTPUT_LOC.exists():
             makedirs(self.OUTPUT_LOC)
-
-        # remove output_dir and seg_dir from file_data
-        del self.file_data["output_dir"]
-        del self.file_data["segment_dir"]
 
         logging.info("successfully initialized")
 
@@ -601,7 +596,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
                 try:
 
-                    target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=deepcopy(file_data), msg_system_in_pipe=MsgSystem.in_pipe,
+                    target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data, msg_system_in_pipe=MsgSystem.in_pipe,
                                                                 headers=headers, library_data=(DBLibrary, DBLibrary.data))
 
                     p = Process(target=target.run)
