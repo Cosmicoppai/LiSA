@@ -11,7 +11,7 @@ from sqlite3 import IntegrityError
 
 
 class Library(ABC):
-    data: Dict[str, Dict[str, Any]] = {}
+    data: Dict[int, Dict[str, Any]] = {}
     _libraries: Dict[str, List[Library]] = {}
     table_name: str
     fields: str = ""
@@ -39,7 +39,9 @@ class Library(ABC):
         cur.execute(cmd, field_values)
         DB.connection.commit()
         cur.execute(f"SELECT {cls.fields} from {cls.table_name} WHERE {cls.oid}=?;", [_id, ])
-        cls.data[_id] = dict(cur.fetchone())
+        data = cur.fetchone()
+        if data:
+            cls.data[_id] = dict(data)
         cur.close()
 
     @classmethod
@@ -60,7 +62,7 @@ class Library(ABC):
         return [data for data in cls.data.values()]
 
     @classmethod
-    def get(cls, filters: Dict[str, Any], query: List[str] = ("*",)) -> List[Dict[str, Any]]:
+    def get(cls, filters: Dict[str, Any], query: List[str] = ("*",), negate: bool = False) -> List[Dict[str, Any]]:
         cur = DB.connection.cursor()
 
         _query: str = ""
@@ -70,10 +72,11 @@ class Library(ABC):
             _query += _queri
 
         cmd = f"SELECT {_query} FROM {cls.table_name} WHERE "
+        equate_query = "=" if not negate else "!="
         for idx, _filter in enumerate(filters):
             if idx != 0:
                 cmd += "AND "
-            cmd += f"{_filter}='{filters[_filter]}'"
+            cmd += f"{_filter}{equate_query}'{filters[_filter]}'"
 
         cur.execute(cmd)
         data = [dict(row) for row in cur.fetchall()]
@@ -128,3 +131,15 @@ class WatchList(Library):
     fields: str = "anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details, created_on"
     oid: str = "anime_id"
     data: Dict[int, Dict[str, Any]] = {}
+
+
+# class ReadList(Library):
+#     ...
+#
+#
+# class ContinueReading(Library):
+#     ...
+#
+#
+# class ContinueWatching(Library):
+#     ...

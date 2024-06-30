@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import aiohttp
 import asyncio
 import m3u8
@@ -600,7 +601,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
                 try:
 
-                    target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data, msg_system_in_pipe=MsgSystem.in_pipe,
+                    target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=deepcopy(file_data), msg_system_in_pipe=MsgSystem.in_pipe,
                                                                 headers=headers, library_data=(DBLibrary, DBLibrary.data))
 
                     p = Process(target=target.run)
@@ -618,8 +619,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def _schedule_pending_downloads(cls):
-        await cls.create_task_from_db(DBLibrary.get({"status": "started"}))  # re-start already started download
-        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))  # schedule remaining pending downloads
+        await cls.create_task_from_db(DBLibrary.get({"status": "downloaded"}, negate=True))  # re-start already started download
 
     @classmethod
     async def create_task_from_db(cls, _tasks):
@@ -689,8 +689,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         file_data["segment_dir"] = seg_dir.__str__()
 
         # add task_data and metadata for tracking and scheduling
-        cls._TaskData[file_data["id"]] = {"status": Status.scheduled,
-                                          "file_name": seg_name, "task_data": (manifest, file_data, header)}
+        cls._TaskData[file_data["id"]] = {"status": Status.scheduled, "file_name": seg_name, "task_data": (manifest, file_data, header)}
         await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
 
     @classmethod
