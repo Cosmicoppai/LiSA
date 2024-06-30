@@ -7,11 +7,11 @@ block_cipher = None
 
 
 a = Analysis(
-    ['backend\\LiSA.py'],
+    ['../backend/LiSA.py'],
     pathex=[],
-    binaries=[('ffmpeg.exe', '.')],
-    datas=[('backend/defaults', 'defaults'), ('backend/sql_queries', 'sql_queries'),
-     ('backend/config/config.json', '.')],
+    binaries=[('/opt/homebrew/bin/ffmpeg', '.')],
+    datas=[('../backend/defaults', 'defaults'), ('../backend/sql_queries', 'sql_queries'),
+     ('../backend/config/config.json', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},

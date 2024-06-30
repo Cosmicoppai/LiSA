@@ -1,10 +1,11 @@
+import json
 from json import JSONDecodeError
 from video.library import DBLibrary
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple
+from typing import Tuple, List
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -209,7 +210,7 @@ async def stream(request: Request):
     if not video_src:
         return await bad_request_400(request, msg="pass valid manifest url or video id")
     if _id:
-        res = DBLibrary.get(filters={"id": _id, "type": "anime"}, query=["file_location"])
+        res = DBLibrary.get(filters={"id": _id, "type": "video"}, query=["file_location"])
         if not res:
             return JSONResponse({"error": "Invalid Id"}, status_code=400)
         video_src = res[0]["file_location"]
@@ -385,11 +386,11 @@ async def top(request: Request):
         case "manga":
             if _category.lower() not in MyAL.manga_types_dict:
                 return await bad_request_400(request, msg="Pass valid Manga Category")
-            top_resp = await MyAL().get_top_mange(manga_type=_category, limit=_limit)
+            top_resp = await MyAL().get_top_manga(manga_type=_category, limit=_limit)
         case _:
             return await bad_request_400(request, msg="Pass valid type")
 
-    if not top_resp["next_top"] and not top_resp["prev_top"]:
+    if not top_resp["data"]:
         return await not_found_404(request, msg="limit out of range")
 
     return JSONResponse(top_resp)
@@ -508,6 +509,59 @@ async def watchlist(request: Request):
         return await bad_request_400(request, msg=f"Record already exists")
 
 
+async def readlist(request: Request):
+    try:
+        if request.method == "GET":
+            cur = DB.connection.cursor()
+            cur.execute("SELECT * FROM readlist ORDER BY created_on DESC")
+            resp = []
+            for row in cur.fetchall():
+                data = dict(row)
+                data["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={data['session']}"
+                data["genres"] = json.loads(data["genres"])
+                resp.append(data)
+
+            return JSONResponse({"data": resp})
+
+        elif request.method == "POST":
+            jb = request.state.body
+
+            manga_session = jb["session"]
+            total_chps = jb["total_chps"]
+            status = jb["status"]
+            genres = json.dumps(jb["genres"])
+            poster = jb["poster"]
+
+            """
+            manga_session format will be https://mangakatana.com/manga/cheese-in-the-trap.1
+            """
+            meta_data: List[str] = manga_session.split("/manga/")
+            if len(meta_data) != 2 or "." not in meta_data[-1]:
+                return await bad_request_400(request, msg="Invalid Manga ID")
+
+            title, manga_id = meta_data[-1].split(".")
+            cur = DB.connection.cursor()
+
+            cur.execute(
+                "INSERT INTO readlist (manga_id, title, total_chps, status, genres, poster, session)"
+                " VALUES (?, ?, ?, ?, ?, ?, ?)", (manga_id, title, total_chps, status, genres, poster, manga_session)
+            )
+
+            DB.connection.commit()
+            return JSONResponse(content="Manga successfully added in Read later", status_code=201)
+
+        cur = DB.connection.cursor()
+        # id validation is bypassed by choice
+        cur.execute("DELETE FROM readlist where manga_id=?", (request.query_params["manga_id"],))
+        DB.connection.commit()
+        return Response(status_code=204)
+    except KeyError as _msg:
+        return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
+    except IntegrityError as err:
+        print(err)
+        return await bad_request_400(request, msg=f"Record already exists")
+
+
 routes = [
     Route("/", endpoint=LiSA, methods=["GET"]),
     Route("/search", endpoint=search, methods=["GET"]),
@@ -527,6 +581,7 @@ routes = [
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route("/proxy", endpoint=proxy, methods=["GET"]),
     Route("/watchlist", endpoint=watchlist, methods=["GET", "POST", "DELETE"]),
+    Route("/readlist", endpoint=readlist, methods=["GET", "POST", "DELETE"]),
     Mount('/default', app=CustomStaticFiles(directory=FileConfig.DEFAULT_DIR), name="static"),
     Mount("/image", app=CustomStaticFiles(directory=FileConfig.DEFAULT_DOWNLOAD_LOCATION), name="image-router"),
 ]

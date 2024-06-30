@@ -12,20 +12,17 @@ import {
     ModalOverlay,
     Progress,
     Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { localImagesPath } from 'src/constants/images';
 
-import { useDispatch, useSelector } from "react-redux";
-import { playVideoExternal } from "../store/actions/animeActions";
+import { playVideoExternal } from '../store/actions/animeActions';
 
-import mpvImg from 'src/assets/img/mpv.png';
-import vlcImg from 'src/assets/img/vlc.png';
-
-export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, historyPlay, playId }) {
-
+export function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, historyPlay, playId }) {
     const dispatch = useDispatch();
 
     const { error: externalError, loading: externalLoading } = useSelector(
-        (state) => state.animeStreamExternal
+        (state) => state.animeStreamExternal,
     );
     const { details } = useSelector((state) => state.animeStreamDetails);
     const playHandler = async (player) => {
@@ -35,7 +32,7 @@ export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language,
                     playVideoExternal({
                         id: playId,
                         player,
-                    })
+                    }),
                 );
                 onClose();
             } else {
@@ -44,7 +41,7 @@ export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language,
                         playVideoExternal({
                             manifest_url: details[language],
                             player,
-                        })
+                        }),
                     );
                     onClose();
                 }
@@ -61,24 +58,23 @@ export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language,
                 <ModalHeader>Choose your favourite video player </ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <Flex display={"flex"} alignItems={"center"} justifyContent={"center"}>
-                        <Box p={4} onClick={() => playHandler("mpv")} sx={{ cursor: "pointer" }}>
-                            <Image src={mpvImg} />
+                    <Flex display={'flex'} alignItems={'center'} justifyContent={'center'}>
+                        <Box p={4} onClick={() => playHandler('mpv')} sx={{ cursor: 'pointer' }}>
+                            <Image src={localImagesPath.mpv} />
                         </Box>
-                        <Box p={4} sx={{ cursor: "pointer" }} onClick={() => playHandler("vlc")}>
-                            <Image src={vlcImg} />
+                        <Box p={4} sx={{ cursor: 'pointer' }} onClick={() => playHandler('vlc')}>
+                            <Image src={localImagesPath.vlc} />
                         </Box>
                     </Flex>
                     {externalError && (
-                        <Text align={"center"} color="red.300">
-                            {externalError ? externalError["error"] : ""}
+                        <Text align={'center'} color="red.300">
+                            {externalError ? externalError['error'] : ''}
                         </Text>
                     )}
                     {externalLoading && (
                         <Box>
-                            {" "}
                             <Progress size="xs" isIndeterminate />
-                            <Text align={"center"} mt={2}>
+                            <Text align={'center'} mt={2}>
                                 Loading video in your local player, Please wait..
                             </Text>
                         </Box>
@@ -87,4 +83,4 @@ export default function ExternalPlayerPopup({ isOpen, onOpen, onClose, language,
             </ModalContent>
         </Modal>
     );
-};
+}

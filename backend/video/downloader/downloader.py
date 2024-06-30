@@ -84,7 +84,7 @@ class ProgressTracker:
 
     def send_update(self) -> None:
         if self.msg_pipe_input:  # if pipe exists, pass the msg
-            self.msg_pipe_input.send({"data": self.file_data})
+            self.msg_pipe_input.send({"data": self.file_data, "type": "downloads"})
 
 
 class Downloader(ABC):
@@ -123,10 +123,6 @@ class Downloader(ABC):
 
         if not self.OUTPUT_LOC.exists():
             makedirs(self.OUTPUT_LOC)
-
-        # remove output_dir and seg_dir from file_data
-        del self.file_data["output_dir"]
-        del self.file_data["segment_dir"]
 
         logging.info("successfully initialized")
 
@@ -167,7 +163,7 @@ class Downloader(ABC):
         self.library.update(self.file_data["id"], {"status": self.file_data["status"], "total_size": total_size})
         if status == "started":
             self.file_data["speed"] = 0
-        self.msg_system_in_pipe.send({"data": self.file_data})
+        self.msg_system_in_pipe.send({"data": self.file_data, "type": "downloads"})
 
     @staticmethod
     def read_manifest(file_path: str) -> str | List[str]:
@@ -367,13 +363,21 @@ class VideoDownloader(Downloader):
             output_file = self._output_file
 
         # check if exe present in backend folder else fallback to default option
-        ffmpeg_loc = get_path("ffmpeg", "./ffmpeg")
+        ffmpeg_loc = get_path("ffmpeg", Path(__file__).parent.parent.parent.parent.joinpath("./ffmpeg"))
 
-        cmd = f'"{ffmpeg_loc}" -f concat -safe 0 -i "{input_file}" -c copy "{output_file}" -hide_banner -loglevel warning'
+        cmd = [
+            ffmpeg_loc,
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', str(input_file),
+            '-c', 'copy',
+            str(output_file),
+            '-hide_banner',
+            '-loglevel', 'warning'
+        ]
 
-        subprocess.run(
-            cmd, check=True, shell=False
-        )
+        subprocess.run(cmd, check=True, shell=False)
+
         remove_folder(self.SEGMENT_DIR)  # remove segments
         logging.info("Merging completed")
         return path.getsize(output_file)
@@ -610,8 +614,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def _schedule_pending_downloads(cls):
-        await cls.create_task_from_db(DBLibrary.get({"status": "started"}))  # re-start already started download
-        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))  # schedule remaining pending downloads
+        await cls.create_task_from_db(DBLibrary.get({"status": "downloaded"}, negate=True))  # re-start already started download
 
     @classmethod
     async def create_task_from_db(cls, _tasks):
@@ -675,14 +678,13 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                                         output_dir.joinpath(f"{_file_name[1]}{ext}").__str__())
 
         if MsgSystem.in_pipe:
-            MsgSystem.in_pipe.send({"data": file_data})  # send msg to update about the status
+            MsgSystem.in_pipe.send({"data": file_data, "type": "downloads"})  # send msg to update about the status
 
         file_data["output_dir"] = output_dir.__str__()
         file_data["segment_dir"] = seg_dir.__str__()
 
         # add task_data and metadata for tracking and scheduling
-        cls._TaskData[file_data["id"]] = {"status": Status.scheduled,
-                                          "file_name": seg_name, "task_data": (manifest, file_data, header)}
+        cls._TaskData[file_data["id"]] = {"status": Status.scheduled, "file_name": seg_name, "task_data": (manifest, file_data, header)}
         await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
 
     @classmethod

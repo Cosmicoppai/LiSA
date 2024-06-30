@@ -1,4 +1,8 @@
 from __future__ import annotations
+
+from datetime import datetime
+import json
+
 import aiohttp
 import asyncio
 from abc import abstractmethod
@@ -55,18 +59,28 @@ class Animepahe(Anime):
 
     @classmethod
     async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
-        if not cls.session:
+        if not cls.session or not cls.cookies:
+            cur = DB.connection.cursor()
+            res = cur.execute(f"SELECT * from site_state where site_name = ?", (cls._SITE_NAME, )).fetchone()
+            if res:
+                res = dict(res)
+                if datetime.fromisoformat(res["created_on"]) < datetime.now():
+                    await cls.set_session(json.loads(res["session_info"]))
 
-            cookie_req_data = {"type": "cookie_request", "site_url": cls.site_url, "user_agent": headers["user-agent"]}
-            if MsgSystem.in_pipe:
-                MsgSystem.in_pipe.send({"data": cookie_req_data})
-                while True:
-                    await asyncio.sleep(0.25)
-                    if MsgSystem.in_pipe.poll():
-                        cookies = MsgSystem.in_pipe.recv()
-                        if cookies:
-                            await cls.set_session(cookies)
-                        break
+            else:
+                cookie_req_data = {"site_url": cls.site_url, "user_agent": headers["user-agent"]}
+                if MsgSystem.in_pipe:
+                    MsgSystem.in_pipe.send({"type": "cookie_request", "data": cookie_req_data})
+                    while True:
+                        await asyncio.sleep(0.25)
+                        if MsgSystem.in_pipe.poll():
+                            cookies = MsgSystem.in_pipe.recv()
+                            if cookies:
+                                await cls.set_session(cookies)
+                                cur.execute("INSERT INTO site_state (site_name, session_info)" "VALUES (?, ?)", (cls._SITE_NAME, json.dumps(cookies)))
+                                DB.connection.commit()
+                                cur.close()
+                            break
 
         return await super().get(url, data, headers)
 
@@ -113,8 +127,7 @@ class Animepahe(Anime):
 
         return await self.get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[
-                                                                                 str, str] | TypeError | JSONDecodeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
         episodes = {"ep_details": []}
 
         try:
@@ -330,7 +343,7 @@ class Animepahe(Anime):
     def _strip_split(_data: str, strip_chr: str = " ", split_chr: str = " ") -> List[str]:
         return _data.strip(strip_chr).split(split_chr)
 
-    def build_search_resp(self, anime_details: List[Dict]) -> List[Dict]:
+    def build_search_resp(self, anime_details: List[Dict]) -> Dict[str, Any]:
 
         search_response: List[Dict[str, str | int]] = []
 
@@ -350,7 +363,7 @@ class Animepahe(Anime):
                 "anime_id": anime_detail.get("id", None)
             })
 
-        return search_response
+        return {"response": search_response, "prev": None, "next": None}
 
     async def __get_episodes(self, anime_session: str, page: int = 1) -> list:
         return [x["session"] for x in
@@ -388,7 +401,7 @@ class Animepahe(Anime):
         return {"file_name": title, "manifest_url": stream_re.search(unpacked).group(0)}
 
     @staticmethod
-    def int2base(x, base):
+    def int2base(x, base) -> str:
         digs = string.digits + string.ascii_letters
         if x < 0:
             sign = -1
@@ -406,7 +419,7 @@ class Animepahe(Anime):
         digits.reverse()
         return "".join(digits)
 
-    def js_unpack(self, p, a, c, k):
+    def js_unpack(self, p, a, c, k) -> str:
         k = k.split("|")
         a = int(a)
         c = int(c)

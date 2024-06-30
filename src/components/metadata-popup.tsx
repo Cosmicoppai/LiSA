@@ -1,5 +1,3 @@
-import { useRef } from "react";
-
 import {
     AlertDialog,
     AlertDialogBody,
@@ -8,18 +6,18 @@ import {
     AlertDialogOverlay,
     Progress,
     Text,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import { useRef } from 'react';
 
-export default function MetaDataPopup({ onClose, onOpen, isOpen }) {
+export function MetaDataPopup({ onClose, onOpen, isOpen }) {
     const cancelRef = useRef();
     return (
-        // @ts-ignore
         <AlertDialog
+            onClose={onClose}
             motionPreset="slideInBottom"
             leastDestructiveRef={cancelRef}
             isOpen={isOpen}
-            isCentered
-        >
+            isCentered>
             <AlertDialogOverlay />
 
             <AlertDialogContent>
@@ -31,4 +29,4 @@ export default function MetaDataPopup({ onClose, onOpen, isOpen }) {
             </AlertDialogContent>
         </AlertDialog>
     );
-};
+}

@@ -1,23 +1,18 @@
 // @ts-nocheck
 
-import { Box, Image, useDisclosure, useToast } from "@chakra-ui/react";
-import { useEffect, useState, useRef } from "react";
-import videojs from "video.js";
-import "videojs-contrib-quality-levels";
-import qualitySelector from "videojs-hls-quality-selector";
-import "video.js/dist/video-js.css";
-import "videojs-hotkeys";
+import { Box, useDisclosure } from '@chakra-ui/react';
+import { useEffect, useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import videojs from 'video.js';
+import 'videojs-contrib-quality-levels';
+import 'video.js/dist/video-js.css';
+import 'videojs-hotkeys';
 import 'videojs-pip/videojs-pip';
-import ExternalPlayerPopup from "./externalPopup";
-import { useDispatch, useSelector } from "react-redux";
-// function getWindowSize() {
-//   const { innerWidth, innerHeight } = window;
-//   return { innerWidth, innerHeight };
-// }
-import hlsQualitySelector from "videojs-hls-quality-selector";
-import { downloadVideo } from "../store/actions/downloadActions";
+import hlsQualitySelector from 'videojs-hls-quality-selector';
 
-export default function VideoPlayer({
+import { ExternalPlayerPopup } from './externalPopup';
+
+export function VideoPlayer({
     url,
     epDetails,
     player,
@@ -28,26 +23,22 @@ export default function VideoPlayer({
     setQualityOptions,
     qualityOptions,
 }) {
-    const toast = useToast();
-
     const { details } = useSelector((state) => state.animeStreamDetails);
     const dispatch = useDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [language, setLanguage] = useState("jpn");
+    const [language, setLanguage] = useState('jpn');
     const videoRef = useRef();
     const [callFinishVideoAPI, setCallFinishVideoAPI] = useState(false);
     const [vidDuration, setVidDuration] = useState(50000);
-    const [downloadUrl, setDownloadUrl] = useState(null);
-    const [downloadLoading, setDownloadLoading] = useState(false);
 
     useEffect(() => {
         if (player && url) {
             player.src({
                 src: url,
-                type: "application/x-mpegURL",
+                type: 'application/x-mpegURL',
                 withCredentials: false,
             });
-            player.poster("");
+            player.poster('');
             setCallFinishVideoAPI(false);
         }
 
@@ -68,11 +59,11 @@ export default function VideoPlayer({
     }, [callFinishVideoAPI]);
 
     useEffect(() => {
-        videojs.registerPlugin("hlsQualitySelector", hlsQualitySelector);
+        videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
 
         const videoJsOptions = {
             autoplay: false,
-            preload: "metadata",
+            preload: 'metadata',
             playbackRates: [0.5, 1, 1.5, 2],
 
             controls: true,
@@ -84,7 +75,7 @@ export default function VideoPlayer({
             sources: [
                 {
                     src: url,
-                    type: "application/x-mpegURL",
+                    type: 'application/x-mpegURL',
                     withCredentials: false,
                 },
             ],
@@ -93,7 +84,7 @@ export default function VideoPlayer({
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
-            pipButton: {}
+            pipButton: {},
         };
 
         const plyer = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
@@ -103,16 +94,15 @@ export default function VideoPlayer({
                 enableModifiersForNumbers: false,
             });
         });
-        var fullscreen = plyer.controlBar.getChild("FullscreenToggle");
-        var index = plyer.controlBar.children().indexOf(fullscreen);
-        var externalPlayerButton = plyer.controlBar.addChild("button", {}, index);
+        const fullscreen = plyer.controlBar.getChild('FullscreenToggle');
+        const index = plyer.controlBar.children().indexOf(fullscreen);
+        const externalPlayerButton = plyer.controlBar.addChild('button', {}, index);
 
         console.log(plyer.controlBar.pictureInPictureToggle);
 
-
-        var externalPlayerButtonDom = externalPlayerButton.el();
+        const externalPlayerButtonDom = externalPlayerButton.el();
         if (externalPlayerButtonDom) {
-            externalPlayerButtonDom.innerHTML = "external";
+            externalPlayerButtonDom.innerHTML = 'external';
 
             externalPlayerButtonDom.onclick = function () {
                 if (plyer.isFullscreen()) {
@@ -122,7 +112,7 @@ export default function VideoPlayer({
             };
         }
 
-        let qualityLevels = plyer.qualityLevels();
+        const qualityLevels = plyer.qualityLevels();
 
         setQualityOptions(qualityLevels.levels_);
 
@@ -153,7 +143,7 @@ export default function VideoPlayer({
             player.hlsQualitySelector = hlsQualitySelector;
 
             player.hlsQualitySelector({ displayCurrentQuality: true });
-            let qualityLevels = player.qualityLevels();
+            const qualityLevels = player.qualityLevels();
             setQualityOptions(qualityLevels.levels_);
         }
     }, [player]);
@@ -197,4 +187,4 @@ export default function VideoPlayer({
             <ExternalPlayerPopup isOpen={isOpen} onClose={onClose} language={language} />
         </Box>
     );
-};
+}

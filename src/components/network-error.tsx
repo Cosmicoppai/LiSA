@@ -1,8 +1,7 @@
-import { Box, Heading, Text, Button } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { Box, Heading, Text, Button } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 
-export default function NetworkError() {
-
+export function NetworkError() {
     const navigate = useNavigate();
 
     return (
@@ -13,12 +12,10 @@ export default function NetworkError() {
                 size="2xl"
                 bgGradient="linear(to-r, teal.400, teal.600)"
                 backgroundClip="text">
-                500
-            </Heading>
-            <Text fontSize="18px" mt={3} mb={2}>
                 No Internet Connection
-            </Text>
-            <Text color={"gray.500"} mb={6}>
+            </Heading>
+
+            <Text color={'gray.500'} mb={6}>
                 You dont seem to have an active internet connection. Please check your connection
                 and try again
             </Text>
@@ -28,9 +25,9 @@ export default function NetworkError() {
                 bgGradient="linear(to-r, teal.400, teal.500, teal.600)"
                 color="white"
                 variant="solid"
-                onClick={() => navigate("/")}>
+                onClick={() => navigate('/')}>
                 Go to Home
             </Button>
         </Box>
     );
-};
+}
