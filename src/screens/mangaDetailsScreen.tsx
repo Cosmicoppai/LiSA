@@ -194,7 +194,7 @@ export function MangaDetailsScreen() {
                                         total_chps={data?.total_chps}
                                         poster={data?.poster}
                                         mylist={details?.mylist}
-                                        genres={data?.genres}
+                                        genres={data?.genres || []}
                                         status={data?.status || ''}
                                     />
                                 )}

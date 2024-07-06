@@ -124,6 +124,7 @@ export function DownloadItem({ data: fetchedData }) {
                         <Progress
                             flex={1.5}
                             size="xs"
+                            isIndeterminate={!data.downloaded}
                             value={(data.downloaded / data.total_size) * 100}
                         />
                     </div>
@@ -144,7 +145,9 @@ export function DownloadItem({ data: fetchedData }) {
                         }}>
                         {data.status === 'started' ? (
                             <>
-                                {`${!data.downloaded ? '--' : formatBytes(data.downloaded)} / ${totalSize}`}
+                                {data.downloaded
+                                    ? `${formatBytes(data.downloaded)} / ${totalSize}`
+                                    : '--'}
                             </>
                         ) : (
                             <>{totalSize}</>

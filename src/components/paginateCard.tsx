@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import {
     Box,
     Button,
@@ -19,10 +18,10 @@ import {
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
 
 import { MetaDataPopup } from './metadata-popup';
 import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/actions/animeActions';
-import { downloadVideo } from '../store/actions/downloadActions';
 import server from '../utils/axios';
 
 export function PaginateCard({
@@ -95,20 +94,18 @@ export function PaginateCard({
         }
     }, [downloadLoading]);
 
+    const { downloadVideo } = useDownloadVideo();
+
     const downloadPageHandler = async () => {
-        dispatch(
-            downloadVideo({
-                anime_session: session,
-            }),
-        );
+        downloadVideo({
+            anime_session: session,
+        });
     };
 
     const singleDownloadHandler = (url) => {
-        dispatch(
-            downloadVideo({
-                manifest_url: url.slice(2),
-            }),
-        );
+        downloadVideo({
+            manifest_url: url.slice(2),
+        });
     };
 
     useEffect(() => {
@@ -193,7 +190,7 @@ export function PaginateCard({
 
             <Flex sx={{ marginTop: '20px !important' }}>
                 {data && (
-                    <Flex>
+                    <Flex justifyContent={'space-between'} width={'100%'}>
                         <Fade in={ep_details?.prev_page_url}>
                             <Button
                                 onClick={() => pageChangeHandler(ep_details?.prev_page_url)}
@@ -215,7 +212,7 @@ export function PaginateCard({
                     </Flex>
                 )}
                 {!isSingleAvailable && <Spacer />}
-                <Button disabled={epsLoading}>Download all</Button>
+                {/* <Button disabled={epsLoading}>Download all</Button> */}
                 {isSingleAvailable && (
                     <>
                         <Spacer />

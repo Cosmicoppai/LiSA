@@ -14,15 +14,17 @@ import {
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
 
 import { playVideoExternal } from '../store/actions/animeActions';
-import { downloadVideo } from '../store/actions/downloadActions';
 
 export function EpPopover({ isOpen, onOpen, onClose }) {
     const dispatch = useDispatch();
     const { details, loading } = useSelector((state) => state.animeStreamDetails);
     const [language, setLanguage] = useState(null);
     const [quality, setQuality] = useState(null);
+
+    const { downloadVideo } = useDownloadVideo();
 
     const playHandler = () => {
         if (Object.values(Object.values(details[language])[0])[0]) {
@@ -31,7 +33,7 @@ export function EpPopover({ isOpen, onOpen, onClose }) {
     };
     const downloadHandler = () => {
         if (Object.values(Object.values(details[language])[0])[0]) {
-            dispatch(downloadVideo(Object.values(Object.values(details[language])[0])[0]));
+            downloadVideo(Object.values(Object.values(details[language])[0])[0]);
         }
     };
     return (
