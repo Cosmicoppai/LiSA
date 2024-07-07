@@ -151,7 +151,7 @@ export function InbuiltPlayerScreen() {
                             <Box
                                 sx={{
                                     display: 'flex',
-                                    alignItems: 'center',
+                                    alignItems: 'flex-end',
                                     flexDirection: 'row',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'}>
@@ -159,8 +159,8 @@ export function InbuiltPlayerScreen() {
                                     {anime.eng_name ? ` | ${anime.eng_name}` : ''}
                                     {anime.title ? `${anime.title}` : ''}
                                 </Heading>
-                                <Text fontWeight={600} color={'gray.500'} size="sm" ml={2} mt={1}>
-                                    {`| Episode ${epDetails?.details?.current_ep}`}
+                                <Text fontWeight={600} color={'gray.500'} size="sm" ml={2}>
+                                    | Episode {epDetails?.details?.current_ep}
                                 </Text>
                             </Box>
                         </Box>

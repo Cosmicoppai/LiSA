@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { BsSortNumericDown, BsSortNumericUp } from 'react-icons/bs';
 import { GoScreenFull, GoScreenNormal } from 'react-icons/go';
+import { RiZoomInLine, RiZoomOutLine } from 'react-icons/ri';
 import {
     TbLayoutSidebarLeftCollapseFilled,
     TbLayoutSidebarRightCollapseFilled,
@@ -13,6 +14,7 @@ import { localImagesPath } from 'src/constants/images';
 import server from 'src/utils/axios';
 
 import { TMangaChapter, TMangaChapters, getMangaDetails } from './getMangaDetails';
+import { useZoomHandler } from './useZoomHandler';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
 
 function useGetMangaDetails() {
@@ -88,6 +90,8 @@ export function MangaReaderScreen() {
 
     const [showChapters, setShowChapters] = useState(true);
 
+    const { scale, zoomIn, zoomOut, isZoomInDisabled, isZoomOutDisabled } = useZoomHandler();
+
     return (
         <div
             style={{
@@ -126,6 +130,7 @@ export function MangaReaderScreen() {
             <div
                 ref={fullScreenRef}
                 style={{
+                    paddingBottom: 18,
                     display: 'flex',
                     flexGrow: 1,
                     flexDirection: 'column',
@@ -193,17 +198,49 @@ export function MangaReaderScreen() {
                             </Tooltip>
                         ) : null}
                     </div>
-                    <Tooltip
-                        label={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-                        placement="top">
-                        <Box
+                    <div
+                        style={{
+                            display: 'flex',
+                            columnGap: 30,
+
+                            alignItems: 'center',
+                        }}>
+                        <div
                             style={{
-                                cursor: 'pointer',
-                            }}
-                            onClick={handleFullScreen}>
-                            <Icon as={isFullScreen ? GoScreenNormal : GoScreenFull} w={8} h={8} />
-                        </Box>
-                    </Tooltip>
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                columnGap: 10,
+                            }}>
+                            <Box
+                                opacity={isZoomOutDisabled ? 0.5 : 1}
+                                cursor={isZoomOutDisabled ? 'not-allowed' : 'pointer'}
+                                onClick={zoomOut}>
+                                <Icon as={RiZoomOutLine} w={6} h={6} />
+                            </Box>
+
+                            <Text pointerEvents={'none'} userSelect={'none'}>
+                                {scale * 10} %
+                            </Text>
+
+                            <Box
+                                opacity={isZoomInDisabled ? 0.5 : 1}
+                                cursor={isZoomInDisabled ? 'not-allowed' : 'pointer'}
+                                onClick={zoomIn}>
+                                <Icon as={RiZoomInLine} w={6} h={6} />
+                            </Box>
+                        </div>
+                        <Tooltip
+                            label={isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+                            placement="top">
+                            <Box cursor={'pointer'} onClick={handleFullScreen}>
+                                <Icon
+                                    as={isFullScreen ? GoScreenNormal : GoScreenFull}
+                                    w={6}
+                                    h={6}
+                                />
+                            </Box>
+                        </Tooltip>
+                    </div>
                 </div>
                 <div
                     style={{
@@ -270,7 +307,7 @@ export function MangaReaderScreen() {
                                 backgroundColor: `rgba(255, 255, 255, 0.2)`,
                             },
                         }}>
-                        <MangaChapterImages currentChapter={currentChapter} />
+                        <MangaChapterImages currentChapter={currentChapter} imgScale={scale} />
                     </Box>
                 </div>
             </div>
@@ -351,7 +388,13 @@ export async function getMangaChapter({ url }) {
     };
 }
 
-function MangaChapterImages({ currentChapter }: { currentChapter: TMangaChapter }) {
+function MangaChapterImages({
+    currentChapter,
+    imgScale,
+}: {
+    currentChapter: TMangaChapter;
+    imgScale: number;
+}) {
     const chp_link = currentChapter?.chp_link;
 
     const { data, isLoading } = useQuery({
@@ -398,8 +441,9 @@ function MangaChapterImages({ currentChapter }: { currentChapter: TMangaChapter 
                     key={idx}
                     src={item}
                     alt={`manga-chapter-${idx}-image`}
-                    width={'65%'}
+                    width={`${imgScale * 10}%`}
                     style={{
+                        transition: 'width 0.5s ease-in-out',
                         userSelect: 'none',
                         msUserSelect: 'none',
                         MozUserSelect: 'none',
