@@ -220,7 +220,7 @@ export function AnimeDetailsScreen() {
                         <div>
                             {/* @ts-ignore */}
                             <PaginateCard
-                                data={data}
+                                showPageNav={true}
                                 ep_details={details}
                                 loading={ep_loading}
                                 redirect

@@ -8,10 +8,6 @@ import {
     ANIME_EPISODES_ADD_FAIL,
     ANIME_EPISODES_ADD_REQUEST,
     ANIME_EPISODES_ADD_SUCCESS,
-    ANIME_SEARCH_CLEAR,
-    ANIME_SEARCH_FAIL,
-    ANIME_SEARCH_REQUEST,
-    ANIME_SEARCH_SUCCESS,
     ANIME_STREAM_DETAILS_CLEAR,
     ANIME_STREAM_DETAILS_FAIL,
     ANIME_STREAM_DETAILS_REQUEST,
@@ -21,27 +17,6 @@ import {
     ANIME_STREAM_EXTERNAL_REQUEST,
     ANIME_STREAM_EXTERNAL_SUCCESS,
 } from '../constants/animeConstants';
-
-export const animeSearchListReducer = (state = { animes: null }, action) => {
-    switch (action.type) {
-        case ANIME_SEARCH_REQUEST:
-            return {
-                loading: true,
-                animes: action.payload,
-            };
-
-        case ANIME_SEARCH_SUCCESS:
-            return { loading: false, animes: action.payload };
-
-        case ANIME_SEARCH_FAIL:
-            return { loading: false, animes: null, error: action.payload };
-        case ANIME_SEARCH_CLEAR:
-            return { loading: false, animes: null };
-
-        default:
-            return state;
-    }
-};
 
 export const animeEpisodesReducer = (state = {}, action) => {
     switch (action.type) {

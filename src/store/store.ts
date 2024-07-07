@@ -6,13 +6,11 @@ import {
     animeCurrentEpReducer,
     animeDetailsReducer,
     animeEpisodesReducer,
-    animeSearchListReducer,
     animeStreamDetailsReducer,
     animeStreamExternalReducer,
 } from './reducers/animeReducers';
 
 const reducer = combineReducers({
-    animeSearchList: animeSearchListReducer,
     animeStreamDetails: animeStreamDetailsReducer,
     animeStreamExternal: animeStreamExternalReducer,
     animeEpisodesDetails: animeEpisodesReducer,

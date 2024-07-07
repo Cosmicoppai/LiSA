@@ -24,8 +24,6 @@ export function InbuiltPlayerScreen() {
     const dispatch = useDispatch();
     const { details, loading: streamLoading } = useSelector((state) => state.animeStreamDetails);
 
-    const { animes: data, loading } = useSelector((state) => state.animeSearchList);
-
     const epDetails = useSelector((state) => state.animeCurrentEp);
 
     const { details: anime } = useSelector((state) => state.animeDetails);
@@ -226,7 +224,6 @@ export function InbuiltPlayerScreen() {
                     </Flex>
 
                     <PaginateCard
-                        data={data}
                         ep_details={eps_details}
                         loading={eps_loading}
                         currentEp={epDetails?.details?.current_ep}

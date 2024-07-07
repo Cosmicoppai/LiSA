@@ -25,7 +25,7 @@ import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/act
 import server from '../utils/axios';
 
 export function PaginateCard({
-    data,
+    showPageNav,
     loading,
     ep_details,
     redirect,
@@ -186,7 +186,7 @@ export function PaginateCard({
             </Box>
 
             <Flex sx={{ marginTop: '20px !important' }}>
-                {data && (
+                {showPageNav && (
                     <Flex justifyContent={'space-between'} width={'100%'}>
                         <Fade in={ep_details?.prev_page_url}>
                             <Button
