@@ -1,11 +1,13 @@
 import server from 'src/utils/axios';
 
+export type TMangaChapter = {
+    chp_link: string;
+    chp_name: string;
+    chp_session: string;
+};
+
 export type TMangaChapters = {
-    [chp_no: string]: {
-        chp_link: string;
-        chp_name: string;
-        chp_session: string;
-    };
+    [chp_no: string]: TMangaChapter;
 }[];
 
 export async function getMangaDetails({ url }) {

@@ -156,37 +156,11 @@ export function MangaDetailsScreen() {
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                 }}>
-                                <div>
-                                    <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
-                                        {data?.title ? `${data?.title}` : ''}
-                                    </Heading>
+                                <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
+                                    {data?.title ? `${data?.title}` : ''}
+                                </Heading>
 
-                                    {!isLoading ? (
-                                        <Text
-                                            fontWeight={600}
-                                            color={'gray.500'}
-                                            size="sm"
-                                            display="inline"
-                                            ml={1}>
-                                            by {details?.description?.author}
-                                        </Text>
-                                    ) : (
-                                        <Skeleton
-                                            height={'18px'}
-                                            width={'100px'}
-                                            alignSelf={'baseline'}
-                                            display={'inline-block'}
-                                        />
-                                    )}
-                                </div>
-                                {isLoading ? (
-                                    <Skeleton
-                                        height={'30px'}
-                                        width={'30px'}
-                                        alignSelf={'baseline'}
-                                        display={'inline-block'}
-                                    />
-                                ) : (
+                                {details?.manga_id ? (
                                     <AddToWatchListManga
                                         key={details?.manga_id}
                                         manga_id={details?.manga_id}
@@ -197,13 +171,36 @@ export function MangaDetailsScreen() {
                                         genres={data?.genres || []}
                                         status={data?.status || ''}
                                     />
+                                ) : (
+                                    <Skeleton
+                                        height={'30px'}
+                                        width={'30px'}
+                                        alignSelf={'baseline'}
+                                        display={'inline-block'}
+                                    />
                                 )}
                             </div>
+                            {details?.description?.author ? (
+                                <Text
+                                    fontWeight={600}
+                                    color={'gray.500'}
+                                    size="sm"
+                                    display="inline">
+                                    by {details?.description?.author}
+                                </Text>
+                            ) : (
+                                <Skeleton
+                                    height={'18px'}
+                                    width={'100px'}
+                                    alignSelf={'baseline'}
+                                    display={'inline-block'}
+                                />
+                            )}
                         </Box>
-                        <Text fontWeight={600} color={'gray.500'} size="sm" mb={4}>
+                        <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
                             {volTxt}
                         </Text>
-                        <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
+                        <Stack align={'center'} justify={'center'} direction={'row'}>
                             {data?.type ? (
                                 <Badge
                                     px={2}
@@ -267,10 +264,10 @@ export function MangaDetailsScreen() {
                                 flexGrow: 1,
                                 alignItems: 'flex-end',
                             }}>
-                            {isLoading ? (
-                                <Skeleton p={2} m={2} width={'48px'} height={'48px'} />
-                            ) : (
+                            {details?.chapters?.length ? (
                                 <Button onClick={handleRead}>Read</Button>
+                            ) : (
+                                <Skeleton p={2} m={2} width={'48px'} height={'48px'} />
                             )}
                         </div>
                     </Stack>

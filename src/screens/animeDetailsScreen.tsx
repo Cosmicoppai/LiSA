@@ -43,6 +43,8 @@ export function AnimeDetailsScreen() {
 
     console.log({ data, details });
 
+    const ep = data?.no_of_episodes || data?.episodes;
+
     return (
         <Center py={6} w="100%">
             <Flex
@@ -114,30 +116,11 @@ export function AnimeDetailsScreen() {
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                 }}>
-                                <div>
-                                    <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
-                                        {data.jp_name ? `${data.jp_name}` : ''}{' '}
-                                        {data.title ? `${data.title}` : ''}
-                                    </Heading>
+                                <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
+                                    {data.jp_name ? `${data.jp_name}` : ''}{' '}
+                                    {data.title ? `${data.title}` : ''}
+                                </Heading>
 
-                                    {!ep_loading ? (
-                                        <Text
-                                            fontWeight={600}
-                                            color={'gray.500'}
-                                            size="sm"
-                                            display="inline"
-                                            ml={1}>
-                                            by {details?.description?.studio}
-                                        </Text>
-                                    ) : (
-                                        <Skeleton
-                                            height={'18px'}
-                                            width={'100px'}
-                                            alignSelf={'baseline'}
-                                            display={'inline-block'}
-                                        />
-                                    )}
-                                </div>
                                 {ep_loading ? (
                                     <Skeleton
                                         height={'30px'}
@@ -163,9 +146,7 @@ export function AnimeDetailsScreen() {
                             </div>
                             {!ep_loading ? (
                                 <Heading fontSize={'xl'} fontFamily={'body'} display="block">
-                                    {details?.description?.eng_name
-                                        ? `${details?.description?.eng_name}`
-                                        : ''}
+                                    {details?.description?.eng_name ?? ''}
                                 </Heading>
                             ) : (
                                 <Skeleton
@@ -175,11 +156,25 @@ export function AnimeDetailsScreen() {
                                     display={'block'}
                                 />
                             )}
+                            {details?.description?.studio ? (
+                                <Text
+                                    fontWeight={600}
+                                    color={'gray.500'}
+                                    size="sm"
+                                    display="inline">
+                                    by {details?.description?.studio}
+                                </Text>
+                            ) : (
+                                <Skeleton
+                                    height={'18px'}
+                                    width={'100px'}
+                                    alignSelf={'baseline'}
+                                    display={'inline-block'}
+                                />
+                            )}
                         </Box>
-                        <Text fontWeight={600} color={'gray.500'} size="sm" mb={4}>
-                            No of episodes{' '}
-                            {data.no_of_episodes !== '?' ? data.no_of_episodes : 'running'}
-                            {data.episodes !== '?' ? data.episodes : 'running'}
+                        <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
+                            {ep === '?' ? 'Running' : `Episodes ${ep}`}
                         </Text>
                         <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
                             <Badge
