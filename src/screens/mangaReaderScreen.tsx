@@ -436,25 +436,41 @@ function MangaChapterImages({
                 alignItems: 'center',
                 rowGap: 20,
             }}>
-            {chapters?.map((item, idx) => (
-                <img
-                    key={idx}
-                    src={item}
-                    alt={`manga-chapter-${idx}-image`}
-                    width={`${imgScale * 10}%`}
+            {chapters?.map((item) => (
+                <div
                     style={{
+                        width: `${imgScale * 10}%`,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
                         transition: 'width 0.5s ease-in-out',
-                        userSelect: 'none',
-                        msUserSelect: 'none',
-                        MozUserSelect: 'none',
-                        WebkitUserSelect: 'none',
-                        msTouchSelect: 'none',
-                        pointerEvents: 'none',
-                        borderRadius: 20,
-                        objectFit: 'contain',
-                    }}
-                />
+                    }}>
+                    <ChapterImg key={item} src={item} />
+                </div>
             ))}
         </div>
+    );
+}
+
+function ChapterImg({ src }: { src: string }) {
+    // TODO: Add Skeleton Loader Here
+    return (
+        <img
+            src={src}
+            alt="manga-chapter-image"
+            width={'100%'}
+            style={{
+                userSelect: 'none',
+                msUserSelect: 'none',
+                MozUserSelect: 'none',
+                WebkitUserSelect: 'none',
+                msTouchSelect: 'none',
+                pointerEvents: 'none',
+                borderRadius: 20,
+                minHeight: 200,
+                display: 'block',
+            }}
+            loading="lazy"
+        />
     );
 }
