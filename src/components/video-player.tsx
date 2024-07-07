@@ -2,7 +2,6 @@
 
 import { Box, useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import videojs from 'video.js';
 import 'videojs-contrib-quality-levels';
 import 'video.js/dist/video-js.css';
@@ -23,8 +22,6 @@ export function VideoPlayer({
     setQualityOptions,
     qualityOptions,
 }) {
-    const { details } = useSelector((state) => state.animeStreamDetails);
-    const dispatch = useDispatch();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [language, setLanguage] = useState('jpn');
     const videoRef = useRef();

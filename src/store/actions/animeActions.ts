@@ -9,9 +9,6 @@ import {
     ANIME_EPISODES_ADD_FAIL,
     ANIME_EPISODES_ADD_REQUEST,
     ANIME_EPISODES_ADD_SUCCESS,
-    ANIME_RECOMMENDATION_FAIL,
-    ANIME_RECOMMENDATION_REQUEST,
-    ANIME_RECOMMENDATION_SUCCESS,
     ANIME_STREAM_DETAILS_FAIL,
     ANIME_STREAM_DETAILS_REQUEST,
     ANIME_STREAM_DETAILS_SUCCESS,
@@ -19,10 +16,6 @@ import {
     ANIME_STREAM_EXTERNAL_FAIL,
     ANIME_STREAM_EXTERNAL_REQUEST,
     ANIME_STREAM_EXTERNAL_SUCCESS,
-    ANIME_STREAM_URL_CLEAR,
-    ANIME_STREAM_URL_FAIL,
-    ANIME_STREAM_URL_REQUEST,
-    ANIME_STREAM_URL_SUCCESS,
 } from '../constants/animeConstants';
 
 export const addAnimeDetails = (data) => async (dispatch) => {
@@ -79,10 +72,6 @@ export const addCurrentEp = (data) => async (dispatch) => {
     }
 };
 
-export const clearEp = () => async (dispatch) => {
-    dispatch({ type: ANIME_STREAM_URL_CLEAR });
-};
-
 export const getStreamDetails = (stream_detail) => async (dispatch) => {
     try {
         dispatch({ type: ANIME_STREAM_DETAILS_REQUEST });
@@ -115,24 +104,5 @@ export const playVideoExternal = (payload) => async (dispatch) => {
             });
         }, 3000);
         throw new Error(error);
-    }
-};
-export const getVideoUrl = (pahewin_url) => async (dispatch) => {
-    try {
-        dispatch({ type: ANIME_STREAM_URL_REQUEST });
-        const { data } = await server.post(
-            `/get_video_url`,
-            {
-                pahewin_url,
-            },
-            {
-                // @ts-ignore
-                'Content-Type': 'application/json',
-            },
-        );
-
-        dispatch({ type: ANIME_STREAM_URL_SUCCESS, payload: data });
-    } catch (error) {
-        dispatch({ type: ANIME_STREAM_URL_FAIL, payload: error });
     }
 };

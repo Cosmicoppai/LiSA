@@ -40,7 +40,7 @@ export function PaginateCard({
     const epDetails = useSelector((state) => state.animeCurrentEp);
     const { session } = useSelector((state) => state.animeDetails.details);
     const currentEp = parseInt(epDetails?.details?.current_ep);
-    const { loading: downloadLoading } = useSelector((state) => state.animeDownloadDetails);
+
     // console.log(epsLoading);
     const [isDownloadButtonAvailable, setIsDownloadButtonAvailable] = useState(false);
     const navigate = useNavigate();
@@ -86,15 +86,12 @@ export function PaginateCard({
         });
     }
 
-    useEffect(() => {
-        if (downloadLoading) {
-            onOpen();
-        } else {
-            onClose();
-        }
-    }, [downloadLoading]);
+    const { downloadVideo, downloadLoading } = useDownloadVideo();
 
-    const { downloadVideo } = useDownloadVideo();
+    useEffect(() => {
+        if (downloadLoading) onOpen();
+        else onClose();
+    }, [downloadLoading]);
 
     const downloadPageHandler = async () => {
         downloadVideo({

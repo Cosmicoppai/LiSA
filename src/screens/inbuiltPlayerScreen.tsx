@@ -27,7 +27,7 @@ export function InbuiltPlayerScreen() {
     const { animes: data, loading } = useSelector((state) => state.animeSearchList);
 
     const epDetails = useSelector((state) => state.animeCurrentEp);
-    const urlDetails = useSelector((state) => state.animeEpUrl);
+
     const { details: anime } = useSelector((state) => state.animeDetails);
 
     const { details: eps_details, loading: eps_loading } = useSelector(
