@@ -47,27 +47,8 @@ function useGetMangaDetails() {
     return { data, details, isLoading };
 }
 
-type TCurrentChapter = {
-    idx: number;
-    chp: null | TMangaChapter;
-};
-
 function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
-    const [currentChapter, setCurrentChapter] = useState<TCurrentChapter>({
-        idx: 0,
-        chp: null,
-    });
-
-    useEffect(() => {
-        if (currentChapter.chp?.chp_link) return;
-
-        if (chapters.length) {
-            setCurrentChapter({
-                idx: 0,
-                chp: Object.entries(chapters[0])[0][1],
-            });
-        }
-    }, [chapters]);
+    const [currentChapter, setCurrentChapter] = useState<TMangaChapter | null>(null);
 
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -80,6 +61,12 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
         }
     }, [chapters, order]);
 
+    useEffect(() => {
+        if (currentChapter?.chp_link) return;
+
+        if (chps.length) setCurrentChapter(Object.entries(chps[0])[0][1]);
+    }, [chps]);
+
     return {
         chapters: chps,
         currentChapter,
@@ -90,7 +77,7 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
 }
 
 export function MangaReaderScreen() {
-    const { data, details, isLoading } = useGetMangaDetails();
+    const { data, details } = useGetMangaDetails();
 
     const { chapters, currentChapter, setCurrentChapter, order, toggleOrder } =
         useChapterListHandler({
@@ -128,7 +115,7 @@ export function MangaReaderScreen() {
                                     {data?.title}
                                 </Heading>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" ml={2} mt={1}>
-                                    | {currentChapter.chp?.chp_name || 'Manga Reader'}
+                                    | {currentChapter?.chp_name || 'Manga Reader'}
                                 </Text>
                             </Box>
                         </Box>
@@ -249,12 +236,23 @@ export function MangaReaderScreen() {
                                 backgroundColor: `rgba(255, 255, 255, 0.2)`,
                             },
                         }}>
-                        <MangaChapters
-                            isLoading={isLoading}
-                            data={chapters}
-                            currentChapter={currentChapter}
-                            setCurrentChapter={setCurrentChapter}
-                        />
+                        {chapters?.length ? (
+                            chapters?.map?.((item) => (
+                                <>
+                                    {Object.entries(item).map(([chp_no, chp_detail]) => (
+                                        <ChapterTabItem
+                                            key={chp_detail.chp_link}
+                                            chp_detail={chp_detail}
+                                            chp_no={chp_no}
+                                            currentChapter={currentChapter}
+                                            setCurrentChapter={setCurrentChapter}
+                                        />
+                                    ))}
+                                </>
+                            ))
+                        ) : (
+                            <ChaptersSkeletons />
+                        )}
                     </Flex>
                     <Box
                         sx={{
@@ -280,64 +278,47 @@ export function MangaReaderScreen() {
     );
 }
 
-function MangaChapters({
-    data,
-    currentChapter,
+function ChapterTabItem({
+    chp_detail,
+    chp_no,
     setCurrentChapter,
+    currentChapter,
 }: {
-    isLoading: boolean;
-    data: TMangaChapters;
-    currentChapter: TCurrentChapter;
-    setCurrentChapter: React.Dispatch<React.SetStateAction<TCurrentChapter>>;
+    chp_no: string;
+
+    chp_detail: TMangaChapter;
+    currentChapter: TMangaChapter;
+    setCurrentChapter: React.Dispatch<React.SetStateAction<TMangaChapter>>;
 }) {
+    const isSelected = chp_detail?.chp_link === currentChapter?.chp_link;
+
     return (
-        <>
-            {data?.length ? (
-                <>
-                    {data?.map((item, idx) => (
-                        <>
-                            {Object.entries(item).map(([chp_no, chp_detail]) => (
-                                <Flex
-                                    key={chp_no}
-                                    cursor={'pointer'}
-                                    p={2}
-                                    title={` ${chp_no} ${
-                                        chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null
-                                    }`}
-                                    borderRadius={10}
-                                    alignItems="center"
-                                    bg={idx === currentChapter.idx ? '#CBD5E0' : undefined}
-                                    onClick={() =>
-                                        setCurrentChapter({
-                                            idx,
-                                            chp: chp_detail,
-                                        })
-                                    }>
-                                    <Text
-                                        style={{
-                                            userSelect: 'none',
-                                            msUserSelect: 'none',
-                                            MozUserSelect: 'none',
-                                            WebkitUserSelect: 'none',
-                                            msTouchSelect: 'none',
-                                            pointerEvents: 'none',
-                                            borderRadius: 20,
-                                            objectFit: 'contain',
-                                        }}
-                                        noOfLines={1}
-                                        color={idx === currentChapter.idx ? '#1A202C' : '#CBD5E0'}>
-                                        {chp_no}
-                                        {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
-                                    </Text>
-                                </Flex>
-                            ))}
-                        </>
-                    ))}
-                </>
-            ) : (
-                <ChaptersSkeletons />
-            )}
-        </>
+        <Flex
+            key={chp_no}
+            cursor={'pointer'}
+            p={2}
+            title={` ${chp_no} ${chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}`}
+            borderRadius={10}
+            alignItems="center"
+            bg={isSelected ? '#CBD5E0' : undefined}
+            onClick={() => setCurrentChapter(chp_detail)}>
+            <Text
+                style={{
+                    userSelect: 'none',
+                    msUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    msTouchSelect: 'none',
+                    pointerEvents: 'none',
+                    borderRadius: 20,
+                    objectFit: 'contain',
+                }}
+                noOfLines={1}
+                color={isSelected ? '#1A202C' : '#CBD5E0'}>
+                {chp_no}
+                {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
+            </Text>
+        </Flex>
     );
 }
 
@@ -370,8 +351,8 @@ export async function getMangaChapter({ url }) {
     };
 }
 
-function MangaChapterImages({ currentChapter }: { currentChapter: TCurrentChapter }) {
-    const chp_link = currentChapter.chp?.chp_link;
+function MangaChapterImages({ currentChapter }: { currentChapter: TMangaChapter }) {
+    const chp_link = currentChapter?.chp_link;
 
     const { data, isLoading } = useQuery({
         queryKey: ['manga-chp-images', chp_link],
@@ -381,7 +362,7 @@ function MangaChapterImages({ currentChapter }: { currentChapter: TCurrentChapte
 
     const chapters = data?.data;
 
-    if (isLoading && chapters?.length > 1) {
+    if (isLoading || !chapters?.length) {
         return (
             <div
                 style={{
