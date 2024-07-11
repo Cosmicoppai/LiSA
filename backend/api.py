@@ -25,6 +25,7 @@ from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
 import logging
+from ebook import get_plugin
 
 
 async def LiSA(request: Request):
@@ -258,8 +259,10 @@ async def download(request: Request):
             case "image":
                 site = "mangakatana"
 
+                post_processor = get_plugin(jb.get("download_as", None))
+
                 if jb.get("manga_session", None):
-                    await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1))
+                    await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1), post_processor=post_processor)
 
                 elif jb.get("chp_session", None):
                     await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site)
