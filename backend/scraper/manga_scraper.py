@@ -57,7 +57,7 @@ class MangaKatana(Manga):
 
         search_bs = BeautifulSoup(resp_text, 'html.parser')
 
-        if len(search_bs.find("title").text) != len(manga_name):
+        if len(search_bs.find("title").text.split(" - ")) > 1:
             scrape_func = self.__scrape_list
 
             pag_list = search_bs.find("ul", {"class": "uk-pagination"})  # check if multiple pages exists or not
