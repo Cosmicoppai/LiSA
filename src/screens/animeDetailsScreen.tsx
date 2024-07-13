@@ -20,20 +20,23 @@ import {
 import { useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
-import { useSelector } from 'react-redux';
 import { AddToWatchList } from 'src/components/AddToWatchList';
+import { ErrorMessage } from 'src/components/ErrorMessage';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { Recommendations } from 'src/components/Recommendations';
 import { YoutubeVideo } from 'src/components/YoutubeVideo';
+import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { openExternalUrl } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
 
 export function AnimeDetailsScreen() {
-    // @ts-ignore
-    const { details: data } = useSelector((state) => state.animeDetails);
-    // @ts-ignore
-    const { details, loading: ep_loading } = useSelector((state) => state.animeEpisodesDetails);
+    const {
+        data: { details, params },
+        error,
+        isError,
+        isLoading,
+    } = useGetAnimeDetails();
 
     useEffect(() => {
         if (window) {
@@ -41,9 +44,9 @@ export function AnimeDetailsScreen() {
         }
     }, [details]);
 
-    console.log({ data, details });
+    const ep = params?.episodes || params?.episodes;
 
-    const ep = data?.no_of_episodes || data?.episodes;
+    if (isError) return <ErrorMessage error={error} />;
 
     return (
         <Center py={6} w="100%">
@@ -83,7 +86,7 @@ export function AnimeDetailsScreen() {
 
                             top: 5,
                             left: 0,
-                            backgroundImage: `url(${data?.poster || data?.img_url})`,
+                            backgroundImage: `url(${params?.poster})`,
                             filter: 'blur(15px)',
                             zIndex: 1,
                         }}
@@ -96,7 +99,7 @@ export function AnimeDetailsScreen() {
                             rounded={'lg'}
                             objectFit="contain"
                             boxSize="100%"
-                            src={data?.poster || data?.img_url}
+                            src={params?.poster}
                             zIndex={2}
                         />
                     </Box>
@@ -117,11 +120,11 @@ export function AnimeDetailsScreen() {
                                     alignItems: 'center',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
-                                    {data.jp_name ? `${data.jp_name}` : ''}{' '}
-                                    {data.title ? `${data.title}` : ''}
+                                    {params?.jp_name ? `${params?.jp_name}` : ''}{' '}
+                                    {params?.title ? `${params?.title}` : ''}
                                 </Heading>
 
-                                {ep_loading ? (
+                                {isLoading ? (
                                     <Skeleton
                                         height={'30px'}
                                         width={'30px'}
@@ -132,30 +135,30 @@ export function AnimeDetailsScreen() {
                                     <AddToWatchList
                                         key={details?.description?.anime_id}
                                         anime_id={details?.description?.anime_id}
-                                        jp_name={data.jp_name || data.title}
-                                        poster={data?.poster || data?.img_url}
-                                        mylist={details.mylist}
-                                        no_of_episodes={data.no_of_episodes || data?.episodes}
-                                        type={details?.description?.type || data?.type}
+                                        jp_name={params?.jp_name || params?.title}
+                                        poster={params?.poster}
+                                        mylist={details?.mylist}
+                                        no_of_episodes={params?.no_of_episodes || params?.episodes}
+                                        type={details?.description?.type || params?.type}
                                         status={details?.description?.status || ''}
                                         season={details?.description?.season || ''}
                                         year={details?.description?.year || ''}
-                                        score={data?.score}
+                                        score={params?.score}
                                     />
                                 )}
                             </div>
-                            {!ep_loading ? (
+                            {details?.description?.eng_name ? (
                                 <Heading fontSize={'xl'} fontFamily={'body'} display="block">
                                     {details?.description?.eng_name ?? ''}
                                 </Heading>
-                            ) : (
+                            ) : isLoading ? (
                                 <Skeleton
                                     height={'18px'}
                                     width={'100px'}
                                     alignSelf={'baseline'}
                                     display={'block'}
                                 />
-                            )}
+                            ) : null}
                             {details?.description?.studio ? (
                                 <Text
                                     fontWeight={600}
@@ -164,14 +167,14 @@ export function AnimeDetailsScreen() {
                                     display="inline">
                                     by {details?.description?.studio}
                                 </Text>
-                            ) : (
+                            ) : isLoading ? (
                                 <Skeleton
                                     height={'18px'}
                                     width={'100px'}
                                     alignSelf={'baseline'}
                                     display={'inline-block'}
                                 />
-                            )}
+                            ) : null}
                         </Box>
                         <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
                             {ep === '?' ? 'Running' : `Episodes ${ep}`}
@@ -187,25 +190,25 @@ export function AnimeDetailsScreen() {
                                     alignItems: 'center',
                                 }}>
                                 <Icon as={FiMonitor} />
-                                <Text ml="1">{data.type}</Text>
+                                <Text ml="1">{params?.type}</Text>
                             </Badge>
-                            {data.status && (
+                            {params?.status && (
                                 <Badge px={2} py={1} fontWeight={'400'}>
-                                    {data.status}
+                                    {params?.status}
                                 </Badge>
                             )}
                             <Badge px={2} py={1} fontWeight={'400'}>
                                 <Box display={'flex'} alignItems="center" justifyContent={'center'}>
                                     <AiFillStar color="#FDCC0D" />
-                                    <Text ml={'5px'}>{data.score}</Text>
+                                    <Text ml={'5px'}>{params?.score}</Text>
                                 </Box>
                             </Badge>
                         </Stack>
-                        {details?.description?.synopsis && !ep_loading ? (
+                        {details?.description?.synopsis ? (
                             <Text color={'gray.400'} px={3} pl={0} width="100%">
                                 {details?.description?.synopsis}
                             </Text>
-                        ) : (
+                        ) : isLoading ? (
                             <Stack align={'center'} justify={'center'} direction={'row'}>
                                 <Text color={'gray.400'} width="100%" px={3} pl={0}>
                                     <SkeletonText
@@ -216,13 +219,13 @@ export function AnimeDetailsScreen() {
                                     />
                                 </Text>
                             </Stack>
-                        )}
+                        ) : null}
                         <div>
                             {/* @ts-ignore */}
                             <PaginateCard
                                 showPageNav={true}
                                 ep_details={details}
-                                loading={ep_loading}
+                                loading={isLoading}
                                 redirect
                             />
                         </div>

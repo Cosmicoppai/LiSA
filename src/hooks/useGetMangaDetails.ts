@@ -13,37 +13,50 @@ export type TMangaChapters = {
     [chp_no: string]: TMangaChapter;
 }[];
 
-async function getMangaDetails({ url }) {
+type TMangaSearch = {
+    title: string;
+    total_chps: string;
+    genres: string[];
+    poster: string;
+    status: string;
+    manga_detail: string;
+    session: string;
+};
+
+type TMangaDetails = {
+    chapters: TMangaChapters;
+    description: {
+        alt_name: string;
+        author: string;
+        summary: string;
+    };
+    mylist: boolean;
+    manga_id: string | number;
+    recommendation: string;
+};
+
+type TGetMangaDetails = {
+    data: TMangaSearch;
+    details: TMangaDetails;
+};
+
+async function getMangaDetails({ url }): Promise<TGetMangaDetails> {
     const { data } = await server.get(url);
 
-    const detailUrl = String(url).includes('/search?') ? data?.response[0].manga_detail : url;
+    if (String(url).includes('/search?')) {
+        const detailUrl = data?.response[0]?.manga_detail;
 
-    const { data: details } = await server.get(detailUrl);
+        const { data: details } = await server.get(detailUrl);
+
+        return {
+            data: data?.response?.[0] ?? {},
+            details,
+        };
+    }
 
     return {
-        data: data?.response?.[0] ?? {},
-        details,
-    } as {
-        data: {
-            title: string;
-            total_chps: string;
-            genres: string[];
-            poster: string;
-            status: string;
-            manga_detail: string;
-            session: string;
-        };
-        details: {
-            chapters: TMangaChapters;
-            description: {
-                alt_name: string;
-                author: string;
-                summary: string;
-            };
-            mylist: boolean;
-            manga_id: string | number;
-            recommendation: string;
-        };
+        data: {} as any,
+        details: data,
     };
 }
 

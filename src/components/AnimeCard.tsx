@@ -12,7 +12,11 @@ export function AnimeCard({ data, onClick }: { data: any; onClick?: () => void }
     const detailsClickHandler = () => {
         // @ts-ignore
         dispatch(addAnimeDetails(data));
-        navigate('/anime-details');
+        navigate(
+            `/anime-details?${new URLSearchParams({
+                q: JSON.stringify(data),
+            })}`,
+        );
     };
 
     const episodes = useMemo(() => {
