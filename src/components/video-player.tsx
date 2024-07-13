@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import { Box, useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import videojs from 'video.js';
@@ -13,12 +11,11 @@ import { ExternalPlayerPopup } from './externalPopup';
 
 export function VideoPlayer({
     url,
-    epDetails,
+    snapshot,
     player,
     setPlayer,
     prevTime,
     nextEpHandler,
-    streamLoading,
     setQualityOptions,
     qualityOptions,
 }) {
@@ -50,9 +47,7 @@ export function VideoPlayer({
     }, [url]);
 
     useEffect(() => {
-        if (callFinishVideoAPI) {
-            nextEpHandler();
-        }
+        if (callFinishVideoAPI) nextEpHandler();
     }, [callFinishVideoAPI]);
 
     useEffect(() => {
@@ -64,7 +59,7 @@ export function VideoPlayer({
             playbackRates: [0.5, 1, 1.5, 2],
 
             controls: true,
-            poster: epDetails?.details?.snapshot,
+            poster: snapshot,
             controlBar: {
                 pictureInPictureToggle: true,
             },
@@ -133,7 +128,7 @@ export function VideoPlayer({
         return () => {
             if (player) player.dispose();
         };
-    }, [epDetails]);
+    }, [snapshot]);
 
     useEffect(() => {
         if (player && player.hlsQualitySelector) {
@@ -167,20 +162,24 @@ export function VideoPlayer({
             <div data-vjs-player>
                 <video
                     ref={videoRef}
+                    // @ts-ignore
                     lan
-                    onLoadedMetadata={(e, px) => {
+                    onLoadedMetadata={(e) => {
+                        // @ts-ignore
                         setVidDuration(e.target.duration);
                     }}
                     onTimeUpdate={(e) => {
+                        // @ts-ignore
                         if (e.target.currentTime >= vidDuration - 1) {
                             setCallFinishVideoAPI(true);
                         }
                     }}
                     controls
                     className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
-                    id="my-video"></video>
+                    id="my-video"
+                />
             </div>
-
+            {/* @ts-ignore */}
             <ExternalPlayerPopup isOpen={isOpen} onClose={onClose} language={language} />
         </Box>
     );

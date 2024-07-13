@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {
     Box,
     Button,
@@ -10,67 +8,69 @@ import {
     Text,
     Heading,
     Skeleton,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuGroup,
+    MenuItem,
+    useDisclosure,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { GoBackBtn } from 'src/components/GoBackBtn';
+import { MetaDataPopup } from 'src/components/metadata-popup';
+import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
+import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
+import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
-import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/actions/animeActions';
-import server from '../utils/axios';
 
 export function InbuiltPlayerScreen() {
+    const { data, isLoading: streamLoading } = useGetAnimeStream();
+
+    const details = data?.streamDetails;
+
     const {
-        data: { params: anime },
+        data: { params: anime, details: anime_details },
     } = useGetAnimeDetails();
+    const session = anime?.session;
 
-    const dispatch = useDispatch();
-    const { details, loading: streamLoading } = useSelector((state) => state.animeStreamDetails);
+    const {
+        data: eps_details,
+        isLoading: eps_loading,
+        episodePageUrl,
 
-    const epDetails = useSelector((state) => state.animeCurrentEp);
+        onNextPage,
+    } = useGetAnimeEpPagination();
 
-    const { details: eps_details, loading: eps_loading } = useSelector(
-        (state) => state.animeEpisodesDetails,
-    );
+    const navigate = useNavigate();
 
     const [language, setLanguage] = useState('jpn');
     const [qualityOptions, setQualityOptions] = useState([]);
 
     const [prevTime, setPrevTime] = useState(null);
     const [player, setPlayer] = useState(undefined);
-    const [toogleRefresh, setToogleRefresh] = useState(Math.floor(Math.random() * 100000));
 
     const languageChangeHandler = (e) => {
         setPrevTime(player.currentTime());
         setLanguage(e.target.value);
     };
-    const ep_no = parseInt(epDetails?.details?.current_ep);
+    const ep_no = Math.trunc(data.animeEpisode.ep_no);
 
-    const pageChangeHandler = async (url) => {
-        if (url) {
-            const { data } = await server.get(url);
-            dispatch(addEpisodesDetails({ ...data, current_ep: ep_no + 1 }));
-        }
-    };
     const current_page_eps = eps_details?.ep_details;
 
     const nextEpHandler = () => {
-        setToogleRefresh(null);
-
-        if (ep_no == Object.keys(current_page_eps[current_page_eps.length - 1])[0]) {
-            if (eps_details.next_page_url) {
-                pageChangeHandler(eps_details.next_page_url);
-            } else {
-                return;
-            }
+        if (ep_no === Number(Object.keys(current_page_eps[current_page_eps.length - 1])[0])) {
+            if (eps_details.next_page_url) onNextPage();
+            else return;
         }
 
         let item;
 
         current_page_eps.map((single_ep) => {
-            if (Object.keys(single_ep)[0] == ep_no + 1) {
+            if (Number(Object.keys(single_ep)[0]) === ep_no + 1) {
                 console.log(single_ep);
                 item = Object.values(single_ep)[0];
             }
@@ -78,45 +78,39 @@ export function InbuiltPlayerScreen() {
 
         if (item) {
             console.log('item', item);
-            dispatch(getStreamDetails(item.stream_detail));
-            dispatch(
-                addCurrentEp({
-                    ...item,
-                    current_ep: ep_no + 1,
-                }),
+
+            navigate(
+                `/play?${new URLSearchParams({
+                    q: JSON.stringify(anime),
+                    episodePageUrl,
+                    stream: JSON.stringify({
+                        ...item,
+                        ep_no: ep_no + 1,
+                    }),
+                })}`,
+                { replace: true },
             );
+
             console.log(item);
-
-            setToogleRefresh(Math.floor(Math.random() * 100000));
         }
     };
-    const prevEpHandler = () => {
-        if (ep_no == Object.keys(current_page_eps[0])[0]) {
-            if (eps_details.prev_page_url) {
-                pageChangeHandler(eps_details.prev_page_url);
-            } else {
-                return;
-            }
-        }
 
-        let item;
-
-        current_page_eps.map((single_ep) => {
-            if (Object.keys(single_ep)[0] == ep_no) {
-                item = Object.values(single_ep)[0];
-            }
+    const { downloadVideo, downloadLoading } = useDownloadVideo();
+    const singleDownloadHandler = (url) => {
+        downloadVideo({
+            manifest_url: url.slice(2),
         });
-
-        if (item) {
-            dispatch(getStreamDetails(item.stream_detail));
-            dispatch(
-                addCurrentEp({
-                    ...item,
-                    current_ep: ep_no - 1,
-                }),
-            );
-        }
     };
+    const downloadPageHandler = async () => {
+        downloadVideo({
+            anime_session: session,
+        });
+    };
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    useEffect(() => {
+        if (downloadLoading) onOpen();
+        else onClose();
+    }, [downloadLoading]);
 
     useEffect(() => {
         if (!details || !player) return;
@@ -128,7 +122,7 @@ export function InbuiltPlayerScreen() {
         });
         player.poster('');
     }, [details, streamLoading]);
-    console.log('streamLoading', streamLoading);
+
     console.log('player', player);
 
     useEffect(() => {
@@ -145,7 +139,7 @@ export function InbuiltPlayerScreen() {
                 alignItems={'center'}
                 w="90%"
                 margin={'0 auto'}>
-                {epDetails && anime && (
+                {anime && (
                     <Box w="100%">
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <GoBackBtn />
@@ -156,21 +150,22 @@ export function InbuiltPlayerScreen() {
                                     flexDirection: 'row',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'}>
-                                    {anime.jp_name ? `${anime.jp_name}` : ''}{' '}
-                                    {anime.eng_name ? ` | ${anime.eng_name}` : ''}
-                                    {anime.title ? `${anime.title}` : ''}
+                                    {anime.jp_name ? anime.jp_name : ''}{' '}
+                                    {anime_details?.description?.eng_name
+                                        ? ` | ${anime_details?.description?.eng_name}`
+                                        : null}
+                                    {anime.title ? anime.title : ''}
                                 </Heading>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" ml={2}>
-                                    | Episode {epDetails?.details?.current_ep}
+                                    | Episode {data.animeEpisode.ep_no}
                                 </Text>
                             </Box>
                         </Box>
 
-                        {details && language && epDetails && !streamLoading ? (
+                        {details && language && data.animeEpisode.snapshot && !streamLoading ? (
                             <VideoPlayer
                                 url={details[language]}
-                                streamLoading={streamLoading}
-                                epDetails={epDetails}
+                                snapshot={data.animeEpisode.snapshot}
                                 player={player}
                                 setPlayer={setPlayer}
                                 prevTime={prevTime}
@@ -200,37 +195,50 @@ export function InbuiltPlayerScreen() {
                         p={1}
                         pt={2}
                         gap={6}>
-                        <Button onClick={prevEpHandler} width={'max-content'}>
-                            Previous
-                        </Button>
                         <Select
                             // placeholder="Language"
                             size="md"
                             value={language}
                             onChange={languageChangeHandler}
                             width={'max-content'}>
-                            {Object.keys(details || {}).map((language, idx) => {
-                                return (
-                                    <option key={idx} value={language}>
-                                        {language === 'jpn'
-                                            ? 'Japanese'
-                                            : language === 'eng'
-                                              ? 'English'
-                                              : ''}
-                                    </option>
-                                );
-                            })}
+                            {Object.keys(details || {}).map((language, idx) => (
+                                <option key={idx} value={language}>
+                                    {language === 'jpn'
+                                        ? 'Japanese'
+                                        : language === 'eng'
+                                          ? 'English'
+                                          : ''}
+                                </option>
+                            ))}
                         </Select>
-                        <Button onClick={nextEpHandler} width={'max-content'}>
-                            Next
-                        </Button>
+                        <div
+                            style={{
+                                display: 'flex',
+                                columnGap: 10,
+                            }}>
+                            <Menu>
+                                <MenuButton disabled={eps_loading} as={Button}>
+                                    Download
+                                </MenuButton>
+                                <MenuList>
+                                    <MenuGroup title="Select quality">
+                                        {qualityOptions?.map(({ id, height }) => (
+                                            <MenuItem
+                                                key={id}
+                                                onClick={() => singleDownloadHandler(id)}>
+                                                {height}p
+                                            </MenuItem>
+                                        ))}
+                                    </MenuGroup>
+                                </MenuList>
+                            </Menu>
+                            <Button disabled={eps_loading} onClick={downloadPageHandler}>
+                                Download all
+                            </Button>
+                        </div>
                     </Flex>
-
-                    <PaginateCard
-                        loading={eps_loading}
-                        isSingleAvailable={true}
-                        qualityOptions={qualityOptions}
-                    />
+                    <PaginateCard />
+                    <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
                 </Stack>
             </Flex>
         </Center>

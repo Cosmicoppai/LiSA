@@ -221,13 +221,7 @@ export function AnimeDetailsScreen() {
                             </Stack>
                         ) : null}
                         <div>
-                            {/* @ts-ignore */}
-                            <PaginateCard
-                                showPageNav={true}
-                                ep_details={details}
-                                loading={isLoading}
-                                redirect
-                            />
+                            <PaginateCard />
                         </div>
                         <div>
                             <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
@@ -275,10 +269,7 @@ export function AnimeDetailsScreen() {
                                     w="100%">
                                     <Box
                                         sx={{
-                                            // position: "absolute",
-                                            // top: 0,
                                             marginTop: '10px',
-
                                             justifyContent: 'center',
                                             display: 'flex',
                                             flexWrap: 'wrap',

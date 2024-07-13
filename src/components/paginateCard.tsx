@@ -1,75 +1,51 @@
-import {
-    Box,
-    Button,
-    Fade,
-    Flex,
-    Menu,
-    MenuButton,
-    MenuGroup,
-    MenuItem,
-    MenuList,
-    Skeleton,
-    Spacer,
-    Text,
-    useDisclosure,
-} from '@chakra-ui/react';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
+import { Box, Button, Fade, Flex, Skeleton, Spacer, Text } from '@chakra-ui/react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
-import { getAnimeEpisodeDetails } from 'src/hooks/useGetAnimeEpisodeDetails';
+import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
+import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
 
-import { MetaDataPopup } from './metadata-popup';
-import { addCurrentEp, getStreamDetails } from '../store/actions/animeActions';
+export function PaginateCard() {
+    const location = useLocation();
+    const isPlayRoute = location.pathname.includes('/play');
 
-export function PaginateCard({ showPageNav, redirect, isSingleAvailable, qualityOptions }) {
     const {
         data: { params },
     } = useGetAnimeDetails();
 
-    const [episodePageUrl, setEpisodePageUrl] = useState(null);
+    const {
+        data: ep_details,
+        isLoading: epsLoading,
+        episodePageUrl,
+        onPrevPage,
+        onNextPage,
+    } = useGetAnimeEpPagination();
 
-    const { data: ep_details, isLoading: epsLoading } = useQuery({
-        queryKey: ['anime-ep-details', episodePageUrl, params?.ep_details],
-        queryFn: () => getAnimeEpisodeDetails({ url: episodePageUrl || params?.ep_details }),
-    });
-    const session = params?.session;
+    const {
+        data: { animeEpisode },
+    } = useGetAnimeStream();
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    // @ts-ignore
-    const epDetails = useSelector((state) => state.animeCurrentEp);
-    const currentEp = Math.trunc(epDetails?.details?.current_ep);
+    const currentEp = Math.trunc(animeEpisode?.ep_no);
 
     // console.log(epsLoading);
 
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const episodeClickHandler = (item, ep_no) => {
-        console.log(item);
-        // @ts-ignore
-        dispatch(getStreamDetails(item.stream_detail));
-        dispatch(
-            // @ts-ignore
-            addCurrentEp({
-                ...item,
-                current_ep: ep_no,
-            }),
-        );
 
-        if (redirect) {
-            navigate(
-                `/play?${new URLSearchParams({
-                    q: JSON.stringify(params),
-                })}`,
-            );
-        }
+    const episodeClickHandler = (item, ep_no) => {
+        navigate(
+            `/play?${new URLSearchParams({
+                q: JSON.stringify(params),
+                episodePageUrl,
+                stream: JSON.stringify({
+                    ...item,
+                    ep_no,
+                }),
+            })}`,
+            { replace: isPlayRoute },
+        );
     };
 
     let coloredIdx;
-    console.log({ coloredIdx, qualityOptions, l: 2222 });
+
     // console.log(ep_details);
 
     if (!epsLoading && ep_details) {
@@ -81,141 +57,83 @@ export function PaginateCard({ showPageNav, redirect, isSingleAvailable, quality
         });
     }
 
-    const { downloadVideo, downloadLoading } = useDownloadVideo();
-
-    useEffect(() => {
-        if (downloadLoading) onOpen();
-        else onClose();
-    }, [downloadLoading]);
-
-    const downloadPageHandler = async () => {
-        downloadVideo({
-            anime_session: session,
-        });
-    };
-
-    const singleDownloadHandler = (url) => {
-        downloadVideo({
-            manifest_url: url.slice(2),
-        });
-    };
-
     return (
         <>
             <Box mt={5}>
                 {!epsLoading && ep_details ? (
                     <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
-                        {ep_details?.ep_details?.map((item, key) => {
-                            return (
-                                <Flex
-                                    cursor={'pointer'}
-                                    key={key}
-                                    p={1}
-                                    mr={2}
-                                    mt={2}
-                                    width={'100%'}
-                                    maxWidth={'45px'}
-                                    minWidth={'45px'}
-                                    maxHeight={'45px'}
-                                    minHeight={'45px'}
-                                    justifyContent="center"
-                                    alignItems="center"
-                                    bg={coloredIdx === key && !redirect ? '#10495F' : 'brand.900'}
-                                    onClick={() =>
-                                        episodeClickHandler(
-                                            Object.values(item)[0],
-                                            Object.keys(item)[0],
-                                        )
-                                    }>
-                                    <Text textAlign={'center'}>{Object.keys(item)[0]}</Text>
-                                </Flex>
-                            );
-                        })}
+                        {ep_details?.ep_details?.map((item, key) => (
+                            <Flex
+                                cursor={'pointer'}
+                                key={key}
+                                p={1}
+                                mr={2}
+                                mt={2}
+                                width={'100%'}
+                                maxWidth={'45px'}
+                                minWidth={'45px'}
+                                maxHeight={'45px'}
+                                minHeight={'45px'}
+                                justifyContent="center"
+                                alignItems="center"
+                                bg={isPlayRoute && coloredIdx === key ? '#10495F' : 'brand.900'}
+                                onClick={() =>
+                                    episodeClickHandler(
+                                        Object.values(item)[0],
+                                        Object.keys(item)[0],
+                                    )
+                                }>
+                                <Text textAlign={'center'}>{Object.keys(item)[0]}</Text>
+                            </Flex>
+                        ))}
                     </Flex>
                 ) : (
                     <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
                         {Array(25)
                             .fill(0)
-                            .map((item, key) => {
-                                return (
-                                    <Skeleton
-                                        p={2}
-                                        mr={2}
-                                        mt={2}
+                            .map((item, key) => (
+                                <Skeleton
+                                    p={2}
+                                    mr={2}
+                                    mt={2}
+                                    width={'100%'}
+                                    maxWidth={'50px'}
+                                    justifyContent="center"
+                                    key={key}>
+                                    <Flex
                                         width={'100%'}
                                         maxWidth={'50px'}
-                                        justifyContent="center"
-                                        key={key}>
-                                        <Flex
-                                            width={'100%'}
-                                            maxWidth={'50px'}
-                                            backgroundColor={
-                                                currentEp === key + 1 ? 'while' : 'inherit'
-                                            }
-                                            justifyContent="center">
-                                            <Text textAlign={'center'}>{key + 1}</Text>
-                                        </Flex>
-                                    </Skeleton>
-                                );
-                            })}
+                                        backgroundColor={
+                                            currentEp === key + 1 ? 'while' : 'inherit'
+                                        }
+                                        justifyContent="center">
+                                        <Text textAlign={'center'}>{key + 1}</Text>
+                                    </Flex>
+                                </Skeleton>
+                            ))}
                     </Flex>
                 )}
-                {/* <EpPopover isOpen={isOpen} onOpen={onOpen} onClose={onClose} /> */}
             </Box>
 
             <Flex sx={{ marginTop: '20px !important' }}>
-                {showPageNav ? (
-                    <Flex justifyContent={'space-between'} width={'100%'}>
-                        <Fade in={Boolean(ep_details?.prev_page_url)}>
-                            <Button
-                                onClick={() => setEpisodePageUrl(ep_details?.prev_page_url)}
-                                disabled={!ep_details?.prev_page_url || epsLoading}>
-                                Previous Page
-                            </Button>
-                        </Fade>
+                <Flex justifyContent={'space-between'} width={'100%'}>
+                    <Fade in={Boolean(ep_details?.prev_page_url)}>
+                        <Button
+                            onClick={onPrevPage}
+                            disabled={!ep_details?.prev_page_url || epsLoading}>
+                            Previous Page
+                        </Button>
+                    </Fade>
 
-                        <Spacer />
+                    <Spacer />
 
-                        {ep_details?.next_page_url && (
-                            <Button
-                                ml={5}
-                                onClick={() => setEpisodePageUrl(ep_details?.next_page_url)}
-                                disabled={epsLoading}>
-                                Next Page
-                            </Button>
-                        )}
-                    </Flex>
-                ) : null}
-                {!isSingleAvailable && <Spacer />}
-                {/* <Button disabled={epsLoading} onClick={downloadPageHandler}>
-                    Download all
-                </Button> */}
-                {isSingleAvailable && (
-                    <>
-                        <Spacer />
-                        <Menu>
-                            <MenuButton disabled={epsLoading} as={Button}>
-                                Download
-                            </MenuButton>
-                            <MenuList>
-                                <MenuGroup title="Select quality">
-                                    {qualityOptions?.map(({ id, height }) => {
-                                        return (
-                                            <MenuItem
-                                                key={id}
-                                                onClick={() => singleDownloadHandler(id)}>
-                                                {height}p
-                                            </MenuItem>
-                                        );
-                                    })}
-                                </MenuGroup>
-                            </MenuList>
-                        </Menu>
-                    </>
-                )}
+                    {ep_details?.next_page_url && (
+                        <Button ml={5} onClick={onNextPage} disabled={epsLoading}>
+                            Next Page
+                        </Button>
+                    )}
+                </Flex>
             </Flex>
-
-            <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </>
     );
 }

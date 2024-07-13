@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {
     Button,
     Modal,
@@ -13,22 +11,25 @@ import {
     Stack,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
+import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
+import { usePlayVideoExternal } from 'src/hooks/usePlayVideoExternal';
 
-import { playVideoExternal } from '../store/actions/animeActions';
+export function EpPopover({ isOpen, onClose }) {
+    const {
+        data: { streamDetails: details },
+    } = useGetAnimeStream();
 
-export function EpPopover({ isOpen, onOpen, onClose }) {
-    const dispatch = useDispatch();
-    const { details, loading } = useSelector((state) => state.animeStreamDetails);
     const [language, setLanguage] = useState(null);
     const [quality, setQuality] = useState(null);
 
     const { downloadVideo } = useDownloadVideo();
 
+    const { playVideoExternalMutation } = usePlayVideoExternal();
+
     const playHandler = () => {
         if (Object.values(Object.values(details[language])[0])[0]) {
-            dispatch(playVideoExternal(Object.values(Object.values(details[language])[0])[0]));
+            playVideoExternalMutation.mutate(Object.values(Object.values(details[language])[0])[0]);
         }
     };
     const downloadHandler = () => {
@@ -63,7 +64,8 @@ export function EpPopover({ isOpen, onOpen, onClose }) {
                                     size="lg"
                                     disabled={!language}
                                     onChange={(e) => setQuality(e.target.value)}>
-                                    {details[language]?.map((quality, idx) => {
+                                    {/* @ts-ignore */}
+                                    {details[language]?.map?.((quality, idx) => {
                                         return (
                                             <option key={idx} value={Object.keys(quality)[0]}>
                                                 {Object.keys(quality)[0]}p

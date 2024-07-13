@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {
     Box,
     Flex,
@@ -13,36 +11,31 @@ import {
     Progress,
     Text,
 } from '@chakra-ui/react';
-import { useDispatch, useSelector } from 'react-redux';
 import { localImagesPath } from 'src/constants/images';
+import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
+import { usePlayVideoExternal } from 'src/hooks/usePlayVideoExternal';
 
-import { playVideoExternal } from '../store/actions/animeActions';
+export function ExternalPlayerPopup({ isOpen, onClose, language, historyPlay, playId }) {
+    const {
+        data: { streamDetails: details },
+    } = useGetAnimeStream();
 
-export function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, historyPlay, playId }) {
-    const dispatch = useDispatch();
+    const { playVideoExternalMutation } = usePlayVideoExternal();
 
-    const { error: externalError, loading: externalLoading } = useSelector(
-        (state) => state.animeStreamExternal,
-    );
-    const { details } = useSelector((state) => state.animeStreamDetails);
     const playHandler = async (player) => {
         try {
             if (historyPlay) {
-                await dispatch(
-                    playVideoExternal({
-                        id: playId,
-                        player,
-                    }),
-                );
+                await playVideoExternalMutation.mutateAsync({
+                    id: playId,
+                    player,
+                });
                 onClose();
             } else {
                 if (details) {
-                    await dispatch(
-                        playVideoExternal({
-                            manifest_url: details[language],
-                            player,
-                        }),
-                    );
+                    await playVideoExternalMutation.mutateAsync({
+                        manifest_url: details[language],
+                        player,
+                    });
                     onClose();
                 }
             }
@@ -50,9 +43,15 @@ export function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, history
             console.log(error);
         }
     };
+    // @ts-ignore
+    const error = playVideoExternalMutation.error?.response?.data?.error;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            isCentered
+            onCloseComplete={playVideoExternalMutation.reset}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Choose your favourite video player </ModalHeader>
@@ -66,12 +65,12 @@ export function ExternalPlayerPopup({ isOpen, onOpen, onClose, language, history
                             <Image src={localImagesPath.vlc} />
                         </Box>
                     </Flex>
-                    {externalError && (
+                    {error && (
                         <Text align={'center'} color="red.300">
-                            {externalError ? externalError['error'] : ''}
+                            {error}
                         </Text>
                     )}
-                    {externalLoading && (
+                    {playVideoExternalMutation.isPending && (
                         <Box>
                             <Progress size="xs" isIndeterminate />
                             <Text align={'center'} mt={2}>
