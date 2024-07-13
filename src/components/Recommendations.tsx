@@ -20,6 +20,13 @@ export function Recommendations({ url, type }: { url: string; type: 'manga' | 'a
 
     if (error) return <ErrorMessage error={error} />;
 
+    if (data?.length === 0)
+        return (
+            <span style={{ textAlign: 'center', marginTop: 100, marginBottom: 100 }}>
+                {'Recommendations not available.'}
+            </span>
+        );
+
     if (data?.length) {
         return (
             <>

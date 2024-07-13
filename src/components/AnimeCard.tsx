@@ -1,17 +1,12 @@
 import { useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { SearchResultCard } from './search-result-card';
-import { addAnimeDetails } from '../store/actions/animeActions';
 
 export function AnimeCard({ data, onClick }: { data: any; onClick?: () => void }) {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const detailsClickHandler = () => {
-        // @ts-ignore
-        dispatch(addAnimeDetails(data));
         navigate(
             `/anime-details?${new URLSearchParams({
                 q: JSON.stringify(data),

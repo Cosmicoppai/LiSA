@@ -2,9 +2,6 @@ import {
     ANIME_CURRENT_EP_FAIL,
     ANIME_CURRENT_EP_REQUEST,
     ANIME_CURRENT_EP_SUCCESS,
-    ANIME_DETAILS_FAIL,
-    ANIME_DETAILS_REQUEST,
-    ANIME_DETAILS_SUCCESS,
     ANIME_EPISODES_ADD_FAIL,
     ANIME_EPISODES_ADD_REQUEST,
     ANIME_EPISODES_ADD_SUCCESS,
@@ -46,21 +43,6 @@ export const animeCurrentEpReducer = (state = {}, action) => {
             return { loading: false, details: action.payload };
 
         case ANIME_CURRENT_EP_FAIL:
-            return { loading: false, details: action.payload };
-
-        default:
-            return state;
-    }
-};
-export const animeDetailsReducer = (state = {}, action) => {
-    switch (action.type) {
-        case ANIME_DETAILS_REQUEST:
-            return { loading: true, details: action.payload };
-
-        case ANIME_DETAILS_SUCCESS:
-            return { loading: false, details: action.payload };
-
-        case ANIME_DETAILS_FAIL:
             return { loading: false, details: action.payload };
 
         default:

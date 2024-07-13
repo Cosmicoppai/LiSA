@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
     Box,
     Button,
@@ -6,7 +5,6 @@ import {
     Flex,
     Menu,
     MenuButton,
-    MenuDivider,
     MenuGroup,
     MenuItem,
     MenuList,
@@ -15,72 +13,69 @@ import {
     Text,
     useDisclosure,
 } from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
+import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
+import { getAnimeEpisodeDetails } from 'src/hooks/useGetAnimeEpisodeDetails';
 
 import { MetaDataPopup } from './metadata-popup';
-import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/actions/animeActions';
-import server from '../utils/axios';
+import { addCurrentEp, getStreamDetails } from '../store/actions/animeActions';
 
-export function PaginateCard({
-    showPageNav,
-    loading,
-    ep_details,
-    redirect,
-    isSingleAvailable,
-    qualityOptions,
-    player,
-    setTest,
-}) {
+export function PaginateCard({ showPageNav, redirect, isSingleAvailable, qualityOptions }) {
+    const {
+        data: { params },
+    } = useGetAnimeDetails();
+
+    const [episodePageUrl, setEpisodePageUrl] = useState(null);
+
+    const { data: ep_details, isLoading: epsLoading } = useQuery({
+        queryKey: ['anime-ep-details', episodePageUrl, params?.ep_details],
+        queryFn: () => getAnimeEpisodeDetails({ url: episodePageUrl || params?.ep_details }),
+    });
+    const session = params?.session;
+
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    const { loading: epsLoading } = useSelector((state) => state.animeEpisodesDetails);
+    // @ts-ignore
     const epDetails = useSelector((state) => state.animeCurrentEp);
-    const { session } = useSelector((state) => state.animeDetails.details);
-    const currentEp = parseInt(epDetails?.details?.current_ep);
+    const currentEp = Math.trunc(epDetails?.details?.current_ep);
 
     // console.log(epsLoading);
-    const [isDownloadButtonAvailable, setIsDownloadButtonAvailable] = useState(false);
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const episodeClickHandler = (item, ep_no) => {
-        setIsDownloadButtonAvailable(false);
         console.log(item);
+        // @ts-ignore
         dispatch(getStreamDetails(item.stream_detail));
         dispatch(
+            // @ts-ignore
             addCurrentEp({
                 ...item,
                 current_ep: ep_no,
             }),
         );
-        // sleep(2000).then(() => {
-        //   setIsDownloadButtonAvailable(true);
-        //   setTest({ assdfda: "assdfdasd" });
-        // });
+
         if (redirect) {
-            navigate('/play');
+            navigate(
+                `/play?${new URLSearchParams({
+                    q: JSON.stringify(params),
+                })}`,
+            );
         }
     };
-    const pageChangeHandler = async (url) => {
-        setIsDownloadButtonAvailable(false);
 
-        const { data } = await server.get(url);
-        dispatch(addEpisodesDetails(data));
-
-        sleep(2000).then(() => {
-            setIsDownloadButtonAvailable(true);
-        });
-    };
     let coloredIdx;
-
+    console.log({ coloredIdx, qualityOptions, l: 2222 });
     // console.log(ep_details);
 
-    if (!loading && ep_details) {
+    if (!epsLoading && ep_details) {
         const current_page_eps = ep_details.ep_details;
         current_page_eps?.map((single_ep, idx) => {
-            if (Object.keys(single_ep)[0] == currentEp) {
+            if (Number(Object.keys(single_ep)[0]) === currentEp) {
                 coloredIdx = idx;
             }
         });
@@ -105,27 +100,10 @@ export function PaginateCard({
         });
     };
 
-    useEffect(() => {
-        if (!isSingleAvailable) return;
-        setTest({ asda: 'asdasd' });
-
-        sleep(2000).then(() => {
-            setIsDownloadButtonAvailable(true);
-            setTest({ assdfda: 'assdfdasd' });
-        });
-    }, [isSingleAvailable]);
-    useEffect(() => {
-        sleep(4000).then(() => {
-            setIsDownloadButtonAvailable(true);
-        });
-    }, [isDownloadButtonAvailable]);
-    function sleep(time) {
-        return new Promise((resolve) => setTimeout(resolve, time));
-    }
     return (
         <>
             <Box mt={5}>
-                {!loading && ep_details ? (
+                {!epsLoading && ep_details ? (
                     <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
                         {ep_details?.ep_details?.map((item, key) => {
                             return (
@@ -142,7 +120,7 @@ export function PaginateCard({
                                     minHeight={'45px'}
                                     justifyContent="center"
                                     alignItems="center"
-                                    bg={coloredIdx == key && !redirect ? '#10495F' : 'brand.900'}
+                                    bg={coloredIdx === key && !redirect ? '#10495F' : 'brand.900'}
                                     onClick={() =>
                                         episodeClickHandler(
                                             Object.values(item)[0],
@@ -186,12 +164,12 @@ export function PaginateCard({
             </Box>
 
             <Flex sx={{ marginTop: '20px !important' }}>
-                {showPageNav && (
+                {showPageNav ? (
                     <Flex justifyContent={'space-between'} width={'100%'}>
-                        <Fade in={ep_details?.prev_page_url}>
+                        <Fade in={Boolean(ep_details?.prev_page_url)}>
                             <Button
-                                onClick={() => pageChangeHandler(ep_details?.prev_page_url)}
-                                disabled={loading || !ep_details?.prev_page_url || epsLoading}>
+                                onClick={() => setEpisodePageUrl(ep_details?.prev_page_url)}
+                                disabled={!ep_details?.prev_page_url || epsLoading}>
                                 Previous Page
                             </Button>
                         </Fade>
@@ -201,24 +179,22 @@ export function PaginateCard({
                         {ep_details?.next_page_url && (
                             <Button
                                 ml={5}
-                                onClick={() => pageChangeHandler(ep_details?.next_page_url)}
-                                disabled={loading || epsLoading}>
+                                onClick={() => setEpisodePageUrl(ep_details?.next_page_url)}
+                                disabled={epsLoading}>
                                 Next Page
                             </Button>
                         )}
                     </Flex>
-                )}
+                ) : null}
                 {!isSingleAvailable && <Spacer />}
-                {/* <Button disabled={epsLoading}>Download all</Button> */}
+                {/* <Button disabled={epsLoading} onClick={downloadPageHandler}>
+                    Download all
+                </Button> */}
                 {isSingleAvailable && (
                     <>
                         <Spacer />
-
                         <Menu>
-                            <MenuButton
-                                disabled={!isDownloadButtonAvailable}
-                                as={Button}
-                                onClick={() => setTest({ sdf: 'asdaasdsd' })}>
+                            <MenuButton disabled={epsLoading} as={Button}>
                                 Download
                             </MenuButton>
                             <MenuList>
@@ -226,14 +202,13 @@ export function PaginateCard({
                                     {qualityOptions?.map(({ id, height }) => {
                                         return (
                                             <MenuItem
-                                                onClick={() => singleDownloadHandler(id)}
-                                                key={id}>
+                                                key={id}
+                                                onClick={() => singleDownloadHandler(id)}>
                                                 {height}p
                                             </MenuItem>
                                         );
                                     })}
                                 </MenuGroup>
-                                {/* <MenuDivider /> */}
                             </MenuList>
                         </Menu>
                     </>

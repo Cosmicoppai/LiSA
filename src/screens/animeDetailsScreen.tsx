@@ -44,7 +44,7 @@ export function AnimeDetailsScreen() {
         }
     }, [details]);
 
-    const ep = params?.episodes || params?.episodes;
+    const ep = params?.no_of_episodes || params?.episodes;
 
     if (isError) return <ErrorMessage error={error} />;
 

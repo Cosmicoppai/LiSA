@@ -14,6 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { GoBackBtn } from 'src/components/GoBackBtn';
+import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
@@ -21,12 +22,14 @@ import { addCurrentEp, addEpisodesDetails, getStreamDetails } from '../store/act
 import server from '../utils/axios';
 
 export function InbuiltPlayerScreen() {
+    const {
+        data: { params: anime },
+    } = useGetAnimeDetails();
+
     const dispatch = useDispatch();
     const { details, loading: streamLoading } = useSelector((state) => state.animeStreamDetails);
 
     const epDetails = useSelector((state) => state.animeCurrentEp);
-
-    const { details: anime } = useSelector((state) => state.animeDetails);
 
     const { details: eps_details, loading: eps_loading } = useSelector(
         (state) => state.animeEpisodesDetails,
@@ -34,7 +37,7 @@ export function InbuiltPlayerScreen() {
 
     const [language, setLanguage] = useState('jpn');
     const [qualityOptions, setQualityOptions] = useState([]);
-    const [test, setTest] = useState({});
+
     const [prevTime, setPrevTime] = useState(null);
     const [player, setPlayer] = useState(undefined);
     const [toogleRefresh, setToogleRefresh] = useState(Math.floor(Math.random() * 100000));
@@ -224,13 +227,9 @@ export function InbuiltPlayerScreen() {
                     </Flex>
 
                     <PaginateCard
-                        ep_details={eps_details}
                         loading={eps_loading}
-                        currentEp={epDetails?.details?.current_ep}
                         isSingleAvailable={true}
-                        player={player}
                         qualityOptions={qualityOptions}
-                        setTest={setTest}
                     />
                 </Stack>
             </Flex>

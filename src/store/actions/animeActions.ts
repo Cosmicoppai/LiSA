@@ -3,9 +3,6 @@ import {
     ANIME_CURRENT_EP_FAIL,
     ANIME_CURRENT_EP_REQUEST,
     ANIME_CURRENT_EP_SUCCESS,
-    ANIME_DETAILS_FAIL,
-    ANIME_DETAILS_REQUEST,
-    ANIME_DETAILS_SUCCESS,
     ANIME_EPISODES_ADD_FAIL,
     ANIME_EPISODES_ADD_REQUEST,
     ANIME_EPISODES_ADD_SUCCESS,
@@ -17,35 +14,6 @@ import {
     ANIME_STREAM_EXTERNAL_REQUEST,
     ANIME_STREAM_EXTERNAL_SUCCESS,
 } from '../constants/animeConstants';
-
-export const addAnimeDetails = (data) => async (dispatch) => {
-    try {
-        let ep_details;
-        dispatch({ type: ANIME_DETAILS_REQUEST });
-        dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
-        dispatch({ type: ANIME_EPISODES_ADD_REQUEST, payload: data });
-
-        if (data.anime_detail) {
-            // dispatch({ type: ANIME_EPISODES_ADD_REQUEST });
-
-            const searchRes = await server.get(data.anime_detail);
-
-            ep_details = await server.get(searchRes.data.response[0].ep_details);
-            dispatch({
-                type: ANIME_DETAILS_SUCCESS,
-                payload: { ...data, ...ep_details.data },
-            });
-        } else {
-            dispatch({ type: ANIME_DETAILS_SUCCESS, payload: data });
-
-            ep_details = await server.get(data.ep_details);
-        }
-
-        dispatch(addEpisodesDetails(ep_details.data));
-    } catch (error) {
-        dispatch({ type: ANIME_DETAILS_FAIL, payload: error });
-    }
-};
 
 export const addEpisodesDetails = (data) => async (dispatch, getState) => {
     try {

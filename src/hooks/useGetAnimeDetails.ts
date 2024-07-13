@@ -3,15 +3,7 @@ import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import server from 'src/utils/axios';
 
-export type TAnimeEpisode = {
-    stream_detail: string;
-    snapshot: string;
-    duration: string;
-};
-
-export type TAnimeEpisodes = {
-    [ep_no: string]: TAnimeEpisode;
-}[];
+import { TAnimeEpisodeDetails } from './useGetAnimeEpisodeDetails';
 
 type TAnimeSearch = {
     title: string;
@@ -29,12 +21,8 @@ type TAnimeSearch = {
     anime_id: number;
 };
 
-type TAnimeDetails = {
-    ep_details: TAnimeEpisodes;
+type TAnimeDetails = TAnimeEpisodeDetails & {
     recommendation: string;
-    total_page: number;
-    next_page_url: string;
-    prev_page_url: null;
     description: {
         synopsis: string;
         eng_name: string | null;

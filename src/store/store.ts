@@ -4,7 +4,6 @@ import thunk from 'redux-thunk';
 
 import {
     animeCurrentEpReducer,
-    animeDetailsReducer,
     animeEpisodesReducer,
     animeStreamDetailsReducer,
     animeStreamExternalReducer,
@@ -15,8 +14,6 @@ const reducer = combineReducers({
     animeStreamExternal: animeStreamExternalReducer,
     animeEpisodesDetails: animeEpisodesReducer,
     animeCurrentEp: animeCurrentEpReducer,
-
-    animeDetails: animeDetailsReducer,
 });
 
 const middleware = [thunk];
