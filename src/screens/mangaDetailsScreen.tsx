@@ -18,47 +18,23 @@ import {
     Tag,
     Button,
 } from '@chakra-ui/react';
-import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { AddToWatchListManga } from 'src/components/AddToWatchListManga';
 import { GoBackBtn } from 'src/components/GoBackBtn';
+import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
 
-import { getMangaDetails } from './getMangaDetails';
 import { Recommendations } from '../components/Recommendations';
 
 export function MangaDetailsScreen() {
     const navigate = useNavigate();
 
-    const [searchParams] = useSearchParams();
-
-    const query = useMemo(() => {
-        const q = searchParams.get('q');
-
-        return JSON.parse(q) as {
-            manga_detail: string;
-            poster: string;
-            rank: string;
-            title: string;
-            type: string;
-            volumes: string;
-            score: string;
-        };
-    }, [searchParams]);
-
-    const { data: d1, isLoading } = useQuery({
-        queryKey: ['manga-details', query.manga_detail],
-        queryFn: () => getMangaDetails({ url: query.manga_detail }),
-    });
-
-    const data = {
-        ...d1?.data,
-        ...query,
-    };
-
-    const details = d1?.details;
+    const {
+        data: { params, details },
+        isLoading,
+    } = useGetMangaDetails();
 
     useEffect(() => {
         if (window) {
@@ -66,21 +42,19 @@ export function MangaDetailsScreen() {
         }
     }, [details]);
 
-    console.log({ data, details });
-
     const volTxt = useMemo(() => {
-        if (typeof data?.total_chps === 'string' || typeof data?.total_chps === 'number') {
-            if (data?.total_chps === '?') return 'running';
-            return `CHAPTERS ${data?.total_chps}`;
+        if (typeof params?.total_chps === 'string' || typeof params?.total_chps === 'number') {
+            if (params?.total_chps === '?') return 'running';
+            return `CHAPTERS ${params?.total_chps}`;
         }
 
         return '';
-    }, [data]);
+    }, [params]);
 
     const handleRead = () => {
         navigate(
             `/manga-reader?${new URLSearchParams({
-                q: JSON.stringify(query),
+                q: JSON.stringify(params),
             })}`,
         );
     };
@@ -123,7 +97,7 @@ export function MangaDetailsScreen() {
 
                             top: 5,
                             left: 0,
-                            backgroundImage: `url(${data?.poster})`,
+                            backgroundImage: `url(${params?.poster})`,
                             filter: 'blur(15px)',
                             zIndex: 1,
                         }}
@@ -136,7 +110,7 @@ export function MangaDetailsScreen() {
                             rounded={'lg'}
                             objectFit="contain"
                             boxSize="100%"
-                            src={data?.poster}
+                            src={params?.poster}
                             zIndex={2}
                         />
                     </Box>
@@ -157,19 +131,19 @@ export function MangaDetailsScreen() {
                                     alignItems: 'center',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'} display="inline">
-                                    {data?.title ? `${data?.title}` : ''}
+                                    {params?.title ? `${params?.title}` : ''}
                                 </Heading>
 
                                 {details?.manga_id ? (
                                     <AddToWatchListManga
                                         key={details?.manga_id}
                                         manga_id={details?.manga_id}
-                                        session={data?.session}
-                                        total_chps={data?.total_chps}
-                                        poster={data?.poster}
+                                        session={params?.session}
+                                        total_chps={params?.total_chps}
+                                        poster={params?.poster}
                                         mylist={details?.mylist}
-                                        genres={data?.genres || []}
-                                        status={data?.status || ''}
+                                        genres={params?.genres || []}
+                                        status={params?.status || ''}
                                     />
                                 ) : (
                                     <Skeleton
@@ -201,7 +175,7 @@ export function MangaDetailsScreen() {
                             {volTxt}
                         </Text>
                         <Stack align={'center'} justify={'center'} direction={'row'}>
-                            {data?.type ? (
+                            {params?.type ? (
                                 <Badge
                                     px={2}
                                     py={1}
@@ -212,18 +186,18 @@ export function MangaDetailsScreen() {
                                         alignItems: 'center',
                                     }}>
                                     <Icon as={FiMonitor} />
-                                    <Text ml="1">{data?.type}</Text>
+                                    <Text ml="1">{params?.type}</Text>
                                 </Badge>
                             ) : null}
-                            {data?.status && (
+                            {params?.status && (
                                 <Badge px={2} py={1} fontWeight={'400'}>
-                                    {data?.status}
+                                    {params?.status}
                                 </Badge>
                             )}
                             <Badge px={2} py={1} fontWeight={'400'}>
                                 <Box display={'flex'} alignItems="center" justifyContent={'center'}>
                                     <AiFillStar color="#FDCC0D" />
-                                    <Text ml={'5px'}>{data?.score ?? 'N/A'}</Text>
+                                    <Text ml={'5px'}>{params?.score ?? 'N/A'}</Text>
                                 </Box>
                             </Badge>
                         </Stack>
@@ -244,13 +218,13 @@ export function MangaDetailsScreen() {
                             </Stack>
                         )}
 
-                        {data.genres?.length ? (
+                        {params.genres?.length ? (
                             <div>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                                     Genre
                                 </Text>
                                 <Box>
-                                    {data.genres?.map((item, index) => (
+                                    {params.genres?.map((item, index) => (
                                         <Tag key={index} mr={2}>
                                             {item}
                                         </Tag>

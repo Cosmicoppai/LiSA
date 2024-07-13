@@ -1,3 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import server from 'src/utils/axios';
 
 export type TMangaChapter = {
@@ -10,7 +13,7 @@ export type TMangaChapters = {
     [chp_no: string]: TMangaChapter;
 }[];
 
-export async function getMangaDetails({ url }) {
+async function getMangaDetails({ url }) {
     const { data } = await server.get(url);
 
     const detailUrl = String(url).includes('/search?') ? data?.response[0].manga_detail : url;
@@ -41,5 +44,39 @@ export async function getMangaDetails({ url }) {
             manga_id: string | number;
             recommendation: string;
         };
+    };
+}
+
+export function useGetMangaDetails() {
+    const [searchParams] = useSearchParams();
+
+    const params = useMemo(() => {
+        const q = searchParams.get('q');
+
+        return JSON.parse(q) as {
+            title: string;
+            volumes: string;
+            poster: string;
+            rank: string;
+            type: string;
+            manga_detail: string;
+            score: string;
+        };
+    }, [searchParams]);
+
+    const query = useQuery({
+        queryKey: ['manga-details', params?.manga_detail],
+        queryFn: () => getMangaDetails({ url: params?.manga_detail }),
+    });
+
+    return {
+        ...query,
+        data: {
+            params: {
+                ...query.data?.data,
+                ...params,
+            },
+            details: query.data?.details,
+        },
     };
 }

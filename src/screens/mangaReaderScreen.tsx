@@ -8,46 +8,14 @@ import {
     TbLayoutSidebarLeftCollapseFilled,
     TbLayoutSidebarRightCollapseFilled,
 } from 'react-icons/tb';
-import { useSearchParams } from 'react-router-dom';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { localImagesPath } from 'src/constants/images';
+import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
 import server from 'src/utils/axios';
 
-import { TMangaChapter, TMangaChapters, getMangaDetails } from './getMangaDetails';
 import { useZoomHandler } from './useZoomHandler';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
-
-function useGetMangaDetails() {
-    const [searchParams] = useSearchParams();
-
-    const query = useMemo(() => {
-        const q = searchParams.get('q');
-
-        return JSON.parse(q) as {
-            manga_detail: string;
-            poster: string;
-            rank: string;
-            title: string;
-            type: string;
-            volumes: string;
-            score: string;
-        };
-    }, [searchParams]);
-
-    const { data: d1, isLoading } = useQuery({
-        queryKey: ['manga-details', query?.manga_detail],
-        queryFn: () => getMangaDetails({ url: query?.manga_detail }),
-    });
-
-    const data = {
-        ...d1?.data,
-        ...query,
-    };
-
-    const details = d1?.details;
-
-    return { data, details, isLoading };
-}
+import { TMangaChapter, TMangaChapters } from '../hooks/useGetMangaDetails';
 
 function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
     const [currentChapter, setCurrentChapter] = useState<TMangaChapter | null>(null);
@@ -79,7 +47,9 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
 }
 
 export function MangaReaderScreen() {
-    const { data, details } = useGetMangaDetails();
+    const {
+        data: { params, details },
+    } = useGetMangaDetails();
 
     const { chapters, currentChapter, setCurrentChapter, order, toggleOrder } =
         useChapterListHandler({
@@ -116,7 +86,7 @@ export function MangaReaderScreen() {
                                     flexDirection: 'row',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'}>
-                                    {data?.title}
+                                    {params?.title}
                                 </Heading>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" ml={2} mt={1}>
                                     | {currentChapter?.chp_name || 'Manga Reader'}
