@@ -15,8 +15,9 @@ export function useDownloadVideo() {
         try {
             setIsLoading(true);
             const { data } = await server.post(`/download`, payload, {
-                // @ts-ignore
-                'Content-Type': 'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
 
             if (data?.status) {

@@ -48,8 +48,9 @@ export function useDownloadingActions(id: TDownload['id'][]) {
                     id,
                 },
                 {
-                    // @ts-ignore
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 },
             );
 
@@ -72,8 +73,9 @@ export function useDownloadingActions(id: TDownload['id'][]) {
                     id,
                 },
                 {
-                    // @ts-ignore
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 },
             );
 
@@ -91,8 +93,9 @@ export function useDownloadingActions(id: TDownload['id'][]) {
                     id,
                 },
                 {
-                    // @ts-ignore
-                    'Content-Type': 'application/json',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 },
             );
 

@@ -169,10 +169,10 @@ export function AnimeDetailsScreen() {
                                 />
                             ) : null}
                         </Box>
-                        <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
+                        <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                             {ep === '?' ? 'Running' : `Episodes ${ep}`}
                         </Text>
-                        <Stack align={'center'} justify={'center'} direction={'row'} mt={6}>
+                        <Stack align={'center'} justify={'center'} direction={'row'} my={3}>
                             <Badge
                                 px={2}
                                 py={1}
@@ -214,10 +214,7 @@ export function AnimeDetailsScreen() {
                             </Stack>
                         ) : null}
                         <div>
-                            <PaginateCard />
-                        </div>
-                        <div>
-                            <Text fontWeight={600} color={'gray.500'} size="sm" mt={4}>
+                            <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
                                 External Links
                             </Text>
                             <Box>
@@ -226,8 +223,9 @@ export function AnimeDetailsScreen() {
                                         ([key, value], index) => {
                                             return (
                                                 <Tag
+                                                    title={value}
                                                     key={index}
-                                                    onClick={() => openExternalUrl(value as string)}
+                                                    onClick={() => openExternalUrl(value)}
                                                     mr={2}
                                                     sx={{ cursor: 'pointer' }}>
                                                     {key}
@@ -237,6 +235,7 @@ export function AnimeDetailsScreen() {
                                     )}
                             </Box>
                         </div>
+                        <PaginateCard />
                     </Stack>
                 </Stack>
                 <Tabs width={'100%'} variant="enclosed" mt={5}>

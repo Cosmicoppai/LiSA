@@ -234,9 +234,9 @@ export function MangaDetailsScreen() {
                             }}>
                             {details?.chapters?.length ? (
                                 <Button onClick={handleRead}>Read</Button>
-                            ) : (
+                            ) : isLoading ? (
                                 <Skeleton p={2} m={2} width={'48px'} height={'48px'} />
-                            )}
+                            ) : null}
                         </div>
                     </Stack>
                 </Stack>

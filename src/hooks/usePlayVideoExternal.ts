@@ -5,8 +5,9 @@ export function usePlayVideoExternal() {
     const playVideoExternalMutation = useMutation({
         mutationFn: (data: any) => {
             return server.post('/stream', data, {
-                // @ts-ignore
-                'Content-Type': 'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             });
         },
     });

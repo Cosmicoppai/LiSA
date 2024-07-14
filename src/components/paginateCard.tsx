@@ -1,4 +1,5 @@
-import { Box, Button, Fade, Flex, Skeleton, Spacer, Text } from '@chakra-ui/react';
+import { Box, Button, Fade, Flex, Icon, Skeleton, Spacer, Text } from '@chakra-ui/react';
+import { FaPlay } from 'react-icons/fa';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
@@ -57,8 +58,35 @@ export function PaginateCard() {
         });
     }
 
+    if (ep_details?.ep_details?.length === 1) {
+        if (isPlayRoute) return null;
+
+        return (
+            <div
+                style={{
+                    display: 'flex',
+                    flexGrow: 1,
+                    alignItems: 'flex-end',
+                    marginTop: 18,
+                }}>
+                {/* TODO: Write in better way */}
+                {ep_details?.ep_details?.map((item, key) => (
+                    <Button
+                        bg={'brand.900'}
+                        leftIcon={<Icon as={FaPlay} w={4} h={4} />}
+                        key={key}
+                        onClick={() =>
+                            episodeClickHandler(Object.values(item)[0], Object.keys(item)[0])
+                        }>
+                        Watch Now
+                    </Button>
+                ))}
+            </div>
+        );
+    }
+
     return (
-        <>
+        <div>
             <Box mt={5}>
                 {!epsLoading && ep_details ? (
                     <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
@@ -134,6 +162,6 @@ export function PaginateCard() {
                     )}
                 </Flex>
             </Flex>
-        </>
+        </div>
     );
 }

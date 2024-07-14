@@ -89,8 +89,6 @@ export function InbuiltPlayerScreen() {
                 })}`,
                 { replace: true },
             );
-
-            console.log(item);
         }
     };
 
@@ -215,9 +213,11 @@ export function InbuiltPlayerScreen() {
                                         </MenuGroup>
                                     </MenuList>
                                 </Menu>
-                                <Button disabled={eps_loading} onClick={downloadPageHandler}>
-                                    Download all
-                                </Button>
+                                {eps_details?.ep_details?.length > 1 ? (
+                                    <Button disabled={eps_loading} onClick={downloadPageHandler}>
+                                        Download all
+                                    </Button>
+                                ) : null}
                             </div>
                         </Flex>
                     ) : streamLoading ? (

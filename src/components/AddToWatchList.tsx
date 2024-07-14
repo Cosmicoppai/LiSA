@@ -36,8 +36,9 @@ export function AddToWatchList({
                 anime_id,
             },
             {
-                // @ts-ignore
-                'Content-Type': 'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             },
         );
         setIsAdded(true);

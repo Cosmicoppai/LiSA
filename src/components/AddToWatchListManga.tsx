@@ -29,8 +29,9 @@ export function AddToWatchListManga({
                 status,
             },
             {
-                // @ts-ignore
-                'Content-Type': 'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             },
         );
         setIsAdded(true);

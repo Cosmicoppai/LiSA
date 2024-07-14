@@ -13,7 +13,7 @@ function getPythonServerCMD() {
             return `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`;
         case 'linux':
         case 'darwin':
-            return path.join(app.getAppPath()?.replace(/\/app$/, ''), 'resources/lisa', 'LiSA');
+            return path.join(app.getAppPath().replace(/\/app$/, ''), 'resources/lisa', 'LiSA');
         default:
             // Unknown Platform.
             return null;
