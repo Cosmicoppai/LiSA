@@ -1,12 +1,12 @@
 import { Box, useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import videojs, { VideoJsPlayerOptions } from 'video.js';
-import 'videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels';
 import 'video.js/dist/video-js.css';
+import { QualityLevel, QualityLevelList } from 'videojs-contrib-quality-levels';
+import 'videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels';
+import hlsQualitySelector from 'videojs-hls-quality-selector';
 import 'videojs-hotkeys';
 import 'videojs-pip/videojs-pip';
-import { QualityLevel, QualityLevelList } from 'videojs-contrib-quality-levels';
-import hlsQualitySelector from 'videojs-hls-quality-selector';
 
 import { ExternalPlayerPopup } from './externalPopup';
 
@@ -24,7 +24,7 @@ export function VideoPlayer({
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const videoRef = useRef<HTMLVideoElement>();
-    const player = useRef<videojs.Player>();
+    const playerRef = useRef<videojs.Player>();
 
     const [vidDuration, setVidDuration] = useState(50000);
 
@@ -43,28 +43,21 @@ export function VideoPlayer({
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
+            // @ts-ignore
             pipButton: {},
-            poster: snapshot,
-            sources: [
-                {
-                    src: url,
-                    type: 'application/x-mpegURL',
-                    // @ts-ignore
-                    withCredentials: false,
-                },
-            ],
         };
 
-        const plyer = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
+        const player = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
             this.hotkeys({
                 volumeStep: 0.1,
                 seekStep: 5,
                 enableModifiersForNumbers: false,
             });
         });
-        const fullscreen = plyer.controlBar.getChild('FullscreenToggle');
-        const index = plyer.controlBar.children().indexOf(fullscreen);
-        const externalPlayerButton = plyer.controlBar.addChild('button', {}, index);
+
+        const fullscreen = player.controlBar.getChild('FullscreenToggle');
+        const index = player.controlBar.children().indexOf(fullscreen);
+        const externalPlayerButton = player.controlBar.addChild('button', {}, index);
 
         const externalPlayerButtonDom = externalPlayerButton.el();
         if (externalPlayerButtonDom) {
@@ -72,39 +65,24 @@ export function VideoPlayer({
 
             // @ts-ignore
             externalPlayerButtonDom.onclick = function () {
-                // @ts-ignore
-                if (plyer.isFullscreen()) fullscreen.handleClick();
+                if (player.isFullscreen()) player.exitFullscreen();
 
                 onOpen();
             };
         }
 
-        plyer.hlsQualitySelector({ displayCurrentQuality: true });
-        const qualityLevels: QualityLevelList = plyer.qualityLevels();
+        player.hlsQualitySelector({ displayCurrentQuality: true });
 
-        qualityLevels.on('addqualitylevel', () => {
-            handleQualityLevels(plyer.qualityLevels());
-        });
-        qualityLevels.on('removequalitylevel', () => {
-            handleQualityLevels(plyer.qualityLevels());
-        });
-
-        setPlayer(plyer);
+        playerRef.current = player;
+        setPlayer(player);
 
         return () => {
-            qualityLevels.off('addqualitylevel', () => {
-                handleQualityLevels(plyer.qualityLevels());
-            });
-            qualityLevels.off('removequalitylevel', () => {
-                handleQualityLevels(plyer.qualityLevels());
-            });
-
-            if (plyer && !plyer.isDisposed()) {
-                plyer.dispose();
+            if (!player.isDisposed()) {
+                player.dispose();
                 setPlayer(null);
             }
         };
-    }, [snapshot]);
+    }, []);
 
     function handleQualityLevels(qualityLevelList: QualityLevelList) {
         const levels: QualityLevel[] = [];
@@ -114,26 +92,46 @@ export function VideoPlayer({
             levels.push(quality);
         }
 
-        console.log({ levels });
         setQualityOptions(levels);
     }
 
     useEffect(() => {
-        if (!player.current || !url) return;
+        if (!playerRef.current || !url) return;
 
-        player.current.src({
+        const player = playerRef.current;
+
+        player.src({
             src: url,
             type: 'application/x-mpegURL',
             // @ts-ignore
             withCredentials: false,
         });
-        player.current.poster('');
+
+        player.poster(snapshot);
 
         if (prevTime) {
-            player.current.currentTime(prevTime);
-            player.current.play();
-        } else player.current.currentTime(0);
-    }, [player, url, prevTime]);
+            player.currentTime(prevTime);
+            player.play();
+        } else player.currentTime(0);
+
+        const qualityLevels: QualityLevelList = player.qualityLevels();
+
+        qualityLevels.on('addqualitylevel', () => {
+            handleQualityLevels(player.qualityLevels());
+        });
+        qualityLevels.on('removequalitylevel', () => {
+            handleQualityLevels(player.qualityLevels());
+        });
+
+        return () => {
+            qualityLevels.off('addqualitylevel', () => {
+                handleQualityLevels(player.qualityLevels());
+            });
+            qualityLevels.off('removequalitylevel', () => {
+                handleQualityLevels(player.qualityLevels());
+            });
+        };
+    }, [playerRef, snapshot, url, prevTime]);
 
     return (
         <Box p={3} width="100%">
@@ -143,8 +141,7 @@ export function VideoPlayer({
                     ref={videoRef}
                     className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
                     controls
-                    // @ts-ignore
-                    lan
+                    lang={language}
                     onLoadedMetadata={(e) => {
                         // @ts-ignore
                         setVidDuration(e.target.duration);

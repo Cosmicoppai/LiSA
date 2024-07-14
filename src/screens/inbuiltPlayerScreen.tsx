@@ -41,7 +41,6 @@ export function InbuiltPlayerScreen() {
         data: eps_details,
         isLoading: eps_loading,
         episodePageUrl,
-
         onNextPage,
     } = useGetAnimeEpPagination();
 
