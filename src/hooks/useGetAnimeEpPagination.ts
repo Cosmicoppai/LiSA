@@ -13,14 +13,21 @@ export function useGetAnimeEpPagination() {
 
     const episodePageUrl = searchParams.get('episodePageUrl') || params?.ep_details;
 
-    function setEpisodePageUrl(url) {
-        setSearchParams('episodePageUrl', url);
-    }
-
     const query = useQuery({
         queryKey: ['anime-ep-details', episodePageUrl],
         queryFn: () => getAnimeEpisodeDetails({ url: episodePageUrl }),
     });
+
+    function setEpisodePageUrl(url: string) {
+        setSearchParams(
+            {
+                q: JSON.stringify(params),
+                stream: JSON.parse(searchParams.get('stream')),
+                episodePageUrl: url,
+            },
+            { replace: true },
+        );
+    }
 
     return {
         ...query,

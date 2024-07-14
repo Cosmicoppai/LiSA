@@ -131,6 +131,8 @@ export function InbuiltPlayerScreen() {
         }
     }, []);
 
+    const animeTitle = anime.title || anime.jp_name || anime_details?.description?.eng_name;
+
     return (
         <Center py={6} w="100%">
             <Flex
@@ -150,11 +152,7 @@ export function InbuiltPlayerScreen() {
                                     flexDirection: 'row',
                                 }}>
                                 <Heading fontSize={'2xl'} fontFamily={'body'}>
-                                    {anime.jp_name ? anime.jp_name : ''}{' '}
-                                    {anime_details?.description?.eng_name
-                                        ? ` | ${anime_details?.description?.eng_name}`
-                                        : null}
-                                    {anime.title ? anime.title : ''}
+                                    {animeTitle}
                                 </Heading>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" ml={2}>
                                     | Episode {data.animeEpisode.ep_no}

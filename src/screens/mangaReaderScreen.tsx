@@ -13,9 +13,9 @@ import { localImagesPath } from 'src/constants/images';
 import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
 import server from 'src/utils/axios';
 
-import { useZoomHandler } from './useZoomHandler';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
 import { TMangaChapter, TMangaChapters } from '../hooks/useGetMangaDetails';
+import { useZoomHandler } from '../hooks/useZoomHandler';
 
 function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
     const [currentChapter, setCurrentChapter] = useState<TMangaChapter | null>(null);

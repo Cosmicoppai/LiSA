@@ -148,8 +148,8 @@ export function AnimeDetailsScreen() {
                                 )}
                             </div>
                             {details?.description?.eng_name ? (
-                                <Heading fontSize={'xl'} fontFamily={'body'} display="block">
-                                    {details?.description?.eng_name ?? ''}
+                                <Heading fontSize={'medium'} fontFamily={'body'} display="block">
+                                    {details?.description?.eng_name}
                                 </Heading>
                             ) : isLoading ? (
                                 <Skeleton

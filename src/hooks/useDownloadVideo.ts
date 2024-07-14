@@ -19,17 +19,17 @@ export function useDownloadVideo() {
                 'Content-Type': 'application/json',
             });
 
-            // console.log({ data });
+            if (data?.status) {
+                toast({
+                    title: 'Download has been started, Please check downloads section.',
+                    status: 'success',
+                    duration: 2000,
+                });
 
-            toast({
-                title: 'Download has been started, Please check downloads section.',
-                status: 'success',
-                duration: 2000,
-            });
-
-            queryClient.invalidateQueries({
-                queryKey: [RQKEY_GET_DOWNLOADS],
-            });
+                queryClient.invalidateQueries({
+                    queryKey: [RQKEY_GET_DOWNLOADS],
+                });
+            }
         } catch (error) {
             console.log(error);
 
