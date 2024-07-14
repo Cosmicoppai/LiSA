@@ -58,6 +58,22 @@ export const HomeScreen = () => {
         enabled: searchQuery.length > 0,
     });
 
+    const [isTakingLonger, setIsTakingLonger] = useState(false);
+
+    useEffect(() => {
+        if (isLoading) {
+            const timeOut = setTimeout(() => {
+                setIsTakingLonger(true);
+            }, 5000);
+
+            return () => {
+                clearTimeout(timeOut);
+            };
+        }
+
+        setIsTakingLonger(false);
+    }, [isLoading]);
+
     return (
         <>
             <Flex
@@ -117,11 +133,29 @@ export const HomeScreen = () => {
                         )}
                         {isError && error && !isLoading && !isFetching ? <NotFound /> : null}
                         {isLoading && (
-                            <Image
-                                src={localImagesPath.loaderSearchGif}
-                                alt="loader"
-                                boxSize="150px"
-                            />
+                            <div
+                                style={{
+                                    width: '100%',
+                                    rowGap: 30,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                <Image
+                                    src={localImagesPath.loaderSearchGif}
+                                    alt="loader"
+                                    boxSize="150px"
+                                />
+                                {isTakingLonger ? (
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}>
+                                        It's taking longer than usual
+                                    </span>
+                                ) : null}
+                            </div>
                         )}
                     </Flex>
                 ) : (
