@@ -113,17 +113,6 @@ export function InbuiltPlayerScreen() {
     }, [downloadLoading]);
 
     useEffect(() => {
-        if (!details || !player) return;
-        if (!details[language]) return;
-        player.src({
-            src: details[language],
-            type: 'application/x-mpegURL',
-            withCredentials: false,
-        });
-        player.poster('');
-    }, [details, streamLoading]);
-
-    useEffect(() => {
         if (window) {
             window?.scrollTo(0, 0);
         }
@@ -166,8 +155,8 @@ export function InbuiltPlayerScreen() {
                             <VideoPlayer
                                 key={details[language]}
                                 url={details[language]}
+                                language={language}
                                 snapshot={data.animeEpisode.snapshot}
-                                player={player}
                                 setPlayer={setPlayer}
                                 prevTime={prevTime}
                                 nextEpHandler={nextEpHandler}

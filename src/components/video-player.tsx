@@ -1,57 +1,34 @@
 import { Box, useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
 import videojs, { VideoJsPlayerOptions } from 'video.js';
-import 'videojs-contrib-quality-levels';
+import 'videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels';
 import 'video.js/dist/video-js.css';
 import 'videojs-hotkeys';
 import 'videojs-pip/videojs-pip';
+import { QualityLevel, QualityLevelList } from 'videojs-contrib-quality-levels';
 import hlsQualitySelector from 'videojs-hls-quality-selector';
 
 import { ExternalPlayerPopup } from './externalPopup';
 
+videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
+
 export function VideoPlayer({
     url,
+    language,
     snapshot,
-    player,
     setPlayer,
     prevTime,
     nextEpHandler,
     setQualityOptions,
 }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const [language, setLanguage] = useState('jpn');
-    const videoRef = useRef();
-    const [callFinishVideoAPI, setCallFinishVideoAPI] = useState(false);
+
+    const videoRef = useRef<HTMLVideoElement>();
+    const player = useRef<videojs.Player>();
+
     const [vidDuration, setVidDuration] = useState(50000);
 
     useEffect(() => {
-        if (player && url) {
-            player.src({
-                src: url,
-                type: 'application/x-mpegURL',
-                withCredentials: false,
-            });
-            player.poster('');
-            setCallFinishVideoAPI(false);
-        }
-
-        if (player && prevTime) {
-            if (prevTime) {
-                player?.currentTime(prevTime);
-                player?.play();
-            } else {
-                player?.currentTime(0);
-            }
-        }
-    }, [url]);
-
-    useEffect(() => {
-        if (callFinishVideoAPI) nextEpHandler();
-    }, [callFinishVideoAPI]);
-
-    useEffect(() => {
-        videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
-
         const videoJsOptions: VideoJsPlayerOptions = {
             autoplay: false,
             preload: 'metadata',
@@ -93,49 +70,70 @@ export function VideoPlayer({
         if (externalPlayerButtonDom) {
             externalPlayerButtonDom.innerHTML = 'external';
 
+            // @ts-ignore
             externalPlayerButtonDom.onclick = function () {
-                if (plyer.isFullscreen()) {
-                    fullscreen.handleClick();
-                }
+                // @ts-ignore
+                if (plyer.isFullscreen()) fullscreen.handleClick();
+
                 onOpen();
             };
         }
 
-        const qualityLevels = plyer.qualityLevels();
+        plyer.hlsQualitySelector({ displayCurrentQuality: true });
+        const qualityLevels: QualityLevelList = plyer.qualityLevels();
 
-        setQualityOptions(qualityLevels.levels_);
-
-        // qualityLevels.on('change', function() {
-        //   console.log('Quality Level changed!');
-        //   console.log('New level:', qualityLevels[qualityLevels.selectedIndex]);
-        // });
-        // var downloadButton = plyer.controlBar.addChild("button", {}, index);
-
-        // var downloadButtonDom = downloadButton.el();
-        // if (downloadButtonDom) {
-        //   downloadButtonDom.style.width = "2em";
-        //   downloadButtonDom.innerHTML = `<img style={{margin: "0 auto"}} src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABmJLR0QA/wD/AP+gvaeTAAAAjklEQVQ4je2UsQkCQRBF34iBVRjYhsZygZ3YxKYWYEdnGwY2oUbPZEHxzpMbBRMfTLDM8ubDsAtfIoaa6gpY1uMhItrUFLV4pwzdnaQm/EUpOutX58AemAGLWgDHWhdgGxGnt3Z1rZ7tclU3o6L2yMZLemR5yYOsUZuPJL/j6XGOpQBMq6sFdskcua/lFTf9ZKaqnDiZAAAAAABJRU5ErkJggg==">`;
-
-        //   downloadButtonDom.onclick = function () {
-
-        // }
+        qualityLevels.on('addqualitylevel', () => {
+            handleQualityLevels(plyer.qualityLevels());
+        });
+        qualityLevels.on('removequalitylevel', () => {
+            handleQualityLevels(plyer.qualityLevels());
+        });
 
         setPlayer(plyer);
 
         return () => {
-            if (player) player.dispose();
+            qualityLevels.off('addqualitylevel', () => {
+                handleQualityLevels(plyer.qualityLevels());
+            });
+            qualityLevels.off('removequalitylevel', () => {
+                handleQualityLevels(plyer.qualityLevels());
+            });
+
+            if (plyer && !plyer.isDisposed()) {
+                plyer.dispose();
+                setPlayer(null);
+            }
         };
     }, [snapshot]);
 
-    useEffect(() => {
-        if (player && player.hlsQualitySelector) {
-            player.hlsQualitySelector = hlsQualitySelector;
+    function handleQualityLevels(qualityLevelList: QualityLevelList) {
+        const levels: QualityLevel[] = [];
 
-            player.hlsQualitySelector({ displayCurrentQuality: true });
-            const qualityLevels = player.qualityLevels();
-            setQualityOptions(qualityLevels.levels_);
+        for (let i = 0; i < qualityLevelList.length; i++) {
+            const quality = qualityLevelList[i];
+            levels.push(quality);
         }
-    }, [player]);
+
+        console.log({ levels });
+        setQualityOptions(levels);
+    }
+
+    useEffect(() => {
+        if (!player.current || !url) return;
+
+        player.current.src({
+            src: url,
+            type: 'application/x-mpegURL',
+            // @ts-ignore
+            withCredentials: false,
+        });
+        player.current.poster('');
+
+        if (prevTime) {
+            player.current.currentTime(prevTime);
+            player.current.play();
+        } else player.current.currentTime(0);
+    }, [player, url, prevTime]);
 
     return (
         <Box p={3} width="100%">
@@ -153,9 +151,7 @@ export function VideoPlayer({
                     }}
                     onTimeUpdate={(e) => {
                         // @ts-ignore
-                        if (e.target.currentTime >= vidDuration - 1) {
-                            setCallFinishVideoAPI(true);
-                        }
+                        if (e.target.currentTime >= vidDuration - 1) nextEpHandler();
                     }}
                 />
             </div>
