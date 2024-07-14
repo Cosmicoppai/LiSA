@@ -17,7 +17,6 @@ import {
     TabPanel,
     Tag,
 } from '@chakra-ui/react';
-import { useEffect } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
 import { AddToWatchList } from 'src/components/AddToWatchList';
@@ -37,12 +36,6 @@ export function AnimeDetailsScreen() {
         isError,
         isLoading,
     } = useGetAnimeDetails();
-
-    useEffect(() => {
-        if (window) {
-            window?.scrollTo(0, 0);
-        }
-    }, [details]);
 
     const ep = params?.no_of_episodes || params?.episodes;
 

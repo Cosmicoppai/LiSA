@@ -69,7 +69,7 @@ export const HomeScreen = () => {
                 backgroundColor={'var(--chakra-colors-gray-900)'}>
                 <AppModeSwitch />
             </Flex>
-            <Flex w="100%" h="100%" direction="column" bg={'gray.900'}>
+            <Flex w="100%" h="100%" marginTop={'180px'} direction="column" bg={'gray.900'}>
                 {isOnline ? (
                     <Flex
                         align="center"
@@ -100,18 +100,8 @@ export const HomeScreen = () => {
                                     marginTop: '10px',
                                     maxWidth: '100%',
                                     maxHeight: '100%',
-
                                     height: '100%',
                                     width: '100%',
-                                    overflowX: 'auto',
-                                    '&::-webkit-scrollbar': {
-                                        width: '8px',
-                                        borderRadius: '8px',
-                                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                                    },
-                                    '&::-webkit-scrollbar-thumb': {
-                                        backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                                    },
                                     justifyContent: 'center',
                                     display: 'flex',
                                     flexWrap: 'wrap',

@@ -40,7 +40,7 @@ export function PaginateCard() {
                     ep_no,
                 }),
             })}`,
-            { replace: isPlayRoute },
+            { replace: isPlayRoute, preventScrollReset: isPlayRoute },
         );
     };
 

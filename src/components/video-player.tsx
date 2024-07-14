@@ -71,8 +71,6 @@ export function VideoPlayer({
             };
         }
 
-        player.hlsQualitySelector({ displayCurrentQuality: true });
-
         playerRef.current = player;
         setPlayer(player);
 
@@ -115,6 +113,8 @@ export function VideoPlayer({
         } else player.currentTime(0);
 
         const qualityLevels: QualityLevelList = player.qualityLevels();
+
+        player.hlsQualitySelector({ displayCurrentQuality: true });
 
         qualityLevels.on('addqualitylevel', () => {
             handleQualityLevels(player.qualityLevels());

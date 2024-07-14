@@ -111,12 +111,6 @@ export function InbuiltPlayerScreen() {
         else onClose();
     }, [downloadLoading]);
 
-    useEffect(() => {
-        if (window) {
-            window?.scrollTo(0, 0);
-        }
-    }, []);
-
     const animeTitle = anime.title || anime.jp_name || anime_details?.description?.eng_name;
 
     return (

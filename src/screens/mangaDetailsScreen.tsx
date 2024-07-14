@@ -18,7 +18,7 @@ import {
     Tag,
     Button,
 } from '@chakra-ui/react';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -35,12 +35,6 @@ export function MangaDetailsScreen() {
         data: { params, details },
         isLoading,
     } = useGetMangaDetails();
-
-    useEffect(() => {
-        if (window) {
-            window?.scrollTo(0, 0);
-        }
-    }, [details]);
 
     const volTxt = useMemo(() => {
         if (typeof params?.total_chps === 'string' || typeof params?.total_chps === 'number') {

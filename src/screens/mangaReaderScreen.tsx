@@ -65,6 +65,8 @@ export function MangaReaderScreen() {
     return (
         <div
             style={{
+                overflowY: 'hidden',
+                maxHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
@@ -223,25 +225,15 @@ export function MangaReaderScreen() {
                         direction={'column'}
                         p={2}
                         rowGap={2}
-                        overflowY={'auto'}
                         overflowX={'hidden'}
+                        className="custom-scrollbar"
                         sx={{
-                            height: '100%',
                             width: showChapters ? '25%' : 0,
-                            visibility: showChapters ? 'visible' : 'hidden',
-                            transition: 'width 0.5s ease-in-out',
                             display: 'flex',
                             flexGrow: 1,
-
                             overflowY: 'auto',
-                            '&::-webkit-scrollbar': {
-                                width: '8px',
-                                borderRadius: '8px',
-                                backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                                backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                            },
+                            transition: 'width 0.5s ease-in-out',
+                            visibility: showChapters ? 'visible' : 'hidden',
                         }}>
                         {chapters?.length ? (
                             chapters?.map?.((item) => (
@@ -262,20 +254,12 @@ export function MangaReaderScreen() {
                         )}
                     </Flex>
                     <Box
+                        className="custom-scrollbar"
                         sx={{
                             width: '100%',
                             display: 'flex',
                             flexGrow: 1,
-
                             overflowY: 'auto',
-                            '&::-webkit-scrollbar': {
-                                width: '8px',
-                                borderRadius: '8px',
-                                backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                            },
-                            '&::-webkit-scrollbar-thumb': {
-                                backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                            },
                         }}>
                         <MangaChapterImages currentChapter={currentChapter} imgScale={scale} />
                     </Box>

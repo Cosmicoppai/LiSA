@@ -1,5 +1,5 @@
-import { Box, Grid, GridItem } from '@chakra-ui/react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { Box } from '@chakra-ui/react';
+import { RouterProvider, createHashRouter, Outlet, ScrollRestoration } from 'react-router-dom';
 
 import './styles/App.css';
 
@@ -16,55 +16,83 @@ import { MangaDetailsScreen } from './screens/mangaDetailsScreen';
 import { MangaReaderScreen } from './screens/mangaReaderScreen';
 import { SettingScreen } from './screens/settingScreen';
 
+function AppLayout() {
+    return (
+        <>
+            <Box
+                h={'100%'}
+                w="70px"
+                position={'fixed'}
+                zIndex={1}
+                top={0}
+                left={0}
+                overflowX={'hidden'}
+                maxWidth={'70px'}
+                sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}>
+                <Navbar />
+            </Box>
+            <Box bg={'gray.900'} marginLeft={'70px'} minHeight={'100vh'}>
+                <Outlet />
+            </Box>
+            <ScrollRestoration />
+        </>
+    );
+}
+
+const router = createHashRouter([
+    {
+        element: <AppLayout />,
+        children: [
+            {
+                path: '/',
+                element: <HomeScreen />,
+            },
+            {
+                path: 'explore',
+                element: <ExploreScreen />,
+            },
+            {
+                path: 'download',
+                element: <DownloadScreen />,
+            },
+            {
+                path: 'mylist',
+                element: <MyListScreen />,
+            },
+            {
+                path: 'setting',
+                element: <SettingScreen />,
+            },
+            {
+                path: 'anime-details',
+                element: <AnimeDetailsScreen />,
+            },
+            {
+                path: 'manga-details',
+                element: <MangaDetailsScreen />,
+            },
+            {
+                path: 'manga-reader',
+                element: <MangaReaderScreen />,
+            },
+            {
+                path: 'play',
+                element: <InbuiltPlayerScreen />,
+            },
+            {
+                path: '*',
+                element: <NotFoundScreen />,
+            },
+        ],
+    },
+]);
+
 export function App() {
     useHandleInitialSocketConnection();
 
-    return (
-        <HashRouter>
-            <Grid templateColumns="repeat(1, 0.04fr 1fr)" w={'100%'} h={'100%'} overflow={'hidden'}>
-                <GridItem
-                    w="100%"
-                    h={'100vh'}
-                    maxWidth={'70px'}
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                    }}>
-                    <Navbar />
-                </GridItem>
-                <GridItem
-                    w="100%"
-                    h={'100vh'}
-                    bg={'gray.900'}
-                    sx={{
-                        overflowY: 'auto',
-                        '&::-webkit-scrollbar': {
-                            width: '8px',
-                            borderRadius: '8px',
-                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                        },
-                    }}>
-                    <Box sx={{ width: '100%', height: '100%' }}>
-                        <Routes>
-                            <Route path="/" element={<HomeScreen />} />
-                            <Route path="explore" element={<ExploreScreen />} />
-                            <Route path="download" element={<DownloadScreen />} />
-                            <Route path="mylist" element={<MyListScreen />} />
-                            <Route path="setting" element={<SettingScreen />} />
-
-                            <Route path="anime-details" element={<AnimeDetailsScreen />} />
-                            <Route path="manga-details" element={<MangaDetailsScreen />} />
-                            <Route path="manga-reader" element={<MangaReaderScreen />} />
-                            <Route path="play" element={<InbuiltPlayerScreen />} />
-                            <Route path="*" element={<NotFoundScreen />} />
-                        </Routes>
-                    </Box>
-                </GridItem>
-            </Grid>
-        </HashRouter>
-    );
+    return <RouterProvider router={router} />;
 }

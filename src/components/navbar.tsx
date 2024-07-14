@@ -20,8 +20,8 @@ export function Navbar() {
             flexDirection="column"
             gap={10}
             height={'100%'}
-            minWidth={'70px'}
-            maxWidth={'70px'}>
+            minWidth={'80px'}
+            maxWidth={'80px'}>
             <div
                 style={{
                     display: 'flex',

@@ -15,10 +15,6 @@ export function ExploreScreen() {
     const { mode } = useAppContext();
 
     useEffect(() => {
-        window?.scrollTo(0, 0);
-    }, []);
-
-    useEffect(() => {
         setCategory(mode === 'manga' ? defaultMangaCategory : defaultAnimeCategory);
     }, [mode]);
 
