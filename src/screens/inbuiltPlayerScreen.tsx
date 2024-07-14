@@ -123,8 +123,6 @@ export function InbuiltPlayerScreen() {
         player.poster('');
     }, [details, streamLoading]);
 
-    console.log('player', player);
-
     useEffect(() => {
         if (window) {
             window?.scrollTo(0, 0);
@@ -160,8 +158,13 @@ export function InbuiltPlayerScreen() {
                             </Box>
                         </Box>
 
-                        {details && language && data.animeEpisode.snapshot && !streamLoading ? (
+                        {details &&
+                        language &&
+                        details[language] &&
+                        data?.animeEpisode?.snapshot &&
+                        !streamLoading ? (
                             <VideoPlayer
+                                key={details[language]}
                                 url={details[language]}
                                 snapshot={data.animeEpisode.snapshot}
                                 player={player}
@@ -169,7 +172,6 @@ export function InbuiltPlayerScreen() {
                                 prevTime={prevTime}
                                 nextEpHandler={nextEpHandler}
                                 setQualityOptions={setQualityOptions}
-                                qualityOptions={qualityOptions}
                             />
                         ) : (
                             <Skeleton width={'100%'} height={'660px'} mt={3} />
@@ -186,55 +188,70 @@ export function InbuiltPlayerScreen() {
                     boxShadow={'2xl'}
                     padding={3}
                     w="100%">
-                    <Flex
-                        flex={1}
-                        justifyContent={'space-between'}
-                        alignItems={'center'}
-                        p={1}
-                        pt={2}
-                        gap={6}>
-                        <Select
-                            // placeholder="Language"
-                            size="md"
-                            value={language}
-                            onChange={languageChangeHandler}
-                            width={'max-content'}>
-                            {Object.keys(details || {}).map((language, idx) => (
-                                <option key={idx} value={language}>
-                                    {language === 'jpn'
-                                        ? 'Japanese'
-                                        : language === 'eng'
-                                          ? 'English'
-                                          : ''}
-                                </option>
-                            ))}
-                        </Select>
-                        <div
-                            style={{
-                                display: 'flex',
-                                columnGap: 10,
-                            }}>
-                            <Menu>
-                                <MenuButton disabled={eps_loading} as={Button}>
-                                    Download
-                                </MenuButton>
-                                <MenuList>
-                                    <MenuGroup title="Select quality">
-                                        {qualityOptions?.map(({ id, height }) => (
-                                            <MenuItem
-                                                key={id}
-                                                onClick={() => singleDownloadHandler(id)}>
-                                                {height}p
-                                            </MenuItem>
-                                        ))}
-                                    </MenuGroup>
-                                </MenuList>
-                            </Menu>
-                            <Button disabled={eps_loading} onClick={downloadPageHandler}>
-                                Download all
-                            </Button>
-                        </div>
-                    </Flex>
+                    {details ? (
+                        <Flex
+                            flex={1}
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
+                            p={1}
+                            pt={2}
+                            gap={6}>
+                            <Select
+                                // placeholder="Language"
+                                size="md"
+                                value={language}
+                                onChange={languageChangeHandler}
+                                width={'max-content'}>
+                                {Object.keys(details || {}).map((language, idx) => (
+                                    <option key={idx} value={language}>
+                                        {language === 'jpn'
+                                            ? 'Japanese'
+                                            : language === 'eng'
+                                              ? 'English'
+                                              : ''}
+                                    </option>
+                                ))}
+                            </Select>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    columnGap: 10,
+                                }}>
+                                <Menu>
+                                    <MenuButton disabled={eps_loading} as={Button}>
+                                        Download
+                                    </MenuButton>
+                                    <MenuList>
+                                        <MenuGroup title="Select quality">
+                                            {qualityOptions?.map(({ id, height }) => (
+                                                <MenuItem
+                                                    key={id}
+                                                    onClick={() => singleDownloadHandler(id)}>
+                                                    {height}p
+                                                </MenuItem>
+                                            ))}
+                                        </MenuGroup>
+                                    </MenuList>
+                                </Menu>
+                                <Button disabled={eps_loading} onClick={downloadPageHandler}>
+                                    Download all
+                                </Button>
+                            </div>
+                        </Flex>
+                    ) : streamLoading ? (
+                        <Flex
+                            flex={1}
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
+                            p={1}
+                            gap={6}>
+                            <Skeleton width={'150px'} height={10} />
+                            <div style={{ display: 'flex', columnGap: 10 }}>
+                                <Skeleton width={'150px'} height={10} />
+                                <Skeleton width={'150px'} height={10} />
+                            </div>
+                        </Flex>
+                    ) : null}
                     <PaginateCard />
                     <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
                 </Stack>

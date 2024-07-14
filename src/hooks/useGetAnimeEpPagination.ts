@@ -22,7 +22,7 @@ export function useGetAnimeEpPagination() {
         setSearchParams(
             {
                 q: JSON.stringify(params),
-                stream: JSON.parse(searchParams.get('stream')),
+                stream: searchParams.get('stream'),
                 episodePageUrl: url,
             },
             { replace: true },

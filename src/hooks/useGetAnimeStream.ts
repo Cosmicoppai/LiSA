@@ -15,14 +15,13 @@ async function getAnimeStream({ url }): Promise<TAnimeStreamDetails> {
 
 export function useGetAnimeStream() {
     const [searchParams] = useSearchParams();
+    const stream = searchParams.get('stream');
 
     const params = useMemo(() => {
-        const stream = searchParams.get('stream');
-
         return JSON.parse(stream) as TAnimeEpisode & {
             ep_no: number;
         };
-    }, [searchParams]);
+    }, [stream]);
 
     const query = useQuery({
         queryKey: ['anime-stream', params?.stream_detail],

@@ -1,6 +1,6 @@
 import { Box, useDisclosure } from '@chakra-ui/react';
 import { useEffect, useState, useRef } from 'react';
-import videojs from 'video.js';
+import videojs, { VideoJsPlayerOptions } from 'video.js';
 import 'videojs-contrib-quality-levels';
 import 'video.js/dist/video-js.css';
 import 'videojs-hotkeys';
@@ -17,7 +17,6 @@ export function VideoPlayer({
     prevTime,
     nextEpHandler,
     setQualityOptions,
-    qualityOptions,
 }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [language, setLanguage] = useState('jpn');
@@ -53,30 +52,30 @@ export function VideoPlayer({
     useEffect(() => {
         videojs.registerPlugin('hlsQualitySelector', hlsQualitySelector);
 
-        const videoJsOptions = {
+        const videoJsOptions: VideoJsPlayerOptions = {
             autoplay: false,
             preload: 'metadata',
             playbackRates: [0.5, 1, 1.5, 2],
-
             controls: true,
-            poster: snapshot,
+            fluid: true,
             controlBar: {
                 pictureInPictureToggle: true,
             },
-            fluid: true,
-            sources: [
-                {
-                    src: url,
-                    type: 'application/x-mpegURL',
-                    withCredentials: false,
-                },
-            ],
             html5: {
                 nativeAudioTracks: true,
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
             pipButton: {},
+            poster: snapshot,
+            sources: [
+                {
+                    src: url,
+                    type: 'application/x-mpegURL',
+                    // @ts-ignore
+                    withCredentials: false,
+                },
+            ],
         };
 
         const plyer = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
@@ -89,8 +88,6 @@ export function VideoPlayer({
         const fullscreen = plyer.controlBar.getChild('FullscreenToggle');
         const index = plyer.controlBar.children().indexOf(fullscreen);
         const externalPlayerButton = plyer.controlBar.addChild('button', {}, index);
-
-        console.log(plyer.controlBar.pictureInPictureToggle);
 
         const externalPlayerButtonDom = externalPlayerButton.el();
         if (externalPlayerButtonDom) {
@@ -140,28 +137,14 @@ export function VideoPlayer({
         }
     }, [player]);
 
-    // useEffect(() => {
-
-    //   if (player && prevTime) {
-    //     if (prevTime) {
-    //       player?.currentTime(prevTime);
-    //       player?.play();
-    //     } else {
-    //       console.log("kokoko")
-    //       player?.currentTime(0);
-    //     }
-    //   }
-
-    //   return () => {
-    //     if (player) player.dispose();
-    //   };
-    // }, [prevTime]);
-
     return (
         <Box p={3} width="100%">
             <div data-vjs-player>
                 <video
+                    id="my-video"
                     ref={videoRef}
+                    className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
+                    controls
                     // @ts-ignore
                     lan
                     onLoadedMetadata={(e) => {
@@ -174,9 +157,6 @@ export function VideoPlayer({
                             setCallFinishVideoAPI(true);
                         }
                     }}
-                    controls
-                    className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
-                    id="my-video"
                 />
             </div>
             {/* @ts-ignore */}
