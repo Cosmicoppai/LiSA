@@ -235,14 +235,14 @@ class Animepahe(Anime):
             key, value = info.text.replace("\n", "").split(":", 1)
             details[key.lower()] = value
 
-        description["eng_name"] = details.get("english", details.get("synonyms", None))
-        description["type"] = details.get("type", "TV")
-        description["status"] = details.get("status", "Finished Airing")
-        description["aired"] = details.get("aired", None).replace("to", " to")
+        description["eng_name"] = details.get("english", details.get("synonyms", None).strip())
+        description["type"] = details.get("type", "TV").strip()
+        description["status"] = details.get("status", "Finished Airing").strip()
+        description["aired"] = details.get("aired", None).replace("to", " to").strip()
         description['season'], description["year"] = details.get("season", "None None").split()
         description["duration"] = details.get("duration", "0").strip()
         description["themes"] = details.get("themes", "None").split()
-        description["studio"] = details.get("studio", None)
+        description["studio"] = details.get("studio", None).strip()
 
         return description
 

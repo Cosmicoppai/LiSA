@@ -5,7 +5,8 @@ This file will handle the saving and extraction of metadata about downloaded fil
 """
 from __future__ import annotations
 from abc import ABC
-from typing import Dict, List, Any
+from collections import defaultdict
+from typing import Dict, List, Any, Callable
 from utils import DB
 from sqlite3 import IntegrityError
 
@@ -84,6 +85,51 @@ class Library(ABC):
         return data
 
     @classmethod
+    def group_by(cls,
+                 group_fields: List[str],
+                 filters: Dict[str, Any] = None,
+                 query: List[str] = None,
+                 format_func: Callable[[str, Any], tuple] = None
+                 ) -> Dict[str, Any]:
+        """
+        Group the data by specified fields with custom formatting.
+
+        :param group_fields: List of fields to group by, in order
+        :param filters: Optional filters to apply before grouping
+        :param query: Optional list of fields to include in the result
+        :param format_func: Optional function to format group keys and values
+        :return: A list of nested dictionaries with grouped data
+        """
+        if query is None:
+            query = ["*"]
+
+        if filters:
+            data = cls.get(filters, query)
+        else:
+            data = cls.get_all() if "*" in query else cls.get({}, query)
+
+        def nested_group(data, fields):
+            if not fields:
+                return data
+            field = fields[0]
+            grouped = defaultdict(list)
+            for record in data:
+                key = record.get(field)
+                if format_func:
+                    key, record = format_func(field, record)
+                grouped[key].append(record)
+            return {k: nested_group(v, fields[1:]) for k, v in grouped.items()}
+
+        grouped_data = nested_group(data, group_fields)
+
+        def dict_convert(d):
+            if isinstance(d, defaultdict):
+                d = {k: dict_convert(v) for k, v in d.items()}
+            return d
+
+        return dict_convert(grouped_data)
+
+    @classmethod
     def create(cls, data: Dict[str, Any]) -> None:
         set_statement, field_values = cls.__query_builder(data)
         cmd = f"INSERT INTO {cls.table_name} ({set_statement}) VALUES {'(' + ','.join('?' * len(data)) + ')'}"
@@ -95,10 +141,10 @@ class Library(ABC):
         except IntegrityError:
             raise ValueError("Record already exist")
 
-        cls.data[data["id"]] = data
+        cls.data[data[cls.oid]] = data
 
     @classmethod
-    def delete(cls, _id: int) -> None:
+    def delete(cls, _id: int | str) -> None:
         del cls.data[_id]
         cur = DB.connection.cursor()
         cur.execute(f"DELETE FROM {cls.table_name} WHERE {cls.oid}=?", [_id, ])
@@ -140,13 +186,10 @@ class SiteState(Library):
     data: Dict[str, Dict[str, Any]] = {}
 
 
-# class ReadList(Library):
-#     ...
-#
-#
-# class ContinueReading(Library):
-#     ...
-#
-#
-# class ContinueWatching(Library):
-#     ...
+class ReadList(Library):
+    table_name: str = "readlist"
+    fields: str = "manga_id, title, total_chps, status, genres, poster, session, created_on"
+    oid: str = "manga_id"
+    data: Dict[int, Dict[str, Any]] = {}
+
+

@@ -1,11 +1,11 @@
 import json
 from json import JSONDecodeError
-from video.library import DBLibrary
+from video.library import DBLibrary, WatchList, ReadList
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple, List
+from typing import Tuple, List, Dict, Any
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -317,6 +317,30 @@ async def cancel_download(request: Request):
         return await bad_request_400(request, msg="One or more ids are invalid")
 
 
+def format_series(field: str, record: Dict[str, Any]) -> tuple:
+    if field == 'type':
+        item_type = 'manga' if record['type'] == 'image' else 'anime'
+        return item_type, record
+    elif field == 'series_name':
+        title = ' '.join(word.capitalize() for word in record['series_name'].split('_'))
+        return title, record
+    elif field == 'file_name':
+        return record['file_name'], record
+    return record.get(field), record
+
+
+def format_library_data(grouped_data: Dict[str, Any]):
+    result = []
+    for item_type, series in grouped_data.items():
+        for title, items in series.items():
+            result.append({
+                'type': item_type,
+                'title': title,
+                'chapters' if item_type == 'manga' else 'episodes': list(items.values())[0]
+            })
+    return result
+
+
 async def library(request: Request):
     """
 
@@ -339,7 +363,10 @@ async def library(request: Request):
         except KeyError or TypeError:
             return await bad_request_400(request, msg="missing or invalid query parameter: 'id'")
 
-    return JSONResponse(DBLibrary().get_all())
+    return JSONResponse(format_library_data(
+        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'],
+                           format_func=format_series)
+    ))
 
 
 async def play(player_name: str, manifest_url: str) -> Tuple[str | None, int]:
@@ -479,47 +506,36 @@ async def _manga_recommendation(request: Request):
 async def watchlist(request: Request):
     try:
         if request.method == "GET":
-            cur = DB.connection.cursor()
-            cur.execute("SELECT * FROM watchlist ORDER BY created_on DESC")
-            return JSONResponse({"data": [dict(row) for row in cur.fetchall()]})
+            return JSONResponse(WatchList.get_all())
 
         elif request.method == "POST":
             jb = request.state.body
-
-            anime_id = jb["anime_id"]
+            anime_id = int(jb["anime_id"])
             ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+            WatchList.create({"anime_id": anime_id, "jp_name": jb["jp_name"], "no_of_episodes": jb["no_of_episodes"], "type": jb["type"], "status": jb["status"],
+                              "season": jb["season"], "year": jb["year"], "score": jb["score"], "poster": jb["poster"], "ep_details": ep_details})
 
-            cur = DB.connection.cursor()
-
-            cur.execute(
-                "INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
-                 jb["year"], jb["score"], jb["poster"], ep_details))
-
-            DB.connection.commit()
             return JSONResponse(content="Anime successfully added in watch later", status_code=201)
 
-        cur = DB.connection.cursor()
         # id validation is bypassed by choice
-        cur.execute("DELETE FROM watchlist where anime_id=?", (request.query_params["anime_id"],))
-        DB.connection.commit()
+        WatchList.delete(int(request.query_params["anime_id"]))
         return Response(status_code=204)
     except KeyError as _msg:
+        logging.error(_msg)
         return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
+    except ValueError as err:
+        logging.error(err)
+        return await bad_request_400(request, msg=f"Invalid anime ID")
     except IntegrityError as err:
-        print(err)
+        logging.error(err)
         return await bad_request_400(request, msg=f"Record already exists")
 
 
 async def readlist(request: Request):
     try:
         if request.method == "GET":
-            cur = DB.connection.cursor()
-            cur.execute("SELECT * FROM readlist ORDER BY created_on DESC")
             resp = []
-            for row in cur.fetchall():
-                data = dict(row)
+            for data in ReadList.get_all():
                 data["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={data['session']}"
                 data["genres"] = json.loads(data["genres"])
                 resp.append(data)
@@ -543,25 +559,16 @@ async def readlist(request: Request):
                 return await bad_request_400(request, msg="Invalid Manga ID")
 
             title, manga_id = meta_data[-1].split(".")
-            cur = DB.connection.cursor()
-
-            cur.execute(
-                "INSERT INTO readlist (manga_id, title, total_chps, status, genres, poster, session)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?)", (manga_id, title, total_chps, status, genres, poster, manga_session)
-            )
-
-            DB.connection.commit()
+            ReadList.create({"manga_id": manga_id, "title": title, "total_chps": total_chps, "status": status, "genres": genres, "poster": poster, "session": manga_session})
             return JSONResponse(content="Manga successfully added in Read later", status_code=201)
 
-        cur = DB.connection.cursor()
         # id validation is bypassed by choice
-        cur.execute("DELETE FROM readlist where manga_id=?", (request.query_params["manga_id"],))
-        DB.connection.commit()
+        ReadList.delete(request.query_params["manga_id"])
         return Response(status_code=204)
     except KeyError as _msg:
         return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
     except IntegrityError as err:
-        print(err)
+        logging.error(err)
         return await bad_request_400(request, msg=f"Record already exists")
 
 
