@@ -505,7 +505,7 @@ async def _manga_recommendation(request: Request):
 async def watchlist(request: Request):
     try:
         if request.method == "GET":
-            return JSONResponse(WatchList.get_all())
+            return JSONResponse({"data": WatchList.get_all()})
 
         elif request.method == "POST":
             jb = request.state.body
