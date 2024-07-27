@@ -3,7 +3,7 @@ from __future__ import annotations
 import aiohttp
 import asyncio
 import m3u8
-from os import path, makedirs
+from os import path, makedirs, walk
 from Crypto.Cipher import AES
 from multiprocessing import connection, Process, Pipe
 import subprocess
@@ -126,6 +126,8 @@ class Downloader(ABC):
         if not self.OUTPUT_LOC.exists():
             makedirs(self.OUTPUT_LOC)
 
+        self.timeout = aiohttp.ClientTimeout(total=90)
+
         logging.info("successfully initialized")
 
     def run(self):
@@ -202,10 +204,10 @@ class MangaDownloader(Downloader):
             library_data: Tuple[Library, dict],
             msg_system_in_pipe: Pipe = None,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 50,
             hooks: dict = None,
             headers: dict = get_headers(),
-            post_processor: Callable[[str | Path], str] = None
+            post_processor: Callable[[list[str] | list[Path], str], None] = None
     ) -> None:
 
         self.img_urls = img_urls
@@ -256,8 +258,7 @@ class MangaDownloader(Downloader):
         # The download queue that will be used by download workers
         download_queue: asyncio.Queue = asyncio.Queue()
 
-        timeout = aiohttp.ClientTimeout(25)
-        client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
+        client = aiohttp.ClientSession(headers=self.headers, timeout=self.timeout, raise_for_status=True)
 
         resume_info = await self.parse_resume_info()
 
@@ -267,7 +268,7 @@ class MangaDownloader(Downloader):
             filter(lambda seg: seg[0] not in resume_info, enumerate(self.img_urls))
         )
         self._max_workers = min(self._max_workers,
-                                self.num_of_segments)  # create max workers according to remaining segments
+                                len(img_list))  # create max workers according to remaining segments
 
         self.progress_tracker = ProgressTracker(self.file_data, len(resume_info), self.msg_system_in_pipe)
 
@@ -302,7 +303,15 @@ class MangaDownloader(Downloader):
 
         # convert the image if necessary
         if self.post_processor:
-            self.post_processor(self.OUTPUT_LOC)
+            imgs = []
+            for r, _, f in walk(self.OUTPUT_LOC):
+                for fname in f:
+                    imgs.append(Path(r).joinpath(fname))
+
+            self.post_processor(imgs, Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.pdf"))
+
+            for img in imgs:
+                Path.unlink(img)
 
         await self.update_db_record("downloaded", self.num_of_segments, self.total_size)
 
@@ -335,7 +344,7 @@ class VideoDownloader(Downloader):
             library_data: Tuple[Library, dict],
             msg_system_in_pipe: Pipe = None,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
             headers: dict = get_headers()
     ) -> None:
@@ -424,8 +433,7 @@ class VideoDownloader(Downloader):
         # data to the decrypt process for decryption and for writing to the disk.
 
         decrypt_pipe_output, decrypt_pipe_input = Pipe()
-        timeout = aiohttp.ClientTimeout(25)
-        client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
+        client = aiohttp.ClientSession(headers=self.headers, timeout=self.timeout, raise_for_status=True)
 
         # Check if the m3u8 file passed in has multiple streams, if this is the
         # case then select the stream with the highest "bandwidth" specified.
@@ -530,7 +538,7 @@ class VideoDownloader(Downloader):
             url: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
             headers: dict = None
     ):
@@ -546,7 +554,7 @@ class VideoDownloader(Downloader):
             file_path: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
     ):
         with open(file_path, "r") as file:

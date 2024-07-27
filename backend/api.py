@@ -265,7 +265,7 @@ async def download(request: Request):
                     await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1), post_processor=post_processor)
 
                 elif jb.get("chp_session", None):
-                    await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site)
+                    await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site, post_processor=post_processor)
 
                 else:
                     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
