@@ -9,7 +9,7 @@ block_cipher = None
 a = Analysis(
     ['../backend\\LiSA.py'],
     pathex=['../'],
-    binaries=[('../ffmpeg.exe', '.')],
+    binaries=[('../binaries/windows/ffmpeg.exe', '.')],
     datas=[('../backend/defaults', 'defaults'), ('../backend/sql_queries', 'sql_queries'),
      ('../backend/config/config.json', '.')],
     hiddenimports=[],

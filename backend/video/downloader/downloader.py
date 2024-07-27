@@ -107,7 +107,8 @@ class Downloader(ABC):
             resume_code=None,
             max_workers: int = 8,
             hooks: dict = None,
-            headers: dict = get_headers()
+            headers: dict = get_headers(),
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
     ) -> None:
 
         self._max_workers = max_workers
@@ -127,6 +128,7 @@ class Downloader(ABC):
             makedirs(self.OUTPUT_LOC)
 
         self.timeout = aiohttp.ClientTimeout(total=90)
+        self.post_processor = post_processor
 
         logging.info("successfully initialized")
 
@@ -208,14 +210,14 @@ class MangaDownloader(Downloader):
             hooks: dict = None,
             headers: dict = get_headers(),
             post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
+
     ) -> None:
 
         self.img_urls = img_urls
-        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
+        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers, post_processor)
         self.progress_tracker: ProgressTracker
         self.num_of_segments: int = len(img_urls)
         self.total_size = 0
-        self.post_processor = post_processor
 
     async def _download_worker(self, download_queue: asyncio.Queue, client: aiohttp.ClientSession,
                                decrypt_pipe_input=None, downloader: Downloader = None):
@@ -347,10 +349,11 @@ class VideoDownloader(Downloader):
             resume_code=None,
             max_workers: int = 25,
             hooks: dict = None,
-            headers: dict = get_headers()
+            headers: dict = get_headers(),
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.loads(m3u8_str)
-        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
+        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers, post_processor)
         self._output_file = self.OUTPUT_LOC.joinpath(f"{self.file_data['file_name']}{self.OUTPUT_EXTENSION}")
         self.seg_maps: Dict[str, bytes] = {}
 
