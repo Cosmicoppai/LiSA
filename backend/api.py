@@ -19,7 +19,6 @@ from middleware import ErrorHandlerMiddleware, RequestValidator
 import uvicorn
 from starlette.routing import Mount
 from urllib.parse import parse_qsl
-from utils.init_db import DB
 from utils import remove_file, CustomStaticFiles
 from sqlite3 import IntegrityError
 from sys import modules
