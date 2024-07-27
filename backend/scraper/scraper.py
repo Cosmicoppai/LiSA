@@ -235,15 +235,15 @@ class Animepahe(Anime):
             key, value = info.text.replace("\n", "").split(":", 1)
             details[key.lower()] = value
 
-        description["eng_name"] = details.get("english", details.get("synonyms", None).strip())
-        description["type"] = details.get("type", "TV").strip()
-        description["status"] = details.get("status", "Finished Airing").strip()
-        description["aired"] = details.get("aired", None).replace("to", " to").strip()
-        description['season'], description["year"] = details.get("season", "None None").split()
-        description["duration"] = details.get("duration", "0").strip()
-        description["themes"] = details.get("themes", "None").split()
-        description["studio"] = details.get("studio", None).strip()
-
+        description["eng_name"] = (details.get("english") or details.get("synonyms") or "").strip() or None
+        description["type"] = (details.get("type") or "TV").strip()
+        description["status"] = (details.get("status") or "Finished Airing").strip()
+        description["aired"] = (details.get("aired") or "").replace("to", " to").strip() or None
+        season_year = (details.get("season") or "None None").split()
+        description['season'], description["year"] = season_year if len(season_year) == 2 else ("None", "None")
+        description["duration"] = (details.get("duration") or "0").strip()
+        description["themes"] = (details.get("themes") or "None").split()
+        description["studio"] = (details.get("studio") or "").strip() or None
         return description
 
     async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[str, List[Tuple[str, str]]]:
