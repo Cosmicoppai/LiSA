@@ -32,7 +32,7 @@ def get_ports():
 if __name__ == "__main__":
     freeze_support()
     try:
-        logging.basicConfig(stream=stdout, level=logging.INFO)
+        logging.basicConfig(stream=stdout, level=logging.ERROR)
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
 

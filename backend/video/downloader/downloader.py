@@ -207,7 +207,7 @@ class MangaDownloader(Downloader):
             max_workers: int = 50,
             hooks: dict = None,
             headers: dict = get_headers(),
-            post_processor: Callable[[list[str] | list[Path], str], None] = None
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
     ) -> None:
 
         self.img_urls = img_urls
@@ -302,18 +302,19 @@ class MangaDownloader(Downloader):
         await client.close()  # CLose the http session.
 
         # convert the image if necessary
+        pdf_file_path = Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.pdf")
         if self.post_processor:
             imgs = []
             for r, _, f in walk(self.OUTPUT_LOC):
                 for fname in f:
                     imgs.append(Path(r).joinpath(fname))
 
-            self.post_processor(imgs, Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.pdf"))
+            self.post_processor(imgs, pdf_file_path)
 
             for img in imgs:
                 Path.unlink(img)
 
-        await self.update_db_record("downloaded", self.num_of_segments, self.total_size)
+        await self.update_db_record("downloaded", self.num_of_segments, self.total_size, pdf_file_path.__str__())
 
         remove_folder(self.SEGMENT_DIR)  # remove segments
 

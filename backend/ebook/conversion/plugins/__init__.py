@@ -7,7 +7,5 @@ def get_plugin(file_format: str | None) -> Callable[[list[str] | list[Path], str
     match file_format:
         case "pdf":
             return img_to_pdf
-        case "epub":
-            ...
         case _:
             return None
