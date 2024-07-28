@@ -13,7 +13,7 @@ from config import FileConfig
 from .msg_system import MsgSystem
 from video.library import DBLibrary, Library
 from time import perf_counter
-from utils import DB, remove_folder, get_path
+from utils import DB, remove_folder, get_path, remove_file
 import logging
 from typing import List, Dict, Any, Tuple, Callable
 from utils.headers import get_headers
@@ -312,9 +312,7 @@ class MangaDownloader(Downloader):
                     imgs.append(Path(r).joinpath(fname))
 
             self.post_processor(imgs, pdf_file_path)
-
-            for img in imgs:
-                Path.unlink(img)
+            remove_file(imgs)
 
         await self.update_db_record("downloaded", self.num_of_segments, self.total_size, pdf_file_path.__str__())
 

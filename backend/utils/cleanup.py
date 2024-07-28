@@ -1,5 +1,6 @@
 from shutil import rmtree
 from os import remove
+from typing import List
 
 
 def remove_folder(file_location: str):
@@ -9,8 +10,15 @@ def remove_folder(file_location: str):
         ...
 
 
-def remove_file(file_location: str):
+def remove_file(file_location: str | List[str]):
+    """
+    written in such a way, to maintain backward compatability
+    """
     try:
-        remove(file_location)
+        if isinstance(file_location, list):
+            for file in file_location:
+                remove(file)
+        else:
+            remove(file_location)
     except FileNotFoundError:
         ...
