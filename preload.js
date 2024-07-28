@@ -21,4 +21,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     openExternal: (data) => ipcRenderer.invoke('open-external', data),
     showItemInFolder: (data) => ipcRenderer.invoke('show-item-in-folder', data),
+    getPlatformOS: () => process.platform,
 });

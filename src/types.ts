@@ -10,6 +10,7 @@ interface ElectronAPI {
     getDomainCookies: (data: any) => Promise<any>;
     openExternal: (data: any) => Promise<any>;
     showItemInFolder: (data: any) => Promise<any>;
+    getPlatformOS: () => Promise<NodeJS.Platform>;
 }
 declare global {
     interface Window {

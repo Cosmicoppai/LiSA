@@ -25,7 +25,7 @@ export function useGetAnimeEpPagination() {
                 stream: searchParams.get('stream'),
                 episodePageUrl: url,
             },
-            { replace: true },
+            { replace: true, preventScrollReset: true },
         );
     }
 
