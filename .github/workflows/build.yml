@@ -3,7 +3,7 @@ name: Build executable
 on:
   push:
     branches:
-      - main
+      - og
 
 jobs:
   build-ubuntu:
