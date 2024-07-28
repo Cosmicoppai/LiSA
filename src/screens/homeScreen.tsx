@@ -1,164 +1,190 @@
-import React, { useEffect } from "react";
+import { SearchIcon } from '@chakra-ui/icons';
+import { Box, Flex, Input, InputGroup, InputLeftElement, Text, Image } from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { AnimeCard } from 'src/components/AnimeCard';
+import { AppModeSwitch } from 'src/components/AppModeSwitch';
+import { localImagesPath } from 'src/constants/images';
+import { useAppContext } from 'src/context/app';
+import server from 'src/utils/axios';
 
-import {
-    Box,
-    Flex,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    InputRightElement,
-    Kbd,
-    Text,
-    Image
-} from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
+import { MangaCard } from '../components/MangaCard';
+import { NetworkError } from '../components/network-error';
+import { useNetworkStatus } from '../hooks/useNetworkStatus';
 
-import SearchResultCard from "../components/search-result-card";
-import NetworkError from "../components/network-error";
-import useNetworkStatus from "../hooks/useNetworkStatus";
+function useSearchQuery() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
 
-// @ts-ignore
-import NotFoundImg from "src/assets/img/not-found.png";
-// @ts-ignore
-import LoaderSearchGif from "src/assets/img/loader-serch.gif";
-// @ts-ignore
-import HomeScreenLogoImg from "src/assets/img/home_screen_logo.png";
+    const [search, setSearch] = useState(searchQuery);
 
-import server from "src/utils/axios";
-import { useQuery } from "@tanstack/react-query";
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            setSearchParams({ search });
+        }, 450);
+        return () => clearTimeout(timeoutId);
+    }, [search, setSearchParams]);
 
-async function getAnimeList({ query }) {
+    return {
+        searchQuery,
+        search,
+        setSearch,
+    };
+}
+
+async function getAnimeList({ query, type }) {
     if (!query) return null;
-    const { data } = await server.get(`/search?type=anime&query=${query}`);
-    return data;
+
+    const { data } = await server.get(
+        `/search?${new URLSearchParams({
+            type,
+            query,
+        })}`,
+    );
+    return data?.response ?? [];
 }
 
 export const HomeScreen = () => {
     const { isOnline } = useNetworkStatus();
 
-    const [query, setQuery] = React.useState("");
-    const [tempQuery, setTempQuery] = React.useState("");
-    const handleSearchChange = (event) => {
-        setTempQuery(event.target.value);
-    };
+    const { mode } = useAppContext();
 
-    const {
-        data,
-        error,
-        isLoading,
-    } = useQuery({
-        queryKey: ["anime-list", query],
-        queryFn: () => getAnimeList({ query })
+    const { search, searchQuery, setSearch } = useSearchQuery();
+
+    const { data, error, isError, isLoading, isFetching } = useQuery({
+        queryKey: ['search-list', searchQuery, mode],
+        queryFn: () => getAnimeList({ query: searchQuery, type: mode }),
+        enabled: searchQuery.length > 0,
     });
 
-    useEffect(() => {
-        const c = setTimeout(() => {
-            setQuery(tempQuery);
-        }, 350)
+    const [isTakingLonger, setIsTakingLonger] = useState(false);
 
-        return () => clearTimeout(c);
-    }, [tempQuery])
+    useEffect(() => {
+        if (isLoading) {
+            const timeOut = setTimeout(() => {
+                setIsTakingLonger(true);
+            }, 5000);
+
+            return () => {
+                clearTimeout(timeOut);
+            };
+        }
+
+        setIsTakingLonger(false);
+    }, [isLoading]);
 
     return (
-        <Flex w="100%" h="100%" direction="column" bg={"gray.900"}>
-            {isOnline ? (
-                <Flex
-                    align="center"
-                    justify="center"
-                    direction="column"
-                    w="100%"
-                    h="100%"
-                    pt={"20px"}>
-                    {/* <Text
-                        fontWeight='extrabold'
-                        letterSpacing={3}
-                        fontSize={150}
-                        color={'white'}
-                    >LiSA</Text> */}
-                    <Image objectFit="cover" src={HomeScreenLogoImg} alt="logo" />
-                    <Box w="50%" sx={{ position: "relative" }}>
-                        <InputGroup>
-                            <InputLeftElement
-                                pointerEvents="none"
-                                children={<SearchIcon color="gray.300" />}
-                            />
-
-                            <Input
-                                sx={{ position: "relative" }}
-                                color={"font.main"}
-                                placeholder="Search Anime"
-                                value={tempQuery}
-                                onChange={handleSearchChange}
-                            />
-                            {/* <InputRightElement
-                                pointerEvents="none"
-                                children={
-                                    <Box mr="10" p={1} px={2}>
-                                        <Kbd fontSize={"1.2rem"}>Enter</Kbd>
-                                    </Box>
-                                }
-                            /> */}
-                        </InputGroup>
-                    </Box>
-                    {!isLoading && data && (
-                        <Box
-                            sx={{
-                                marginTop: "10px",
-                                maxWidth: "100%",
-                                maxHeight: "100%",
-
-                                height: "100%",
-                                width: "100%",
-                                overflowX: "auto",
-                                "&::-webkit-scrollbar": {
-                                    width: "8px",
-                                    borderRadius: "8px",
-                                    backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                                },
-                                "&::-webkit-scrollbar-thumb": {
-                                    backgroundColor: `rgba(255, 255, 255, 0.2)`,
-                                },
-                                justifyContent: "center",
-                                display: "flex",
-                                flexWrap: "wrap",
-                            }}>
-                            {data.map((anime, index: number) => {
-                                return (
-                                    <SearchResultCard
-                                        key={index}
-                                        data={anime}
-                                        cardWidth={"250px"}
-                                        cardMargin={"10px 30px"}
-                                        maxImgWidth={"180px"}
-                                    />
-                                );
-                            })}
+        <>
+            <Flex
+                padding={6}
+                justifyContent={'space-between'}
+                alignItems={'center'}
+                w={'100%'}
+                zIndex={1000}
+                backgroundColor={'var(--chakra-colors-gray-900)'}>
+                <AppModeSwitch />
+            </Flex>
+            <Flex w="100%" h="100%" marginTop={'180px'} direction="column" bg={'gray.900'}>
+                {isOnline ? (
+                    <Flex
+                        align="center"
+                        justify="center"
+                        direction="column"
+                        w="100%"
+                        h="100%"
+                        pt={'20px'}>
+                        <Image objectFit="cover" src={localImagesPath.homeScreenLogo} alt="logo" />
+                        <Box w="50%" sx={{ position: 'relative', marginBottom: 8 }}>
+                            <InputGroup>
+                                <InputLeftElement
+                                    pointerEvents="none"
+                                    children={<SearchIcon color="gray.300" />}
+                                />
+                                <Input
+                                    sx={{ position: 'relative' }}
+                                    color={'font.main'}
+                                    placeholder={`Search ${mode === 'manga' ? 'Manga' : 'Anime'}`}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                />
+                            </InputGroup>
                         </Box>
-                    )}
-                    {!isLoading && error && (
-                        <Box textAlign="center" py={10} px={6}>
-                            <Image
-                                src={NotFoundImg}
-                                alt="not-found"
-                                height={200}
-                                display={"flex"}
-                                justifyContent={"center"}
-                                margin={"0 auto"}
-                            />
-                            <Text fontSize="18px" mt={3} mb={2}>
-                                Anime Not Found
-                            </Text>
-                            <Text color={"gray.500"} mb={6}>
-                                The result you're looking for does not seem to exist
-                            </Text>
-                        </Box>
-                    )}
-                    {isLoading && <Image src={LoaderSearchGif} alt="loader" boxSize="150px" />}
-                </Flex>
-            ) : (
-                <NetworkError />
-            )
-            }
-        </Flex >
+                        {!isLoading && data && (
+                            <Box
+                                sx={{
+                                    marginTop: '10px',
+                                    maxWidth: '100%',
+                                    maxHeight: '100%',
+                                    height: '100%',
+                                    width: '100%',
+                                    justifyContent: 'center',
+                                    display: 'flex',
+                                    flexWrap: 'wrap',
+                                }}>
+                                {data?.map((item, index: number) =>
+                                    mode === 'manga' ? (
+                                        <MangaCard key={index} data={item} />
+                                    ) : (
+                                        <AnimeCard key={index} data={item} />
+                                    ),
+                                )}
+                            </Box>
+                        )}
+                        {isError && error && !isLoading && !isFetching ? <NotFound /> : null}
+                        {isLoading && (
+                            <div
+                                style={{
+                                    width: '100%',
+                                    rowGap: 30,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}>
+                                <Image
+                                    src={localImagesPath.loaderSearchGif}
+                                    alt="loader"
+                                    boxSize="150px"
+                                />
+                                {isTakingLonger ? (
+                                    <span
+                                        style={{
+                                            fontWeight: 'bold',
+                                        }}>
+                                        It's taking longer than usual
+                                    </span>
+                                ) : null}
+                            </div>
+                        )}
+                    </Flex>
+                ) : (
+                    <NetworkError />
+                )}
+            </Flex>
+        </>
     );
 };
+
+function NotFound() {
+    const { mode } = useAppContext();
+
+    return (
+        <Box textAlign="center" py={10} px={6}>
+            <Image
+                src={localImagesPath.notFound}
+                alt="not-found"
+                height={200}
+                display={'flex'}
+                justifyContent={'center'}
+                margin={'0 auto'}
+            />
+            <Text fontSize="18px" mt={3} mb={2} textTransform={'capitalize'}>
+                {mode} Not Found
+            </Text>
+            <Text color={'gray.500'} mb={6}>
+                The result you're looking for does not seem to exist
+            </Text>
+        </Box>
+    );
+}

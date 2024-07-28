@@ -1,6 +1,3 @@
-// @ts-nocheck
-
-import { useState } from "react";
 import {
     Button,
     Modal,
@@ -12,28 +9,32 @@ import {
     ModalOverlay,
     Select,
     Stack,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
+import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
+import { usePlayVideoExternal } from 'src/hooks/usePlayVideoExternal';
 
-import { useSelector, useDispatch } from "react-redux";
+export function EpPopover({ isOpen, onClose }) {
+    const {
+        data: { streamDetails: details },
+    } = useGetAnimeStream();
 
-import { playVideoExternal } from "../store/actions/animeActions";
-import { downloadVideo } from "../store/actions/downloadActions";
-
-export default function EpPopover({ isOpen, onOpen, onClose }) {
-
-    const dispatch = useDispatch();
-    const { details, loading } = useSelector((state) => state.animeStreamDetails);
     const [language, setLanguage] = useState(null);
     const [quality, setQuality] = useState(null);
 
+    const { downloadVideo } = useDownloadVideo();
+
+    const { playVideoExternalMutation } = usePlayVideoExternal();
+
     const playHandler = () => {
         if (Object.values(Object.values(details[language])[0])[0]) {
-            dispatch(playVideoExternal(Object.values(Object.values(details[language])[0])[0]));
+            playVideoExternalMutation.mutate(Object.values(Object.values(details[language])[0])[0]);
         }
     };
     const downloadHandler = () => {
         if (Object.values(Object.values(details[language])[0])[0]) {
-            dispatch(downloadVideo(Object.values(Object.values(details[language])[0])[0]));
+            downloadVideo(Object.values(Object.values(details[language])[0])[0]);
         }
     };
     return (
@@ -53,7 +54,7 @@ export default function EpPopover({ isOpen, onOpen, onClose }) {
                                     {Object.keys(details).map((language, idx) => {
                                         return (
                                             <option key={idx} value={language}>
-                                                {language}{" "}
+                                                {language}
                                             </option>
                                         );
                                     })}
@@ -63,7 +64,8 @@ export default function EpPopover({ isOpen, onOpen, onClose }) {
                                     size="lg"
                                     disabled={!language}
                                     onChange={(e) => setQuality(e.target.value)}>
-                                    {details[language]?.map((quality, idx) => {
+                                    {/* @ts-ignore */}
+                                    {details[language]?.map?.((quality, idx) => {
                                         return (
                                             <option key={idx} value={Object.keys(quality)[0]}>
                                                 {Object.keys(quality)[0]}p
@@ -90,4 +92,4 @@ export default function EpPopover({ isOpen, onOpen, onClose }) {
             )}
         </>
     );
-};
+}

@@ -1,9 +1,11 @@
 from __future__ import annotations
+import re
 from bs4 import BeautifulSoup
 from typing import Dict, Any
 from config import ServerConfig
 from utils.headers import get_headers
 from .base import Scraper
+from urllib.parse import quote
 
 
 class MyAL(Scraper):
@@ -39,7 +41,7 @@ class MyAL(Scraper):
     types_dict = {"anime": anime_types_dict, "manga": manga_types_dict}
 
     @classmethod
-    async def get_top_mange(cls, manga_type: str, limit: int = 0):
+    async def get_top_manga(cls, manga_type: str, limit: int = 0):
         return await cls.get_top(manga_type, limit, "manga")
 
     @classmethod
@@ -81,10 +83,14 @@ class MyAL(Scraper):
 
         bs_top = BeautifulSoup(await resp.text(), 'html.parser')
 
-        rank = bs_top.find_all("span", {"class": ['rank1', 'rank2', 'rank3', 'rank4']})
+        ranks_text = bs_top.find_all("span", {"class": ['rank1', 'rank2', 'rank3', 'rank4']})
         ranks = []
-        for i in rank:
-            ranks.append(i.text)
+
+        if not ranks_text:
+            ranks = [span.get_text() for div in bs_top.find_all('div', {'class': 'icon-ranking'}) for span in div.find_all('span') if span.get_text()]
+        else:
+            for i in ranks_text:
+                ranks.append(i.text)
 
         img = bs_top.find_all("img", {"width": "50", "height": "70"})
         imgs = []
@@ -98,6 +104,9 @@ class MyAL(Scraper):
                     end = i
             imgs.append(src.replace(src[start:end], ""))
 
+        if not imgs:
+            imgs = [image.get('data-bg') for image in bs_top.find_all("div", {"class": "tile-unit"})]
+
         title_class: str = ""
         match media:
             case "anime":
@@ -105,16 +114,39 @@ class MyAL(Scraper):
             case "manga":
                 title_class = "manga_h3"
 
-        title = bs_top.find_all("h3", {"class": title_class})
+        titles = [title.get_text() for title in bs_top.find_all("h3", {"class": title_class})]
+
+        if not titles:
+            titles = [title.get_text() for title in bs_top.find_all("h2", {"class": "title"})]
 
         info = bs_top.find_all("div", {"class": "information"})
         segments = []
         a_type = []
         for x in info:
-            val = x.text.replace('\n', '').replace(' ', '')
-            start, end = val.index("("), val.index(")")
-            segments.append(val[start + 1:end])
-            a_type.append(val[:start])
+            text = x.text.replace('\n', '').replace(' ', '')
+            if not text:
+                continue
+
+            match1 = re.search(r'(TV|OVA|ONA|Movie|TV Special|Special|Manga|Manhwa|Light Novel|Novel|Manhua|Doujinshi|One-shot)\s*\((\d+)\s*(eps|vols)?\)', text)
+            match2 = re.search(r'(TV|OVA|ONA|Movie|TV Special|Special|Manga|Manhwa|Light Novel|Novel|Manhua|Doujinshi|One-shot)\s*\(\?\s*(eps|vols)?\)', text)
+            match3 = re.search(r'(TV|OVA|ONA|Movie|TV Special|Special|Manga|Manhwa|Light Novel|Novel|Manhua|Doujinshi|One-shot)\s*\((\d+)\)', text)
+            match4 = re.search(r'(TV|OVA|ONA|Movie|TV Special|Special|Manga|Manhwa|Light Novel|Novel|Manhua|Doujinshi|One-shot)\s*(\((\d+)\s*(eps|vols)?\))?', text)
+
+            if match1:
+                a_type.append(match1.group(1))
+                segments.append(match1.group(2))
+            elif match2:
+                a_type.append(match2.group(1))
+                segments.append("?")
+            elif match3:
+                a_type.append(match3.group(1))
+                segments.append(match3.group(2))
+            elif match4:
+                a_type.append(match4.group(1))
+                segments.append("1")
+            else:
+                a_type.append("Unknown")
+                segments.append("0")
 
         score = bs_top.find_all("span", {"class": [
             "score-10", "score-9", "score-8", "score-7", "score-6", "score-5", "score-4", "score-3", "score-2",
@@ -126,15 +158,15 @@ class MyAL(Scraper):
         for idx, rank in enumerate(ranks):
             if rank == "-":
                 rank = "na"
-            item = {"rank": rank, "poster": imgs[idx], "title": title[idx].text, "type": a_type[idx],
-                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={media}&query={title[idx].text}&total_res=1'}
+            item = {"rank": rank, "poster": imgs[idx], "title": titles[idx], "type": a_type[idx],
+                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={media}&query={quote(titles[idx])}&total_res=1'}
 
             match media:
                 case "anime":
-                    item["episodes"] = segments[idx].replace('eps', '')
-                    item["score"] = score[idx * 2].text
+                    item["episodes"] = segments[idx]
+                    item["score"] = score[idx].text if len(score) == len(ranks) else score[idx*2].text
                 case "manga":
-                    item["volumes"] = segments[idx].replace('vols', '')
+                    item["volumes"] = segments[idx]
 
             top.append(item)
 

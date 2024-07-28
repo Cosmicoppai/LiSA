@@ -1,4 +1,8 @@
 from __future__ import annotations
+
+from datetime import datetime
+import json
+
 import aiohttp
 import asyncio
 from abc import abstractmethod
@@ -12,6 +16,7 @@ from json import JSONDecodeError
 from .base import Scraper
 from utils import DB
 from video.downloader.msg_system import MsgSystem
+from video.library import DBLibrary, WatchList, ReadList
 
 
 class Anime(Scraper):
@@ -55,18 +60,28 @@ class Animepahe(Anime):
 
     @classmethod
     async def get(cls, url: str, data=None, headers: dict = get_headers()) -> aiohttp.ClientResponse:
-        if not cls.session:
+        if not cls.session or not cls.cookies:
+            cur = DB.connection.cursor()
+            res = cur.execute(f"SELECT * from site_state where site_name = ?", (cls._SITE_NAME, )).fetchone()
+            if res:
+                res = dict(res)
+                if datetime.fromisoformat(res["created_on"]) < datetime.now():
+                    await cls.set_session(json.loads(res["session_info"]))
 
-            cookie_req_data = {"type": "cookie_request", "site_url": cls.site_url, "user_agent": headers["user-agent"]}
-            if MsgSystem.in_pipe:
-                MsgSystem.in_pipe.send({"data": cookie_req_data})
-                while True:
-                    await asyncio.sleep(0.25)
-                    if MsgSystem.in_pipe.poll():
-                        cookies = MsgSystem.in_pipe.recv()
-                        if cookies:
-                            await cls.set_session(cookies)
-                        break
+            else:
+                cookie_req_data = {"site_url": cls.site_url, "user_agent": headers["user-agent"]}
+                if MsgSystem.in_pipe:
+                    MsgSystem.in_pipe.send({"type": "cookie_request", "data": cookie_req_data})
+                    while True:
+                        await asyncio.sleep(0.25)
+                        if MsgSystem.in_pipe.poll():
+                            cookies = MsgSystem.in_pipe.recv()
+                            if cookies:
+                                await cls.set_session(cookies)
+                                cur.execute("INSERT INTO site_state (site_name, session_info)" "VALUES (?, ?)", (cls._SITE_NAME, json.dumps(cookies)))
+                                DB.connection.commit()
+                                cur.close()
+                            break
 
         return await super().get(url, data, headers)
 
@@ -113,8 +128,7 @@ class Animepahe(Anime):
 
         return await self.get_api(episodes_params, episodes_headers)
 
-    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[
-                                                                                 str, str] | TypeError | JSONDecodeError:
+    async def get_episode_details(self, anime_session: str, page_no: str) -> Dict[str, str] | TypeError | JSONDecodeError:
         episodes = {"ep_details": []}
 
         try:
@@ -147,9 +161,7 @@ class Animepahe(Anime):
 
             if page_no == "1":
                 episodes["description"] = await description
-                cur = DB.connection.cursor()
-                res = cur.execute("SELECT * FROM watchlist WHERE anime_id=?", (episodes["description"]["anime_id"],))
-                episodes["mylist"] = True if res.fetchone() else False
+                episodes["mylist"] = True if len(WatchList.get(filters={"anime_id": episodes["description"]["anime_id"]})) else False
 
             return episodes
         except TypeError:
@@ -222,15 +234,15 @@ class Animepahe(Anime):
             key, value = info.text.replace("\n", "").split(":", 1)
             details[key.lower()] = value
 
-        description["eng_name"] = details.get("english", details.get("synonyms", None))
-        description["type"] = details.get("type", "TV")
-        description["status"] = details.get("status", "Finished Airing")
-        description["aired"] = details.get("aired", None).replace("to", " to")
-        description['season'], description["year"] = details.get("season", "None None").split()
-        description["duration"] = details.get("duration", "0").strip()
-        description["themes"] = details.get("themes", "None").split()
-        description["studio"] = details.get("studio", None)
-
+        description["eng_name"] = (details.get("english") or details.get("synonyms") or "").strip() or None
+        description["type"] = (details.get("type") or "TV").strip()
+        description["status"] = (details.get("status") or "Finished Airing").strip()
+        description["aired"] = (details.get("aired") or "").replace("to", " to").strip() or None
+        season_year = (details.get("season") or "None None").split()
+        description['season'], description["year"] = season_year if len(season_year) == 2 else ("None", "None")
+        description["duration"] = (details.get("duration") or "0").strip()
+        description["themes"] = (details.get("themes") or "None").split()
+        description["studio"] = (details.get("studio") or "").strip() or None
         return description
 
     async def get_stream_data(self, anime_session: str, episode_session: str) -> Dict[str, List[Tuple[str, str]]]:
@@ -264,7 +276,7 @@ class Animepahe(Anime):
             resp.setdefault(aud, []).append((quality, kwik_url))
         return resp
 
-    async def get_manifest_file(self, kwik_url: str) -> ('manifest_file', 'uwu_root_domain', 'file_name'):
+    async def get_manifest_file(self, kwik_url: str) -> (str, str, str):  # ('manifest_file', 'uwu_root_domain', 'file_name')
         hls_data = await self.get_hls_playlist(kwik_url)
 
         uwu_url = hls_data["manifest_url"]
@@ -330,7 +342,7 @@ class Animepahe(Anime):
     def _strip_split(_data: str, strip_chr: str = " ", split_chr: str = " ") -> List[str]:
         return _data.strip(strip_chr).split(split_chr)
 
-    def build_search_resp(self, anime_details: List[Dict]) -> List[Dict]:
+    def build_search_resp(self, anime_details: List[Dict]) -> Dict[str, Any]:
 
         search_response: List[Dict[str, str | int]] = []
 
@@ -350,23 +362,23 @@ class Animepahe(Anime):
                 "anime_id": anime_detail.get("id", None)
             })
 
-        return search_response
+        return {"response": search_response, "prev": None, "next": None}
 
     async def __get_episodes(self, anime_session: str, page: int = 1) -> list:
         return [x["session"] for x in
                 (await self.get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page}))[
                     "data"]]
 
-    async def get_links(self, anime_session: str, page: int = 1, aud: str = "jap") -> list:
+    async def get_links(self, anime_session: str, page: int = 1, aud: str = "jpn") -> list:
         links = []
 
         stream_datas = await asyncio.gather(
             *[self.get_stream_data(anime_session, episode) for episode in
               await self.__get_episodes(anime_session, page)])
-        for stream_datas in stream_datas:
+        for stream_data in stream_datas:
             best_quality: Tuple = (0, "")
-            for _stream_data in stream_datas[aud]:
-                best_quality = _stream_data if best_quality[0] < _stream_data[0] else ...
+            for _stream_data in stream_data[aud]:
+                best_quality = _stream_data if int(best_quality[0]) < int(_stream_data[0]) else ...
             links.append(best_quality[1])
         return links
 
@@ -388,7 +400,7 @@ class Animepahe(Anime):
         return {"file_name": title, "manifest_url": stream_re.search(unpacked).group(0)}
 
     @staticmethod
-    def int2base(x, base):
+    def int2base(x, base) -> str:
         digs = string.digits + string.ascii_letters
         if x < 0:
             sign = -1
@@ -406,7 +418,7 @@ class Animepahe(Anime):
         digits.reverse()
         return "".join(digits)
 
-    def js_unpack(self, p, a, c, k):
+    def js_unpack(self, p, a, c, k) -> str:
         k = k.split("|")
         a = int(a)
         c = int(c)

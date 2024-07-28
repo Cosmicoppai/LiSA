@@ -7,13 +7,9 @@ _path_dirs = _path_env.split(pathsep)
 
 def get_path(binary_name: str, default_path: str) -> str:
     for directory in _path_dirs:
-        print(directory)
         binary_path = path.join(directory, binary_name)
         if path.isfile(binary_path):
             return binary_path
-        else:
-            continue
-
     return default_path
 
 

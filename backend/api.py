@@ -1,10 +1,11 @@
+import json
 from json import JSONDecodeError
-from video.library import DBLibrary
+from video.library import DBLibrary, WatchList, ReadList
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple
+from typing import Tuple, List, Dict, Any
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -18,12 +19,12 @@ from middleware import ErrorHandlerMiddleware, RequestValidator
 import uvicorn
 from starlette.routing import Mount
 from urllib.parse import parse_qsl
-from utils.init_db import DB
 from utils import remove_file, CustomStaticFiles
 from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
 import logging
+from ebook import get_plugin
 
 
 async def LiSA(request: Request):
@@ -106,7 +107,8 @@ async def _search_manga(request: Request):
     except KeyError:
         return await not_found_404(request, msg="manga not found")
 
-    except ValueError:
+    except ValueError as e:
+        logging.error(e)
         return await bad_request_400(request, msg="invalid query parameter: param should be of type int")
 
 
@@ -209,7 +211,7 @@ async def stream(request: Request):
     if not video_src:
         return await bad_request_400(request, msg="pass valid manifest url or video id")
     if _id:
-        res = DBLibrary.get(filters={"id": _id, "type": "anime"}, query=["file_location"])
+        res = DBLibrary.get(filters={"id": _id, "type": "video"}, query=["file_location"])
         if not res:
             return JSONResponse({"error": "Invalid Id"}, status_code=400)
         video_src = res[0]["file_location"]
@@ -257,11 +259,13 @@ async def download(request: Request):
             case "image":
                 site = "mangakatana"
 
+                post_processor = get_plugin(jb.get("download_as", None))
+
                 if jb.get("manga_session", None):
-                    await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1))
+                    await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1), post_processor=post_processor)
 
                 elif jb.get("chp_session", None):
-                    await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site)
+                    await DownloadManager.schedule(typ, manifest_url=jb["chp_session"], site=site, post_processor=post_processor)
 
                 else:
                     return await bad_request_400(request, msg="Malformed body: pass manifest url or anime session")
@@ -313,6 +317,30 @@ async def cancel_download(request: Request):
         return await bad_request_400(request, msg="One or more ids are invalid")
 
 
+def format_series(field: str, record: Dict[str, Any]) -> tuple:
+    if field == 'type':
+        item_type = 'manga' if record['type'] == 'image' else 'anime'
+        return item_type, record
+    elif field == 'series_name':
+        title = ' '.join(word.capitalize() for word in record['series_name'].split('_'))
+        return title, record
+    elif field == 'file_name':
+        return record['file_name'], record
+    return record.get(field), record
+
+
+def format_library_data(grouped_data: Dict[str, Any]):
+    result = []
+    for item_type, series in grouped_data.items():
+        for title, items in series.items():
+            result.append({
+                'type': item_type,
+                'title': title,
+                'chapters' if item_type == 'manga' else 'episodes': [item for sublist in items.values() for item in sublist]
+            })
+    return result
+
+
 async def library(request: Request):
     """
 
@@ -335,7 +363,14 @@ async def library(request: Request):
         except KeyError or TypeError:
             return await bad_request_400(request, msg="missing or invalid query parameter: 'id'")
 
-    return JSONResponse(DBLibrary().get_all())
+    status = request.query_params.get("status", "downloaded")
+    if status == "downloading":
+        status = ["started", "scheduled", "paused"]
+
+    return JSONResponse(format_library_data(
+        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
+                           format_func=format_series)
+    ))
 
 
 async def play(player_name: str, manifest_url: str) -> Tuple[str | None, int]:
@@ -385,11 +420,11 @@ async def top(request: Request):
         case "manga":
             if _category.lower() not in MyAL.manga_types_dict:
                 return await bad_request_400(request, msg="Pass valid Manga Category")
-            top_resp = await MyAL().get_top_mange(manga_type=_category, limit=_limit)
+            top_resp = await MyAL().get_top_manga(manga_type=_category, limit=_limit)
         case _:
             return await bad_request_400(request, msg="Pass valid type")
 
-    if not top_resp["next_top"] and not top_resp["prev_top"]:
+    if not top_resp["data"]:
         return await not_found_404(request, msg="limit out of range")
 
     return JSONResponse(top_resp)
@@ -475,36 +510,69 @@ async def _manga_recommendation(request: Request):
 async def watchlist(request: Request):
     try:
         if request.method == "GET":
-            cur = DB.connection.cursor()
-            cur.execute("SELECT * FROM watchlist ORDER BY created_on DESC")
-            return JSONResponse({"data": [dict(row) for row in cur.fetchall()]})
+            return JSONResponse({"data": WatchList.get_all()})
+
+        elif request.method == "POST":
+            jb = request.state.body
+            anime_id = int(jb["anime_id"])
+            ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+            WatchList.create({"anime_id": anime_id, "jp_name": jb["jp_name"], "no_of_episodes": jb["no_of_episodes"], "type": jb["type"], "status": jb["status"],
+                              "season": jb["season"], "year": jb["year"], "score": jb["score"], "poster": jb["poster"], "ep_details": ep_details})
+
+            return JSONResponse(content="Anime successfully added in watch later", status_code=201)
+
+        # id validation is bypassed by choice
+        WatchList.delete(int(request.query_params["anime_id"]))
+        return Response(status_code=204)
+    except KeyError as _msg:
+        logging.error(_msg)
+        return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
+    except ValueError as err:
+        logging.error(err)
+        return await bad_request_400(request, msg=f"Invalid anime ID")
+    except IntegrityError as err:
+        logging.error(err)
+        return await bad_request_400(request, msg=f"Record already exists")
+
+
+async def readlist(request: Request):
+    try:
+        if request.method == "GET":
+            resp = []
+            for data in ReadList.get_all():
+                data["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={data['session']}"
+                data["genres"] = json.loads(data["genres"])
+                resp.append(data)
+
+            return JSONResponse({"data": resp})
 
         elif request.method == "POST":
             jb = request.state.body
 
-            anime_id = jb["anime_id"]
-            ep_details = f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_id={anime_id}"
+            manga_session = jb["session"]
+            total_chps = jb["total_chps"]
+            status = jb["status"]
+            genres = json.dumps(jb["genres"])
+            poster = jb["poster"]
 
-            cur = DB.connection.cursor()
+            """
+            manga_session format will be https://mangakatana.com/manga/cheese-in-the-trap.1
+            """
+            meta_data: List[str] = manga_session.split("/manga/")
+            if len(meta_data) != 2 or "." not in meta_data[-1]:
+                return await bad_request_400(request, msg="Invalid Manga ID")
 
-            cur.execute(
-                "INSERT INTO watchlist (anime_id, jp_name, no_of_episodes, type, status, season, year, score, poster, ep_details)"
-                " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (anime_id, jb["jp_name"], jb["no_of_episodes"], jb["type"], jb["status"], jb["season"],
-                 jb["year"], jb["score"], jb["poster"], ep_details))
+            title, manga_id = meta_data[-1].split(".")
+            ReadList.create({"manga_id": manga_id, "title": title, "total_chps": total_chps, "status": status, "genres": genres, "poster": poster, "session": manga_session})
+            return JSONResponse(content="Manga successfully added in Read later", status_code=201)
 
-            DB.connection.commit()
-            return JSONResponse(content="Anime successfully added in watch later", status_code=201)
-
-        cur = DB.connection.cursor()
         # id validation is bypassed by choice
-        cur.execute("DELETE FROM watchlist where anime_id=?", (request.query_params["anime_id"],))
-        DB.connection.commit()
+        ReadList.delete(request.query_params["manga_id"])
         return Response(status_code=204)
     except KeyError as _msg:
         return await bad_request_400(request, msg=f"Invalid request: {_msg} not present")
     except IntegrityError as err:
-        print(err)
+        logging.error(err)
         return await bad_request_400(request, msg=f"Record already exists")
 
 
@@ -527,6 +595,7 @@ routes = [
     Route("/manifest", endpoint=get_manifest, methods=["GET"]),
     Route("/proxy", endpoint=proxy, methods=["GET"]),
     Route("/watchlist", endpoint=watchlist, methods=["GET", "POST", "DELETE"]),
+    Route("/readlist", endpoint=readlist, methods=["GET", "POST", "DELETE"]),
     Mount('/default', app=CustomStaticFiles(directory=FileConfig.DEFAULT_DIR), name="static"),
     Mount("/image", app=CustomStaticFiles(directory=FileConfig.DEFAULT_DOWNLOAD_LOCATION), name="image-router"),
 ]

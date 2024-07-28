@@ -1,54 +1,55 @@
-import { Skeleton } from "@chakra-ui/react";
-import Card from "./card";
-import server from "src/utils/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useToast } from '@chakra-ui/react';
+import { useQuery } from '@tanstack/react-query';
+import server from 'src/utils/axios';
+
+import { AnimeCard } from './AnimeCard';
+import { ErrorMessage } from './ErrorMessage';
+import { SkeletonCards } from './SkeletonCards';
 
 async function getAnimeList({ category }) {
     const { data } = await server.get(`top?type=anime&c=${category}&limit=0`);
     return data;
 }
 
-export function ExploreAnimeCategories({
-    category
-}) {
-
-    const {
-        data,
-        error,
-        isLoading,
-    } = useQuery({
-        queryKey: ["anime-list", category],
+export function ExploreAnimeCategories({ category }) {
+    const { data, error, isLoading } = useQuery({
+        queryKey: ['anime-list', category],
         queryFn: () => getAnimeList({ category }),
     });
-    // console.log(data);
 
-    // @ts-ignore
-    if (error) return <span style={{ textAlign: 'center', marginTop: 100 }}>An error occurred: {error.message}</span>;
+    const toast = useToast();
+
+    const handleUpcomingAnimes = () => {
+        toast({
+            title: 'Anime has not been aired yet! ❤️',
+            status: 'error',
+            duration: 2000,
+        });
+    };
+
+    if (error) return <ErrorMessage error={error} />;
 
     return (
         <ul
             style={{
-                display: "flex",
-                flexWrap: "wrap",
-                listStyle: "none",
+                display: 'flex',
+                flexWrap: 'wrap',
+                listStyle: 'none',
                 margin: 0,
                 padding: 0,
-                marginTop: "20px",
-            }}
-        >
-            {isLoading ?
-                Array(30).fill(0)
-                    .map((data, index: number) => <Skeleton
+                marginTop: '20px',
+            }}>
+            {isLoading ? (
+                <SkeletonCards />
+            ) : (
+                data?.data?.map((item, index) => (
+                    <AnimeCard
                         key={index}
-                        width={"300px"}
-                        height={"450px"}
-                        sx={{ padding: "1rem", margin: "10px auto" }}
-                        padding={6} />
-                    ) :
-                data?.data?.map((anime, index) =>
-                    <Card key={index} data={anime} query={category} />
-                )
-            }
+                        onClick={category === 'upcoming' ? handleUpcomingAnimes : undefined}
+                        data={item}
+                    />
+                ))
+            )}
         </ul>
     );
 }

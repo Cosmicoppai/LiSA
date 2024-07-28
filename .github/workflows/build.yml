@@ -3,7 +3,7 @@ name: Build executable
 on:
   push:
     branches:
-      - main
+      - og
 
 jobs:
   build-ubuntu:
@@ -27,7 +27,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r build_requirements.txt
         npm install
         
     - name: Build exe
@@ -55,7 +54,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install -r build_requirements.txt
         npm install
         
     - name: Build exe

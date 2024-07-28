@@ -1,47 +1,38 @@
-import { ReactNode, useEffect } from "react";
-import ReactDOM from "react-dom/client";
+import { ChakraProvider, useColorMode } from '@chakra-ui/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
+import { SocketContextProvider } from 'src/context/socket';
 
-import { ChakraProvider, useColorMode } from "@chakra-ui/react";
-import { Provider } from "react-redux";
+import './styles/index.css';
 
-import "./styles/index.css";
-
-import App from "./App";
-
-import store from "./store/store";
-
-import { client, SocketContext } from "src/context/socket";
-import { theme } from "./styles/theme";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-function ForceDarkMode({ children }: {
-    children: ReactNode
-}) {
-    const { colorMode, toggleColorMode } = useColorMode();
-
-    useEffect(() => {
-        if (colorMode === "dark") return;
-        toggleColorMode();
-    }, [colorMode]);
-
-    return <>{children}</>;
-}
+import { App } from './App';
+import { AppContextProvider } from './context/app';
+import { theme } from './styles/theme';
 
 const queryClient = new QueryClient();
 
-ReactDOM
-    .createRoot(document.getElementById("root"))
-    .render(
+// Fixes: Even if setting initialColorMode as dark, localStorage chakra-ui-color-mode key sets to 'light'
+function ForceDarkMode() {
+    const { colorMode, toggleColorMode } = useColorMode();
 
-        <ChakraProvider theme={theme}>
-            <ForceDarkMode>
-                <SocketContext.Provider value={client}>
-                    <QueryClientProvider client={queryClient}>
-                        <Provider store={store}>
-                            <App />
-                        </Provider>
-                    </QueryClientProvider>
-                </SocketContext.Provider>
-            </ForceDarkMode>
-        </ChakraProvider>
-    );
+    useEffect(() => {
+        if (colorMode === 'dark') return;
+        toggleColorMode();
+    }, [colorMode]);
+
+    return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+    <ChakraProvider theme={theme}>
+        <ForceDarkMode />
+        <SocketContextProvider>
+            <QueryClientProvider client={queryClient}>
+                <AppContextProvider>
+                    <App />
+                </AppContextProvider>
+            </QueryClientProvider>
+        </SocketContextProvider>
+    </ChakraProvider>,
+);

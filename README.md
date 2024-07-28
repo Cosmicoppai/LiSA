@@ -1,6 +1,6 @@
 <div align="center">
 
-![Banner](src/assets/img/home_screen_logo.png)
+![Banner](public/images/home_screen_logo.png)
 
 ![GitHub contributors](https://img.shields.io/github/contributors/cosmicoppai/LiSA?color=lightgrey)
 [![GitHub forks](https://img.shields.io/github/forks/cosmicoppai/LiSA?color=lightgrey)](https://github.com/Cosmicoppai/LiSA/network)
@@ -16,10 +16,6 @@
 </div>
 
 A Desktop application, for streaming and downloading your favourite anime.
-
-## ⚠️ Alert
-
-We are adding new features, so the current main branch is unstable. We recommend that you download the stable version from [here](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1).
 
 ## CONTENTS OF THE FILE
 
@@ -166,7 +162,7 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## 🤝 CONTRIBUTING
 
-Contributions, issues, and feature requests are welcome! See [See Contribution Guide.](./CONTRIBUTING.md)
+Contributions, issues, and feature requests are welcome! See [Contribution Guide.](./CONTRIBUTING.md)
 
 ## ⭐ SUPPORT
 

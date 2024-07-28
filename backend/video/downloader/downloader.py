@@ -3,7 +3,7 @@ from __future__ import annotations
 import aiohttp
 import asyncio
 import m3u8
-from os import path, makedirs
+from os import path, makedirs, walk
 from Crypto.Cipher import AES
 from multiprocessing import connection, Process, Pipe
 import subprocess
@@ -13,15 +13,16 @@ from config import FileConfig
 from .msg_system import MsgSystem
 from video.library import DBLibrary, Library
 from time import perf_counter
-from utils import DB, remove_folder, get_path
+from utils import DB, remove_folder, get_path, remove_file
 import logging
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Callable
 from utils.headers import get_headers
 from utils import validate_path
 from sys import exc_info
 from abc import ABC, abstractmethod
 import traceback
 from yarl import URL
+from concurrent.futures import ThreadPoolExecutor
 
 
 def _parse_resume_info(raw_file_data: str = "", file_path: str | Path = None):
@@ -84,7 +85,7 @@ class ProgressTracker:
 
     def send_update(self) -> None:
         if self.msg_pipe_input:  # if pipe exists, pass the msg
-            self.msg_pipe_input.send({"data": self.file_data})
+            self.msg_pipe_input.send({"data": self.file_data, "type": "downloads"})
 
 
 class Downloader(ABC):
@@ -96,6 +97,7 @@ class Downloader(ABC):
     SEGMENT_DIR: Path = Path(__file__).resolve().parent.parent.joinpath("segments")
     OUTPUT_LOC: Path = FileConfig.DEFAULT_DOWNLOAD_LOCATION
     RESUME_FILENAME: str = "resumeinfo.yuk"
+    executor = ThreadPoolExecutor()
 
     def __init__(
             self,
@@ -105,7 +107,8 @@ class Downloader(ABC):
             resume_code=None,
             max_workers: int = 8,
             hooks: dict = None,
-            headers: dict = get_headers()
+            headers: dict = get_headers(),
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
     ) -> None:
 
         self._max_workers = max_workers
@@ -124,9 +127,8 @@ class Downloader(ABC):
         if not self.OUTPUT_LOC.exists():
             makedirs(self.OUTPUT_LOC)
 
-        # remove output_dir and seg_dir from file_data
-        del self.file_data["output_dir"]
-        del self.file_data["segment_dir"]
+        self.timeout = aiohttp.ClientTimeout(total=90)
+        self.post_processor = post_processor
 
         logging.info("successfully initialized")
 
@@ -144,7 +146,7 @@ class Downloader(ABC):
     async def _run(self):
         ...
 
-    def parse_resume_info(self) -> List[str]:
+    async def parse_resume_info(self) -> List[str]:
 
         if path.isfile(self.resume_file_path):
             with open(self.resume_file_path) as file:
@@ -156,18 +158,30 @@ class Downloader(ABC):
             resume_info = []
             logging.info(f"No resume data found for {self._resume_code}")
 
-            self.update_db_record("started", 0, self.num_of_segments)
+            await self.update_db_record("started", 0, self.num_of_segments)
 
         return resume_info
 
-    def update_db_record(self, status: str, downloaded: int, total_size: int):
+    async def update_db_record(self, status: str, downloaded: int, total_size: int, file_location: str = None):
         self.file_data["total_size"] = total_size
         self.file_data["downloaded"] = downloaded
         self.file_data["status"] = status
-        self.library.update(self.file_data["id"], {"status": self.file_data["status"], "total_size": total_size})
+
         if status == "started":
             self.file_data["speed"] = 0
-        self.msg_system_in_pipe.send({"data": self.file_data})
+        self.msg_system_in_pipe.send({"data": self.file_data, "type": "downloads"})
+
+        new_data = {"status": status, "total_size": total_size}
+        if file_location:
+            self.file_data["file_location"] = file_location
+            new_data["file_location"] = file_location
+
+        await asyncio.get_event_loop().run_in_executor(
+            self.executor,
+            self.library.update,
+            self.file_data["id"],
+            new_data
+        )
 
     @staticmethod
     def read_manifest(file_path: str) -> str | List[str]:
@@ -192,13 +206,15 @@ class MangaDownloader(Downloader):
             library_data: Tuple[Library, dict],
             msg_system_in_pipe: Pipe = None,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 50,
             hooks: dict = None,
-            headers: dict = get_headers()
+            headers: dict = get_headers(),
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
+
     ) -> None:
 
         self.img_urls = img_urls
-        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
+        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers, post_processor)
         self.progress_tracker: ProgressTracker
         self.num_of_segments: int = len(img_urls)
         self.total_size = 0
@@ -244,10 +260,9 @@ class MangaDownloader(Downloader):
         # The download queue that will be used by download workers
         download_queue: asyncio.Queue = asyncio.Queue()
 
-        timeout = aiohttp.ClientTimeout(25)
-        client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
+        client = aiohttp.ClientSession(headers=self.headers, timeout=self.timeout, raise_for_status=True)
 
-        resume_info = self.parse_resume_info()
+        resume_info = await self.parse_resume_info()
 
         assert self.num_of_segments != 0
 
@@ -255,7 +270,7 @@ class MangaDownloader(Downloader):
             filter(lambda seg: seg[0] not in resume_info, enumerate(self.img_urls))
         )
         self._max_workers = min(self._max_workers,
-                                self.num_of_segments)  # create max workers according to remaining segments
+                                len(img_list))  # create max workers according to remaining segments
 
         self.progress_tracker = ProgressTracker(self.file_data, len(resume_info), self.msg_system_in_pipe)
 
@@ -288,7 +303,18 @@ class MangaDownloader(Downloader):
 
         await client.close()  # CLose the http session.
 
-        self.update_db_record("downloaded", self.num_of_segments, self.total_size)
+        # convert the image if necessary
+        pdf_file_path = Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.pdf")
+        if self.post_processor:
+            imgs = []
+            for r, _, f in walk(self.OUTPUT_LOC):
+                for fname in f:
+                    imgs.append(Path(r).joinpath(fname))
+
+            self.post_processor(imgs, pdf_file_path)
+            remove_file(imgs)
+
+        await self.update_db_record("downloaded", self.num_of_segments, self.total_size, pdf_file_path.__str__())
 
         remove_folder(self.SEGMENT_DIR)  # remove segments
 
@@ -319,12 +345,13 @@ class VideoDownloader(Downloader):
             library_data: Tuple[Library, dict],
             msg_system_in_pipe: Pipe = None,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
-            headers: dict = get_headers()
+            headers: dict = get_headers(),
+            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
     ) -> None:
         self._m3u8: m3u8.M3U8 = m3u8.loads(m3u8_str)
-        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers)
+        super().__init__(file_data, library_data, msg_system_in_pipe, resume_code, max_workers, hooks, headers, post_processor)
         self._output_file = self.OUTPUT_LOC.joinpath(f"{self.file_data['file_name']}{self.OUTPUT_EXTENSION}")
         self.seg_maps: Dict[str, bytes] = {}
 
@@ -367,13 +394,21 @@ class VideoDownloader(Downloader):
             output_file = self._output_file
 
         # check if exe present in backend folder else fallback to default option
-        ffmpeg_loc = get_path("ffmpeg", "./ffmpeg")
+        ffmpeg_loc = get_path("ffmpeg", Path(__file__).parent.parent.parent.parent.joinpath("./ffmpeg"))
 
-        cmd = f'"{ffmpeg_loc}" -f concat -safe 0 -i "{input_file}" -c copy "{output_file}" -hide_banner -loglevel warning'
+        cmd = [
+            ffmpeg_loc,
+            '-f', 'concat',
+            '-safe', '0',
+            '-i', str(input_file),
+            '-c', 'copy',
+            str(output_file),
+            '-hide_banner',
+            '-loglevel', 'warning'
+        ]
 
-        subprocess.run(
-            cmd, check=True, shell=False
-        )
+        subprocess.run(cmd, check=True, shell=False)
+
         remove_folder(self.SEGMENT_DIR)  # remove segments
         logging.info("Merging completed")
         return path.getsize(output_file)
@@ -400,8 +435,7 @@ class VideoDownloader(Downloader):
         # data to the decrypt process for decryption and for writing to the disk.
 
         decrypt_pipe_output, decrypt_pipe_input = Pipe()
-        timeout = aiohttp.ClientTimeout(25)
-        client = aiohttp.ClientSession(headers=self.headers, timeout=timeout, raise_for_status=True)
+        client = aiohttp.ClientSession(headers=self.headers, timeout=self.timeout, raise_for_status=True)
 
         # Check if the m3u8 file passed in has multiple streams, if this is the
         # case then select the stream with the highest "bandwidth" specified.
@@ -419,7 +453,7 @@ class VideoDownloader(Downloader):
 
         self.num_of_segments = len(stream.segments)
 
-        resume_info = self.parse_resume_info()
+        resume_info = await self.parse_resume_info()
 
         assert self.num_of_segments != 0  # no of streams is not equal to 0
 
@@ -487,7 +521,7 @@ class VideoDownloader(Downloader):
         # Write the concat info and invoke ffmpeg to concatenate the files.
         file_size = self._write_concat_info(self.num_of_segments)
 
-        self.update_db_record("downloaded", self.num_of_segments, file_size)
+        await self.update_db_record("downloaded", self.num_of_segments, file_size)
 
     async def get_key(self, client, segment):
         if self.key:
@@ -506,7 +540,7 @@ class VideoDownloader(Downloader):
             url: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
             headers: dict = None
     ):
@@ -522,7 +556,7 @@ class VideoDownloader(Downloader):
             file_path: str,
             output_file_name: str,
             resume_code=None,
-            max_workers: int = 8,
+            max_workers: int = 25,
             hooks: dict = None,
     ):
         with open(file_path, "r") as file:
@@ -579,7 +613,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     async def workers(cls):
         while True:
             task_id = await DownloadManager.DownloadTaskQueue.get()
-            manifest, file_data, headers = cls._TaskData[task_id]["task_data"]
+            manifest, file_data, headers, post_processor = cls._TaskData[task_id]["task_data"]
 
             task_status = cls._TaskData[task_id]["status"]
             if task_status != Status.scheduled:  # if task is in not in scheduled state
@@ -593,7 +627,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                 try:
 
                     target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data, msg_system_in_pipe=MsgSystem.in_pipe,
-                                                                headers=headers, library_data=(DBLibrary, DBLibrary.data))
+                                                                headers=headers, library_data=(DBLibrary, DBLibrary.data), post_processor=post_processor)
 
                     p = Process(target=target.run)
                     p.start()
@@ -610,8 +644,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
 
     @classmethod
     async def _schedule_pending_downloads(cls):
-        await cls.create_task_from_db(DBLibrary.get({"status": "started"}))  # re-start already started download
-        await cls.create_task_from_db(DBLibrary.get({"status": "scheduled"}))  # schedule remaining pending downloads
+        await cls.create_task_from_db(DBLibrary.get({"status": "downloaded"}, negate=True))  # re-start already started download
 
     @classmethod
     async def create_task_from_db(cls, _tasks):
@@ -638,7 +671,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         await asyncio.gather(*tasks)  # schedule all remaining tasks
 
     @classmethod
-    async def schedule(cls, typ: str, session: str = None, manifest_url: str = None, site: str = "animepahe", page: int = 1):
+    async def schedule(cls, typ: str, session: str = None, manifest_url: str = None, site: str = "animepahe", page: int = 1, post_processor: Callable[[str | Path], str] = None):
 
         scraper = cls._Scrapers[typ].get_scraper(site)()
         if not scraper:
@@ -647,10 +680,10 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         manifest_datas = await cls.__get_manifest__(scraper, session, manifest_url, page)
 
         await asyncio.gather(
-            *[cls._schedule_download(typ, data[2], scraper.manifest_header, manifest=data[0]) for data in manifest_datas])
+            *[cls._schedule_download(typ, data[2], scraper.manifest_header, manifest=data[0], post_processor=post_processor) for data in manifest_datas])
 
     @classmethod
-    async def _schedule_download(cls, typ: str, _file_name: List[str], header: str, file_data: dict = None, manifest: str = None) -> None:
+    async def _schedule_download(cls, typ: str, _file_name: List[str], header: str, file_data: dict = None, manifest: str = None, post_processor: Callable[[str | Path], str] = None) -> None:
 
         downloader = cls._DOWNLOADER[typ]
         series_name, seg_name = validate_path(_file_name)
@@ -675,14 +708,13 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                                         output_dir.joinpath(f"{_file_name[1]}{ext}").__str__())
 
         if MsgSystem.in_pipe:
-            MsgSystem.in_pipe.send({"data": file_data})  # send msg to update about the status
+            MsgSystem.in_pipe.send({"data": file_data, "type": "downloads"})  # send msg to update about the status
 
         file_data["output_dir"] = output_dir.__str__()
         file_data["segment_dir"] = seg_dir.__str__()
 
         # add task_data and metadata for tracking and scheduling
-        cls._TaskData[file_data["id"]] = {"status": Status.scheduled,
-                                          "file_name": seg_name, "task_data": (manifest, file_data, header)}
+        cls._TaskData[file_data["id"]] = {"status": Status.scheduled, "file_name": seg_name, "task_data": (manifest, file_data, header, post_processor)}
         await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
 
     @classmethod

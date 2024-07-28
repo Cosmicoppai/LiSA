@@ -6,6 +6,7 @@ from config import ServerConfig
 from utils.headers import get_headers
 import re
 from .base import Scraper
+from utils import DB
 
 
 class Manga(Scraper):
@@ -56,7 +57,7 @@ class MangaKatana(Manga):
 
         search_bs = BeautifulSoup(resp_text, 'html.parser')
 
-        if len(search_bs.find("title").text) != len(manga_name):
+        if len(search_bs.find("title").text.split(" - ")) > 1:
             scrape_func = self.__scrape_list
 
             pag_list = search_bs.find("ul", {"class": "uk-pagination"})  # check if multiple pages exists or not
@@ -119,7 +120,7 @@ class MangaKatana(Manga):
 
         manga["title"] = info.find("h1", {"class": "heading"}).string
         meta_data = info.find("ul", {"class": "meta d-table"})
-        manga["total_chps"] = meta_data.find("div", {"class": "new_chap"}).text.strip(" ").split()[-1]
+        manga["total_chps"] = float(search_bs.find_all("div", {"class": "chapter"})[0].text.split(": ")[0].split(" ")[1])
         manga["genres"] = []
         for genre in meta_data.find("div", {"class": "genres"}).find_all("a"):
             manga["genres"].append(genre.string)
@@ -158,6 +159,15 @@ class MangaKatana(Manga):
         res["description"]["summary"] = detail_bs.find("div", {"class": "summary"}).find("p").text
         res["recommendation"] = f"{ServerConfig.API_SERVER_ADDRESS}/recommendation?type=manga&manga_session={manga_session}"
 
+        meta_data: List[str] = manga_session.split("/manga/")
+        _, manga_id = meta_data[-1].split(".")
+
+        cur = DB.connection.cursor()
+        read_list = cur.execute("SELECT * FROM readlist WHERE manga_id=?", (manga_id,))
+        res["mylist"] = True if read_list.fetchone() else False
+        
+        res["manga_id"] = manga_id
+
         return res
 
     async def get_manga_source_data(self, chp_session: str) -> List[str]:
@@ -183,7 +193,8 @@ class MangaKatana(Manga):
                     rec_data = rec.find("div", {"class": "text"})
                     title_data = rec_data.find("h3")
                     recommendation["title"] = title_data.text
-                    recommendation["total_chps"] = float(rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0])
+                    total_chps_text = rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0]
+                    recommendation["total_chps"] = float(re.search(r'\d+', total_chps_text).group())
                     recommendation["status"] = rec_data.find("div", {"class": "status"}).text
                     manga_session = title_data.find('a')['href']
                     recommendation["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_session}"

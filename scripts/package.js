@@ -1,11 +1,12 @@
-const { spawnSync } = require("child_process");
-const { Builder } = require("./build");
+const { spawnSync } = require('child_process');
+
+const { Builder } = require('./build');
 
 const builder = new Builder();
 
 // Define input and output directories
 const path = (directory) => {
-    return require("path").resolve(__dirname, directory);
+    return require('path').resolve(__dirname, directory);
 };
 
 /**
@@ -25,28 +26,28 @@ class Packager {
 
         const options = {
             build: [
-                "app",
-                "--extra-resource=./resources",
-                "--icon ./public/favicon.ico",
-                "--platform linux",
-                "--arch x64",
-                "--out",
-                "./dist/linux",
-                "--overwrite",
-            ].join(" "),
+                'app',
+                '--extra-resource=./resources',
+                '--icon ./public/favicon.ico',
+                '--platform linux',
+                '--arch x64',
+                '--out',
+                './dist/linux',
+                '--overwrite',
+            ].join(' '),
 
             package: [
-                `--src ${path("../dist/linux/app-linux-x64/")}`,
-                "LiSA",
-                `--dest ${path("../dist/linux/setup")}`,
-                "--arch amd64",
-                `--icon ${path("../utilities/deb/images/icon.ico")}`,
-                `--background ${path("../utilities/deb/images/background.png")}`,
+                `--src ${path('../dist/linux/app-linux-x64/')}`,
+                'LiSA',
+                `--dest ${path('../dist/linux/setup')}`,
+                '--arch amd64',
+                `--icon ${path('../utilities/deb/images/icon.ico')}`,
+                `--background ${path('../utilities/deb/images/background.png')}`,
                 '--title "LiSA"',
-                "--overwrite",
-            ].join(" "),
+                '--overwrite',
+            ].join(' '),
 
-            spawn: { detached: false, shell: true, stdio: "inherit" },
+            spawn: { detached: false, shell: true, stdio: 'inherit' },
         };
 
         spawnSync(`electron-packager . ${options.build}`, options.spawn);
@@ -65,29 +66,29 @@ class Packager {
 
         const options = {
             build: [
-                "app",
-                "--extra-resource=./resources",
-                "--icon ./public/favicon.ico",
-                "--win32",
-                "--out",
-                "./dist/mac",
-                "--overwrite",
-            ].join(" "),
+                'LiSA',
+                '--extra-resource=./resources',
+                '--icon ./public/favicon.ico',
+                '--out',
+                './dist/mac',
+                '--overwrite',
+            ].join(' '),
 
             package: [
-                path("../dist/mac/app-darwin-x64/app.app"),
-                "LiSA",
-                `--out=${path("../dist/mac/setup")}`,
-                `--icon=${path("../utilities/dmg/images/icon.icns")}`,
-                `--background=${path("../utilities/dmg/images/background.png")}`,
-                '--title="Example app"',
-                "--overwrite",
-            ].join(" "),
+                path('../dist/mac/LiSA-darwin-arm64/LiSA.app'),
+                'LiSA',
+                `--out=${path('../dist/mac/setup')}`,
+                `--icon=${path('../utilities/dmg/images/icon.icns')}`,
+                `--background=${path('../utilities/dmg/images/background.png')}`,
+                '--title="LiSA"',
+                '--overwrite',
+            ].join(' '),
 
-            spawn: { detached: false, shell: true, stdio: "inherit" },
+            spawn: { detached: false, shell: true, stdio: 'inherit' },
         };
 
         spawnSync(`electron-packager . ${options.build}`, options.spawn);
+        console.log('Creating DMG...');
         spawnSync(`electron-installer-dmg ${options.package}`, options.spawn);
     };
 
@@ -99,25 +100,25 @@ class Packager {
      */
     packageWindows = () => {
         // eslint-disable-next-line no-console
-        console.log("Building windows package...");
+        console.log('Building windows package...');
 
         // Build Python & React distribution files
         builder.buildAll();
 
         const options = {
             app: [
-                "LiSA",
-                "--asar",
-                "--extra-resource=./resources/LiSA",
-                "--icon ./public/favicon.ico",
-                "--win32metadata.requested-execution-level=highestAvailable",
-                "--win32",
-                "--out",
-                "./dist/windows",
-                "--overwrite",
-            ].join(" "),
+                'LiSA',
+                '--asar',
+                '--extra-resource=./resources/LiSA',
+                '--icon ./public/favicon.ico',
+                '--win32metadata.requested-execution-level=highestAvailable',
+                '--win32',
+                '--out',
+                './dist/windows',
+                '--overwrite',
+            ].join(' '),
 
-            spawn: { detached: false, shell: true, stdio: "inherit" },
+            spawn: { detached: false, shell: true, stdio: 'inherit' },
         };
 
         spawnSync(`electron-packager . ${options.app}`, options.spawn);
