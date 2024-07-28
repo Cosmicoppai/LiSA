@@ -1,7 +1,7 @@
 import logging
 from video.downloader.msg_system import MsgSystem
 from threading import Thread
-from sys import stdout, argv
+from sys import argv
 import asyncio
 from utils import DB
 from config import ServerConfig, parse_config_json, update_environ, FileConfig
@@ -9,6 +9,7 @@ from api import start_api_server
 from multiprocessing import Pipe, Manager, freeze_support
 from video.downloader import DownloadManager
 from video.library import Library
+from pathlib import Path
 
 
 def run_api_server(port: int = 8000):
@@ -32,7 +33,7 @@ def get_ports():
 if __name__ == "__main__":
     freeze_support()
     try:
-        logging.basicConfig(filename="LiSA.log", filemode="w", level=logging.ERROR, format="%(name)s → %(levelname)s: %(message)s")
+        logging.basicConfig(filename=Path(__file__).parent.joinpath("LiSA.log"), filemode="w", level=logging.ERROR, format="%(name)s → %(levelname)s: %(message)s")
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
 
