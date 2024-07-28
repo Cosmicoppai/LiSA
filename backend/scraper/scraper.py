@@ -16,6 +16,7 @@ from json import JSONDecodeError
 from .base import Scraper
 from utils import DB
 from video.downloader.msg_system import MsgSystem
+from video.library import DBLibrary, WatchList, ReadList
 
 
 class Anime(Scraper):
@@ -160,9 +161,7 @@ class Animepahe(Anime):
 
             if page_no == "1":
                 episodes["description"] = await description
-                cur = DB.connection.cursor()
-                res = cur.execute("SELECT * FROM watchlist WHERE anime_id=?", (episodes["description"]["anime_id"],))
-                episodes["mylist"] = True if res.fetchone() else False
+                episodes["mylist"] = True if len(WatchList.get(filters={"anime_id": episodes["description"]["anime_id"]})) else False
 
             return episodes
         except TypeError:
@@ -277,7 +276,7 @@ class Animepahe(Anime):
             resp.setdefault(aud, []).append((quality, kwik_url))
         return resp
 
-    async def get_manifest_file(self, kwik_url: str) -> ('manifest_file', 'uwu_root_domain', 'file_name'):
+    async def get_manifest_file(self, kwik_url: str) -> (str, str, str):  # ('manifest_file', 'uwu_root_domain', 'file_name')
         hls_data = await self.get_hls_playlist(kwik_url)
 
         uwu_url = hls_data["manifest_url"]
