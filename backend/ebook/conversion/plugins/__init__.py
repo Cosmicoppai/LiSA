@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable
 from pathlib import Path
 from .img_to_pdf import img_to_pdf
 

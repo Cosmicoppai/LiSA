@@ -32,7 +32,7 @@ def get_ports():
 if __name__ == "__main__":
     freeze_support()
     try:
-        logging.basicConfig(stream=stdout, level=logging.ERROR)
+        logging.basicConfig(filename="LiSA.log", filemode="w+", level=logging.INFO)
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
 
