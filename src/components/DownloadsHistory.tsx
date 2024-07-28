@@ -156,7 +156,7 @@ function DownloadsHistoryItem({
 
 function DownloadsHistoryEmpty() {
     return (
-        <Flex alignItems={'center'} justifyContent="center" p={3} pt={2} width={'100%'}>
+        <Flex alignItems={'center'} justifyContent="center" p={3} width={'100%'}>
             <Box color="gray.500" marginInline="2">
                 <TbMoodSad size={24} />
             </Box>

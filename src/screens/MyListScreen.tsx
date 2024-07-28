@@ -19,7 +19,7 @@ export function MyListScreen() {
 
     const { data, error, isLoading } = useQuery({
         queryKey: [mode === 'manga' ? 'read-list' : 'watch-list', mode],
-        queryFn: () => getMyList({ url: mode === 'manga' ? 'readlist' : '/watchlist' }),
+        queryFn: () => getMyList({ url: mode === 'manga' ? '/readlist' : '/watchlist' }),
     });
 
     if (error) return <ErrorMessage error={error} />;

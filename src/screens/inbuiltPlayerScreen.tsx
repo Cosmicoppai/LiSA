@@ -23,6 +23,7 @@ import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
 import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
+import { useFeatureAvailable } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
@@ -109,6 +110,8 @@ export function InbuiltPlayerScreen() {
         else onClose();
     }, [downloadLoading]);
 
+    const { isDownloadFeatureAvailable } = useFeatureAvailable();
+
     const animeTitle = anime.title || anime.jp_name || anime_details?.description?.eng_name;
 
     return (
@@ -192,33 +195,37 @@ export function InbuiltPlayerScreen() {
                                     </option>
                                 ))}
                             </Select>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    columnGap: 10,
-                                }}>
-                                <Menu>
-                                    <MenuButton disabled={eps_loading} as={Button}>
-                                        Download
-                                    </MenuButton>
-                                    <MenuList>
-                                        <MenuGroup title="Select quality">
-                                            {qualityOptions?.map(({ id, height }) => (
-                                                <MenuItem
-                                                    key={id}
-                                                    onClick={() => singleDownloadHandler(id)}>
-                                                    {height}p
-                                                </MenuItem>
-                                            ))}
-                                        </MenuGroup>
-                                    </MenuList>
-                                </Menu>
-                                {eps_details?.ep_details?.length > 1 ? (
-                                    <Button disabled={eps_loading} onClick={downloadPageHandler}>
-                                        Download all
-                                    </Button>
-                                ) : null}
-                            </div>
+                            {isDownloadFeatureAvailable ? (
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        columnGap: 10,
+                                    }}>
+                                    <Menu>
+                                        <MenuButton disabled={eps_loading} as={Button}>
+                                            Download
+                                        </MenuButton>
+                                        <MenuList>
+                                            <MenuGroup title="Select quality">
+                                                {qualityOptions?.map(({ id, height }) => (
+                                                    <MenuItem
+                                                        key={id}
+                                                        onClick={() => singleDownloadHandler(id)}>
+                                                        {height}p
+                                                    </MenuItem>
+                                                ))}
+                                            </MenuGroup>
+                                        </MenuList>
+                                    </Menu>
+                                    {eps_details?.ep_details?.length > 1 ? (
+                                        <Button
+                                            disabled={eps_loading}
+                                            onClick={downloadPageHandler}>
+                                            Download all
+                                        </Button>
+                                    ) : null}
+                                </div>
+                            ) : null}
                         </Flex>
                     ) : streamLoading ? (
                         <Flex

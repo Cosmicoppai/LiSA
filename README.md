@@ -162,7 +162,7 @@ Download and Install VLC Media player form [here](https://www.videolan.org/vlc/d
 
 ## 🤝 CONTRIBUTING
 
-Contributions, issues, and feature requests are welcome! See [See Contribution Guide.](./CONTRIBUTING.md)
+Contributions, issues, and feature requests are welcome! See [Contribution Guide.](./CONTRIBUTING.md)
 
 ## ⭐ SUPPORT
 

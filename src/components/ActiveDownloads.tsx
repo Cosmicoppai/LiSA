@@ -55,7 +55,7 @@ export function ActiveDownloads() {
 
 function ActiveDownloadsEmpty() {
     return (
-        <Flex alignItems={'center'} justifyContent="center">
+        <Flex alignItems={'center'} justifyContent="center" p={3} width={'100%'}>
             <Box color="gray.500" mr="2">
                 <TbMoodSad size={24} />
             </Box>
