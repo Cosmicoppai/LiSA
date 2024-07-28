@@ -370,16 +370,16 @@ class Animepahe(Anime):
                 (await self.get_api({"m": "release", "sort": "episode_desc", "id": anime_session, "page": page}))[
                     "data"]]
 
-    async def get_links(self, anime_session: str, page: int = 1, aud: str = "jap") -> list:
+    async def get_links(self, anime_session: str, page: int = 1, aud: str = "jpn") -> list:
         links = []
 
         stream_datas = await asyncio.gather(
             *[self.get_stream_data(anime_session, episode) for episode in
               await self.__get_episodes(anime_session, page)])
-        for stream_datas in stream_datas:
+        for stream_data in stream_datas:
             best_quality: Tuple = (0, "")
-            for _stream_data in stream_datas[aud]:
-                best_quality = _stream_data if best_quality[0] < _stream_data[0] else ...
+            for _stream_data in stream_data[aud]:
+                best_quality = _stream_data if int(best_quality[0]) < int(_stream_data[0]) else ...
             links.append(best_quality[1])
         return links
 
