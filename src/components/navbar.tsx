@@ -1,4 +1,5 @@
 import { Badge, Box, Flex, Icon, Tooltip } from '@chakra-ui/react';
+import { useMemo } from 'react';
 import {
     AiOutlineCompass,
     AiOutlineDownload,
@@ -8,7 +9,7 @@ import {
 import { LuListVideo } from 'react-icons/lu';
 import { Link, useLocation } from 'react-router-dom';
 
-import { useGetDownloadingList } from './ActiveDownloads';
+import { useGetActiveDownloads } from './useGetDownloads';
 
 export function Navbar() {
     return (
@@ -62,9 +63,20 @@ function NavBarItem({ label, to, Icon: IconAs }) {
 function NavBarDownloadItem({ label, to, Icon: IconAs }) {
     const { pathname } = useLocation();
 
-    const { downloadingList } = useGetDownloadingList();
+    const { data } = useGetActiveDownloads();
 
-    const totalItems = downloadingList.length;
+    const totalItems = useMemo(() => {
+        let n = 0;
+
+        if (data?.length) {
+            for (const d of data) {
+                const epLength = d?.episodes?.length;
+
+                if (epLength) n = n + epLength;
+            }
+        }
+        return n;
+    }, [data]);
 
     const countText = totalItems > 9 ? '9+' : totalItems;
 

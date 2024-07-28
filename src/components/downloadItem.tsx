@@ -6,12 +6,15 @@ import { IoMdPause } from 'react-icons/io';
 import { useSocketContext } from 'src/context/socket';
 import { formatBytes } from 'src/utils/formatBytes';
 
-import { TDownload, TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
+import { TDownloadItem, TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
 
 export function DownloadItem({ data: fetchedData }) {
     const { cancelDownload, pauseDownload, resumeDownload } = useDownloadingActions([
         fetchedData.id,
     ]);
+
+    const [data, setSocketData] = useState<TDownloadItem>(fetchedData);
+    const { socket, isSocketConnected } = useSocketContext();
 
     const pauseDownloadHandler = async () => {
         if (await pauseDownload()) {
@@ -30,10 +33,6 @@ export function DownloadItem({ data: fetchedData }) {
             });
         }
     };
-
-    const [data, setSocketData] = useState<TDownload>(fetchedData);
-
-    const { socket, isSocketConnected } = useSocketContext();
 
     const handleSocketConnection = useCallback(
         (ev: MessageEvent<any>) => {
@@ -100,7 +99,7 @@ export function DownloadItem({ data: fetchedData }) {
                         display: 'flex',
                         justifyContent: 'space-between',
                     }}>
-                    <strong>{data.file_name}</strong>
+                    <span>{data.file_name}</span>
                     {import.meta.env.DEV && data.status !== 'started' ? (
                         <span
                             style={{

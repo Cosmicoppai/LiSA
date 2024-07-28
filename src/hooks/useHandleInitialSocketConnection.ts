@@ -1,6 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect } from 'react';
-import { RQKEY_GET_DOWNLOADS, TSocketEventDownloading } from 'src/components/useGetDownloads';
+import {
+    RQKEY_GET_DOWNLOADS_ACTIVE,
+    RQKEY_GET_DOWNLOADS_HISTORY,
+    TSocketEventDownloading,
+} from 'src/components/useGetDownloads';
 
 import { useSocketContext } from '../context/socket';
 import { TCookieReq } from '../types';
@@ -31,7 +35,10 @@ export function useHandleInitialSocketConnection() {
             // Refetch the downloading count when any download item finished downloading.
             if (msg?.type === 'downloads' && msg.data?.status === 'downloaded') {
                 queryClient.invalidateQueries({
-                    queryKey: [RQKEY_GET_DOWNLOADS],
+                    queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
+                });
+                queryClient.invalidateQueries({
+                    queryKey: [RQKEY_GET_DOWNLOADS_HISTORY],
                 });
             }
         },

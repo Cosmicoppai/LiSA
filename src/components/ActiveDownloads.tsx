@@ -1,23 +1,11 @@
 import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import { useMemo } from 'react';
 import { TbMoodSad } from 'react-icons/tb';
 
 import { DownloadItem } from './downloadItem';
-import { useGetDownloads } from './useGetDownloads';
-
-export function useGetDownloadingList() {
-    const { data } = useGetDownloads();
-
-    const downloadingList = useMemo(() => {
-        const library = data?.length ? data : [];
-        return library.filter((i) => i.status !== 'downloaded');
-    }, [data]);
-
-    return { downloadingList };
-}
+import { useGetActiveDownloads } from './useGetDownloads';
 
 export function ActiveDownloads() {
-    const { downloadingList } = useGetDownloadingList();
+    const { data } = useGetActiveDownloads();
 
     return (
         <Stack flex={1} flexDirection="column">
@@ -29,11 +17,10 @@ export function ActiveDownloads() {
                 flex={1}
                 flexDirection="column"
                 alignItems="flex-start"
-                p={1}
                 pt={2}
                 bg={'gray.900'}
                 minWidth={'400px'}>
-                {downloadingList.length ? (
+                {data.length ? (
                     <div
                         style={{
                             display: 'flex',
@@ -41,8 +28,8 @@ export function ActiveDownloads() {
                             width: '100%',
                             rowGap: 20,
                         }}>
-                        {downloadingList.map((item, index: number) => (
-                            <DownloadItem key={index} data={item} />
+                        {data.map((item) => (
+                            <>{item.episodes?.map((i) => <DownloadItem key={i.id} data={i} />)}</>
                         ))}
                     </div>
                 ) : (

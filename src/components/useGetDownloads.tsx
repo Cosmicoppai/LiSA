@@ -3,6 +3,12 @@ import { useCallback } from 'react';
 import server from 'src/utils/axios';
 
 export type TDownload = {
+    title: string;
+    type: 'anime' | 'manga';
+    episodes: TDownloadItem[];
+};
+
+export type TDownloadItem = {
     id: number;
     type: 'video';
     series_name: string;
@@ -16,27 +22,37 @@ export type TDownload = {
 };
 
 export type TSocketEventDownloading = {
-    data: TDownload;
+    data: TDownloadItem;
     type: 'downloads';
 };
 
-async function getDownloads(): Promise<TDownload[]> {
-    const { data } = await server.get('/library');
+async function getDownloads(url: string): Promise<TDownload[]> {
+    const { data } = await server.get(url);
     return data;
 }
 
-export const RQKEY_GET_DOWNLOADS = 'downloads';
+export const RQKEY_GET_DOWNLOADS_HISTORY = 'download-history';
+export const RQKEY_GET_DOWNLOADS_ACTIVE = 'downloads-active';
 
-export function useGetDownloads() {
+export function useGetActiveDownloads() {
     return useQuery({
-        queryKey: [RQKEY_GET_DOWNLOADS],
-        queryFn: getDownloads,
+        queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
+        queryFn: () => getDownloads('/library?status=downloading'),
         initialData: [],
         placeholderData: [],
     });
 }
 
-export function useDownloadingActions(id: TDownload['id'][]) {
+export function useGetDownloadsHistory() {
+    return useQuery({
+        queryKey: [RQKEY_GET_DOWNLOADS_HISTORY],
+        queryFn: () => getDownloads('/library?status=downloaded'),
+        initialData: [],
+        placeholderData: [],
+    });
+}
+
+export function useDownloadingActions(id: TDownloadItem['id'][]) {
     // Get QueryClient from the context
     const queryClient = useQueryClient();
 
@@ -60,7 +76,7 @@ export function useDownloadingActions(id: TDownload['id'][]) {
             console.log(error);
         } finally {
             queryClient.invalidateQueries({
-                queryKey: [RQKEY_GET_DOWNLOADS],
+                queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
             });
         }
     }, [queryClient, id]);
