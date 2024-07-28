@@ -77,7 +77,13 @@ class Library(ABC):
         for idx, _filter in enumerate(filters):
             if idx != 0:
                 cmd += "AND "
-            cmd += f"{_filter}{equate_query}'{filters[_filter]}'"
+            if isinstance(filters[_filter], list):
+                for _idx, __filter in enumerate(filters[_filter]):
+                    if _idx != 0:
+                        cmd += " OR "
+                    cmd += f"{_filter}{equate_query}'{__filter}'"
+            else:
+                cmd += f"{_filter}{equate_query}'{filters[_filter]}'"
 
         cur.execute(cmd)
         data = [dict(row) for row in cur.fetchall()]

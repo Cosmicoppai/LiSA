@@ -335,7 +335,7 @@ def format_library_data(grouped_data: Dict[str, Any]):
             result.append({
                 'type': item_type,
                 'title': title,
-                'chapters' if item_type == 'manga' else 'episodes': list(items.values())[0]
+                'chapters' if item_type == 'manga' else 'episodes': [item for sublist in items.values() for item in sublist]
             })
     return result
 
@@ -362,8 +362,12 @@ async def library(request: Request):
         except KeyError or TypeError:
             return await bad_request_400(request, msg="missing or invalid query parameter: 'id'")
 
+    status = request.query_params.get("status", "downloaded")
+    if status == "downloading":
+        status = ["started", "scheduled", "paused"]
+
     return JSONResponse(format_library_data(
-        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'],
+        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
                            format_func=format_series)
     ))
 
