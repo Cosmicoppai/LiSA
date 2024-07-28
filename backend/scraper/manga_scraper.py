@@ -120,7 +120,7 @@ class MangaKatana(Manga):
 
         manga["title"] = info.find("h1", {"class": "heading"}).string
         meta_data = info.find("ul", {"class": "meta d-table"})
-        manga["total_chps"] = int(search_bs.find_all("div", {"class": "chapter"})[0].text.split(": ")[0].split(" ")[1])
+        manga["total_chps"] = float(search_bs.find_all("div", {"class": "chapter"})[0].text.split(": ")[0].split(" ")[1])
         manga["genres"] = []
         for genre in meta_data.find("div", {"class": "genres"}).find_all("a"):
             manga["genres"].append(genre.string)

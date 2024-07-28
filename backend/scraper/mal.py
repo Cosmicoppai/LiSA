@@ -5,6 +5,7 @@ from typing import Dict, Any
 from config import ServerConfig
 from utils.headers import get_headers
 from .base import Scraper
+from urllib.parse import quote
 
 
 class MyAL(Scraper):
@@ -158,7 +159,7 @@ class MyAL(Scraper):
             if rank == "-":
                 rank = "na"
             item = {"rank": rank, "poster": imgs[idx], "title": titles[idx], "type": a_type[idx],
-                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={media}&query={titles[idx]}&total_res=1'}
+                    f"{media}_detail": f'{ServerConfig.API_SERVER_ADDRESS}/search?type={media}&query={quote(titles[idx])}&total_res=1'}
 
             match media:
                 case "anime":

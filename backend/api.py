@@ -107,7 +107,8 @@ async def _search_manga(request: Request):
     except KeyError:
         return await not_found_404(request, msg="manga not found")
 
-    except ValueError:
+    except ValueError as e:
+        logging.error(e)
         return await bad_request_400(request, msg="invalid query parameter: param should be of type int")
 
 
