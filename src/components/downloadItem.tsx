@@ -4,6 +4,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { IoMdPause } from 'react-icons/io';
 import { useSocketContext } from 'src/context/socket';
+import { isViteDEV } from 'src/utils/fn';
 import { formatBytes } from 'src/utils/formatBytes';
 
 import { TDownloadItem, TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
@@ -13,12 +14,16 @@ export function DownloadItem({ data: fetchedData }) {
         fetchedData.id,
     ]);
 
+    const [isPauseTriggered, setIsPauseTriggered] = useState(false);
+
     const [data, setSocketData] = useState<TDownloadItem>(fetchedData);
     const { socket, isSocketConnected } = useSocketContext();
 
     const pauseDownloadHandler = async () => {
+        setIsPauseTriggered(true);
         if (await pauseDownload()) {
             setSocketData({
+                ...fetchedData,
                 ...data,
                 status: 'paused',
             });
@@ -26,8 +31,10 @@ export function DownloadItem({ data: fetchedData }) {
     };
 
     const resumeDownloadHandler = async () => {
+        setIsPauseTriggered(false);
         if (await resumeDownload()) {
             setSocketData({
+                ...fetchedData,
                 ...data,
                 status: 'scheduled',
             });
@@ -39,14 +46,14 @@ export function DownloadItem({ data: fetchedData }) {
             const msg: TSocketEventDownloading =
                 typeof ev?.data === 'string' ? JSON.parse(ev?.data) : null;
 
-            if (msg?.type === 'downloads' && msg.data.id === fetchedData.id) {
+            if (!isPauseTriggered && msg?.type === 'downloads' && msg.data.id === fetchedData.id) {
                 setSocketData({
                     ...fetchedData,
                     ...msg.data,
                 });
             }
         },
-        [socket, window, data],
+        [isPauseTriggered, fetchedData],
     );
 
     useEffect(() => {
@@ -57,7 +64,7 @@ export function DownloadItem({ data: fetchedData }) {
         return () => socket.removeEventListener('message', handleSocketConnection);
     }, [isSocketConnected, socket, handleSocketConnection]);
 
-    const totalSize = formatBytes(data.total_size);
+    const totalSize = data.total_size ? formatBytes(data.total_size) : null;
 
     return (
         <section
@@ -100,7 +107,7 @@ export function DownloadItem({ data: fetchedData }) {
                         justifyContent: 'space-between',
                     }}>
                     <span>{data.file_name}</span>
-                    {import.meta.env.DEV && data.status !== 'started' ? (
+                    {isViteDEV ? (
                         <span
                             style={{
                                 color: '#999',

@@ -95,7 +95,12 @@ export function useDownloadingActions(id: TDownloadItem['id'][]) {
                 },
             );
 
-            if (res.status === 200) return true;
+            if (res.status === 200) {
+                queryClient.invalidateQueries({
+                    queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
+                });
+                return true;
+            }
         } catch (error) {
             console.log(error);
         }
@@ -115,7 +120,12 @@ export function useDownloadingActions(id: TDownloadItem['id'][]) {
                 },
             );
 
-            if (res.status === 200) return true;
+            if (res.status === 200) {
+                queryClient.invalidateQueries({
+                    queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
+                });
+                return true;
+            }
         } catch (error) {
             console.log(error);
         }

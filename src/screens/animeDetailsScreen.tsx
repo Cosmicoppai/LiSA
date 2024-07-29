@@ -169,9 +169,11 @@ export function AnimeDetailsScreen() {
                                 />
                             ) : null}
                         </Box>
-                        <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
-                            {ep === '?' ? 'Running' : `Episodes ${ep}`}
-                        </Text>
+                        {ep ? (
+                            <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
+                                {ep === '?' ? 'Running' : `Episodes ${ep}`}
+                            </Text>
+                        ) : null}
                         <Stack align={'center'} justify={'center'} direction={'row'} my={3}>
                             <Badge
                                 px={2}
