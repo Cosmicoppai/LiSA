@@ -54,7 +54,7 @@ A Desktop application, for streaming and downloading your favourite anime.
 
 > Note: Currently only windows executables are provided.
 
-Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.0.0) from here and extract the zip file.
+Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from here and extract the zip file.
 
 ### Tested on
 
