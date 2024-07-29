@@ -54,7 +54,8 @@ function killPythonServer() {
         const killCmd = `tskill LiSA`;
         spawn('cmd.exe', ['/c', killCmd]);
     } else {
-        process.kill(-pythonServer.pid, 'SIGINT');
+        const killCmd = 'pkill -f LiSA';
+        spawn('sh', ['-c', killCmd]);
     }
 
     pythonServer = null;
