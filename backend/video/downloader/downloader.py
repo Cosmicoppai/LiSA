@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 import aiohttp
 import asyncio
 import m3u8
@@ -393,8 +395,13 @@ class VideoDownloader(Downloader):
         if not output_file:
             output_file = self._output_file
 
-        # check if exe present in backend folder else fallback to default option
-        ffmpeg_loc = get_path("ffmpeg", Path(__file__).parent.parent.parent.parent.joinpath("./ffmpeg"))
+        # check if ffmpeg binary is present in system path, else fallback to the binary in backend folder
+        if getattr(sys, 'frozen', False):
+            application_path = sys._MEIPASS
+        else:
+            application_path = Path(__file__).parent.parent.parent.parent
+
+        ffmpeg_loc = get_path("ffmpeg", Path(application_path).joinpath("ffmpeg"))
 
         cmd = [
             ffmpeg_loc,

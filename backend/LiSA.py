@@ -9,12 +9,11 @@ from api import start_api_server
 from multiprocessing import Pipe, Manager, freeze_support
 from video.downloader import DownloadManager
 from video.library import Library
-from pathlib import Path
 
 
 def run_api_server(port: int = 8000):
     ServerConfig.API_SERVER_ADDRESS = f"http://localhost:{port}"
-    print(f"server started on port: {port} \n You can access API SERVER on {ServerConfig.API_SERVER_ADDRESS}")
+    logging.info(f"server started on port: {port} \n You can access API SERVER on {ServerConfig.API_SERVER_ADDRESS}")
     start_api_server(port=port)
 
 
@@ -33,7 +32,7 @@ def get_ports():
 if __name__ == "__main__":
     freeze_support()
     try:
-        logging.basicConfig(filename=Path(__file__).parent.joinpath("LiSA.log"), filemode="w", level=logging.ERROR, format="%(name)s → %(levelname)s: %(message)s")
+        logging.basicConfig(level=logging.ERROR)
         DB.migrate()  # migrate the database
         DB()  # initialize the highest id
 

@@ -2,6 +2,7 @@ const { spawn } = require('child_process');
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const isDevMode = require('electron-is-dev');
 const path = require('path');
+const fs = require('fs');
 
 let pythonServer;
 
@@ -27,21 +28,34 @@ function startPythonServer() {
         return;
     }
 
+    const logPath = path.join(path.dirname(process.execPath), 'LiSA.log');
+    fs.writeFileSync(logPath, '', { encoding: 'utf8' });  // clear logs
+
     pythonServer = spawn(cmd, {
         shell: true,
-        detached: isDevMode,
+        detached: false,
+        stdio: ['ignore', 'pipe', 'pipe']
+    });
+
+    const logStream = fs.createWriteStream(logPath, { flags: 'a' });
+    pythonServer.stdout.pipe(logStream);
+    pythonServer.stderr.pipe(logStream);
+
+    pythonServer.on('close', (_) => {
+        logStream.end();
     });
 }
+
 
 function killPythonServer() {
     if (!pythonServer) return;
 
     if (process.platform === 'win32') {
-        const killCmd = `taskkill /pid ${pythonServer.pid} /f /t`;
+        const killCmd = `tskill LiSA`;
         spawn('cmd.exe', ['/c', killCmd]);
-    } else pythonServer.kill('SIGINT');
-
-    console.log('Killed python server, PID: ', pythonServer.pid);
+    } else {
+        process.kill(-pythonServer.pid, 'SIGINT');
+    }
 
     pythonServer = null;
 }
@@ -191,7 +205,7 @@ app.whenReady().then(async () => {
 
 app.on('activate', () => {
     /**
-     * On macOS it's common to re-create a window in the app when the
+     * On macOS, it's common to re-create a window in the app when the
      * dock icon is clicked and there are no other windows open.
      */
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -206,8 +220,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
-app.on('quit', function () {
-    // Clean up the Python server when the app quits
+app.on('quit', (event) => {
     killPythonServer();
 });
 
