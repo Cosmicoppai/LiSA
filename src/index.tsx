@@ -1,5 +1,6 @@
 import { ChakraProvider, useColorMode } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { SocketContextProvider } from 'src/context/socket';
@@ -23,7 +24,6 @@ function ForceDarkMode() {
 
     return null;
 }
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <ChakraProvider theme={theme}>
         <ForceDarkMode />
@@ -32,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <AppContextProvider>
                     <App />
                 </AppContextProvider>
+                <ReactQueryDevtools />
             </QueryClientProvider>
         </SocketContextProvider>
     </ChakraProvider>,
