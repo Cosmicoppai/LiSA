@@ -50,11 +50,11 @@ A Desktop application, for streaming and downloading your favourite anime.
 
 ## 🤗 Download
 
-[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/tag/v1.1)
+[![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/latest)
 
 > Note: Currently only windows executables are provided.
 
-Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases) from here and extract the zip file.
+Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases/latest) from here and extract the zip file.
 
 ### Tested on
 
@@ -169,6 +169,11 @@ Contributions, issues, and feature requests are welcome! See [Contribution Guide
 If this project is helpful to you and love our work and feels like showing love/appreciation, give a ⭐, AND 😉...
 
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/SayAnime)
+
+##### LTC
+```
+LLk9HEj6nz9vTb591Foq9mhx7A8SfueWzh
+```
 
 ## 📄 LICENSE
 
