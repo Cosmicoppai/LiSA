@@ -62,13 +62,18 @@ Please submit an Issue or even better a PR and We'll review :)
     VITE_SOCKET_URL=ws://localhost:9000
     ```
 
-2. Install Node modules
-
+3. Install yarn
     ```bash
-    npm i
+    npm i -g yarn
     ```
 
-3. Start dev app using
+3. Install Node modules
+
+    ```bash
+    yarn
+    ```
+
+4. Start dev app using
     ```bash
     npm start
     ```
