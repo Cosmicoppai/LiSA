@@ -32,9 +32,20 @@ class Builder {
             '--distpath ./resources', // Dist (out) path
             `--icon ${icon}`, // Icon to use
         ].join(' ');
-        // TODO: Check if python is installed.. If not, prompt user
-        // "Python is required but not installed, install it? (y/n)"
-        spawnSync(`pyinstaller spec/windows.spec --clean`, spawnOptions);
+
+        switch (process.platform) {
+            case 'win32':
+                spawnSync(`pyinstaller spec/windows.spec --clean`, spawnOptions);
+                break;
+            case 'linux':
+                spawnSync(`pyinstaller spec/linux.spec --clean`, spawnOptions);
+                break;
+            case 'darwin':
+                spawnSync(`pyinstaller spec/darwin.spec --clean`, spawnOptions);
+                break;
+            default:
+                throw Error('Unsupported Platform');
+        }
     };
 
     /**

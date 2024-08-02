@@ -1,5 +1,5 @@
 import { Center, Stack } from '@chakra-ui/react';
-import { useFeatureAvailable } from 'src/utils/fn';
+import { useFeatureAvailable } from 'src/hooks/useFeatureAvailable';
 
 import { ActiveDownloads } from '../components/ActiveDownloads';
 import { DownloadsHistory } from '../components/DownloadsHistory';
