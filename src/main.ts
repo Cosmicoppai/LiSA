@@ -1,124 +1,103 @@
-import { spawn } from 'child_process';
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
-import isDevMode from 'electron-is-dev';
-import fs from 'fs';
+import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import puppeteer from 'puppeteer';
 
-function getPythonServerCMD() {
-    if (isDevMode) return 'python backend/LiSA.py';
+import './electron-main/ipcMainHandlers';
 
-    switch (process.platform) {
-        case 'win32':
-            return `powershell -Command Start-Process -WindowStyle Hidden "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
-        case 'linux':
-        case 'darwin': {
-            return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
-        }
-        default:
-            // Unknown Platform.
-            return null;
-    }
-}
-
-function startPythonServer() {
-    const cmd = getPythonServerCMD();
-    if (!cmd) {
-        console.error('Unsupported platform or failed to get the command to run python server.');
-        return;
-    }
-
-    const logPath = path.join(path.dirname(process.execPath), 'LiSA.log');
-    fs.writeFileSync(logPath, '', { encoding: 'utf8' }); // clear logs
-
-    const pythonServer = spawn(cmd, {
-        shell: true,
-        detached: false,
-        stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    const logStream = fs.createWriteStream(logPath, { flags: 'a' });
-    pythonServer.stdout.pipe(logStream);
-    pythonServer.stderr.pipe(logStream);
-
-    pythonServer.on('close', (_) => {
-        logStream.end();
-    });
-}
-
-function killPythonServer() {
-    if (process.platform === 'win32') {
-        const killCmd = `tskill /IM LiSA /F`;
-        spawn('cmd.exe', ['/c', killCmd]);
-    } else {
-        const killCmd = 'pkill -f LiSA';
-        spawn('sh', ['-c', killCmd]);
-    }
-}
+import { isViteDEV } from './constants/env';
+import { killPythonServer, startPythonServer } from './electron-main/pythonServer';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
     app.quit();
 }
 
-/**
- * @namespace BrowserWindow
- * @description - Electron browser windows.
- */
-const browserWindows = {};
+const loadingWindowFilePath = path.join(
+    __dirname,
+    isViteDEV ? '' : `../renderer/${MAIN_WINDOW_VITE_NAME}`,
+    'loader.html',
+);
 
-const createMainWindow = () => {
-    const { loadingWindow, mainWindow } = browserWindows;
+async function createLoadingWindow() {
+    const loadingWindow = new BrowserWindow({
+        frame: false,
+        transparent: true,
+        alwaysOnTop: true,
+    });
 
-    /**
-     * @description - Function to use custom JavaSCript in the DOM.
-     * @param {string} command - JavaScript to execute in DOM.
-     * @param {function} callback - Callback to execute here once complete.
-     * @returns {Promise}
-     */
-    const executeOnWindow = (command, callback) => {
-        return mainWindow.webContents
-            .executeJavaScript(command)
-            .then(callback)
-            .catch(console.error);
-    };
+    await loadingWindow.loadFile(loadingWindowFilePath);
 
-    /**
-     * If in developer mode, show a loading window while
-     * the app and developer server compile.
-     */
-    const isPageLoaded = `
-    var isBodyFull = document.body.innerHTML !== "";
-    var isHeadFull = document.head.innerHTML !== "";
-    var isLoadSuccess = isBodyFull && isHeadFull;
+    loadingWindow.removeMenu();
 
-    isLoadSuccess || Boolean(location.reload());
-    `;
+    loadingWindow.webContents.on('did-finish-load', () => {
+        loadingWindow.show();
+    });
+    return { loadingWindow };
+}
 
-    /**
-     * @description Updates windows if page is loaded
-     * @param {*} isLoaded
-     */
-    const handleLoad = (isLoaded) => {
-        if (isLoaded) {
-            /**
-             * Hide loading window and show main window
-             * once the main window is ready.
-             */
-            loadingWindow.close();
-            mainWindow.show();
-        }
-    };
+async function createMainWindow({ loadingWindow }: { loadingWindow: BrowserWindow }) {
+    const mainWindow = new BrowserWindow({
+        show: false,
+        autoHideMenuBar: true,
+        webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: true,
+            preload: path.join(__dirname, 'preload.js'),
+        },
+    });
 
     if (MAIN_WINDOW_VITE_DEV_SERVER_URL) mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
     else {
-        mainWindow.removeMenu(true);
+        mainWindow.removeMenu();
         mainWindow.loadFile(
             path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
         );
     }
 
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.maximize();
+    });
+
     mainWindow.webContents.on('did-finish-load', () => {
+        /**
+         * @description - Function to use custom JavaSCript in the DOM.
+         * @param {string} command - JavaScript to execute in DOM.
+         * @param {function} callback - Callback to execute here once complete.
+         * @returns {Promise}
+         */
+        const executeOnWindow = (command, callback) => {
+            return mainWindow.webContents
+                .executeJavaScript(command)
+                .then(callback)
+                .catch(console.error);
+        };
+
+        /**
+         * If in developer mode, show a loading window while
+         * the app and developer server compile.
+         */
+        const isPageLoaded = `
+            var isBodyFull = document.body.innerHTML !== "";
+            var isHeadFull = document.head.innerHTML !== "";
+            var isLoadSuccess = isBodyFull && isHeadFull;
+
+            isLoadSuccess || Boolean(location.reload());
+        `;
+
+        /**
+         * @description Updates windows if page is loaded
+         * @param {*} isLoaded
+         */
+        const handleLoad = (isLoaded) => {
+            if (isLoaded) {
+                /**
+                 * Hide loading window and show main window
+                 * once the main window is ready.
+                 */
+                if (!loadingWindow?.isDestroyed()) loadingWindow?.close();
+                mainWindow.show();
+            }
+        };
+
         /**
          * Checks page for errors that may have occurred
          * during the hot-loading process.
@@ -131,65 +110,23 @@ const createMainWindow = () => {
          */
         executeOnWindow(isPageLoaded, handleLoad);
     });
-};
+    return { mainWindow };
+}
 
-/**
- * @description - Creates loading window to show while build is created.
- * @memberof BrowserWindow
- */
-const createLoadingWindow = () => {
-    return new Promise((resolve, reject) => {
-        const { loadingWindow } = browserWindows;
+async function createWindows() {
+    const { loadingWindow } = await createLoadingWindow();
 
-        try {
-            loadingWindow.loadFile(path.join(__dirname, 'loader.html'));
-            loadingWindow.removeMenu(true);
+    const { mainWindow } = await createMainWindow({ loadingWindow });
 
-            loadingWindow.webContents.on('did-finish-load', () => {
-                loadingWindow.show();
-                resolve();
-            });
-        } catch (error) {
-            console.error(error);
-            reject();
-        }
-    });
-};
-
-function createWindow() {
-    /**
-     * Assigns the loading && main browser window on the
-     * browserWindows object.
-     */
-
-    browserWindows.loadingWindow = new BrowserWindow({
-        frame: false,
-        transparent: true,
-        alwaysOnTop: true,
-    });
-
-    browserWindows.mainWindow = new BrowserWindow({
-        show: false,
-        autoHideMenuBar: true,
-        webPreferences: {
-            contextIsolation: true,
-            nodeIntegration: true,
-            preload: path.join(__dirname, 'preload.js'),
-        },
-    });
-
-    browserWindows.mainWindow.once('ready-to-show', () => {
-        browserWindows.mainWindow.maximize();
-    });
-
-    createLoadingWindow().then(() => {
-        createMainWindow();
-    });
+    return {
+        loadingWindow,
+        mainWindow,
+    };
 }
 
 app.whenReady().then(async () => {
-    createWindow();
     startPythonServer();
+    const { mainWindow } = await createWindows();
 
     /**
      * Ensures that only a single instance of the app
@@ -200,8 +137,8 @@ app.whenReady().then(async () => {
     if (!initialInstance) app.quit();
     else {
         app.on('second-instance', () => {
-            if (browserWindows.mainWindow?.isMinimized()) browserWindows.mainWindow?.restore();
-            browserWindows.mainWindow?.focus();
+            if (mainWindow?.isMinimized()) mainWindow?.restore();
+            mainWindow?.focus();
         });
     }
 });
@@ -211,7 +148,7 @@ app.on('activate', () => {
      * On macOS, it's common to re-create a window in the app when the
      * dock icon is clicked and there are no other windows open.
      */
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createWindows();
 });
 
 /**
@@ -225,44 +162,4 @@ app.on('window-all-closed', () => {
 
 app.on('quit', (event) => {
     killPythonServer();
-});
-
-// IPC handler to respond to messages from the renderer process
-ipcMain.handle('getDomainCookies', async (event, args) => {
-    try {
-        console.log('Getting cookies');
-        // Prepare data to send to the renderer process
-
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-
-        // Set User-Agent and other headers if necessary
-        await page.setUserAgent(args.data.user_agent);
-
-        // Go to the website
-        await page.goto(args.data.site_url ?? 'https://animepahe.ru', {
-            waitUntil: 'networkidle2',
-        });
-
-        // Wait for the challenge to be solved and the page to navigate
-        await page.waitForNavigation({ waitUntil: 'networkidle0' });
-
-        // Get cookies after the challenge is solved
-        const cookies = await page.cookies();
-        console.log('Cookies generated');
-        await browser.close();
-
-        return cookies;
-    } catch (error) {
-        console.log('Domain Cookies Error', error);
-        return [];
-    }
-});
-
-// IPC handler to open external URLs
-ipcMain.handle('open-external', (event, url) => {
-    shell.openExternal(url);
-});
-ipcMain.handle('show-item-in-folder', (event, file_location) => {
-    shell.showItemInFolder(file_location);
 });

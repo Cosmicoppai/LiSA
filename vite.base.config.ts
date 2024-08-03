@@ -16,9 +16,7 @@ export function getBuildConfig(env: ConfigEnv<'build'>): UserConfig {
     return {
         root,
         mode,
-        resolve: {
-            alias: [{ find: 'src', replacement: '/src' }],
-        },
+
         build: {
             // Prevent multiple builds from interfering with each other.
             emptyOutDir: false,
@@ -26,13 +24,14 @@ export function getBuildConfig(env: ConfigEnv<'build'>): UserConfig {
             outDir: '.vite/build',
             watch: command === 'serve' ? {} : null,
             minify: command === 'build',
-            rollupOptions: {
-                output: {
-                    format: 'cjs',
-                },
-            },
         },
         clearScreen: false,
+        esbuild:
+            command === 'build'
+                ? {
+                      drop: ['console', 'debugger'],
+                  }
+                : {},
     };
 }
 
