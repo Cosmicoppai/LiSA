@@ -83,7 +83,7 @@ Please submit an Issue or even better a PR and We'll review :)
 -   For Windows
 
     ```bash
-    npm run build:package:windows
+    npm run make
     ```
 
 Note:

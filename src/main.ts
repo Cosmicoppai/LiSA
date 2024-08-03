@@ -1,20 +1,19 @@
-const { spawn } = require('child_process');
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
-const isDevMode = require('electron-is-dev');
-const path = require('path');
-const fs = require('fs');
-
-let pythonServer;
+import { spawn } from 'child_process';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import isDevMode from 'electron-is-dev';
+import path from 'path';
+import fs from 'fs';
 
 function getPythonServerCMD() {
     if (isDevMode) return 'python backend/LiSA.py';
 
     switch (process.platform) {
         case 'win32':
-            return `powershell -Command Start-Process -WindowStyle Hidden "./resources/LiSA/LiSA.exe"`;
+            return `powershell -Command Start-Process -WindowStyle Hidden "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
         case 'linux':
-        case 'darwin':
-            return path.join(app.getAppPath().replace(/\/app$/, ''), 'resources/lisa', 'LiSA');
+        case 'darwin': {
+            return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
+        }
         default:
             // Unknown Platform.
             return null;
@@ -29,12 +28,12 @@ function startPythonServer() {
     }
 
     const logPath = path.join(path.dirname(process.execPath), 'LiSA.log');
-    fs.writeFileSync(logPath, '', { encoding: 'utf8' });  // clear logs
+    fs.writeFileSync(logPath, '', { encoding: 'utf8' }); // clear logs
 
-    pythonServer = spawn(cmd, {
+    const pythonServer = spawn(cmd, {
         shell: true,
         detached: false,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
     });
 
     const logStream = fs.createWriteStream(logPath, { flags: 'a' });
@@ -46,10 +45,7 @@ function startPythonServer() {
     });
 }
 
-
 function killPythonServer() {
-    if (!pythonServer) return;
-
     if (process.platform === 'win32') {
         const killCmd = `tskill LiSA`;
         spawn('cmd.exe', ['/c', killCmd]);
@@ -57,8 +53,11 @@ function killPythonServer() {
         const killCmd = 'pkill -f LiSA';
         spawn('sh', ['-c', killCmd]);
     }
+}
 
-    pythonServer = null;
+// Handle creating/removing shortcuts on Windows when installing/uninstalling.
+if (require('electron-squirrel-startup')) {
+    app.quit();
 }
 
 /**
@@ -110,10 +109,12 @@ const createMainWindow = () => {
         }
     };
 
-    if (isDevMode) mainWindow.loadURL('http://localhost:5173');
+    if (MAIN_WINDOW_VITE_DEV_SERVER_URL) mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
     else {
         mainWindow.removeMenu(true);
-        mainWindow.loadFile(path.join(__dirname, 'build/index.html'));
+        mainWindow.loadFile(
+            path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
+        );
     }
 
     mainWindow.webContents.on('did-finish-load', () => {
@@ -140,7 +141,7 @@ const createLoadingWindow = () => {
         const { loadingWindow } = browserWindows;
 
         try {
-            loadingWindow.loadFile(path.join(__dirname, 'public/loader.html'));
+            loadingWindow.loadFile(path.join(__dirname, 'loader.html'));
             loadingWindow.removeMenu(true);
 
             loadingWindow.webContents.on('did-finish-load', () => {
@@ -172,7 +173,7 @@ function createWindow() {
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: true,
-            preload: path.join(isDevMode ? __dirname : app.getAppPath(), 'preload.js'),
+            preload: path.join(__dirname, 'preload.js'),
         },
     });
 
@@ -225,7 +226,7 @@ app.on('quit', (event) => {
     killPythonServer();
 });
 
-const puppeteer = require('puppeteer');
+import puppeteer from 'puppeteer';
 
 // IPC handler to respond to messages from the renderer process
 ipcMain.handle('getDomainCookies', async (event, args) => {
