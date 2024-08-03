@@ -1,8 +1,9 @@
 import { spawn } from 'child_process';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import isDevMode from 'electron-is-dev';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
+import puppeteer from 'puppeteer';
 
 function getPythonServerCMD() {
     if (isDevMode) return 'python backend/LiSA.py';
@@ -47,7 +48,7 @@ function startPythonServer() {
 
 function killPythonServer() {
     if (process.platform === 'win32') {
-        const killCmd = `tskill LiSA`;
+        const killCmd = `tskill /IM LiSA /F`;
         spawn('cmd.exe', ['/c', killCmd]);
     } else {
         const killCmd = 'pkill -f LiSA';
@@ -225,8 +226,6 @@ app.on('window-all-closed', () => {
 app.on('quit', (event) => {
     killPythonServer();
 });
-
-import puppeteer from 'puppeteer';
 
 // IPC handler to respond to messages from the renderer process
 ipcMain.handle('getDomainCookies', async (event, args) => {

@@ -16,7 +16,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "build:python": "node ./scripts/dispatch build python"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
