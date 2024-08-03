@@ -75,16 +75,21 @@ Please submit an Issue or even better a PR and We'll review :)
 
 4. Start dev app using
     ```bash
-    npm start
+    yarn start
     ```
 
 ### Build package
 
--   For Windows
-
+- Build Backend
     ```bash
-    npm run make
+    yarn build:python
     ```
+
+- Make distributable packages
+    ```bash
+    yarn make
+    ```
+
 
 Note:
 
