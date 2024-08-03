@@ -1,10 +1,11 @@
 import { spawn } from 'child_process';
-import isDevMode from 'electron-is-dev';
 import fs from 'fs';
 import path from 'path';
 
+import { isViteDEV } from '../constants/env';
+
 function getPythonServerCMD() {
-    if (isDevMode) return 'python backend/LiSA.py';
+    if (isViteDEV) return 'python backend/LiSA.py';
 
     switch (process.platform) {
         case 'win32':
