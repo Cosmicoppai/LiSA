@@ -11,7 +11,7 @@ import path from 'path';
 const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
-        icon: path.join(__dirname, './logo512'),
+        icon: path.join(__dirname, './images/logo'),
         name: 'LiSA',
         extraResource: [path.join(__dirname, './resources')],
         win32metadata: {
@@ -21,7 +21,7 @@ const config: ForgeConfig = {
     rebuildConfig: {},
     makers: [
         // new MakerSquirrel({}),
-        new MakerDMG({}),
+        new MakerDMG(),
         // new MakerZIP({}, ['darwin']),
         new MakerRpm({}),
         new MakerDeb({}),

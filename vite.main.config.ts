@@ -8,6 +8,7 @@ export default defineConfig((env) => {
     const { forgeConfigSelf } = forgeEnv;
     const define = getBuildDefine(forgeEnv);
     const config: UserConfig = {
+        publicDir: false,
         build: {
             lib: {
                 entry: forgeConfigSelf.entry!,
@@ -16,7 +17,6 @@ export default defineConfig((env) => {
             },
             rollupOptions: {
                 external,
-
                 output: {
                     format: 'cjs',
                 },
