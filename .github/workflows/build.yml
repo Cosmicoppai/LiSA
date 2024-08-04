@@ -27,11 +27,44 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        npm install
+        npm i -g yarn
+        yarn
         
-    - name: Build exe
+    - name: Build backend
+      run: yarn build:python
+
+    - name: Build App
+      run:  yarn make
+  
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10.4
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
       run: |
-        npm run build
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        npm i -g yarn
+        yarn
+        
+    - name: Build backend
+      run: yarn build:python
+
+    - name: Build App
+      run:  yarn make
 
   build-windows:
     runs-on: windows-latest
@@ -54,8 +87,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        npm install
+        npm i -g yarn
+        yarn
         
-    - name: Build exe
-      run: |
-        npm run build
+    - name: Build backend
+      run: yarn build:python
+
+    - name: Build App
+      run:  yarn make
