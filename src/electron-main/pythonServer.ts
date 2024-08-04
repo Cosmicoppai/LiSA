@@ -47,7 +47,7 @@ export function startPythonServer() {
 
 export function killPythonServer() {
     if (process.platform === 'win32') {
-        const killCmd = `tskill /IM LiSA /F`;
+        const killCmd = `tskill LiSA`;
         spawn('cmd.exe', ['/c', killCmd]);
     } else {
         const killCmd = 'pkill -f LiSA';
