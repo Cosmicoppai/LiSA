@@ -255,10 +255,6 @@ class MangaDownloader(Downloader):
 
             download_queue.task_done()
 
-    def run(self):
-        self.library.data = self.lib_data
-        asyncio.run(self._run())
-
     async def _run(self):
         # The download queue that will be used by download workers
         download_queue: asyncio.Queue = asyncio.Queue()
@@ -313,7 +309,8 @@ class MangaDownloader(Downloader):
 
     def _post_process(self) -> str | None:
         if self.post_processor:
-            file_path = Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.{self.post_processor.ext}")
+            _file_name = self.file_data['file_name'].split("---")[0]
+            file_path = Path(self.OUTPUT_LOC).joinpath(f"{_file_name}.{self.post_processor.ext}")
             imgs = []
             for r, _, f in walk(self.OUTPUT_LOC):
                 for fname in f:
@@ -433,10 +430,6 @@ class VideoDownloader(Downloader):
                 f = "file " + f"segment-{segment_number}{self.SEGMENT_EXTENSION}\n"
                 file.write(f)
         return self._merge_segments(concat_file)
-
-    def run(self):
-        self.library.data = self.lib_data
-        asyncio.run(self._run())
 
     async def _run(self):
         # The download queue that will be used by download workers
@@ -604,6 +597,25 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         self.task_workers = [loop.create_task(self.workers()) for _ in range(no_of_workers)]
         loop.create_task(self._schedule_pending_downloads())
 
+    async def shutdown(self):
+        for task_id, task_data in self._TaskData.items():
+            if task_data['status'] == Status.started:
+                process = task_data.get('process')
+                if process and process.is_alive():
+                    process.terminate()
+                    process.join()
+
+        while not self.DownloadTaskQueue.empty():
+            try:
+                self.DownloadTaskQueue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
+
+        for worker in self.task_workers:
+            worker.cancel()
+
+        await asyncio.gather(*self.task_workers)
+
     @staticmethod
     def _check_ids(ids: List[int]):
         for _id in ids:
@@ -624,34 +636,50 @@ class DownloadManager(metaclass=DownloadManagerMeta):
     async def workers(cls):
         while True:
             task_id = await DownloadManager.DownloadTaskQueue.get()
-            manifest, file_data, headers, post_processor = cls._TaskData[task_id]["task_data"]
+            try:
+                manifest, file_data, headers, post_processor = cls._TaskData[task_id]["task_data"]
 
-            task_status = cls._TaskData[task_id]["status"]
-            if task_status != Status.scheduled:  # if task is in not in scheduled state
-                if task_status == Status.cancelled:  # if task is in cancelled state, remove from the _Task Dict
-                    del cls._TaskData[file_data["id"]]
+                task_status = cls._TaskData[task_id]["status"]
+                if task_status != Status.scheduled:
+                    if task_status == Status.cancelled:
+                        del cls._TaskData[file_data["id"]]
+                    continue
 
-            else:
-                # start download as a new process
                 logging.info(f"Task received with id {task_id} of type {file_data['type']}")
 
+                target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data,
+                                                            msg_system_in_pipe=MsgSystem.in_pipe,
+                                                            headers=headers, library_data=(DBLibrary, DBLibrary.data),
+                                                            post_processor=post_processor)
+
+                p = Process(target=target.run)
+                p.start()
+                cls._TaskData[task_id]["process"] = p
+                cls._TaskData[task_id]["status"] = Status.started
+
                 try:
+                    await asyncio.wait_for(cls._wait_for_process(p), timeout=3600)  # 1 hour timeout
+                    if p.exitcode == 0:
+                        logging.info(f"Task {task_id} completed successfully")
+                        del cls._TaskData[file_data["id"]]
+                    else:
+                        logging.error(f"Task {task_id} failed with exit code {p.exitcode}")
+                except asyncio.TimeoutError:
+                    logging.error(f"Task {task_id} timed out")
+                    p.terminate()
+                    p.join()
 
-                    target = cls._DOWNLOADER[file_data["type"]](manifest, file_data=file_data, msg_system_in_pipe=MsgSystem.in_pipe,
-                                                                headers=headers, library_data=(DBLibrary, DBLibrary.data), post_processor=post_processor)
+            except Exception as e:
+                logging.error(f"Download process failed with error {e}")
+                logging.error(traceback.format_exception(*exc_info()))
+            finally:
+                DownloadManager.DownloadTaskQueue.task_done()
 
-                    p = Process(target=target.run)
-                    p.start()
-                    cls._TaskData[task_id]["process"] = p
-                    cls._TaskData[task_id]["status"] = Status.started
-                    while p.is_alive():
-                        await asyncio.sleep(10)
-
-                    if p.exitcode == 0:  # if task ended successfully
-                        del cls._TaskData[file_data["id"]]  # remove task_data
-                except Exception as e:
-                    logging.info(f"Download process failed with error {e}")
-                    logging.error(traceback.format_exception(*exc_info()))
+    @staticmethod
+    async def _wait_for_process(process):
+        while process.is_alive():
+            await asyncio.sleep(10)
+        process.join()
 
     @classmethod
     async def _schedule_pending_downloads(cls):
@@ -716,16 +744,17 @@ class DownloadManager(metaclass=DownloadManagerMeta):
             file_data["downloaded"] = len(_parse_resume_info(file_path=seg_dir.joinpath(downloader.RESUME_FILENAME)))
         else:
             file_data = cls.create_data(_file_name, typ, manifest_file_path.__str__(),
-                                        output_dir.joinpath(f"{_file_name[1]}{ext}").__str__())
+                                        output_dir.joinpath(f"{seg_name}{ext}").__str__())
 
         if MsgSystem.in_pipe:
             MsgSystem.in_pipe.send({"data": file_data, "type": "downloads"})  # send msg to update about the status
 
         file_data["output_dir"] = output_dir.__str__()
         file_data["segment_dir"] = seg_dir.__str__()
+        file_data["file_name"] = seg_name
 
         # add task_data and metadata for tracking and scheduling
-        cls._TaskData[file_data["id"]] = {"status": Status.scheduled, "file_name": seg_name, "task_data": (manifest, file_data, header, post_processor)}
+        cls._TaskData[file_data["id"]] = {"status": Status.scheduled, "task_data": (manifest, file_data, header, post_processor)}
         await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
 
     @classmethod
@@ -740,8 +769,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
                           "total_size": 0, "manifest_file_path": manifest_file_path,
                           "file_location": output_file})
 
-        return {"id": _id, "type": typ, "status": "scheduled", "file_name": _file_name[1],
-                "total_size": None, "downloaded": None}
+        return {"id": _id, "type": typ, "status": "scheduled", "total_size": 0, "downloaded": 0}
 
     @classmethod
     async def pause(cls, task_ids: List[int]):
