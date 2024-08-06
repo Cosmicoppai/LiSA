@@ -20,10 +20,10 @@ import { useNavigate } from 'react-router-dom';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { MetaDataPopup } from 'src/components/metadata-popup';
 import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
+import { useFeatureAvailable } from 'src/hooks/useFeatureAvailable';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
 import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
-import { useFeatureAvailable } from 'src/utils/fn';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
