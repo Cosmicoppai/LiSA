@@ -368,7 +368,8 @@ async def library(request: Request):
         status = ["started", "scheduled", "paused"]
 
     return JSONResponse(format_library_data(
-        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
+        DBLibrary.group_by(query=["id", "type", "series_name", "file_name", "status", "total_size", "file_location", "created_on"],
+                           group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
                            format_func=format_series)
     ))
 
@@ -613,7 +614,7 @@ middleware = [
 ]
 
 app = Starlette(
-    debug=True,
+    debug=False,
     routes=routes,
     exception_handlers=exception_handlers,
     middleware=middleware,
