@@ -302,7 +302,7 @@ class MangaDownloader(Downloader):
 
         await client.close()  # CLose the http session.
 
-        file_path = self._post_process()  # convert the image if necessary
+        file_path = self._post_process() or self.OUTPUT_LOC  # post process the images if necessary
         await self.update_db_record("downloaded", self.num_of_segments, self.total_size, file_path)
 
         remove_folder(self.SEGMENT_DIR)  # remove segments
@@ -737,14 +737,12 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         Create recursive folder in-case of manga (downloads/manga_name/chp_name).
         Create recursive folder with actual file (downloads/anime_name/ep_name.mp4)
         """
-        ext = downloader.OUTPUT_EXTENSION if typ == "video" else ""
         output_dir: Path = downloader.OUTPUT_LOC.joinpath(series_name).joinpath(f"{seg_name}")
 
         if file_data:
             file_data["downloaded"] = len(_parse_resume_info(file_path=seg_dir.joinpath(downloader.RESUME_FILENAME)))
         else:
-            file_data = cls.create_data(_file_name, typ, manifest_file_path.__str__(),
-                                        output_dir.joinpath(f"{seg_name}{ext}").__str__())
+            file_data = cls.create_data(_file_name, typ, manifest_file_path.__str__())
 
         if MsgSystem.in_pipe:
             MsgSystem.in_pipe.send({"data": file_data, "type": "downloads"})  # send msg to update about the status
@@ -758,7 +756,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         await cls.DownloadTaskQueue.put(file_data["id"])  # put task in download queue
 
     @classmethod
-    def create_data(cls, _file_name: List[str], typ: str, manifest_file_path: str, output_file: str) -> Dict[str, str | int]:
+    def create_data(cls, _file_name: List[str], typ: str, manifest_file_path: str) -> Dict[str, str | int]:
         """
         This function will save the metaData into DB and serialize it into python dict.
         This dict will act as the base format while saving the status into database.
@@ -766,8 +764,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         _id = DB.get_id()
 
         DBLibrary.create({"id": _id, "type": typ, "series_name": _file_name[0], "file_name": _file_name[1], "status": "scheduled",
-                          "total_size": 0, "manifest_file_path": manifest_file_path,
-                          "file_location": output_file})
+                          "total_size": 0, "manifest_file_path": manifest_file_path})
 
         return {"id": _id, "type": typ, "status": "scheduled", "total_size": 0, "downloaded": 0}
 
