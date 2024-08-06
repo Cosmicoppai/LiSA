@@ -21,7 +21,7 @@ function useSearchQuery() {
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {
-            setSearchParams({ search });
+            setSearchParams({ search: search.trim() });
         }, 450);
         return () => clearTimeout(timeoutId);
     }, [search, setSearchParams]);

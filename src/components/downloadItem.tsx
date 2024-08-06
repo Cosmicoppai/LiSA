@@ -3,8 +3,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { IoMdPause } from 'react-icons/io';
+import { isViteDEV } from 'src/constants/env';
 import { useSocketContext } from 'src/context/socket';
-import { isViteDEV } from 'src/utils/fn';
 import { formatBytes } from 'src/utils/formatBytes';
 
 import { TDownloadItem, TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
