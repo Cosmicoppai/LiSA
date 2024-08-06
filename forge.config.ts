@@ -1,9 +1,7 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerDMG } from '@electron-forge/maker-dmg';
-import { MakerRpm } from '@electron-forge/maker-rpm';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
@@ -14,6 +12,7 @@ const config: ForgeConfig = {
         asar: true,
         icon: path.join(__dirname, './images/logo'),
         name: 'LiSA',
+        executableName: 'LiSA',
         extraResource: [path.join(__dirname, './resources')],
         win32metadata: {
             'requested-execution-level': 'highestAvailable',
@@ -22,11 +21,9 @@ const config: ForgeConfig = {
     },
     rebuildConfig: {},
     makers: [
-        // new MakerSquirrel({}),
         new MakerDMG(),
         new MakerZIP({}, ['win32']),
-        new MakerRpm({}),
-        new MakerDeb({}),
+        new MakerDeb({options: {bin: 'LiSA'}})
     ],
     plugins: [
         new VitePlugin({
