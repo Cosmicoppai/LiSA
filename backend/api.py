@@ -5,7 +5,7 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Type
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -24,7 +24,7 @@ from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
 import logging
-from ebook import get_plugin
+from ebook import get_plugin, Plugin
 
 
 async def LiSA(request: Request):
@@ -259,7 +259,7 @@ async def download(request: Request):
             case "image":
                 site = "mangakatana"
 
-                post_processor = get_plugin(jb.get("download_as", None))
+                post_processor: Type[Plugin] = get_plugin(jb.get("download_as", None))
 
                 if jb.get("manga_session", None):
                     await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1), post_processor=post_processor)

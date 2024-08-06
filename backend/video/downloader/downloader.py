@@ -17,7 +17,7 @@ from video.library import DBLibrary, Library
 from time import perf_counter
 from utils import DB, remove_folder, get_path, remove_file
 import logging
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List, Dict, Any, Tuple, Callable, Type
 from utils.headers import get_headers
 from utils import validate_path
 from sys import exc_info
@@ -25,6 +25,7 @@ from abc import ABC, abstractmethod
 import traceback
 from yarl import URL
 from concurrent.futures import ThreadPoolExecutor
+from ebook import Plugin
 
 
 def _parse_resume_info(raw_file_data: str = "", file_path: str | Path = None):
@@ -110,7 +111,7 @@ class Downloader(ABC):
             max_workers: int = 8,
             hooks: dict = None,
             headers: dict = get_headers(),
-            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
+            post_processor: Type[Plugin] | None = None
     ) -> None:
 
         self._max_workers = max_workers
@@ -130,7 +131,7 @@ class Downloader(ABC):
             makedirs(self.OUTPUT_LOC)
 
         self.timeout = aiohttp.ClientTimeout(total=90)
-        self.post_processor = post_processor
+        self.post_processor: Type[Plugin] | None = post_processor
 
         logging.info("successfully initialized")
 
@@ -211,7 +212,7 @@ class MangaDownloader(Downloader):
             max_workers: int = 50,
             hooks: dict = None,
             headers: dict = get_headers(),
-            post_processor: Callable[[list[str] | list[Path], str | Path], None] = None
+            post_processor: Type[Plugin] | None = None
 
     ) -> None:
 
@@ -305,20 +306,23 @@ class MangaDownloader(Downloader):
 
         await client.close()  # CLose the http session.
 
-        # convert the image if necessary
-        pdf_file_path = Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.pdf")
+        file_path = self._post_process()  # convert the image if necessary
+        await self.update_db_record("downloaded", self.num_of_segments, self.total_size, file_path)
+
+        remove_folder(self.SEGMENT_DIR)  # remove segments
+
+    def _post_process(self) -> str | None:
         if self.post_processor:
+            file_path = Path(self.OUTPUT_LOC).joinpath(f"{self.file_data['file_name']}.{self.post_processor.ext}")
             imgs = []
             for r, _, f in walk(self.OUTPUT_LOC):
                 for fname in f:
                     imgs.append(Path(r).joinpath(fname))
 
-            self.post_processor(imgs, pdf_file_path)
+            self.post_processor.convert(imgs, file_path)
             remove_file(imgs)
-
-        await self.update_db_record("downloaded", self.num_of_segments, self.total_size, pdf_file_path.__str__())
-
-        remove_folder(self.SEGMENT_DIR)  # remove segments
+            return str(file_path)
+        return None
 
     @staticmethod
     def read_manifest(file_path: str) -> str | List[str]:
@@ -678,7 +682,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
         await asyncio.gather(*tasks)  # schedule all remaining tasks
 
     @classmethod
-    async def schedule(cls, typ: str, session: str = None, manifest_url: str = None, site: str = "animepahe", page: int = 1, post_processor: Callable[[str | Path], str] = None):
+    async def schedule(cls, typ: str, session: str = None, manifest_url: str = None, site: str = "animepahe", page: int = 1, post_processor: Type[Plugin] = None):
 
         scraper = cls._Scrapers[typ].get_scraper(site)()
         if not scraper:
@@ -690,7 +694,7 @@ class DownloadManager(metaclass=DownloadManagerMeta):
             *[cls._schedule_download(typ, data[2], scraper.manifest_header, manifest=data[0], post_processor=post_processor) for data in manifest_datas])
 
     @classmethod
-    async def _schedule_download(cls, typ: str, _file_name: List[str], header: str, file_data: dict = None, manifest: str = None, post_processor: Callable[[str | Path], str] = None) -> None:
+    async def _schedule_download(cls, typ: str, _file_name: List[str], header: str, file_data: dict = None, manifest: str = None, post_processor: Type[Plugin] | None = None) -> None:
 
         downloader = cls._DOWNLOADER[typ]
         series_name, seg_name = validate_path(_file_name)
