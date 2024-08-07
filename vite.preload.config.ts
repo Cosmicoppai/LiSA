@@ -5,7 +5,8 @@ import { getBuildConfig, external, pluginHotRestart } from './vite.base.config.j
 // https://vitejs.dev/config
 export default defineConfig((env) => {
     const forgeEnv = env as ConfigEnv<'build'>;
-    const { forgeConfigSelf, command } = forgeEnv;
+    const { forgeConfigSelf } = forgeEnv;
+
     const config: UserConfig = {
         publicDir: false,
         build: {
@@ -24,12 +25,6 @@ export default defineConfig((env) => {
             },
         },
         plugins: [pluginHotRestart('reload')],
-        esbuild:
-            command === 'build'
-                ? {
-                      drop: ['console', 'debugger'],
-                  }
-                : {},
     };
 
     return mergeConfig(getBuildConfig(forgeEnv), config);

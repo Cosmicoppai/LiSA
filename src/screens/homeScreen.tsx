@@ -107,6 +107,7 @@ export const HomeScreen = () => {
                                     placeholder={`Search ${mode === 'manga' ? 'Manga' : 'Anime'}`}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
+                                    spellCheck="false"
                                 />
                             </InputGroup>
                         </Box>

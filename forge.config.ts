@@ -10,10 +10,10 @@ import path from 'path';
 const config: ForgeConfig = {
     packagerConfig: {
         asar: true,
-        icon: path.join(__dirname, './images/logo'),
+        icon: path.join(__dirname, 'images/logo'),
         name: 'LiSA',
         executableName: 'LiSA',
-        extraResource: [path.join(__dirname, './resources')],
+        extraResource: [path.join(__dirname, 'resources')],
         win32metadata: {
             'requested-execution-level': 'highestAvailable',
         },
@@ -21,9 +21,9 @@ const config: ForgeConfig = {
     },
     rebuildConfig: {},
     makers: [
-        new MakerDMG(),
-        new MakerZIP({}, ['win32']),
-        new MakerDeb({options: {bin: 'LiSA'}})
+        new MakerDMG({}),
+        new MakerZIP({}, ['win32', 'darwin']),
+        new MakerDeb({ options: { bin: 'LiSA' } }),
     ],
     plugins: [
         new VitePlugin({

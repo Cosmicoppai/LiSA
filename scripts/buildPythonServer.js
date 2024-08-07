@@ -1,18 +1,31 @@
 const { spawnSync } = require('child_process');
-const spawnOptions = { detached: false, shell: true, stdio: 'inherit' };
 
-console.log('Creating Python distribution files...');
+console.log('Python Server - Build Starting...\n');
 
-switch (process.platform) {
-    case 'win32':
-        spawnSync(`pyinstaller spec/windows.spec --clean`, spawnOptions);
-        break;
-    case 'linux':
-        spawnSync(`pyinstaller spec/linux.spec --clean`, spawnOptions);
-        break;
-    case 'darwin':
-        spawnSync(`pyinstaller spec/darwin.spec --clean`, spawnOptions);
-        break;
-    default:
-        throw Error('Unsupported Platform');
+function getPythonServerSpecFilePath() {
+    switch (process.platform) {
+        case 'win32':
+            return 'spec/windows.spec';
+        case 'linux':
+            return 'spec/linux.spec';
+        case 'darwin':
+            return 'spec/darwin.spec';
+        default:
+            throw Error('Unsupported Platform');
+    }
 }
+
+const pythonServerSpecFilePath = getPythonServerSpecFilePath();
+
+spawnSync(`pyinstaller ${pythonServerSpecFilePath} --distpath resources --clean -y`, {
+    shell: true,
+    stdio: 'inherit',
+});
+
+const { Cleaner } = require('./clean');
+const cleaner = new Cleaner();
+
+const removePaths = ['./build'];
+removePaths.forEach(cleaner.removePath);
+
+console.log('\nPython Server - Build Completed\n');

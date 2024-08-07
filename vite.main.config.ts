@@ -5,10 +5,9 @@ import { getBuildConfig, getBuildDefine, external, pluginHotRestart } from './vi
 // https://vitejs.dev/config
 export default defineConfig((env) => {
     const forgeEnv = env as ConfigEnv<'build'>;
-    const { forgeConfigSelf } = forgeEnv;
-    const define = getBuildDefine(forgeEnv);
+    const { forgeConfigSelf, command } = forgeEnv;
 
-    const { command } = env;
+    const define = getBuildDefine(forgeEnv);
 
     const config: UserConfig = {
         publicDir: command === 'build' ? false : undefined,
@@ -28,12 +27,6 @@ export default defineConfig((env) => {
             // Load the Node.js entry.
             mainFields: ['module', 'jsnext:main', 'jsnext'],
         },
-        esbuild:
-            command === 'build'
-                ? {
-                      drop: ['console', 'debugger'],
-                  }
-                : {},
     };
 
     return mergeConfig(getBuildConfig(forgeEnv), config);
