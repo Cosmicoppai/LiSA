@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
     RQKEY_GET_DOWNLOADS_ACTIVE,
     RQKEY_GET_DOWNLOADS_HISTORY,
@@ -12,37 +12,70 @@ import { TCookieReq } from '../types';
 export function useHandleInitialSocketConnection() {
     const { socket, isSocketConnected } = useSocketContext();
 
+    const [isDomainCookiesGenerating, setIsDomainCookiesGenerating] = useState(false);
+
     // Get QueryClient from the context
     const queryClient = useQueryClient();
 
+    const handleCookieGeneration = useCallback(
+        async (msg: TCookieReq) => {
+            if (isDomainCookiesGenerating) {
+                console.log('Cookie Generation: Ignored');
+                return;
+            }
+
+            try {
+                setIsDomainCookiesGenerating(true);
+                const cookies = await window?.electronAPI?.getDomainCookies(msg);
+                socket.send(
+                    JSON.stringify({
+                        type: 'cookie_request',
+                        data: cookies,
+                    }),
+                );
+            } catch (error) {
+                console.error('Cookie Generation: Error', error);
+            } finally {
+                setIsDomainCookiesGenerating(false);
+            }
+        },
+        [socket, isDomainCookiesGenerating],
+    );
+
+    const handleDownloads = useCallback(
+        (msg: TSocketEventDownloading) => {
+            if (msg.data?.status !== 'downloaded') return;
+
+            // Refetch the downloading count when any download item finished downloading.
+            queryClient.invalidateQueries({
+                queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
+            });
+            queryClient.invalidateQueries({
+                queryKey: [RQKEY_GET_DOWNLOADS_HISTORY],
+            });
+        },
+        [queryClient],
+    );
+
     const handleSocketConnection = useCallback(
-        (ev: MessageEvent<any>) => {
+        async (ev: MessageEvent<any>) => {
             const msg: TCookieReq | TSocketEventDownloading =
                 typeof ev?.data === 'string' ? JSON.parse(ev?.data) : null;
 
             console.log('socket event', msg);
-            if (msg?.type === 'cookie_request') {
-                window?.electronAPI?.getDomainCookies(msg).then((response) => {
-                    socket.send(
-                        JSON.stringify({
-                            type: 'cookie_request',
-                            data: response,
-                        }),
-                    );
-                });
-            }
 
-            // Refetch the downloading count when any download item finished downloading.
-            if (msg?.type === 'downloads' && msg.data?.status === 'downloaded') {
-                queryClient.invalidateQueries({
-                    queryKey: [RQKEY_GET_DOWNLOADS_ACTIVE],
-                });
-                queryClient.invalidateQueries({
-                    queryKey: [RQKEY_GET_DOWNLOADS_HISTORY],
-                });
+            switch (msg?.type) {
+                case 'downloads':
+                    handleDownloads(msg);
+                    break;
+                case 'cookie_request':
+                    await handleCookieGeneration(msg);
+                    break;
+                default:
+                    break;
             }
         },
-        [socket, window],
+        [socket, handleDownloads, handleCookieGeneration],
     );
 
     useEffect(() => {

@@ -45,6 +45,7 @@ function AppLayout() {
 
 const router = createHashRouter([
     {
+        path: '/',
         element: <AppLayout />,
         children: [
             {

@@ -24,6 +24,7 @@ const config: ForgeConfig = {
             'requested-execution-level': 'highestAvailable',
         },
         overwrite: true,
+        appCategoryType: 'public.app-category.entertainment',
     },
     rebuildConfig: {},
     makers: [

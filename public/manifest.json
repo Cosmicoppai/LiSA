@@ -1,6 +1,6 @@
 {
-    "short_name": "Lisa",
-    "name": "Lisa",
+    "short_name": "LiSA",
+    "name": "LiSA",
     "icons": [
         {
             "src": "favicon.ico",
@@ -8,14 +8,9 @@
             "type": "image/x-icon"
         },
         {
-            "src": "images/logo192.png",
+            "src": "images/logo720.png",
             "type": "image/png",
-            "sizes": "192x192"
-        },
-        {
-            "src": "images/logo512.png",
-            "type": "image/png",
-            "sizes": "512x512"
+            "sizes": "720x720"
         }
     ],
     "start_url": ".",
