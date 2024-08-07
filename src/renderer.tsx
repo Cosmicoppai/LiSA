@@ -39,7 +39,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <AppContextProvider>
                     <App />
                 </AppContextProvider>
-                <ReactQueryDevtools />
+                <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>
         </SocketContextProvider>
     </ChakraProvider>,

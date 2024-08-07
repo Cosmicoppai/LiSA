@@ -97,7 +97,7 @@ export function DownloadsHistory() {
                                                             style={{
                                                                 fontSize: 12,
                                                             }}>
-                                                            {item.episodes.length} Videos
+                                                            {item.episodes?.length} Videos
                                                         </span>
                                                         <AccordionIcon />
                                                     </div>

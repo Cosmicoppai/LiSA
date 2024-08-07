@@ -2,12 +2,12 @@ import { ipcMain, shell } from 'electron';
 import puppeteer from 'puppeteer';
 
 // IPC handler to respond to messages from the renderer process
-ipcMain.handle('getDomainCookies', async (event, args) => {
+ipcMain.handle('get-domain-cookies', async (event, args) => {
     try {
         console.log('Getting cookies');
         // Prepare data to send to the renderer process
 
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({ headless: 'shell' });
         const page = await browser.newPage();
 
         // Set User-Agent and other headers if necessary

@@ -3,6 +3,8 @@
 
 // All of the Node.js APIs are available in the preload process.
 // It has the same sandbox as a Chrome extension.
+import { contextBridge, ipcRenderer } from 'electron';
+
 window.addEventListener('DOMContentLoaded', () => {
     process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true as any;
 
@@ -16,11 +18,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-const { contextBridge, ipcRenderer } = require('electron');
-
 contextBridge.exposeInMainWorld('electronAPI', {
     getDomainCookies: async (data) => {
-        return await ipcRenderer.invoke('getDomainCookies', data);
+        return await ipcRenderer.invoke('get-domain-cookies', data);
     },
     openExternal: (data) => ipcRenderer.invoke('open-external', data),
     showItemInFolder: (data) => ipcRenderer.invoke('show-item-in-folder', data),

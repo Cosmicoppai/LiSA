@@ -6,23 +6,21 @@ Please submit an Issue or even better a PR and We'll review :)
 
 ## 📖 Development Setup
 
+### Prerequisites / Dependencies
+
+- Make sure [Python 3.10.x](https://www.python.org/downloads/release/python-31014) || [Python 3.11.x](https://www.python.org/downloads/release/python-3119) && [Node.js >=18](https://nodejs.org/en/download/package-manager) are installed.
+
+- Run all commands in the project root.
+
+- Powershell is recommended for windows.
+
 ### Clone Repo
 
--   Clone the project using
-
+- If you are a collaborator, clone the repository.
     ```bash
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
-
-### Prerequisites / Dependencies
-
--   Make sure [Python 3.10](https://www.python.org/downloads/release/python-31011/) and [Node.js](https://nodejs.org/en/download/package-manager) >=18 are installed.
-
--   Download [ffmpeg](https://ffmpeg.org/download.html).
-
--   Run all commands in root folder.
-
--   Powershell is recommended for windows.
+- If you are an external contributor, fork this repository to your own GitHub account and then clone it to your local device.
 
 ### Backend
 
@@ -51,8 +49,6 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./requirements.txt
     ```
 
-4. Add `ffmpeg` executable to root folder or in `PATH` Var.
-
 ### Frontend
 
 1. Create `.env` & paste the following content
@@ -67,20 +63,20 @@ Please submit an Issue or even better a PR and We'll review :)
     npm i -g yarn
     ```
 
-3. Install Node modules
+3. Install node modules
 
     ```bash
     yarn
     ```
 
-4. Start dev app using
+4. Start dev app
     ```bash
     yarn start
     ```
 
 ### Build package
 
-- Build Backend
+- Build backend
     ```bash
     yarn build:python
     ```
@@ -88,9 +84,12 @@ Please submit an Issue or even better a PR and We'll review :)
 - Make distributable packages
     ```bash
     yarn make
+
+    # For additional debug logs
+    DEBUG=true yarn make
     ```
 
 
 Note:
 
-> Make sure to allow app to run as admin and allow incoming port forwarding on (`6969`, `9000`).
+> On Windows, ensure you run as an administrator and allow incoming port forwarding on `6969` and `9000`.

@@ -386,13 +386,6 @@
   dependencies:
     "@chakra-ui/shared-utils" "2.0.5"
 
-"@chakra-ui/icons@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.npmjs.org/@chakra-ui/icons/-/icons-2.1.1.tgz"
-  integrity sha512-3p30hdo4LlRZTT5CwoAJq3G9fHI0wDc0pBaMHj4SUn0yomO+RcDRlzhdXqdr5cVnzax44sqXJVnf3oQG0eI+4g==
-  dependencies:
-    "@chakra-ui/icon" "3.2.0"
-
 "@chakra-ui/image@2.1.0":
   version "2.1.0"
   resolved "https://registry.npmjs.org/@chakra-ui/image/-/image-2.1.0.tgz"
@@ -1896,29 +1889,29 @@
   dependencies:
     "@typescript-eslint/utils" "8.0.0-alpha.30"
 
-"@tanstack/query-core@5.51.17":
-  version "5.51.17"
-  resolved "https://registry.npmjs.org/@tanstack/query-core/-/query-core-5.51.17.tgz"
-  integrity sha512-AtVNOgVrZNz4C7RzMfx7sCn1/gf0Ype4nX8UP2BOh0C2tTMszwXk98iCLRacTn5vTRNJCZxz3fgEcTJq0uv8GQ==
+"@tanstack/query-core@5.51.21":
+  version "5.51.21"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.51.21.tgz#a510469c6c30d3de2a8b8798e340169a4b0fd08f"
+  integrity sha512-POQxm42IUp6n89kKWF4IZi18v3fxQWFRolvBA6phNVmA8psdfB1MvDnGacCJdS+EOX12w/CyHM62z//rHmYmvw==
 
 "@tanstack/query-devtools@5.51.16":
   version "5.51.16"
   resolved "https://registry.npmjs.org/@tanstack/query-devtools/-/query-devtools-5.51.16.tgz"
   integrity sha512-ajwuq4WnkNCMj/Hy3KR8d3RtZ6PSKc1dD2vs2T408MdjgKzQ3klVoL6zDgVO7X+5jlb5zfgcO3thh4ojPhfIaw==
 
-"@tanstack/react-query-devtools@^5.51.15":
-  version "5.51.18"
-  resolved "https://registry.npmjs.org/@tanstack/react-query-devtools/-/react-query-devtools-5.51.18.tgz"
-  integrity sha512-0gOltE8TXHTw2X36EuKYWixyR9ISj2sK3G/Lb44YdlXK2qBwkgSt3uciH5x/xVvUB2hIVcPDILOumKwkw28cTg==
+"@tanstack/react-query-devtools@^5.51.21":
+  version "5.51.21"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.51.21.tgz#8ccfcfdb07e64de9220c34f7a969691dfb12a9ae"
+  integrity sha512-mi5ef8dvsS48GsG6/8M60O2EgrzPK1kNPngOcHBTlIUrB5dGkxP9fuHf05GQRxtSp5W5GlyeUpzOmtkKNpf9dQ==
   dependencies:
     "@tanstack/query-devtools" "5.51.16"
 
-"@tanstack/react-query@^5.51.1":
-  version "5.51.18"
-  resolved "https://registry.npmjs.org/@tanstack/react-query/-/react-query-5.51.18.tgz"
-  integrity sha512-l/PF3X6Coi53kEDpL2XEU0x+y3szOk/oKWSHMlyy8tyUHviaIg8tJ6O4Cc1AjLAhbyTG1a+bZobdSuLXzYTt/w==
+"@tanstack/react-query@^5.51.21":
+  version "5.51.21"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.51.21.tgz#cdd14677bcc809a83e01b6c38842c841ce7420af"
+  integrity sha512-Q/V81x3sAYgCsxjwOkfLXfrmoG+FmDhLeHH5okC/Bp8Aaw2c33lbEo/mMcMnkxUPVtB2FLpzHT0tq3c+OlZEbw==
   dependencies:
-    "@tanstack/query-core" "5.51.17"
+    "@tanstack/query-core" "5.51.21"
 
 "@tootallnate/once@2":
   version "2.0.0"
@@ -1993,6 +1986,11 @@
     "@types/node" "*"
     "@types/responselike" "^1.0.0"
 
+"@types/electron-squirrel-startup@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@types/electron-squirrel-startup/-/electron-squirrel-startup-1.0.2.tgz#80c4b4c63dc5be3aa7d4ffe64471ba45aa73ae69"
+  integrity sha512-AzxnvBzNh8K/0SmxMmZtpJf1/IWoGXLP+pQDuUaVkPyotI8ryvAtBSqgxR/qOSvxWHYWrxkeNsJ+Ca5xOuUxJQ==
+
 "@types/estree@1.0.5":
   version "1.0.5"
   resolved "https://registry.npmjs.org/@types/estree/-/estree-1.0.5.tgz"
@@ -2047,7 +2045,7 @@
   resolved "https://registry.npmjs.org/@types/minimatch/-/minimatch-5.1.2.tgz"
   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
 
-"@types/node@*":
+"@types/node@*", "@types/node@^22.1.0":
   version "22.1.0"
   resolved "https://registry.npmjs.org/@types/node/-/node-22.1.0.tgz"
   integrity sha512-AOmuRF0R2/5j1knA3c6G3HOk523Ga+l+ZXltX8SF1+5oqcXijjfTd8fY3XRZqSihEu9XhtQnKYLmkFaoxgsJHw==
@@ -2899,10 +2897,10 @@ chrome-trace-event@^1.0.3:
   resolved "https://registry.npmjs.org/chrome-trace-event/-/chrome-trace-event-1.0.4.tgz"
   integrity sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==
 
-chromium-bidi@0.6.3:
-  version "0.6.3"
-  resolved "https://registry.npmjs.org/chromium-bidi/-/chromium-bidi-0.6.3.tgz"
-  integrity sha512-qXlsCmpCZJAnoTYI83Iu6EdYQpMYdVkCfq08KDh2pmlVqK5t5IA9mGs4/LwCwp4fqisSOMXZxP3HIh8w8aRn0A==
+chromium-bidi@0.6.4:
+  version "0.6.4"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-0.6.4.tgz#627d76bae2819d59b61a413babe9664e0a16b71d"
+  integrity sha512-8zoq6ogmhQQkAKZVKO2ObFTl4uOkqoX1PlKQX3hZQ5E9cbUotcAb7h4pTNVAGGv8Z36PF3CtdOriEp/Rz82JqQ==
   dependencies:
     mitt "3.0.1"
     urlpattern-polyfill "10.0.0"
@@ -4195,10 +4193,10 @@ forwarded@0.2.0:
   resolved "https://registry.npmjs.org/forwarded/-/forwarded-0.2.0.tgz"
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
 
-framer-motion@^11.3.19:
-  version "11.3.21"
-  resolved "https://registry.npmjs.org/framer-motion/-/framer-motion-11.3.21.tgz"
-  integrity sha512-D+hfIsvzV8eL/iycld4K+tKlg2Q2LdwnrcBEohtGw3cG1AIuNYATbT5RUqIM1ndsAk+EfGhoSGf0UaiFodc5Tw==
+framer-motion@^11.3.22:
+  version "11.3.22"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-11.3.22.tgz#59b09479e3e8919edb44171bb5e9a5a814ba2351"
+  integrity sha512-NS9TnPOJhkUrKKe7sl9zAMmQlzm70bwzJ6/gs/DkYP3kCqc0wO350CEqiEcBuVjhyqVNnDf33SkenzByi8x8Gg==
   dependencies:
     tslib "^2.4.0"
 
@@ -6193,10 +6191,10 @@ possible-typed-array-names@^1.0.0:
   resolved "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.0.0.tgz"
   integrity sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==
 
-postcss@^8.4.39:
-  version "8.4.40"
-  resolved "https://registry.npmjs.org/postcss/-/postcss-8.4.40.tgz"
-  integrity sha512-YF2kKIUzAofPMpfH6hOi2cGnv/HrUlfucspc7pDyvv7kGdqXrfj8SCl/t8owkEgKEuu8ZcRjSOxFxVLqwChZ2Q==
+postcss@^8.4.40:
+  version "8.4.41"
+  resolved "https://registry.yarnpkg.com/postcss/-/postcss-8.4.41.tgz#d6104d3ba272d882fe18fc07d15dc2da62fa2681"
+  integrity sha512-TesUflQ0WKZqAvg52PWL6kHgLKP6xB6heTOdoYM0Wt2UHyxNa4K25EZZMgKns3BH1RLVbZCREPpLY0rhnNoHVQ==
   dependencies:
     nanoid "^3.3.7"
     picocolors "^1.0.1"
@@ -6303,26 +6301,27 @@ punycode@^2.1.0:
   resolved "https://registry.npmjs.org/punycode/-/punycode-2.3.1.tgz"
   integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
-puppeteer-core@22.15.0:
-  version "22.15.0"
-  resolved "https://registry.npmjs.org/puppeteer-core/-/puppeteer-core-22.15.0.tgz"
-  integrity sha512-cHArnywCiAAVXa3t4GGL2vttNxh7GqXtIYGym99egkNJ3oG//wL9LkvO4WE8W1TJe95t1F1ocu9X4xWaGsOKOA==
+puppeteer-core@23.0.1:
+  version "23.0.1"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-23.0.1.tgz#5b447163dacd439fafc4a5b7bd2d453122be21c8"
+  integrity sha512-gZYLcZUkWHZW1vvKEdOZuAB++3qY96Uh4b7B22PI0802omN4Ghrjt9H1r64NVt+AmnaZ/6Q+OW60S/Q7y+BZgQ==
   dependencies:
     "@puppeteer/browsers" "2.3.0"
-    chromium-bidi "0.6.3"
+    chromium-bidi "0.6.4"
     debug "^4.3.6"
     devtools-protocol "0.0.1312386"
     ws "^8.18.0"
 
-puppeteer@^22.14.0:
-  version "22.15.0"
-  resolved "https://registry.npmjs.org/puppeteer/-/puppeteer-22.15.0.tgz"
-  integrity sha512-XjCY1SiSEi1T7iSYuxS82ft85kwDJUS7wj1Z0eGVXKdtr5g4xnVcbjwxhq5xBnpK/E7x1VZZoJDxpjAOasHT4Q==
+puppeteer@^23.0.1:
+  version "23.0.1"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-23.0.1.tgz#ffe576746e862337c03b12b94502a42c368397fa"
+  integrity sha512-i5P0MJcpLZ+lK66/B6TX9G347+Yh4D6b5KGyzaz8b7wYrNenN55GwRa1svKoZMUGjFHcmtQuniE7qZ8/k/YbQw==
   dependencies:
     "@puppeteer/browsers" "2.3.0"
+    chromium-bidi "0.6.4"
     cosmiconfig "^9.0.0"
     devtools-protocol "0.0.1312386"
-    puppeteer-core "22.15.0"
+    puppeteer-core "23.0.1"
 
 qs@6.11.0:
   version "6.11.0"
@@ -7649,13 +7648,13 @@ vite-tsconfig-paths@^4.3.2:
     globrex "^0.1.2"
     tsconfck "^3.0.3"
 
-vite@^5.3.5:
-  version "5.3.5"
-  resolved "https://registry.npmjs.org/vite/-/vite-5.3.5.tgz"
-  integrity sha512-MdjglKR6AQXQb9JGiS7Rc2wC6uMjcm7Go/NHNO63EwiJXfuk9PgqiP/n5IDJCziMkfw9n4Ubp7lttNwz+8ZVKA==
+vite@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.4.0.tgz#11dca8a961369ba8b5cae42d068c7ad684d5370f"
+  integrity sha512-5xokfMX0PIiwCMCMb9ZJcMyh5wbBun0zUzKib+L65vAZ8GY9ePZMXxFrHbr/Kyll2+LSCY7xtERPpxkBDKngwg==
   dependencies:
     esbuild "^0.21.3"
-    postcss "^8.4.39"
+    postcss "^8.4.40"
     rollup "^4.13.0"
   optionalDependencies:
     fsevents "~2.3.3"
