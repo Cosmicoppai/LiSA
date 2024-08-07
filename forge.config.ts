@@ -7,10 +7,16 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import path from 'path';
 
+import ignoreNodeModulesGlobPatters from './utilities/ignore-node-modules-glob-patters.json';
+
 const config: ForgeConfig = {
     packagerConfig: {
-        asar: true,
-        icon: path.join(__dirname, 'images/logo'),
+        asar: {
+            globOptions: {
+                ignore: ignoreNodeModulesGlobPatters.safe,
+            },
+        },
+        icon: path.join(__dirname, 'utilities/images/logo'),
         name: 'LiSA',
         executableName: 'LiSA',
         extraResource: [path.join(__dirname, 'resources')],

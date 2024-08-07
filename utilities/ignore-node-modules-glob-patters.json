@@ -1,0 +1,15 @@
+{
+    "safe": [
+        "**/.git*",
+        "**/.eslintrc*",
+        "**/.prettier*",
+        "**/.husky/*",
+        "**/.travis.yml",
+        "**/*.{md,markdown}",
+        "**/[lL][iI][cC][eE][nN][sS][eE]*",
+        "**/[CC][hH][aA][nN][gG][eE][lL][oO][gG]",
+        "**/.npmignore",
+        "**/*.js.map",
+        "**/__tests__/*"
+    ]
+}
