@@ -49,6 +49,12 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./requirements.txt
     ```
 
+4. Run backend as a separate process `(only if your making changes in backend directory)`
+    ```bash
+    python backend/LiSA.py
+    ```
+
+
 ### Frontend
 
 1. Create `.env` & paste the following content
@@ -58,7 +64,7 @@ Please submit an Issue or even better a PR and We'll review :)
     VITE_SOCKET_URL=ws://localhost:9000
     ```
 
-3. Install yarn
+2. Install yarn
     ```bash
     npm i -g yarn
     ```
@@ -89,7 +95,5 @@ Please submit an Issue or even better a PR and We'll review :)
     DEBUG=true yarn make
     ```
 
-
-Note:
-
+> [!NOTE]  
 > On Windows, ensure you run as an administrator and allow incoming port forwarding on `6969` and `9000`.
