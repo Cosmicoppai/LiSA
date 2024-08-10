@@ -1,34 +1,42 @@
-import { ipcMain, shell } from 'electron';
-import puppeteer from 'puppeteer';
+import { BrowserWindow, ipcMain, session, shell } from 'electron';
+
+const yellowTxt = (str) => `\u001b[33m${str}\u001b[39m`;
 
 // IPC handler to respond to messages from the renderer process
 ipcMain.handle('get-domain-cookies', async (event, args) => {
     try {
-        console.log('Getting cookies');
-        // Prepare data to send to the renderer process
+        const siteURL = args.data.site_url || 'https://animepahe.ru';
+        const userAgent = args.data.user_agent;
 
-        const browser = await puppeteer.launch({ headless: 'shell' });
-        const page = await browser.newPage();
+        console.log(
+            'Cookies Generating:',
+            '\nSite : ',
+            yellowTxt(siteURL),
+            '\nUserAgent: ',
+            userAgent,
+        );
 
-        // Set User-Agent and other headers if necessary
-        await page.setUserAgent(args.data.user_agent);
+        // To generate fresh cookies every time
+        await session.defaultSession.clearStorageData();
 
-        // Go to the website
-        await page.goto(args.data.site_url || 'https://animepahe.ru', {
-            waitUntil: 'networkidle2',
+        const cookieGenerationWindow = new BrowserWindow({
+            show: false,
         });
 
-        // Wait for the challenge to be solved and the page to navigate
-        await page.waitForNavigation({ waitUntil: 'networkidle0' });
+        // await purpose - wait for the 'did-finish-load' event to complete.
+        await cookieGenerationWindow.loadURL(siteURL, { userAgent });
 
-        // Get cookies after the challenge is solved
-        const cookies = await page.cookies();
-        console.log('Cookies generated');
-        await browser.close();
+        // No need for waitForNavigation as of now.
 
+        // Query all cookies - We can add the siteURL to get cookies from it, but we don't need to.
+        const cookies = await session.defaultSession.cookies.get({});
+
+        cookieGenerationWindow.destroy();
+
+        console.log('\nCookies generated\n', cookies);
         return cookies;
     } catch (error) {
-        console.log('Domain Cookies Error', error);
+        console.error('Domain Cookies Error', error);
         return [];
     }
 });
