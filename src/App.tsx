@@ -8,6 +8,7 @@ import { useHandleInitialSocketConnection } from './hooks/useHandleInitialSocket
 import { DownloadScreen } from './screens/DownloadsScreen';
 import { MyListScreen } from './screens/MyListScreen';
 import { NotFoundScreen } from './screens/NotFoundScreen';
+import { PlayerScreen } from './screens/PlayerScreen';
 import { AnimeDetailsScreen } from './screens/animeDetailsScreen';
 import { ExploreScreen } from './screens/exploreScreen';
 import { HomeScreen } from './screens/homeScreen';
@@ -83,6 +84,10 @@ const router = createHashRouter([
             {
                 path: 'play',
                 element: <InbuiltPlayerScreen />,
+            },
+            {
+                path: 'local-player',
+                element: <PlayerScreen />,
             },
             {
                 path: '*',

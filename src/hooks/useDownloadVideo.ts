@@ -32,7 +32,7 @@ export function useDownloadVideo() {
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
 
             const errMsg = error?.response?.data;
 

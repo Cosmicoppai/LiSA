@@ -152,8 +152,15 @@ export function VideoPlayer({
                     }}
                 />
             </div>
-            {/* @ts-ignore */}
-            <ExternalPlayerPopup isOpen={isOpen} onClose={onClose} language={language} />
+
+            <ExternalPlayerPopup
+                isOpen={isOpen}
+                onClose={onClose}
+                data={{
+                    type: 'manifest',
+                    manifest_url: url,
+                }}
+            />
         </Box>
     );
 }

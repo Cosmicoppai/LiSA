@@ -11,30 +11,20 @@ import {
     Stack,
     Text,
     Tooltip,
-    useDisclosure,
 } from '@chakra-ui/react';
-import { useState } from 'react';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 import { MdVideoLibrary } from 'react-icons/md';
 import { TbMoodSad } from 'react-icons/tb';
+import { useNavigate } from 'react-router-dom';
 import { openFileExplorer } from 'src/utils/fn';
 import { timeHourMin } from 'src/utils/time';
 
-import { ExternalPlayerPopup } from './externalPopup';
 import { TDownloadItem, useGetDownloadsHistory } from './useGetDownloads';
 import { formatBytes } from '../utils/formatBytes';
 
 export function DownloadsHistory() {
     const { data } = useGetDownloadsHistory();
-
-    const [playId, setPlayId] = useState(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const playClickHandler = async (id) => {
-        setPlayId(id);
-        onOpen();
-    };
 
     return (
         <Stack flex={1} flexDirection="column">
@@ -112,11 +102,7 @@ export function DownloadsHistory() {
                                                     rowGap: 20,
                                                 }}>
                                                 {item.episodes?.map((i) => (
-                                                    <DownloadsHistoryItem
-                                                        key={i.id}
-                                                        data={i}
-                                                        playClickHandler={playClickHandler}
-                                                    />
+                                                    <DownloadsHistoryItem key={i.id} data={i} />
                                                 ))}
                                             </div>
                                         </AccordionPanel>
@@ -129,24 +115,21 @@ export function DownloadsHistory() {
                     <DownloadsHistoryEmpty />
                 )}
             </Stack>
-            {/* @ts-ignore */}
-            <ExternalPlayerPopup
-                isOpen={isOpen}
-                onClose={onClose}
-                playId={playId}
-                historyPlay={true}
-            />
         </Stack>
     );
 }
 
-function DownloadsHistoryItem({
-    data,
-    playClickHandler,
-}: {
-    data: TDownloadItem;
-    playClickHandler: (id: TDownloadItem['id']) => void;
-}) {
+function DownloadsHistoryItem({ data }: { data: TDownloadItem }) {
+    const navigate = useNavigate();
+
+    function playClickHandler() {
+        navigate(
+            `/local-player?${new URLSearchParams({
+                q: JSON.stringify(data),
+            })}`,
+        );
+    }
+
     return (
         <section
             style={{
@@ -162,11 +145,11 @@ function DownloadsHistoryItem({
                         borderWidth: 1,
                         borderColor: 'white',
                         borderRadius: 20,
-                        padding: 16,
+                        padding: 14,
                         display: 'flex',
                         alignItems: 'center',
                     }}
-                    onClick={() => playClickHandler(data.id)}>
+                    onClick={playClickHandler}>
                     <Icon as={FaPlay} w={6} h={6} />
                 </Box>
             </Tooltip>

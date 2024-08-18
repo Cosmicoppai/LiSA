@@ -37,6 +37,8 @@ async function createMainWindow({ loadingWindow }: { loadingWindow: BrowserWindo
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
+            // TODO: Make webSecurity true
+            webSecurity: false,
             contextIsolation: true,
             nodeIntegration: true,
             preload: path.join(__dirname, 'preload.js'),

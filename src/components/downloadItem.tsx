@@ -81,7 +81,7 @@ export function DownloadItem({ data: fetchedData }) {
                         borderWidth: 1,
                         borderColor: 'white',
                         borderRadius: 20,
-                        padding: 16,
+                        padding: 14,
                         display: 'flex',
                         alignItems: 'center',
                     }}
