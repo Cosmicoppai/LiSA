@@ -19,7 +19,6 @@ export function ActiveDownloads() {
                 alignItems="flex-start"
                 pt={2}
                 p={4}
-                bg={'gray.900'}
                 minWidth={'400px'}>
                 {data.length ? (
                     <div

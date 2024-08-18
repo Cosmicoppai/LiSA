@@ -81,11 +81,10 @@ export const HomeScreen = () => {
                 justifyContent={'space-between'}
                 alignItems={'center'}
                 w={'100%'}
-                zIndex={1000}
-                backgroundColor={'var(--chakra-colors-gray-900)'}>
+                zIndex={1000}>
                 <AppModeSwitch />
             </Flex>
-            <Flex w="100%" h="100%" marginTop={'180px'} direction="column" bg={'gray.900'}>
+            <Flex w="100%" h="100%" marginTop={'180px'} direction="column">
                 {isOnline ? (
                     <Flex
                         align="center"

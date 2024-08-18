@@ -11,9 +11,8 @@ function getPythonServerCMD() {
         case 'win32':
             return `powershell -Command Start-Process -WindowStyle Hidden "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
         case 'linux':
-        case 'darwin': {
+        case 'darwin':
             return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
-        }
         default:
             // Unknown Platform.
             return null;

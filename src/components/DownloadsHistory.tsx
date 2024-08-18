@@ -46,7 +46,6 @@ export function DownloadsHistory() {
                 flexDirection="column"
                 alignItems="flex-start"
                 pt={2}
-                bg={'gray.900'}
                 minWidth={'400px'}>
                 {data.length ? (
                     <div

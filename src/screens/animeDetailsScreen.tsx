@@ -257,7 +257,6 @@ export function AnimeDetailsScreen() {
                                     borderRadius="lg"
                                     justifyContent="space-between"
                                     direction={'column'}
-                                    bg={'gray.900'}
                                     boxShadow={'2xl'}
                                     padding={0}
                                     w="100%">

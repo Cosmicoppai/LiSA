@@ -164,7 +164,6 @@ export function InbuiltPlayerScreen() {
                     borderRadius="lg"
                     justifyContent="space-between"
                     direction={'column'}
-                    bg={'gray.900'}
                     boxShadow={'2xl'}
                     padding={3}
                     w="100%">

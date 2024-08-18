@@ -1,8 +1,8 @@
 # 🤝 Contributing
 
-Thank you for help improving LiSA. All kinds of contributions are welcome. We are open to suggestions!
+Thank you for contributing to LiSA! We appreciate your contributions, whether they are bug reports, feature suggestions, or code improvements.
 
-Please submit an Issue or even better a PR and We'll review :)
+Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) or, even better a pull request, and we’ll review :)
 
 ## 📖 Development Setup
 
@@ -20,7 +20,7 @@ Please submit an Issue or even better a PR and We'll review :)
     ```bash
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
-- If you are an external contributor, fork this repository to your own GitHub account and then clone it to your local device.
+- If you are an external contributor, [fork](https://github.com/Cosmicoppai/LiSA/fork) this repository to your account and then clone it to your local device.
 
 ### Backend
 
@@ -49,7 +49,7 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./requirements.txt
     ```
 
-4. Run backend as a separate process `(only if your making changes in backend directory)`
+4. Run backend as a separate process `(if you are making changes in the backend directory)`.
     ```bash
     python backend/LiSA.py
     ```
@@ -92,7 +92,9 @@ Please submit an Issue or even better a PR and We'll review :)
     yarn make
 
     # For additional debug logs
-    DEBUG=true yarn make
+    
+    DEBUG=* yarn make
+    DEBUG=electron-* yarn make
     ```
 
 > [!NOTE]  
