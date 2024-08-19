@@ -340,7 +340,7 @@ def _get_sorted_jpg_files(file_path: Path) -> List[str]:
 
 
 def _process_manga_item(item: Dict[str, Any]) -> Dict[str, Any]:
-    if not item["file_location"].endswith(".pdf"):
+    if item and not item["file_location"].endswith(".pdf"):
         item["file_location"] = _get_sorted_jpg_files(Path(item["file_location"]))
     return item
 
