@@ -525,7 +525,7 @@ class VideoDownloader(Downloader):
         # Write the concat info and invoke ffmpeg to concatenate the files.
         file_size = self._write_concat_info(self.num_of_segments)
 
-        await self.update_db_record("downloaded", self.num_of_segments, file_size)
+        await self.update_db_record("downloaded", self.num_of_segments, file_size, str(self._output_file))
 
     async def get_key(self, client, segment):
         if self.key:
