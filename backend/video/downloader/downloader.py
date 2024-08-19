@@ -302,7 +302,7 @@ class MangaDownloader(Downloader):
 
         await client.close()  # CLose the http session.
 
-        file_path = self._post_process() or self.OUTPUT_LOC  # post process the images if necessary
+        file_path = self._post_process() or str(self.OUTPUT_LOC)  # post process the images if necessary
         await self.update_db_record("downloaded", self.num_of_segments, self.total_size, file_path)
 
         remove_folder(self.SEGMENT_DIR)  # remove segments
