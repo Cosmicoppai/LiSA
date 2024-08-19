@@ -7340,11 +7340,6 @@ videojs-hotkeys@^0.2.27:
   resolved "https://registry.npmjs.org/videojs-hotkeys/-/videojs-hotkeys-0.2.28.tgz"
   integrity sha512-M8rlD5OSB3EDRdbS4MRNlGKFpA2sSIStmUPvy5zfl/NigzWaN6r4wnb32rEN0v97GiQwmUfXSmqrPNrXhiFQmQ==
 
-videojs-pip@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/videojs-pip/-/videojs-pip-1.0.3.tgz"
-  integrity sha512-WvS9MxIsHRQ9xkqtzKF0pfNQrQs8esimW4EI9Wyp4DSRgaXb6R0RWo1aAnzffRZcku/ntZ1Vw1uvAmZvl3i8Pg==
-
 videojs-vtt.js@^0.15.5:
   version "0.15.5"
   resolved "https://registry.npmjs.org/videojs-vtt.js/-/videojs-vtt.js-0.15.5.tgz"

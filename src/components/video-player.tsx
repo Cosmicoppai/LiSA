@@ -6,7 +6,6 @@ import { QualityLevel, QualityLevelList } from 'videojs-contrib-quality-levels';
 import 'videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels';
 import hlsQualitySelector from 'videojs-hls-quality-selector';
 import 'videojs-hotkeys';
-import 'videojs-pip/videojs-pip';
 
 import { ExternalPlayerPopup } from './externalPopup';
 
@@ -43,8 +42,6 @@ export function VideoPlayer({
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
-            // @ts-ignore
-            pipButton: {},
         };
 
         const player = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {

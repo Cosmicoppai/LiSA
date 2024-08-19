@@ -37,7 +37,7 @@ async function createMainWindow({ loadingWindow }: { loadingWindow: BrowserWindo
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
-            // TODO: Make webSecurity true
+            // TODO: Make webSecurity true - setting to false to load local downloaded files
             webSecurity: false,
             contextIsolation: true,
             nodeIntegration: true,

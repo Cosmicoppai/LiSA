@@ -5,7 +5,7 @@ import videojs, { VideoJsPlayerOptions } from 'video.js';
 
 import 'video.js/dist/video-js.css';
 import 'videojs-hotkeys';
-import 'videojs-pip/videojs-pip';
+
 import { GoBackBtn } from '../components/GoBackBtn';
 import { ExternalPlayerPopup } from '../components/externalPopup';
 import { TDownloadItem } from '../components/useGetDownloads';
@@ -87,8 +87,6 @@ export function VideoPlayer() {
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
-            // @ts-ignore
-            pipButton: {},
         };
 
         const player = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
