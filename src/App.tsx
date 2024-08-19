@@ -13,6 +13,7 @@ import { AnimeDetailsScreen } from './screens/animeDetailsScreen';
 import { ExploreScreen } from './screens/exploreScreen';
 import { HomeScreen } from './screens/homeScreen';
 import { InbuiltPlayerScreen } from './screens/inbuiltPlayerScreen';
+import { LocalMangaReaderScreen } from './screens/localMangaReader';
 import { MangaDetailsScreen } from './screens/mangaDetailsScreen';
 import { MangaReaderScreen } from './screens/mangaReaderScreen';
 import { SettingScreen } from './screens/settingScreen';
@@ -80,6 +81,10 @@ const router = createHashRouter([
             {
                 path: 'manga-reader',
                 element: <MangaReaderScreen />,
+            },
+            {
+                path: 'local-manga-reader',
+                element: <LocalMangaReaderScreen />,
             },
             {
                 path: 'play',

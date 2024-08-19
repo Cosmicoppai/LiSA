@@ -6,19 +6,28 @@ export type TDownload = {
     title: string;
     type: 'anime' | 'manga';
     episodes: TDownloadItem[];
+    chapters: TDownloadMangaItem[];
 };
 
-export type TDownloadItem = {
+type TDownloadBase = {
     id: number;
-    type: 'video';
     series_name: string;
     file_name: string;
     status: 'downloaded' | 'paused' | 'started' | 'scheduled';
     created_on: string;
     total_size: number;
-    file_location: string;
     downloaded: number;
     speed: number;
+};
+
+export type TDownloadItem = TDownloadBase & {
+    type: 'video';
+    file_location: string;
+};
+
+export type TDownloadMangaItem = TDownloadBase & {
+    type: 'image';
+    file_location: string | string[];
 };
 
 export type TSocketEventDownloading = {
