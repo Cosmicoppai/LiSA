@@ -1,4 +1,5 @@
 import json
+import re
 from json import JSONDecodeError
 from video.library import DBLibrary, WatchList, ReadList
 from starlette.applications import Starlette
@@ -25,6 +26,7 @@ from sys import modules
 from glob import glob
 import logging
 from ebook import get_plugin, Plugin
+from pathlib import Path
 
 
 async def LiSA(request: Request):
@@ -329,14 +331,30 @@ def format_series(field: str, record: Dict[str, Any]) -> tuple:
     return record.get(field), record
 
 
+def _natural_sort_key(s):
+    return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
+
+
 def format_library_data(grouped_data: Dict[str, Any]):
     result = []
     for item_type, series in grouped_data.items():
         for title, items in series.items():
+            if item_type == "manga":
+                sub_part = []
+                for sublist in items.values():
+                    for item in sublist:
+                        if item["file_location"].split(".")[-1] != "pdf":
+                            file_path = Path(item["file_location"])
+                            jpg_files = glob(str(file_path / "*.jpg"))
+                            item["file_location"] = sorted(jpg_files, key=_natural_sort_key)
+
+                        sub_part.append(item)
+            else:
+                sub_part = [item for sublist in items.values() for item in sublist]
             result.append({
                 'type': item_type,
                 'title': title,
-                'chapters' if item_type == 'manga' else 'episodes': [item for sublist in items.values() for item in sublist]
+                'chapters' if item_type == 'manga' else 'episodes': sub_part
             })
     return result
 
