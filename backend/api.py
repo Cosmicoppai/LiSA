@@ -335,22 +335,29 @@ def _natural_sort_key(s):
     return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
 
 
+def _get_sorted_jpg_files(file_path: Path) -> List[str]:
+    return sorted(glob(str(file_path / "*.jpg")), key=_natural_sort_key)
+
+
+def _process_manga_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    if not item["file_location"].endswith(".pdf"):
+        item["file_location"] = _get_sorted_jpg_files(Path(item["file_location"]))
+    return item
+
+
 def format_library_data(grouped_data: Dict[str, Any]):
     result = []
     for item_type, series in grouped_data.items():
         for title, items in series.items():
             if item_type == "manga":
-                sub_part = []
-                for sublist in items.values():
-                    for item in sublist:
-                        if item["file_location"].split(".")[-1] != "pdf":
-                            file_path = Path(item["file_location"])
-                            jpg_files = glob(str(file_path / "*.jpg"))
-                            item["file_location"] = sorted(jpg_files, key=_natural_sort_key)
-
-                        sub_part.append(item)
+                sub_part = [
+                    _process_manga_item(item)
+                    for sublist in items.values()
+                    for item in sublist
+                ]
             else:
                 sub_part = [item for sublist in items.values() for item in sublist]
+
             result.append({
                 'type': item_type,
                 'title': title,
