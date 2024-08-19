@@ -19,11 +19,9 @@ function useGetCurrentLocalVideo() {
         return JSON.parse(q) as TDownloadItem;
     }, [searchParams]);
 
-    // const url = `file:///Users/rakesh/MyFiles/LiSA/downloads/anime/Doraemon_1979/AnimePahe_Doraemon_1979_-_0004_DVD_576p_Orange-Flash/AnimePahe_Doraemon_1979_-_0004_DVD_576p_Orange-Flash.mp4`;
-
     return {
         ...params,
-        // file_location: params.file_location || url,
+        file_location: `file:///${params?.file_location}`,
     };
 }
 
@@ -115,7 +113,7 @@ export function VideoPlayer() {
 
         playerRef.current = player;
 
-        player.enterFullWindow();
+        player.requestFullscreen();
 
         return () => {
             if (!player.isDisposed()) {
