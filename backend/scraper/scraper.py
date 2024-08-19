@@ -152,7 +152,7 @@ class Animepahe(Anime):
                                                       f"{ServerConfig.API_SERVER_ADDRESS}/ep_details?anime_session={anime_session}&")
             episodes["prev_page_url"] = prev_page_url
 
-            episode_session = episode_data.get("data", None)
+            episode_session = episode_data.get("data", [])
             for ep in episode_session:
                 episodes["ep_details"].append(
                     {ep["episode"]: {
