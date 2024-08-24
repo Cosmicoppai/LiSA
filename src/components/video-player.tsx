@@ -64,6 +64,8 @@ export function VideoPlayer({
             externalPlayerButtonDom.onclick = function () {
                 if (player.isFullscreen()) player.exitFullscreen();
 
+                player.pause();
+
                 onOpen();
             };
         }
@@ -98,8 +100,6 @@ export function VideoPlayer({
         player.src({
             src: url,
             type: 'application/x-mpegURL',
-            // @ts-ignore
-            withCredentials: false,
         });
 
         player.poster(snapshot);

@@ -7,7 +7,11 @@ import { isViteDEV } from 'src/constants/env';
 import { useSocketContext } from 'src/context/socket';
 import { formatBytes } from 'src/utils/formatBytes';
 
-import { TDownloadItem, TSocketEventDownloading, useDownloadingActions } from './useGetDownloads';
+import {
+    TDownloadItem,
+    TSocketEventDownloading,
+    useDownloadingActions,
+} from '../hooks/useGetDownloads';
 
 export function DownloadItem({ data: fetchedData }) {
     const { cancelDownload, pauseDownload, resumeDownload } = useDownloadingActions([

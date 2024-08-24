@@ -4,7 +4,7 @@ import {
     RQKEY_GET_DOWNLOADS_ACTIVE,
     RQKEY_GET_DOWNLOADS_HISTORY,
     TSocketEventDownloading,
-} from 'src/components/useGetDownloads';
+} from 'src/hooks/useGetDownloads';
 
 import { useSocketContext } from '../context/socket';
 import { TCookieReq } from '../types';

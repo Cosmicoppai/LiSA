@@ -6,6 +6,7 @@
         "checkJs": true,
         "jsx": "react-jsx",
         "skipLibCheck": true,
+        "noEmit": true,
         "esModuleInterop": true,
         "sourceMap": true,
         "moduleResolution": "node",
@@ -15,5 +16,7 @@
         "paths": {
             "@/*": ["*"]
         }
-    }
+    },
+    "include": ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
+    "exclude": ["node_modules", "backend"]
 }

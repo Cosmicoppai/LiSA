@@ -5,8 +5,8 @@ import server from 'src/utils/axios';
 export type TDownload = {
     title: string;
     type: 'anime' | 'manga';
-    episodes: TDownloadItem[];
-    chapters: TDownloadMangaItem[];
+    episodes: TDownloadAnimeEpisode[];
+    chapters: TDownloadMangaChapter[];
 };
 
 type TDownloadBase = {
@@ -20,15 +20,17 @@ type TDownloadBase = {
     speed: number;
 };
 
-export type TDownloadItem = TDownloadBase & {
+export type TDownloadAnimeEpisode = TDownloadBase & {
     type: 'video';
     file_location: string;
 };
 
-export type TDownloadMangaItem = TDownloadBase & {
+export type TDownloadMangaChapter = TDownloadBase & {
     type: 'image';
     file_location: string | string[];
 };
+
+export type TDownloadItem = TDownloadAnimeEpisode | TDownloadMangaChapter;
 
 export type TSocketEventDownloading = {
     data: TDownloadItem;

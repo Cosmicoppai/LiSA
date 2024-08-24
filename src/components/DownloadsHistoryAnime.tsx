@@ -14,13 +14,12 @@ import { useNavigate } from 'react-router-dom';
 import { openFileExplorer } from 'src/utils/fn';
 import { timeHourMin } from 'src/utils/time';
 
-import { TDownload, TDownloadItem } from './useGetDownloads';
+import { TDownload, TDownloadAnimeEpisode } from '../hooks/useGetDownloads';
 import { formatBytes } from '../utils/formatBytes';
 
 export function DownloadsHistoryAnimeItem({ item }: { item: TDownload }) {
     return (
         <div
-            key={`${item.type}-${item.title}`}
             style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -81,7 +80,7 @@ export function DownloadsHistoryAnimeItem({ item }: { item: TDownload }) {
     );
 }
 
-function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadItem }) {
+function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadAnimeEpisode }) {
     const navigate = useNavigate();
 
     function playClickHandler() {

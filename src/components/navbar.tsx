@@ -9,7 +9,7 @@ import {
 import { LuListVideo } from 'react-icons/lu';
 import { Link, useLocation } from 'react-router-dom';
 
-import { useGetActiveDownloads } from './useGetDownloads';
+import { useGetActiveDownloads } from '../hooks/useGetDownloads';
 
 export function Navbar() {
     return (
@@ -63,19 +63,27 @@ function NavBarItem({ label, to, Icon: IconAs }) {
 function NavBarDownloadItem({ label, to, Icon: IconAs }) {
     const { pathname } = useLocation();
 
-    const { data } = useGetActiveDownloads();
+    const { data = [] } = useGetActiveDownloads();
 
     const totalItems = useMemo(() => {
-        let n = 0;
-
-        if (data?.length) {
-            for (const d of data) {
-                const epLength = d?.episodes?.length;
-
-                if (epLength) n = n + epLength;
+        return data.reduce((total, item) => {
+            switch (item.type) {
+                case 'anime': {
+                    const epLength = item?.episodes?.length;
+                    if (epLength) return total + epLength;
+                    break;
+                }
+                case 'manga': {
+                    const epLength = item?.chapters?.length;
+                    if (epLength) return total + epLength;
+                    break;
+                }
+                default:
+                    break;
             }
-        }
-        return n;
+
+            return total;
+        }, 0);
     }, [data]);
 
     const countText = totalItems > 9 ? '9+' : totalItems;

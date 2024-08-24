@@ -2,7 +2,7 @@ import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { TbMoodSad } from 'react-icons/tb';
 
 import { DownloadItem } from './downloadItem';
-import { useGetActiveDownloads } from './useGetDownloads';
+import { useGetActiveDownloads } from '../hooks/useGetDownloads';
 
 export function ActiveDownloads() {
     const { data } = useGetActiveDownloads();

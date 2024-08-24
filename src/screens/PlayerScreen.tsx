@@ -8,7 +8,7 @@ import 'videojs-hotkeys';
 
 import { GoBackBtn } from '../components/GoBackBtn';
 import { ExternalPlayerPopup } from '../components/externalPopup';
-import { TDownloadItem } from '../components/useGetDownloads';
+import { TDownloadAnimeEpisode } from '../hooks/useGetDownloads';
 
 function useGetCurrentLocalVideo() {
     const [searchParams] = useSearchParams();
@@ -16,7 +16,7 @@ function useGetCurrentLocalVideo() {
     const params = useMemo(() => {
         const q = searchParams.get('q');
 
-        return JSON.parse(q) as TDownloadItem;
+        return JSON.parse(q) as TDownloadAnimeEpisode;
     }, [searchParams]);
 
     return {
@@ -107,6 +107,8 @@ export function VideoPlayer() {
             externalPlayerButtonDom.onclick = function () {
                 if (player.isFullscreen()) player.exitFullscreen();
 
+                player.pause();
+
                 onOpen();
             };
         }
@@ -130,8 +132,6 @@ export function VideoPlayer() {
         player.src({
             src: file_location,
             type: 'video/mp4',
-            // @ts-ignore
-            withCredentials: false,
         });
 
         player.currentTime(0);

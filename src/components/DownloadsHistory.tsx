@@ -1,9 +1,10 @@
 import { Accordion, Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Fragment } from 'react/jsx-runtime';
 import { TbMoodSad } from 'react-icons/tb';
 
 import { DownloadsHistoryAnimeItem } from './DownloadsHistoryAnime';
 import { DownloadsHistoryMangaItem } from './DownloadsHistoryManga';
-import { useGetDownloadsHistory } from './useGetDownloads';
+import { useGetDownloadsHistory } from '../hooks/useGetDownloads';
 
 export function DownloadsHistory() {
     const { data } = useGetDownloadsHistory();
@@ -28,13 +29,15 @@ export function DownloadsHistory() {
                             rowGap: 20,
                         }}>
                         <Accordion allowToggle>
-                            {data.map((item) =>
-                                item.type === 'manga' ? (
-                                    <DownloadsHistoryMangaItem item={item} />
-                                ) : (
-                                    <DownloadsHistoryAnimeItem item={item} />
-                                ),
-                            )}
+                            {data.map((item) => (
+                                <Fragment key={`${item.type}-${item.title}`}>
+                                    {item.type === 'manga' ? (
+                                        <DownloadsHistoryMangaItem item={item} />
+                                    ) : (
+                                        <DownloadsHistoryAnimeItem item={item} />
+                                    )}
+                                </Fragment>
+                            ))}
                         </Accordion>
                     </div>
                 ) : (
