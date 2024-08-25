@@ -71,7 +71,7 @@ export function DownloadsHistoryMangaItem({ item }: { item: TDownload }) {
                             rowGap: 20,
                         }}>
                         {item.chapters?.map((i) => (
-                            <DownloadsHistoryAnimeEpItem key={i.id} data={i} />
+                            <DownloadsHistoryAnimeEpItem key={i.id} data={i} mangaDetails={item} />
                         ))}
                     </div>
                 </AccordionPanel>
@@ -80,16 +80,25 @@ export function DownloadsHistoryMangaItem({ item }: { item: TDownload }) {
     );
 }
 
-function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadMangaChapter }) {
+function DownloadsHistoryAnimeEpItem({
+    data,
+    mangaDetails,
+}: {
+    data: TDownloadMangaChapter;
+    mangaDetails: TDownload;
+}) {
     const navigate = useNavigate();
 
     function playClickHandler() {
         navigate(
             `/local-manga-reader?${new URLSearchParams({
-                q: JSON.stringify(data),
+                q: JSON.stringify(mangaDetails),
+                chapter_id: String(data.id),
             })}`,
         );
     }
+
+    const filePath = Array.isArray(data.file_location) ? data.file_location[0] : data.file_location;
 
     return (
         <section
@@ -152,19 +161,15 @@ function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadMangaChapter }) 
                         }}>
                         {formatBytes(data.total_size)}
                     </span>
-
-                    {typeof data.file_location === 'string' ? (
-                        <Tooltip label={'Show file in folder'} placement="bottom-end">
-                            <Box
-                                // @ts-ignore
-                                onClick={() => openFileExplorer(data.file_location)}
-                                sx={{
-                                    cursor: 'pointer',
-                                }}>
-                                <AiOutlineFolderOpen size={22} />
-                            </Box>
-                        </Tooltip>
-                    ) : null}
+                    <Tooltip label={'Show file in folder'} placement="bottom-end">
+                        <Box
+                            onClick={() => openFileExplorer(filePath)}
+                            sx={{
+                                cursor: 'pointer',
+                            }}>
+                            <AiOutlineFolderOpen size={22} />
+                        </Box>
+                    </Tooltip>
                 </div>
             </div>
         </section>

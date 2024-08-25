@@ -384,7 +384,7 @@ function ChapterTabItem({
     );
 }
 
-function ChaptersSkeletons() {
+export function ChaptersSkeletons() {
     return (
         <Flex
             direction={'column'}
@@ -477,7 +477,7 @@ function MangaChapterImages({
     );
 }
 
-function ChapterImg({ src }: { src: string }) {
+export function ChapterImg({ src }: { src: string }) {
     // TODO: Add Skeleton Loader Here
     return (
         <img
