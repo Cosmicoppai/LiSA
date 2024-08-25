@@ -194,7 +194,12 @@ class MangaKatana(Manga):
                     title_data = rec_data.find("h3")
                     recommendation["title"] = title_data.text
                     total_chps_text = rec_data.find("div", {"class": "chapter"}).text.strip("Chapter ").split(" ")[0]
-                    recommendation["total_chps"] = float(re.search(r'\d+', total_chps_text).group())
+                    total_chps = re.search(r'\d+', total_chps_text)
+                    if not total_chps:
+                        total_chps = 1.0
+                    else:
+                        total_chps = float(total_chps.group())
+                    recommendation["total_chps"] = total_chps
                     recommendation["status"] = rec_data.find("div", {"class": "status"}).text
                     manga_session = title_data.find('a')['href']
                     recommendation["manga_detail"] = f"{ServerConfig.API_SERVER_ADDRESS}/manga_detail?session={manga_session}"
