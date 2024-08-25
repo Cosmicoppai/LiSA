@@ -336,11 +336,11 @@ def _natural_sort_key(s):
 
 
 def _get_sorted_jpg_files(file_path: Path) -> List[str]:
-    return sorted(glob(str(file_path / "*.jpg")), key=_natural_sort_key)
+    return sorted([str(f) for f in file_path.glob("*.jpg")], key=_natural_sort_key)
 
 
 def _process_manga_item(item: Dict[str, Any]) -> Dict[str, Any]:
-    if item and not item["file_location"].endswith(".pdf"):
+    if item and not item.get("file_location", "").endswith(".pdf"):
         item["file_location"] = _get_sorted_jpg_files(Path(item["file_location"]))
     return item
 
