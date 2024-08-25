@@ -15,7 +15,7 @@
 
 </div>
 
-A Desktop application, for streaming and downloading your favourite anime.
+A Desktop application, for streaming and downloading your favourite Anime & Manga.
 
 ## CONTENTS OF THE FILE
 
@@ -91,12 +91,6 @@ _My List_
 
 https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4
 
-## Future Plans
-
--   UI Improvement
--   Continue Watching
--   Download episodes with custom range
-
 ## 🤔 FAQ
 
 ### Q) How can I download detective conan's episodes from 10 to 30?
@@ -125,11 +119,17 @@ https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-
 
 ## 😶‍🌫️ Supported Websites
 
-Note: In the following version the user can only download from animepahe, more websites to come in future.
+### Anime
 
-| Website | Sub/Dub selection | Supported resolutions | File Size |
-|--- |--- |--- |--- |
-| [AnimePahe](https://animepahe.com/) | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
+| Website                                 | Sub/Dub selection | Supported resolutions | File Size |
+|-----------------------------------------|--- |--- |--- |
+| [AnimePahe](https://animepahe.ru/)      | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
+
+### Manga
+
+| Website                                 | Sub/Dub selection | Supported formats |
+|-----------------------------------------|-------------------|-------------------|
+| [MangaKatana](https://mangakatana.com/) | No                | JPG, PDF          |
 
 ## 📺 Supported External Players
 
@@ -150,18 +150,6 @@ Make sure mpv is added to Path.
 ### VLC Media Player
 
 Download and Install VLC Media player form [here](https://www.videolan.org/vlc/download-windows.html).
-
-## Filters
-
--   TV
--   Movie
--   Airing
--   Upcoming
--   By Popularity
--   OVA
--   ONA
--   Special
--   Favourite
 
 ## 🤝 CONTRIBUTING
 
