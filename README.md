@@ -22,12 +22,10 @@ A Desktop application, for streaming and downloading your favourite Anime & Mang
 -   [Features](#-features)
 -   [Download](#-download)
 -   [Demo](#-demo)
--   [Future Plans](#future-plans)
 -   [FAQ](#-faq)
 -   Appendix
     -   [Supported Webistes](#%EF%B8%8F-supported-websites)
     -   [Supported External Video Player](#-supported-external-players)
-    -   [Filters](#filters)
 -   [Contributing](#-contributing)
     -   [Setup](./CONTRIBUTING.md#-development-setup)
 -   [Support](#-support)
@@ -40,7 +38,7 @@ A Desktop application, for streaming and downloading your favourite Anime & Mang
 -   Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
 -   Batch Download
 -   Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
--   Explore anime based on different [filters](#filters)
+-   Explore anime based on different filters
 -   Download Manager
 -   Library to view pre-downloaded episodes and active downloads
 -   Recommendation System
@@ -68,25 +66,37 @@ xattr -c /Applications/LiSA.app
 
 ### Screenshots
 
-![search](demo_images/ss_search.png)
+![Anime Search](docs/images/ss_anime_search.png)
 _Search results for Bakuman_
 
-![Anime Details Page](demo_images/ss_anime_details.png)
+![Anime Details](docs/images/ss_anime_details.png)
 _Episode details of Bakuman_
 
-![Video Player](demo_images/ss_play_episode.png)
-_Built-in Video Player on LiSA_
+![Video Player](docs/images/ss_play_episode.png)
+_Built-in Video Player_
 
-![Download Manager and Library](demo_images/ss_download_manager.png)
-_Download Manager and Library_
+![Manga Search](docs/images/ss_manga_search.png)
+_Search results for Doraemon_
 
-![Explore Page](demo_images/ss_explore.png)
-_Explore Page with filters_
+![Manga Details](docs/images/ss_manga_details.png)
+_Episode details of Doraemon_
 
-![Explore Page Manga](demo_images/explore_page_manga.png)
-_Explore Page Manga_
+![Manga Reader](docs/images/ss_manga_reader.png)
+_Built-in Manga Reader_
 
-![My List](demo_images/my_list.png)
+![Explore Anime](docs/images/ss_anime_explore.png)
+_Explore Anime with filters_
+
+![Explore Manga](docs/images/ss_manga_explore.png)
+_Explore Manga with filters_
+
+![Download Manager and Library - 1](docs/images/ss_download_screen_1.png)
+_Download Manager and Library - 1_
+
+![Download Manager and Library - 2](docs/images/ss_download_screen_2.png)
+_Download Manager and Library - 2_
+
+![My List](docs/images/ss_my_list.png)
 _My List_
 
 https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-a1dd-77eff145a432.mp4

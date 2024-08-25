@@ -339,19 +339,22 @@ function ChapterTabItem({
                 {chp_no}
                 {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
             </Text>
-            <Icon
-                className="manga-chp-download-icon"
-                as={RxDownload}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    singleDownloadHandler();
-                }}
-                color={isSelected ? '#1A202C' : '#CBD5E0'}
-                _hover={{
-                    opacity: 0.8,
-                }}
-            />
-
+            <Tooltip label={'Download this chapter'} placement="top-start">
+                <Box>
+                    <Icon
+                        className="manga-chp-download-icon"
+                        as={RxDownload}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            singleDownloadHandler();
+                        }}
+                        color={isSelected ? '#1A202C' : '#CBD5E0'}
+                        _hover={{
+                            opacity: 0.8,
+                        }}
+                    />
+                </Box>
+            </Tooltip>
             <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Flex>
     );
