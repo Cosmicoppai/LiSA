@@ -219,7 +219,13 @@ export function AnimeDetailsScreen() {
                             <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
                                 External Links
                             </Text>
-                            <Box>
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    columnGap: 8,
+                                    flexWrap: 'wrap',
+                                    rowGap: 8,
+                                }}>
                                 {details?.description &&
                                     Object.entries(details?.description?.external_links).map(
                                         ([key, value], index) => {
@@ -228,14 +234,13 @@ export function AnimeDetailsScreen() {
                                                     title={value}
                                                     key={index}
                                                     onClick={() => openExternalUrl(value)}
-                                                    mr={2}
                                                     sx={{ cursor: 'pointer' }}>
                                                     {key}
                                                 </Tag>
                                             );
                                         },
                                     )}
-                            </Box>
+                            </div>
                         </div>
                         <PaginateCard />
                     </Stack>

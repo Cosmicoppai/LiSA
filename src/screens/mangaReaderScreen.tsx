@@ -1,9 +1,21 @@
-import { Box, Center, Flex, Heading, Icon, Image, Skeleton, Text, Tooltip } from '@chakra-ui/react';
+import {
+    Box,
+    Center,
+    Flex,
+    Heading,
+    Icon,
+    Image,
+    Skeleton,
+    Text,
+    Tooltip,
+    useDisclosure,
+} from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { BsSortNumericDown, BsSortNumericUp } from 'react-icons/bs';
 import { GoScreenFull, GoScreenNormal } from 'react-icons/go';
 import { RiZoomInLine, RiZoomOutLine } from 'react-icons/ri';
+import { RxDownload } from 'react-icons/rx';
 import {
     TbLayoutSidebarLeftCollapseFilled,
     TbLayoutSidebarRightCollapseFilled,
@@ -13,6 +25,8 @@ import { localImagesPath } from 'src/constants/images';
 import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
 import server from 'src/utils/axios';
 
+import { MetaDataPopup } from '../components/metadata-popup';
+import { useDownloadVideo } from '../hooks/useDownloadVideo';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
 import { TMangaChapter, TMangaChapters } from '../hooks/useGetMangaDetails';
 import { useZoomHandler } from '../hooks/useZoomHandler';
@@ -61,6 +75,20 @@ export function MangaReaderScreen() {
     const [showChapters, setShowChapters] = useState(true);
 
     const { scale, zoomIn, zoomOut, isZoomInDisabled, isZoomOutDisabled } = useZoomHandler();
+
+    const { downloadVideo, downloadLoading } = useDownloadVideo();
+
+    const downloadManga = () => {
+        downloadVideo({
+            manga_session: params.session,
+        });
+    };
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    useEffect(() => {
+        if (downloadLoading) onOpen();
+        else onClose();
+    }, [downloadLoading]);
 
     return (
         <div
@@ -177,6 +205,19 @@ export function MangaReaderScreen() {
 
                             alignItems: 'center',
                         }}>
+                        <Tooltip label={'Download'} placement="top">
+                            <Box cursor={'pointer'} onClick={downloadManga}>
+                                <Icon
+                                    as={RxDownload}
+                                    _hover={{
+                                        opacity: 0.8,
+                                    }}
+                                    w={6}
+                                    h={6}
+                                />
+                            </Box>
+                        </Tooltip>
+                        <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
                         <div
                             style={{
                                 display: 'flex',
@@ -232,7 +273,7 @@ export function MangaReaderScreen() {
                             display: 'flex',
                             flexGrow: 1,
                             overflowY: 'auto',
-                            transition: 'width 0.5s ease-in-out',
+                            transition: 'width 0.3s ease-in-out',
                             visibility: showChapters ? 'visible' : 'hidden',
                         }}>
                         {chapters?.length ? (
@@ -283,10 +324,26 @@ function ChapterTabItem({
 }) {
     const isSelected = chp_detail?.chp_link === currentChapter?.chp_link;
 
+    const { downloadVideo, downloadLoading } = useDownloadVideo();
+
+    const singleDownloadHandler = () => {
+        downloadVideo({
+            chp_session: chp_detail?.chp_session,
+        });
+    };
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    useEffect(() => {
+        if (downloadLoading) onOpen();
+        else onClose();
+    }, [downloadLoading]);
+
     return (
         <Flex
-            key={chp_no}
+            className="manga-chp-download-container"
             cursor={'pointer'}
+            justifyContent={'space-between'}
+            columnGap={2}
             p={2}
             title={` ${chp_no} ${chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}`}
             borderRadius={10}
@@ -309,6 +366,20 @@ function ChapterTabItem({
                 {chp_no}
                 {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
             </Text>
+            <Icon
+                className="manga-chp-download-icon"
+                as={RxDownload}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    singleDownloadHandler();
+                }}
+                color={isSelected ? '#1A202C' : '#CBD5E0'}
+                _hover={{
+                    opacity: 0.8,
+                }}
+            />
+
+            <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Flex>
     );
 }

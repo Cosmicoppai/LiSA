@@ -20,7 +20,6 @@ A Desktop application, for streaming and downloading your favourite anime.
 ## CONTENTS OF THE FILE
 
 -   [Features](#-features)
--   [Dependencies](#dependencies)
 -   [Download](#-download)
 -   [Demo](#-demo)
 -   [Future Plans](#future-plans)
@@ -45,16 +44,21 @@ A Desktop application, for streaming and downloading your favourite anime.
 -   Download Manager
 -   Library to view pre-downloaded episodes and active downloads
 -   Recommendation System
-
 <br>
 
 ## 🤗 Download
 
 [![Total Downloads](https://img.shields.io/github/downloads/Cosmicoppai/LiSA/total.svg?style=for-the-badge)](https://github.com/Cosmicoppai/LiSA/releases/latest)
 
-> Note: Currently only windows executables are provided.
-
 Download the [latest release](https://github.com/Cosmicoppai/LiSA/releases/latest) from here and extract the zip file.
+
+On Windows, ensure you run as an administrator and allow incoming port forwarding on `6969` and `9000`.
+ 
+On macOS, run the below command in terminal. See [reference](https://discussions.apple.com/thread/253714860?answerId=257037956022&sortBy=rank#257037956022)
+
+```
+xattr -c /Applications/LiSA.app
+```
 
 ### Tested on
 
@@ -121,7 +125,8 @@ https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-
 
 ## 😶‍🌫️ Supported Websites
 
-Note: In the following version the user can only download from animepahe, more websites to come in future. <br>
+Note: In the following version the user can only download from animepahe, more websites to come in future.
+
 | Website | Sub/Dub selection | Supported resolutions | File Size |
 |--- |--- |--- |--- |
 | [AnimePahe](https://animepahe.com/) | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
@@ -140,13 +145,11 @@ OR
 
 Visit: [Official MPV site](https://mpv.io/installation/)
 
-Make sure mpv is added to Path.<br> <br>
+Make sure mpv is added to Path.
 
 ### VLC Media Player
 
 Download and Install VLC Media player form [here](https://www.videolan.org/vlc/download-windows.html).
-
-<br>
 
 ## Filters
 

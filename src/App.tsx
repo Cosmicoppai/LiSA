@@ -1,7 +1,7 @@
 import { Box } from '@chakra-ui/react';
 import { RouterProvider, createHashRouter, Outlet, ScrollRestoration } from 'react-router-dom';
 
-import './styles/App.css';
+import './styles/videojs-skin.css';
 
 import { Navbar } from './components/navbar';
 import { useHandleInitialSocketConnection } from './hooks/useHandleInitialSocketConnection';

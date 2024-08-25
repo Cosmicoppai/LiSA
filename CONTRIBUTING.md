@@ -96,6 +96,3 @@ Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) o
     DEBUG=* yarn make
     DEBUG=electron-* yarn make
     ```
-
-> [!NOTE]  
-> On Windows, ensure you run as an administrator and allow incoming port forwarding on `6969` and `9000`.

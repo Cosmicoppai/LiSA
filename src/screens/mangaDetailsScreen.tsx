@@ -217,13 +217,17 @@ export function MangaDetailsScreen() {
                                 <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                                     Genre
                                 </Text>
-                                <Box>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        columnGap: 8,
+                                        flexWrap: 'wrap',
+                                        rowGap: 8,
+                                    }}>
                                     {params.genres?.map((item, index) => (
-                                        <Tag key={index} mr={2}>
-                                            {item}
-                                        </Tag>
+                                        <Tag key={index}>{item}</Tag>
                                     ))}
-                                </Box>
+                                </div>
                             </div>
                         ) : null}
                         <div

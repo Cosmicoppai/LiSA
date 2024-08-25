@@ -1,4 +1,5 @@
 import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Fragment } from 'react/jsx-runtime';
 import { TbMoodSad } from 'react-icons/tb';
 
 import { DownloadItem } from './downloadItem';
@@ -29,7 +30,20 @@ export function ActiveDownloads() {
                             rowGap: 20,
                         }}>
                         {data.map((item) => (
-                            <>{item.episodes?.map((i) => <DownloadItem key={i.id} data={i} />)}</>
+                            <Fragment key={`${item.type}-${item.title}`}>
+                                <>
+                                    {item.type === 'anime'
+                                        ? item.episodes?.map((i) => (
+                                              <DownloadItem key={i.id} data={i} />
+                                          ))
+                                        : null}
+                                    {item.type === 'manga'
+                                        ? item.chapters?.map((i) => (
+                                              <DownloadItem key={i.id} data={i} />
+                                          ))
+                                        : null}
+                                </>
+                            </Fragment>
                         ))}
                     </div>
                 ) : (
