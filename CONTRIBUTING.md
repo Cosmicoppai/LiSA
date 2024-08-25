@@ -1,28 +1,26 @@
 # 🤝 Contributing
 
-Thank you for help improving LiSA. All kinds of contributions are welcome. We are open to suggestions!
+Thank you for contributing to LiSA! We appreciate your contributions, whether they are bug reports, feature suggestions, or code improvements.
 
-Please submit an Issue or even better a PR and We'll review :)
+Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) or, even better a pull request, and we’ll review :)
 
 ## 📖 Development Setup
 
+### Prerequisites / Dependencies
+
+- Make sure [Python 3.10.x](https://www.python.org/downloads/release/python-31014) || [Python 3.11.x](https://www.python.org/downloads/release/python-3119) && [Node.js >=18](https://nodejs.org/en/download/package-manager) are installed.
+
+- Run all commands in the project root.
+
+- Powershell is recommended for windows.
+
 ### Clone Repo
 
--   Clone the project using
-
+- If you are a collaborator, clone the repository.
     ```bash
     git clone https://github.com/Cosmicoppai/LiSA.git
     ```
-
-### Prerequisites / Dependencies
-
--   Make sure [Python 3.10](https://www.python.org/downloads/release/python-31011/) and [Node.js](https://nodejs.org/en/download/package-manager) >=18 are installed.
-
--   Download [ffmpeg](https://ffmpeg.org/download.html).
-
--   Run all commands in root folder.
-
--   Powershell is recommended for windows.
+- If you are an external contributor, [fork](https://github.com/Cosmicoppai/LiSA/fork) this repository to your account and then clone it to your local device.
 
 ### Backend
 
@@ -51,7 +49,11 @@ Please submit an Issue or even better a PR and We'll review :)
     pip install -r ./requirements.txt
     ```
 
-4. Add `ffmpeg` executable to root folder or in `PATH` Var.
+4. Run backend as a separate process `(if you are making changes in the backend directory)`.
+    ```bash
+    python backend/LiSA.py
+    ```
+
 
 ### Frontend
 
@@ -62,25 +64,25 @@ Please submit an Issue or even better a PR and We'll review :)
     VITE_SOCKET_URL=ws://localhost:9000
     ```
 
-3. Install yarn
+2. Install yarn
     ```bash
     npm i -g yarn
     ```
 
-3. Install Node modules
+3. Install node modules
 
     ```bash
     yarn
     ```
 
-4. Start dev app using
+4. Start dev app
     ```bash
     yarn start
     ```
 
 ### Build package
 
-- Build Backend
+- Build backend
     ```bash
     yarn build:python
     ```
@@ -88,9 +90,9 @@ Please submit an Issue or even better a PR and We'll review :)
 - Make distributable packages
     ```bash
     yarn make
+
+    # For additional debug logs
+    
+    DEBUG=* yarn make
+    DEBUG=electron-* yarn make
     ```
-
-
-Note:
-
-> Make sure to allow app to run as admin and allow incoming port forwarding on (`6969`, `9000`).

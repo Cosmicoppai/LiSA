@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import { app } from 'electron';
 import fs from 'fs';
 import path from 'path';
 
@@ -11,9 +12,8 @@ function getPythonServerCMD() {
         case 'win32':
             return `powershell -Command Start-Process -WindowStyle Hidden "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
         case 'linux':
-        case 'darwin': {
+        case 'darwin':
             return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
-        }
         default:
             // Unknown Platform.
             return null;
@@ -27,7 +27,11 @@ export function startPythonServer() {
         return;
     }
 
-    const logPath = path.join(path.dirname(process.execPath), 'LiSA.log');
+    const logPath = path.join(
+        isViteDEV ? app.getAppPath() : path.dirname(process.execPath),
+        'LiSA.log',
+    );
+
     fs.writeFileSync(logPath, '', { encoding: 'utf8' }); // clear logs
 
     const pythonServer = spawn(cmd, {

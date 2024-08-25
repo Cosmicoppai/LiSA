@@ -1,1 +1,1 @@
-from .conversion import get_plugin
+from .plugins import get_plugin, Plugin

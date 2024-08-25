@@ -1,15 +1,13 @@
 import { app, BrowserWindow } from 'electron';
+import isSquirrelStartup from 'electron-squirrel-startup';
 import path from 'path';
 
 import './electron-main/ipcMainHandlers';
-
 import { isViteDEV } from './constants/env';
 import { killPythonServer, startPythonServer } from './electron-main/pythonServer';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) {
-    app.quit();
-}
+if (isSquirrelStartup) app.quit();
 
 const loadingWindowFilePath = path.join(
     __dirname,
@@ -39,6 +37,8 @@ async function createMainWindow({ loadingWindow }: { loadingWindow: BrowserWindo
         show: false,
         autoHideMenuBar: true,
         webPreferences: {
+            // TODO: Make webSecurity true - setting to false to load local downloaded files
+            webSecurity: false,
             contextIsolation: true,
             nodeIntegration: true,
             preload: path.join(__dirname, 'preload.js'),

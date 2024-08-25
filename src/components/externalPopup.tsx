@@ -12,37 +12,56 @@ import {
     Text,
 } from '@chakra-ui/react';
 import { localImagesPath } from 'src/constants/images';
-import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
 import { usePlayVideoExternal } from 'src/hooks/usePlayVideoExternal';
 
-export function ExternalPlayerPopup({ isOpen, onClose, language, historyPlay, playId }) {
-    const {
-        data: { streamDetails: details },
-    } = useGetAnimeStream();
+type TExternalPlayerPopup =
+    | {
+          type: 'manifest';
+          manifest_url: string;
+      }
+    | {
+          type: 'download_id';
+          download_id: string | number;
+      };
 
+export function ExternalPlayerPopup({
+    isOpen,
+    onClose,
+    data,
+}: {
+    isOpen: boolean;
+    onClose: () => void;
+    data: TExternalPlayerPopup;
+}) {
     const { playVideoExternalMutation } = usePlayVideoExternal();
+
+    function getPlayVideoExternalMutationData() {
+        switch (data.type) {
+            case 'manifest':
+                return {
+                    manifest_url: data.manifest_url,
+                };
+            case 'download_id':
+                return {
+                    id: data.download_id,
+                };
+            default:
+                break;
+        }
+    }
 
     const playHandler = async (player) => {
         try {
-            if (historyPlay) {
-                await playVideoExternalMutation.mutateAsync({
-                    id: playId,
-                    player,
-                });
-                onClose();
-            } else {
-                if (details) {
-                    await playVideoExternalMutation.mutateAsync({
-                        manifest_url: details[language],
-                        player,
-                    });
-                    onClose();
-                }
-            }
+            await playVideoExternalMutation.mutateAsync({
+                ...getPlayVideoExternalMutationData(),
+                player,
+            });
+            onClose();
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     };
+
     // @ts-ignore
     const error = playVideoExternalMutation.error?.response?.data?.error;
 
@@ -58,7 +77,7 @@ export function ExternalPlayerPopup({ isOpen, onClose, language, historyPlay, pl
                 <ModalCloseButton />
                 <ModalBody>
                     <Flex display={'flex'} alignItems={'center'} justifyContent={'center'}>
-                        <Box p={4} onClick={() => playHandler('mpv')} sx={{ cursor: 'pointer' }}>
+                        <Box p={4} sx={{ cursor: 'pointer' }} onClick={() => playHandler('mpv')}>
                             <Image src={localImagesPath.mpv} />
                         </Box>
                         <Box p={4} sx={{ cursor: 'pointer' }} onClick={() => playHandler('vlc')}>

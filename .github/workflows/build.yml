@@ -9,6 +9,10 @@ jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -18,10 +22,10 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Use Node.js 20
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '22.5.1'
+        node-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
       run: |
@@ -46,6 +50,10 @@ jobs:
   build-macos:
     runs-on: macos-latest
 
+    strategy:
+      matrix:
+        node-version: [20.x]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -55,10 +63,10 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Use Node.js 20
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '22.5.1'
+        node-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
       run: |
@@ -77,10 +85,14 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: macos-artifact
-        path: out/make/*.dmg
+        path: out/make/*.dmg, out/make/zip/darwin/arm64/*.zip
 
   build-windows:
     runs-on: windows-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
 
     steps:
     - name: Checkout code
@@ -91,10 +103,10 @@ jobs:
       with:
         python-version: 3.11
 
-    - name: Use Node.js 20
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
-        node-version: '22.5.1'
+        node-version: ${{ matrix.node-version }}
 
     - name: Install dependencies
       run: |
@@ -139,7 +151,7 @@ jobs:
         with:
           token: ${{ secrets.LISA }}
           tag: ${{ steps.get_latest_tag.outputs.LATEST_TAG }}
-          release_name: Release ${{ steps.get_latest_tag.outputs.LATEST_TAG }}
-          draft: false
+          name: Release ${{ steps.get_latest_tag.outputs.LATEST_TAG }}
+          draft: true
           prerelease: false
           artifacts: "ubuntu-artifact/*,macos-artifact/*,windows-artifact/*"

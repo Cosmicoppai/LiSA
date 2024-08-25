@@ -1,8 +1,10 @@
+import react from '@vitejs/plugin-react';
 import type { ConfigEnv, UserConfig } from 'vite';
 import { defineConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+
 import { pluginExposeRenderer } from './vite.base.config.js';
 
-import tsconfigPaths from 'vite-tsconfig-paths';
 // https://vitejs.dev/config
 export default defineConfig((env) => {
     const forgeEnv = env as ConfigEnv<'renderer'>;
@@ -19,14 +21,12 @@ export default defineConfig((env) => {
             rollupOptions: {
                 // https://stackoverflow.com/questions/76694615/module-level-directives-cause-errors-when-bundled-use-client-was-ignored-caus
                 onwarn(warning, warn) {
-                    if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
-                        return;
-                    }
+                    if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
                     warn(warning);
                 },
             },
         },
-        plugins: [tsconfigPaths(), pluginExposeRenderer(name)],
+        plugins: [tsconfigPaths(), pluginExposeRenderer(name), react()],
         resolve: {
             preserveSymlinks: true,
         },

@@ -17,17 +17,20 @@ import {
     TabPanel,
     Tag,
     Button,
+    useDisclosure,
 } from '@chakra-ui/react';
-import { useMemo } from 'react';
-import { AiFillStar } from 'react-icons/ai';
+import { useEffect, useMemo } from 'react';
+import { AiFillRead, AiFillStar } from 'react-icons/ai';
 import { FiMonitor } from 'react-icons/fi';
+import { RxDownload } from 'react-icons/rx';
 import { useNavigate } from 'react-router-dom';
 import { AddToWatchListManga } from 'src/components/AddToWatchListManga';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
 
 import { Recommendations } from '../components/Recommendations';
-
+import { MetaDataPopup } from '../components/metadata-popup';
+import { useDownloadVideo } from '../hooks/useDownloadVideo';
 export function MangaDetailsScreen() {
     const navigate = useNavigate();
 
@@ -52,6 +55,21 @@ export function MangaDetailsScreen() {
             })}`,
         );
     };
+
+    const { downloadVideo, downloadLoading } = useDownloadVideo();
+
+    const downloadManga = () => {
+        downloadVideo({
+            manga_session: params.session,
+        });
+    };
+
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    useEffect(() => {
+        if (downloadLoading) onOpen();
+        else onClose();
+    }, [downloadLoading]);
 
     return (
         <Center py={6} w="100%">
@@ -217,23 +235,45 @@ export function MangaDetailsScreen() {
                                 <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                                     Genre
                                 </Text>
-                                <Box>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        columnGap: 8,
+                                        flexWrap: 'wrap',
+                                        rowGap: 8,
+                                    }}>
                                     {params.genres?.map((item, index) => (
-                                        <Tag key={index} mr={2}>
-                                            {item}
-                                        </Tag>
+                                        <Tag key={index}>{item}</Tag>
                                     ))}
-                                </Box>
+                                </div>
                             </div>
                         ) : null}
                         <div
                             style={{
                                 display: 'flex',
                                 flexGrow: 1,
+                                width: '100%',
+                                justifyContent: 'space-between',
                                 alignItems: 'flex-end',
                             }}>
                             {details?.chapters?.length ? (
-                                <Button onClick={handleRead}>Read</Button>
+                                <>
+                                    <Button onClick={handleRead}>
+                                        <Icon as={AiFillRead} w={6} h={6} marginRight={2} />{' '}
+                                        <span>Read</span>
+                                    </Button>
+
+                                    <Button onClick={downloadManga}>
+                                        <Icon as={RxDownload} w={6} h={6} marginRight={2} />
+                                        <span>Download</span>
+                                    </Button>
+
+                                    <MetaDataPopup
+                                        isOpen={isOpen}
+                                        onOpen={onOpen}
+                                        onClose={onClose}
+                                    />
+                                </>
                             ) : isLoading ? (
                                 <Skeleton p={2} m={2} width={'48px'} height={'48px'} />
                             ) : null}
@@ -253,7 +293,6 @@ export function MangaDetailsScreen() {
                                     borderRadius="lg"
                                     justifyContent="space-between"
                                     direction={'column'}
-                                    bg={'gray.900'}
                                     boxShadow={'2xl'}
                                     padding={0}
                                     w="100%">

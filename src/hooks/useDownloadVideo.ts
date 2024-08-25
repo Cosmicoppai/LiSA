@@ -1,7 +1,7 @@
 import { createStandaloneToast } from '@chakra-ui/toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
-import { RQKEY_GET_DOWNLOADS_ACTIVE } from 'src/components/useGetDownloads';
+import { RQKEY_GET_DOWNLOADS_ACTIVE } from 'src/hooks/useGetDownloads';
 import server from 'src/utils/axios';
 
 const { toast } = createStandaloneToast();
@@ -32,7 +32,7 @@ export function useDownloadVideo() {
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
 
             const errMsg = error?.response?.data;
 

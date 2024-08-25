@@ -31,6 +31,7 @@ function ForceDarkMode() {
 
     return null;
 }
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <ChakraProvider theme={theme}>
         <ForceDarkMode />
@@ -39,7 +40,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                 <AppContextProvider>
                     <App />
                 </AppContextProvider>
-                <ReactQueryDevtools />
+                <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
             </QueryClientProvider>
         </SocketContextProvider>
     </ChakraProvider>,

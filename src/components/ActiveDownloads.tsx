@@ -1,8 +1,9 @@
 import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Fragment } from 'react/jsx-runtime';
 import { TbMoodSad } from 'react-icons/tb';
 
 import { DownloadItem } from './downloadItem';
-import { useGetActiveDownloads } from './useGetDownloads';
+import { useGetActiveDownloads } from '../hooks/useGetDownloads';
 
 export function ActiveDownloads() {
     const { data } = useGetActiveDownloads();
@@ -13,14 +14,7 @@ export function ActiveDownloads() {
                 Active Downloads
             </Heading>
 
-            <Stack
-                flex={1}
-                flexDirection="column"
-                alignItems="flex-start"
-                pt={2}
-                p={4}
-                bg={'gray.900'}
-                minWidth={'400px'}>
+            <Stack flex={1} flexDirection="column" alignItems="flex-start" p={2} minWidth={'400px'}>
                 {data.length ? (
                     <div
                         style={{
@@ -30,7 +24,20 @@ export function ActiveDownloads() {
                             rowGap: 20,
                         }}>
                         {data.map((item) => (
-                            <>{item.episodes?.map((i) => <DownloadItem key={i.id} data={i} />)}</>
+                            <Fragment key={`${item.type}-${item.title}`}>
+                                <>
+                                    {item.type === 'anime'
+                                        ? item.episodes?.map((i) => (
+                                              <DownloadItem key={i.id} data={i} />
+                                          ))
+                                        : null}
+                                    {item.type === 'manga'
+                                        ? item.chapters?.map((i) => (
+                                              <DownloadItem key={i.id} data={i} />
+                                          ))
+                                        : null}
+                                </>
+                            </Fragment>
                         ))}
                     </div>
                 ) : (

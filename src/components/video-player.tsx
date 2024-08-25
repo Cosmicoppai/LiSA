@@ -6,7 +6,6 @@ import { QualityLevel, QualityLevelList } from 'videojs-contrib-quality-levels';
 import 'videojs-contrib-quality-levels/dist/videojs-contrib-quality-levels';
 import hlsQualitySelector from 'videojs-hls-quality-selector';
 import 'videojs-hotkeys';
-import 'videojs-pip/videojs-pip';
 
 import { ExternalPlayerPopup } from './externalPopup';
 
@@ -43,8 +42,6 @@ export function VideoPlayer({
                 nativeVideoTracks: true,
                 nativeTextTracks: true,
             },
-            // @ts-ignore
-            pipButton: {},
         };
 
         const player = videojs(videoRef.current, videoJsOptions, function onPlayerReady() {
@@ -66,6 +63,8 @@ export function VideoPlayer({
             // @ts-ignore
             externalPlayerButtonDom.onclick = function () {
                 if (player.isFullscreen()) player.exitFullscreen();
+
+                player.pause();
 
                 onOpen();
             };
@@ -101,8 +100,6 @@ export function VideoPlayer({
         player.src({
             src: url,
             type: 'application/x-mpegURL',
-            // @ts-ignore
-            withCredentials: false,
         });
 
         player.poster(snapshot);
@@ -134,26 +131,43 @@ export function VideoPlayer({
     }, [playerRef, snapshot, url, prevTime]);
 
     return (
-        <Box p={3} width="100%">
-            <div data-vjs-player>
-                <video
-                    id="my-video"
-                    ref={videoRef}
-                    className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
-                    controls
-                    lang={language}
-                    onLoadedMetadata={(e) => {
-                        // @ts-ignore
-                        setVidDuration(e.target.duration);
-                    }}
-                    onTimeUpdate={(e) => {
-                        // @ts-ignore
-                        if (e.target.currentTime >= vidDuration - 1) nextEpHandler();
-                    }}
-                />
-            </div>
-            {/* @ts-ignore */}
-            <ExternalPlayerPopup isOpen={isOpen} onClose={onClose} language={language} />
+        <Box
+            p={3}
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+            }}>
+            <Box
+                w={{
+                    base: '80%',
+                    '2xl': '70%',
+                }}>
+                <div data-vjs-player>
+                    <video
+                        id="my-video"
+                        ref={videoRef}
+                        className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
+                        controls
+                        lang={language}
+                        onLoadedMetadata={(e) => {
+                            // @ts-ignore
+                            setVidDuration(e.target.duration);
+                        }}
+                        onTimeUpdate={(e) => {
+                            // @ts-ignore
+                            if (e.target.currentTime >= vidDuration - 1) nextEpHandler();
+                        }}
+                    />
+                </div>
+            </Box>
+            <ExternalPlayerPopup
+                isOpen={isOpen}
+                onClose={onClose}
+                data={{
+                    type: 'manifest',
+                    manifest_url: url,
+                }}
+            />
         </Box>
     );
 }

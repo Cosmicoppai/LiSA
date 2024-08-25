@@ -1,7 +1,7 @@
-import { SearchIcon } from '@chakra-ui/icons';
 import { Box, Flex, Input, InputGroup, InputLeftElement, Text, Image } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { IoIosSearch } from 'react-icons/io';
 import { useSearchParams } from 'react-router-dom';
 import { AnimeCard } from 'src/components/AnimeCard';
 import { AppModeSwitch } from 'src/components/AppModeSwitch';
@@ -81,11 +81,10 @@ export const HomeScreen = () => {
                 justifyContent={'space-between'}
                 alignItems={'center'}
                 w={'100%'}
-                zIndex={1000}
-                backgroundColor={'var(--chakra-colors-gray-900)'}>
+                zIndex={1000}>
                 <AppModeSwitch />
             </Flex>
-            <Flex w="100%" h="100%" marginTop={'180px'} direction="column" bg={'gray.900'}>
+            <Flex w="100%" h="100%" marginTop={'180px'} direction="column">
                 {isOnline ? (
                     <Flex
                         align="center"
@@ -99,7 +98,7 @@ export const HomeScreen = () => {
                             <InputGroup>
                                 <InputLeftElement
                                     pointerEvents="none"
-                                    children={<SearchIcon color="gray.300" />}
+                                    children={<IoIosSearch color="gray.300" size={22} />}
                                 />
                                 <Input
                                     sx={{ position: 'relative' }}
@@ -107,6 +106,7 @@ export const HomeScreen = () => {
                                     placeholder={`Search ${mode === 'manga' ? 'Manga' : 'Anime'}`}
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
+                                    spellCheck="false"
                                 />
                             </InputGroup>
                         </Box>

@@ -1,11 +1,12 @@
 import json
+import re
 from json import JSONDecodeError
 from video.library import DBLibrary, WatchList, ReadList
 from starlette.applications import Starlette
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List, Dict, Any, Type
 from errors.http_error import not_found_404, bad_request_400, internal_server_500, service_unavailable_503
 from video.downloader import DownloadManager, MangaDownloader
 from scraper import Animepahe, MyAL, MangaKatana, Proxy
@@ -24,7 +25,8 @@ from sqlite3 import IntegrityError
 from sys import modules
 from glob import glob
 import logging
-from ebook import get_plugin
+from ebook import get_plugin, Plugin
+from pathlib import Path
 
 
 async def LiSA(request: Request):
@@ -259,7 +261,7 @@ async def download(request: Request):
             case "image":
                 site = "mangakatana"
 
-                post_processor = get_plugin(jb.get("download_as", None))
+                post_processor: Type[Plugin] = get_plugin(jb.get("download_as", None))
 
                 if jb.get("manga_session", None):
                     await DownloadManager.schedule(typ, jb["manga_session"], site=site, page=jb.get("page_no", 1), post_processor=post_processor)
@@ -329,14 +331,37 @@ def format_series(field: str, record: Dict[str, Any]) -> tuple:
     return record.get(field), record
 
 
+def _natural_sort_key(s):
+    return [int(c) if c.isdigit() else c.lower() for c in re.split(r'(\d+)', s)]
+
+
+def _get_sorted_jpg_files(file_path: Path) -> List[str]:
+    return sorted([str(f) for f in file_path.glob("*.jpg")], key=_natural_sort_key)
+
+
+def _process_manga_item(item: Dict[str, Any]) -> Dict[str, Any]:
+    if item.get("file_location") and not item.get("file_location").endswith(".pdf"):
+        item["file_location"] = _get_sorted_jpg_files(Path(item["file_location"]))
+    return item
+
+
 def format_library_data(grouped_data: Dict[str, Any]):
     result = []
     for item_type, series in grouped_data.items():
         for title, items in series.items():
+            if item_type == "manga":
+                sub_part = [
+                    _process_manga_item(item)
+                    for sublist in items.values()
+                    for item in sublist
+                ]
+            else:
+                sub_part = [item for sublist in items.values() for item in sublist]
+
             result.append({
                 'type': item_type,
                 'title': title,
-                'chapters' if item_type == 'manga' else 'episodes': [item for sublist in items.values() for item in sublist]
+                'chapters' if item_type == 'manga' else 'episodes': sub_part
             })
     return result
 
@@ -368,7 +393,8 @@ async def library(request: Request):
         status = ["started", "scheduled", "paused"]
 
     return JSONResponse(format_library_data(
-        DBLibrary.group_by(group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
+        DBLibrary.group_by(query=["id", "type", "series_name", "file_name", "status", "total_size", "file_location", "created_on"],
+                           group_fields=['type', 'series_name', 'file_name'], filters={"status": status},
                            format_func=format_series)
     ))
 
@@ -613,7 +639,7 @@ middleware = [
 ]
 
 app = Starlette(
-    debug=True,
+    debug=False,
     routes=routes,
     exception_handlers=exception_handlers,
     middleware=middleware,

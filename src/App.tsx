@@ -1,17 +1,19 @@
 import { Box } from '@chakra-ui/react';
 import { RouterProvider, createHashRouter, Outlet, ScrollRestoration } from 'react-router-dom';
 
-import './styles/App.css';
+import './styles/videojs-skin.css';
 
 import { Navbar } from './components/navbar';
 import { useHandleInitialSocketConnection } from './hooks/useHandleInitialSocketConnection';
 import { DownloadScreen } from './screens/DownloadsScreen';
 import { MyListScreen } from './screens/MyListScreen';
 import { NotFoundScreen } from './screens/NotFoundScreen';
+import { PlayerScreen } from './screens/PlayerScreen';
 import { AnimeDetailsScreen } from './screens/animeDetailsScreen';
 import { ExploreScreen } from './screens/exploreScreen';
 import { HomeScreen } from './screens/homeScreen';
 import { InbuiltPlayerScreen } from './screens/inbuiltPlayerScreen';
+import { LocalMangaReaderScreen } from './screens/localMangaReader';
 import { MangaDetailsScreen } from './screens/mangaDetailsScreen';
 import { MangaReaderScreen } from './screens/mangaReaderScreen';
 import { SettingScreen } from './screens/settingScreen';
@@ -45,6 +47,7 @@ function AppLayout() {
 
 const router = createHashRouter([
     {
+        path: '/',
         element: <AppLayout />,
         children: [
             {
@@ -80,8 +83,16 @@ const router = createHashRouter([
                 element: <MangaReaderScreen />,
             },
             {
+                path: 'local-manga-reader',
+                element: <LocalMangaReaderScreen />,
+            },
+            {
                 path: 'play',
                 element: <InbuiltPlayerScreen />,
+            },
+            {
+                path: 'local-player',
+                element: <PlayerScreen />,
             },
             {
                 path: '*',

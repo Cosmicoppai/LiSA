@@ -19,3 +19,11 @@ code {
     border-radius: 8px;
     background-color: rgba(255, 255, 255, 0.2);
 }
+
+.manga-chp-download-container:not(:hover) .manga-chp-download-icon {
+    display: none;
+}
+
+.manga-chp-download-container:hover .manga-chp-download-icon {
+    display: block;
+}

@@ -1,37 +1,43 @@
-import {
-    Box,
-    Center,
-    Flex,
-    Heading,
-    Icon,
-    Image,
-    Skeleton,
-    Text,
-    Tooltip,
-    useDisclosure,
-} from '@chakra-ui/react';
-import { useQuery } from '@tanstack/react-query';
+import { Box, Center, Flex, Heading, Icon, Image, Text, Tooltip } from '@chakra-ui/react';
 import { useEffect, useMemo, useState } from 'react';
 import { BsSortNumericDown, BsSortNumericUp } from 'react-icons/bs';
 import { GoScreenFull, GoScreenNormal } from 'react-icons/go';
 import { RiZoomInLine, RiZoomOutLine } from 'react-icons/ri';
-import { RxDownload } from 'react-icons/rx';
 import {
     TbLayoutSidebarLeftCollapseFilled,
     TbLayoutSidebarRightCollapseFilled,
 } from 'react-icons/tb';
+import { useSearchParams } from 'react-router-dom';
 import { GoBackBtn } from 'src/components/GoBackBtn';
 import { localImagesPath } from 'src/constants/images';
-import { useGetMangaDetails } from 'src/hooks/useGetMangaDetails';
-import server from 'src/utils/axios';
 
-import { MetaDataPopup } from '../components/metadata-popup';
-import { useDownloadVideo } from '../hooks/useDownloadVideo';
+import { ChapterImg, ChaptersSkeletons } from './mangaReaderScreen';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
-import { TMangaChapter, TMangaChapters } from '../hooks/useGetMangaDetails';
+import { TDownload } from '../hooks/useGetDownloads';
 import { useZoomHandler } from '../hooks/useZoomHandler';
 
-function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
+type TMangaChapter = TDownload['chapters'][0];
+
+function useGetMangaDetails() {
+    const [searchParams] = useSearchParams();
+
+    const params = useMemo(() => {
+        const q = searchParams.get('q');
+
+        return JSON.parse(q) as TDownload;
+    }, [searchParams]);
+
+    return {
+        data: {
+            params,
+        },
+    };
+}
+
+function useChapterListHandler({ chapters }: { chapters: TDownload['chapters'] }) {
+    const [searchParams] = useSearchParams();
+    const chapter_id = searchParams.get('chapter_id') || '';
+
     const [currentChapter, setCurrentChapter] = useState<TMangaChapter | null>(null);
 
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
@@ -46,9 +52,18 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
     }, [chapters, order]);
 
     useEffect(() => {
-        if (currentChapter?.chp_link) return;
+        if (currentChapter?.file_location) return;
 
-        if (chps.length) setCurrentChapter(Object.entries(chps[0])[0][1]);
+        if (chapter_id) {
+            const chapterIndex = chps.findIndex((i) => i.id === Number(chapter_id));
+
+            if (chapterIndex >= 0) {
+                setCurrentChapter(chps[chapterIndex]);
+                return;
+            }
+        }
+
+        if (chps.length) setCurrentChapter(chps[0]);
     }, [chps]);
 
     return {
@@ -60,14 +75,14 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
     };
 }
 
-export function MangaReaderScreen() {
+export function LocalMangaReaderScreen() {
     const {
-        data: { params, details },
+        data: { params },
     } = useGetMangaDetails();
 
     const { chapters, currentChapter, setCurrentChapter, order, toggleOrder } =
         useChapterListHandler({
-            chapters: details?.chapters ?? [],
+            chapters: params?.chapters ?? [],
         });
 
     const { isFullScreen, fullScreenRef, handleFullScreen } = useFullScreenMode();
@@ -105,7 +120,7 @@ export function MangaReaderScreen() {
                                     {params?.title}
                                 </Heading>
                                 <Text fontWeight={600} color={'gray.500'} size="sm" ml={2} mt={1}>
-                                    | {currentChapter?.chp_name || 'Manga Reader'}
+                                    | {currentChapter?.file_name || 'Manga Reader'}
                                 </Text>
                             </Box>
                         </Box>
@@ -251,17 +266,12 @@ export function MangaReaderScreen() {
                         }}>
                         {chapters?.length ? (
                             chapters?.map?.((item) => (
-                                <>
-                                    {Object.entries(item).map(([chp_no, chp_detail]) => (
-                                        <ChapterTabItem
-                                            key={chp_detail.chp_link}
-                                            chp_detail={chp_detail}
-                                            chp_no={chp_no}
-                                            currentChapter={currentChapter}
-                                            setCurrentChapter={setCurrentChapter}
-                                        />
-                                    ))}
-                                </>
+                                <ChapterTabItem
+                                    key={item.id}
+                                    chp_detail={item}
+                                    currentChapter={currentChapter}
+                                    setCurrentChapter={setCurrentChapter}
+                                />
                             ))
                         ) : (
                             <ChaptersSkeletons />
@@ -285,40 +295,23 @@ export function MangaReaderScreen() {
 
 function ChapterTabItem({
     chp_detail,
-    chp_no,
+
     setCurrentChapter,
     currentChapter,
 }: {
-    chp_no: string;
-
     chp_detail: TMangaChapter;
     currentChapter: TMangaChapter;
     setCurrentChapter: React.Dispatch<React.SetStateAction<TMangaChapter>>;
 }) {
-    const isSelected = chp_detail?.chp_link === currentChapter?.chp_link;
-
-    const { downloadVideo, downloadLoading } = useDownloadVideo();
-
-    const singleDownloadHandler = () => {
-        downloadVideo({
-            chp_session: chp_detail?.chp_session,
-        });
-    };
-
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    useEffect(() => {
-        if (downloadLoading) onOpen();
-        else onClose();
-    }, [downloadLoading]);
+    const isSelected = chp_detail?.id === currentChapter?.id;
 
     return (
         <Flex
-            className="manga-chp-download-container"
             cursor={'pointer'}
             justifyContent={'space-between'}
             columnGap={2}
             p={2}
-            title={` ${chp_no} ${chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}`}
+            title={chp_detail.file_name}
             borderRadius={10}
             alignItems="center"
             bg={isSelected ? '#CBD5E0' : undefined}
@@ -336,54 +329,10 @@ function ChapterTabItem({
                 }}
                 noOfLines={1}
                 color={isSelected ? '#1A202C' : '#CBD5E0'}>
-                {chp_no}
-                {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
+                {chp_detail.file_name}
             </Text>
-            <Icon
-                className="manga-chp-download-icon"
-                as={RxDownload}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    singleDownloadHandler();
-                }}
-                color={isSelected ? '#1A202C' : '#CBD5E0'}
-                _hover={{
-                    opacity: 0.8,
-                }}
-            />
-
-            <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
         </Flex>
     );
-}
-
-export function ChaptersSkeletons() {
-    return (
-        <Flex
-            direction={'column'}
-            rowGap={4}
-            flexWrap="wrap"
-            width={'100%'}
-            justifyContent="center">
-            {Array(18)
-                .fill(0)
-                .map((_, index) => (
-                    <Skeleton key={index} p={2} width={'90%'} borderRadius={6} height={'30px'} />
-                ))}
-        </Flex>
-    );
-}
-
-export async function getMangaChapter({ url }) {
-    if (!url) return { data: [] };
-
-    const { data } = await server.get(url);
-
-    return {
-        data: data ?? [],
-    } as {
-        data: string[];
-    };
 }
 
 function MangaChapterImages({
@@ -393,34 +342,30 @@ function MangaChapterImages({
     currentChapter: TMangaChapter;
     imgScale: number;
 }) {
-    const chp_link = currentChapter?.chp_link;
+    const chapters = currentChapter?.file_location;
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['manga-chp-images', chp_link],
-        queryFn: () => getMangaChapter({ url: chp_link }),
-        enabled: Boolean(chp_link),
-    });
-
-    const chapters = data?.data;
-
-    if (isLoading || !chapters?.length) {
+    if (Array.isArray(chapters)) {
         return (
             <div
                 style={{
                     width: '100%',
-                    rowGap: 30,
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'center',
                     alignItems: 'center',
+                    rowGap: 20,
                 }}>
-                <Image src={localImagesPath.loaderSearchGif} alt="loader" boxSize="250px" />
-                <span
-                    style={{
-                        fontWeight: 'bold',
-                    }}>
-                    Loading ...
-                </span>
+                {chapters?.map((item) => (
+                    <div
+                        style={{
+                            width: `${imgScale * 10}%`,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'width 0.5s ease-in-out',
+                        }}>
+                        <ChapterImg key={item} src={`file:///${item}`} />
+                    </div>
+                ))}
             </div>
         );
     }
@@ -429,46 +374,19 @@ function MangaChapterImages({
         <div
             style={{
                 width: '100%',
+                rowGap: 30,
                 display: 'flex',
                 flexDirection: 'column',
+                justifyContent: 'center',
                 alignItems: 'center',
-                rowGap: 20,
             }}>
-            {chapters?.map((item) => (
-                <div
-                    style={{
-                        width: `${imgScale * 10}%`,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        transition: 'width 0.5s ease-in-out',
-                    }}>
-                    <ChapterImg key={item} src={item} />
-                </div>
-            ))}
+            <Image src={localImagesPath.loaderSearchGif} alt="loader" boxSize="250px" />
+            <span
+                style={{
+                    fontWeight: 'bold',
+                }}>
+                Loading ...
+            </span>
         </div>
-    );
-}
-
-export function ChapterImg({ src }: { src: string }) {
-    // TODO: Add Skeleton Loader Here
-    return (
-        <img
-            src={src}
-            alt="manga-chapter-image"
-            width={'100%'}
-            style={{
-                userSelect: 'none',
-                msUserSelect: 'none',
-                MozUserSelect: 'none',
-                WebkitUserSelect: 'none',
-                msTouchSelect: 'none',
-                pointerEvents: 'none',
-                borderRadius: 20,
-                minHeight: 200,
-                display: 'block',
-            }}
-            loading="lazy"
-        />
     );
 }

@@ -29,43 +29,49 @@ def get_ports():
     return _api_port, _web_sock_port
 
 
+async def main():
+    DB.migrate()  # migrate the database
+    DB()  # initialize the highest id
+
+    # Library.data = Manager().dict()  # update the dict into manager dict
+    for _, lib in Library._libraries.items():
+        for table in lib:
+            table.data = Manager().dict()
+
+    Library.load_datas()  # load data of all tables in-mem
+
+    """
+    update configs and environment variables
+    """
+    parse_config_json(FileConfig.CONFIG_JSON_PATH)
+    update_environ()
+
+    api_port, web_sock_port = get_ports()
+
+    t1 = Thread(target=run_api_server, args=(api_port,))
+    t1.daemon = True
+    t1.start()
+
+    DM = DownloadManager()
+
+    MsgSystem.out_pipe, MsgSystem.in_pipe = Pipe()
+    msg_system = MsgSystem(web_sock_port)
+
+    try:
+        await asyncio.gather(
+            msg_system.send_updates(),
+            msg_system.run_server()
+        )
+    finally:
+        await DM.shutdown()
+
+
 if __name__ == "__main__":
     freeze_support()
     try:
         logging.basicConfig(level=logging.ERROR)
-        DB.migrate()  # migrate the database
-        DB()  # initialize the highest id
-
-        # Library.data = Manager().dict()  # update the dict into manager dict
-        for _, lib in Library._libraries.items():
-            for table in lib:
-                table.data = Manager().dict()
-
-        Library.load_datas()  # load data of all tables in-mem
-
-        """
-        update configs and environment variables
-        """
-        parse_config_json(FileConfig.CONFIG_JSON_PATH)
-        update_environ()
-
-        api_port, web_sock_port = get_ports()
-
-        t1 = Thread(target=run_api_server, args=(api_port,))
-        t1.daemon = True
-        t1.start()
-
-        # initialize DownloadManager
-
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        DownloadManager()
-
-        MsgSystem.out_pipe, MsgSystem.in_pipe = Pipe()
-        msg_system = MsgSystem(web_sock_port)
-        loop.create_task(msg_system.send_updates())
-
-        loop.run_until_complete(msg_system.run_server())  # run socket server
+        asyncio.run(main())
     except KeyboardInterrupt:
+        ...
+    finally:
         DB.connection.close()

@@ -7,23 +7,30 @@ import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import path from 'path';
 
+import ignoreNodeModulesGlobPatters from './utils/ignore-node-modules-glob-patters.json';
+
 const config: ForgeConfig = {
     packagerConfig: {
-        asar: true,
-        icon: path.join(__dirname, './images/logo'),
+        asar: {
+            globOptions: {
+                ignore: ignoreNodeModulesGlobPatters.safe,
+            },
+        },
+        icon: path.join(__dirname, 'utils/images/logo'),
         name: 'LiSA',
         executableName: 'LiSA',
-        extraResource: [path.join(__dirname, './resources')],
+        extraResource: [path.join(__dirname, 'resources')],
         win32metadata: {
             'requested-execution-level': 'highestAvailable',
         },
         overwrite: true,
+        appCategoryType: 'public.app-category.entertainment',
     },
     rebuildConfig: {},
     makers: [
-        new MakerDMG(),
-        new MakerZIP({}, ['win32']),
-        new MakerDeb({options: {bin: 'LiSA'}})
+        new MakerDMG({}),
+        new MakerZIP({}, ['win32', 'darwin']),
+        new MakerDeb({ options: { bin: 'LiSA' } }),
     ],
     plugins: [
         new VitePlugin({
