@@ -36,11 +36,13 @@ A Desktop application, for streaming and downloading your favourite Anime & Mang
 
 -   A User Friendly Interface
 -   Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
+-   Download Manga from [supported websites](#-supported-websites) in multiple formats.
 -   Batch Download
 -   Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
--   Explore anime based on different filters
+-   Read Manga in the inbuilt E-Reader
+-   Explore anime & Manga based on different filters
 -   Download Manager
--   Library to view pre-downloaded episodes and active downloads
+-   Library to view pre-downloaded Manga and Chapters along with active downloads
 -   Recommendation System
 <br>
 
