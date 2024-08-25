@@ -131,25 +131,35 @@ export function VideoPlayer({
     }, [playerRef, snapshot, url, prevTime]);
 
     return (
-        <Box p={3} width="100%">
-            <div data-vjs-player>
-                <video
-                    id="my-video"
-                    ref={videoRef}
-                    className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
-                    controls
-                    lang={language}
-                    onLoadedMetadata={(e) => {
-                        // @ts-ignore
-                        setVidDuration(e.target.duration);
-                    }}
-                    onTimeUpdate={(e) => {
-                        // @ts-ignore
-                        if (e.target.currentTime >= vidDuration - 1) nextEpHandler();
-                    }}
-                />
-            </div>
-
+        <Box
+            p={3}
+            style={{
+                display: 'flex',
+                justifyContent: 'center',
+            }}>
+            <Box
+                w={{
+                    base: '80%',
+                    '2xl': '70%',
+                }}>
+                <div data-vjs-player>
+                    <video
+                        id="my-video"
+                        ref={videoRef}
+                        className="vidPlayer video-js vjs-default-skin vjs-big-play-centered"
+                        controls
+                        lang={language}
+                        onLoadedMetadata={(e) => {
+                            // @ts-ignore
+                            setVidDuration(e.target.duration);
+                        }}
+                        onTimeUpdate={(e) => {
+                            // @ts-ignore
+                            if (e.target.currentTime >= vidDuration - 1) nextEpHandler();
+                        }}
+                    />
+                </div>
+            </Box>
             <ExternalPlayerPopup
                 isOpen={isOpen}
                 onClose={onClose}

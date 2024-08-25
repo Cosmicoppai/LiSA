@@ -76,20 +76,6 @@ export function MangaReaderScreen() {
 
     const { scale, zoomIn, zoomOut, isZoomInDisabled, isZoomOutDisabled } = useZoomHandler();
 
-    const { downloadVideo, downloadLoading } = useDownloadVideo();
-
-    const downloadManga = () => {
-        downloadVideo({
-            manga_session: params.session,
-        });
-    };
-
-    const { isOpen, onOpen, onClose } = useDisclosure();
-    useEffect(() => {
-        if (downloadLoading) onOpen();
-        else onClose();
-    }, [downloadLoading]);
-
     return (
         <div
             style={{
@@ -205,19 +191,6 @@ export function MangaReaderScreen() {
 
                             alignItems: 'center',
                         }}>
-                        <Tooltip label={'Download'} placement="top">
-                            <Box cursor={'pointer'} onClick={downloadManga}>
-                                <Icon
-                                    as={RxDownload}
-                                    _hover={{
-                                        opacity: 0.8,
-                                    }}
-                                    w={6}
-                                    h={6}
-                                />
-                            </Box>
-                        </Tooltip>
-                        <MetaDataPopup isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
                         <div
                             style={{
                                 display: 'flex',

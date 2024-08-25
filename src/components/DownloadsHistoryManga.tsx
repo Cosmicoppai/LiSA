@@ -1,82 +1,108 @@
 import {
-    AccordionButton,
-    AccordionIcon,
-    AccordionItem,
-    AccordionPanel,
     Box,
+    Button,
     Icon,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Text,
     Tooltip,
+    useDisclosure,
 } from '@chakra-ui/react';
-import { AiOutlineFolderOpen } from 'react-icons/ai';
-import { FaPlay } from 'react-icons/fa';
-import { MdVideoLibrary } from 'react-icons/md';
+import { useRef } from 'react';
+import { AiOutlineFolderOpen, AiFillRead } from 'react-icons/ai';
+import { BiSolidBook } from 'react-icons/bi';
+import { BsDot } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { openFileExplorer } from 'src/utils/fn';
-import { timeHourMin } from 'src/utils/time';
 
 import { TDownload, TDownloadMangaChapter } from '../hooks/useGetDownloads';
 import { formatBytes } from '../utils/formatBytes';
+import { timeHourMin } from '../utils/time';
 
 export function DownloadsHistoryMangaItem({ item }: { item: TDownload }) {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const btnRef = useRef(null);
+
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                rowGap: 20,
-            }}>
-            <AccordionItem
+        <>
+            <Box
+                ref={btnRef}
+                onClick={onOpen}
                 style={{
-                    borderTopWidth: 0,
+                    width: '100%',
+                    display: 'flex',
+                    columnGap: 20,
+                    cursor: 'pointer',
+                    padding: 10,
+                    borderRadius: 10,
+                }}
+                _hover={{
+                    backgroundColor: '#00000033',
                 }}>
-                <AccordionButton>
-                    <div
+                <BiSolidBook size={48} />
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        columnGap: 10,
+                    }}>
+                    <Text
+                        noOfLines={1}
                         style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            width: '100%',
+                            fontWeight: 'bold',
+                            fontSize: 20,
                         }}>
+                        {item.title}
+                    </Text>
+                    <span
+                        style={{
+                            fontSize: 12,
+                        }}>
+                        {item.chapters?.length} Chapters
+                    </span>
+                </div>
+            </Box>
+            <Modal
+                onClose={onClose}
+                finalFocusRef={btnRef}
+                isOpen={isOpen}
+                isCentered
+                size={'3xl'}
+                scrollBehavior={'inside'}
+                motionPreset="slideInBottom">
+                <ModalOverlay />
+                <ModalContent bg={'gray.800'}>
+                    <ModalHeader>{item.title}</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody className="custom-scrollbar">
                         <div
                             style={{
                                 display: 'flex',
-                                columnGap: 10,
-                                alignItems: 'center',
+                                flexDirection: 'column',
+                                width: '100%',
+                                rowGap: 20,
                             }}>
-                            <MdVideoLibrary size={28} />
-                            <strong>{item.title}</strong>
+                            {item.chapters?.map((i) => (
+                                <DownloadsHistoryAnimeEpItem
+                                    key={i.id}
+                                    data={i}
+                                    mangaDetails={item}
+                                />
+                            ))}
                         </div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                columnGap: 10,
-                                alignItems: 'center',
-                            }}>
-                            <span
-                                style={{
-                                    fontSize: 12,
-                                }}>
-                                {item.chapters?.length} Chapters
-                            </span>
-                            <AccordionIcon />
-                        </div>
-                    </div>
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            width: '100%',
-                            rowGap: 20,
-                        }}>
-                        {item.chapters?.map((i) => (
-                            <DownloadsHistoryAnimeEpItem key={i.id} data={i} mangaDetails={item} />
-                        ))}
-                    </div>
-                </AccordionPanel>
-            </AccordionItem>
-        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={onClose}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
 
@@ -101,14 +127,21 @@ function DownloadsHistoryAnimeEpItem({
     const filePath = Array.isArray(data.file_location) ? data.file_location[0] : data.file_location;
 
     return (
-        <section
+        <Box
             style={{
                 width: '100%',
                 display: 'flex',
                 columnGap: 20,
-                alignItems: 'center',
-            }}>
-            <Tooltip label={'Play'} placement="top">
+
+                cursor: 'pointer',
+                padding: 10,
+                borderRadius: 10,
+            }}
+            _hover={{
+                backgroundColor: '#00000033',
+            }}
+            onClick={playClickHandler}>
+            <Tooltip label={'Read'} placement="top">
                 <Box
                     style={{
                         cursor: 'pointer',
@@ -118,9 +151,8 @@ function DownloadsHistoryAnimeEpItem({
                         padding: 14,
                         display: 'flex',
                         alignItems: 'center',
-                    }}
-                    onClick={playClickHandler}>
-                    <Icon as={FaPlay} w={6} h={6} />
+                    }}>
+                    <Icon as={AiFillRead} w={6} h={6} />
                 </Box>
             </Tooltip>
             <div
@@ -131,39 +163,42 @@ function DownloadsHistoryAnimeEpItem({
                     flexDirection: 'column',
                     rowGap: 6,
                 }}>
+                <strong>{data.file_name}</strong>
                 <div
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'flex-end',
                     }}>
-                    <span>{data.file_name}</span>
-                    <span
+                    <div
                         style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             color: '#999',
-                            fontSize: 14,
                         }}>
-                        {timeHourMin(data.created_on)}
-                    </span>
-                </div>
-                <div
-                    style={{
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                    }}>
-                    <span
-                        style={{
-                            color: '#999',
-                            fontSize: 14,
-                        }}>
-                        {formatBytes(data.total_size)}
-                    </span>
+                        <span
+                            style={{
+                                fontSize: 14,
+                            }}>
+                            {formatBytes(data.total_size)}
+                        </span>
+                        <BsDot />
+                        <span
+                            style={{
+                                color: '#999',
+                                fontSize: 14,
+                            }}>
+                            {timeHourMin(data.created_on)}
+                        </span>
+                    </div>
                     <Tooltip label={'Show file in folder'} placement="bottom-end">
                         <Box
-                            onClick={() => openFileExplorer(filePath)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openFileExplorer(filePath);
+                            }}
                             sx={{
                                 cursor: 'pointer',
                             }}>
@@ -172,6 +207,6 @@ function DownloadsHistoryAnimeEpItem({
                     </Tooltip>
                 </div>
             </div>
-        </section>
+        </Box>
     );
 }

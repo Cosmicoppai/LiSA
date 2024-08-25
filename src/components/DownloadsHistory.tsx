@@ -1,4 +1,4 @@
-import { Accordion, Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
+import { Box, Flex, Heading, Stack, Text } from '@chakra-ui/react';
 import { Fragment } from 'react/jsx-runtime';
 import { TbMoodSad } from 'react-icons/tb';
 
@@ -21,25 +21,23 @@ export function DownloadsHistory() {
                 pt={2}
                 minWidth={'400px'}>
                 {data.length ? (
-                    <div
+                    <Box
                         style={{
-                            display: 'flex',
-                            flexDirection: 'column',
                             width: '100%',
-                            rowGap: 20,
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                            gap: 18,
                         }}>
-                        <Accordion allowToggle>
-                            {data.map((item) => (
-                                <Fragment key={`${item.type}-${item.title}`}>
-                                    {item.type === 'manga' ? (
-                                        <DownloadsHistoryMangaItem item={item} />
-                                    ) : (
-                                        <DownloadsHistoryAnimeItem item={item} />
-                                    )}
-                                </Fragment>
-                            ))}
-                        </Accordion>
-                    </div>
+                        {data.map((item) => (
+                            <Fragment key={`${item.type}-${item.title}`}>
+                                {item.type === 'manga' ? (
+                                    <DownloadsHistoryMangaItem item={item} />
+                                ) : (
+                                    <DownloadsHistoryAnimeItem item={item} />
+                                )}
+                            </Fragment>
+                        ))}
+                    </Box>
                 ) : (
                     <DownloadsHistoryEmpty />
                 )}

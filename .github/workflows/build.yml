@@ -152,6 +152,6 @@ jobs:
           token: ${{ secrets.LISA }}
           tag: ${{ steps.get_latest_tag.outputs.LATEST_TAG }}
           name: Release ${{ steps.get_latest_tag.outputs.LATEST_TAG }}
-          draft: false
+          draft: true
           prerelease: false
           artifacts: "ubuntu-artifact/*,macos-artifact/*,windows-artifact/*"

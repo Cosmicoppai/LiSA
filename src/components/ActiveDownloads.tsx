@@ -14,13 +14,7 @@ export function ActiveDownloads() {
                 Active Downloads
             </Heading>
 
-            <Stack
-                flex={1}
-                flexDirection="column"
-                alignItems="flex-start"
-                pt={2}
-                p={4}
-                minWidth={'400px'}>
+            <Stack flex={1} flexDirection="column" alignItems="flex-start" p={2} minWidth={'400px'}>
                 {data.length ? (
                     <div
                         style={{

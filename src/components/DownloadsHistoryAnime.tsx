@@ -1,13 +1,21 @@
 import {
-    AccordionButton,
-    AccordionIcon,
-    AccordionItem,
-    AccordionPanel,
     Box,
+    Button,
     Icon,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Text,
     Tooltip,
+    useDisclosure,
 } from '@chakra-ui/react';
+import { useEffect, useRef, useState } from 'react';
 import { AiOutlineFolderOpen } from 'react-icons/ai';
+import { BsDot } from 'react-icons/bs';
 import { FaPlay } from 'react-icons/fa';
 import { MdVideoLibrary } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
@@ -16,67 +24,85 @@ import { timeHourMin } from 'src/utils/time';
 
 import { TDownload, TDownloadAnimeEpisode } from '../hooks/useGetDownloads';
 import { formatBytes } from '../utils/formatBytes';
+import { getVideoDuration, getVideoThumbnail } from '../utils/video-metadata';
 
 export function DownloadsHistoryAnimeItem({ item }: { item: TDownload }) {
+    const { isOpen, onOpen, onClose } = useDisclosure();
+
+    const btnRef = useRef(null);
+
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                rowGap: 20,
-            }}>
-            <AccordionItem
+        <>
+            <Box
+                ref={btnRef}
+                onClick={onOpen}
                 style={{
-                    borderTopWidth: 0,
+                    width: '100%',
+                    display: 'flex',
+                    columnGap: 20,
+                    cursor: 'pointer',
+                    padding: 10,
+                    borderRadius: 10,
+                }}
+                _hover={{
+                    backgroundColor: '#00000033',
                 }}>
-                <AccordionButton>
-                    <div
+                <MdVideoLibrary size={48} />
+
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        columnGap: 10,
+                    }}>
+                    <Text
+                        noOfLines={1}
                         style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            width: '100%',
+                            fontWeight: 'bold',
+                            fontSize: 20,
                         }}>
+                        {item.title}
+                    </Text>
+                    <span
+                        style={{
+                            fontSize: 12,
+                        }}>
+                        {item.episodes?.length} Videos
+                    </span>
+                </div>
+            </Box>
+
+            <Modal
+                onClose={onClose}
+                finalFocusRef={btnRef}
+                isOpen={isOpen}
+                isCentered
+                size={'3xl'}
+                scrollBehavior={'inside'}
+                motionPreset="slideInBottom">
+                <ModalOverlay />
+                <ModalContent bg={'gray.800'}>
+                    <ModalHeader>{item.title}</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody className="custom-scrollbar">
                         <div
                             style={{
                                 display: 'flex',
-                                columnGap: 10,
-                                alignItems: 'center',
+                                flexDirection: 'column',
+                                width: '100%',
+                                rowGap: 20,
                             }}>
-                            <MdVideoLibrary size={28} />
-                            <strong>{item.title}</strong>
+                            {item.episodes?.map((i) => (
+                                <DownloadsHistoryAnimeEpItem key={i.id} data={i} />
+                            ))}
                         </div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                columnGap: 10,
-                                alignItems: 'center',
-                            }}>
-                            <span
-                                style={{
-                                    fontSize: 12,
-                                }}>
-                                {item.episodes?.length} Videos
-                            </span>
-                            <AccordionIcon />
-                        </div>
-                    </div>
-                </AccordionButton>
-                <AccordionPanel pb={4}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            width: '100%',
-                            rowGap: 20,
-                        }}>
-                        {item.episodes?.map((i) => (
-                            <DownloadsHistoryAnimeEpItem key={i.id} data={i} />
-                        ))}
-                    </div>
-                </AccordionPanel>
-            </AccordionItem>
-        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button onClick={onClose}>Close</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 }
 
@@ -91,28 +117,82 @@ function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadAnimeEpisode }) 
         );
     }
 
+    const [thumbnail, setThumbnail] = useState(null);
+    const [vidDuration, setVidDuration] = useState(null);
+    useEffect(() => {
+        (async () => {
+            try {
+                const thumb = await getVideoThumbnail(`file:///${data.file_location}`, 8);
+                if (thumb) setThumbnail(thumb);
+            } catch (error) {
+                console.error(error);
+            }
+        })();
+    }, [data.file_location]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const duration = await getVideoDuration(`file:///${data.file_location}`);
+                if (duration) setVidDuration(duration);
+            } catch (error) {
+                console.error(error);
+            }
+        })();
+    }, [data.file_location]);
+
     return (
-        <section
+        <Box
             style={{
                 width: '100%',
                 display: 'flex',
                 columnGap: 20,
-                alignItems: 'center',
-            }}>
-            <Tooltip label={'Play'} placement="top">
-                <Box
-                    style={{
-                        cursor: 'pointer',
-                        borderWidth: 1,
-                        borderColor: 'white',
-                        borderRadius: 20,
-                        padding: 14,
-                        display: 'flex',
-                        alignItems: 'center',
-                    }}
-                    onClick={playClickHandler}>
-                    <Icon as={FaPlay} w={6} h={6} />
-                </Box>
+                cursor: 'pointer',
+                padding: 10,
+                borderRadius: 10,
+            }}
+            _hover={{
+                backgroundColor: '#00000033',
+            }}
+            onClick={playClickHandler}>
+            <Tooltip label={'Play'} placement="bottom">
+                {thumbnail ? (
+                    <div style={{ position: 'relative' }}>
+                        <img
+                            src={thumbnail}
+                            alt="Video Thumbnail"
+                            width={100}
+                            height={100}
+                            style={{
+                                borderRadius: 10,
+                            }}
+                        />
+                        <div
+                            style={{
+                                position: 'absolute',
+                                left: 10,
+                                bottom: 10,
+                            }}>
+                            <FaPlay />
+                        </div>
+                    </div>
+                ) : (
+                    <Box
+                        style={{
+                            maxWidth: 80,
+                            maxHeight: 80,
+                            minWidth: 80,
+                            minHeight: 80,
+                            borderRadius: 20,
+                            borderWidth: 1,
+                            borderColor: 'white',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                        <Icon as={FaPlay} width={6} h={6} />
+                    </Box>
+                )}
             </Tooltip>
             <div
                 style={{
@@ -122,39 +202,50 @@ function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadAnimeEpisode }) 
                     flexDirection: 'column',
                     rowGap: 6,
                 }}>
+                <strong>{data.file_name}</strong>
+                {vidDuration ? (
+                    <span
+                        style={{
+                            fontSize: 14,
+                        }}>
+                        {Math.floor(vidDuration / 60)}m
+                    </span>
+                ) : null}
                 <div
                     style={{
                         flexGrow: 1,
                         flexShrink: 1,
                         display: 'flex',
                         justifyContent: 'space-between',
+                        alignItems: 'flex-end',
                     }}>
-                    <span>{data.file_name}</span>
-                    <span
+                    <div
                         style={{
+                            display: 'flex',
+                            alignItems: 'center',
                             color: '#999',
-                            fontSize: 14,
                         }}>
-                        {timeHourMin(data.created_on)}
-                    </span>
-                </div>
-                <div
-                    style={{
-                        flexGrow: 1,
-                        flexShrink: 1,
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                    }}>
-                    <span
-                        style={{
-                            color: '#999',
-                            fontSize: 14,
-                        }}>
-                        {formatBytes(data.total_size)}
-                    </span>
+                        <span
+                            style={{
+                                fontSize: 14,
+                            }}>
+                            {formatBytes(data.total_size)}
+                        </span>
+                        <BsDot />
+                        <span
+                            style={{
+                                color: '#999',
+                                fontSize: 14,
+                            }}>
+                            {timeHourMin(data.created_on)}
+                        </span>
+                    </div>
                     <Tooltip label={'Show file in folder'} placement="bottom-end">
                         <Box
-                            onClick={() => openFileExplorer(data.file_location)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                openFileExplorer(data.file_location);
+                            }}
                             sx={{
                                 cursor: 'pointer',
                             }}>
@@ -163,6 +254,6 @@ function DownloadsHistoryAnimeEpItem({ data }: { data: TDownloadAnimeEpisode }) 
                     </Tooltip>
                 </div>
             </div>
-        </section>
+        </Box>
     );
 }

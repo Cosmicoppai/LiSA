@@ -138,7 +138,12 @@ export function VideoPlayer() {
     }, [playerRef, file_location]);
 
     return (
-        <Box p={3} width="100%">
+        <Box
+            p={3}
+            w={{
+                base: '80%',
+                '2xl': '70%',
+            }}>
             <div data-vjs-player>
                 <video
                     id="my-video"
