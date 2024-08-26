@@ -41,6 +41,8 @@ export function AnimeDetailsScreen() {
 
     if (isError) return <ErrorMessage error={error} />;
 
+    const external_links = details?.description?.external_links;
+
     return (
         <Center py={6} w="100%">
             <Flex
@@ -169,7 +171,7 @@ export function AnimeDetailsScreen() {
                                 />
                             ) : null}
                         </Box>
-                        {ep ? (
+                        {ep && ep !== 1 ? (
                             <Text fontWeight={600} color={'gray.500'} size="sm" my={2}>
                                 {ep === '?' ? 'Running' : `Episodes ${ep}`}
                             </Text>
@@ -215,33 +217,32 @@ export function AnimeDetailsScreen() {
                                 </Text>
                             </Stack>
                         ) : null}
-                        <div>
-                            <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
-                                External Links
-                            </Text>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    columnGap: 8,
-                                    flexWrap: 'wrap',
-                                    rowGap: 8,
-                                }}>
-                                {details?.description &&
-                                    Object.entries(details?.description?.external_links).map(
-                                        ([key, value], index) => {
-                                            return (
-                                                <Tag
-                                                    title={value}
-                                                    key={index}
-                                                    onClick={() => openExternalUrl(value)}
-                                                    sx={{ cursor: 'pointer' }}>
-                                                    {key}
-                                                </Tag>
-                                            );
-                                        },
+                        {external_links && (
+                            <>
+                                <Text fontWeight={600} color={'gray.500'} size="sm" my={4}>
+                                    External Links
+                                </Text>
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        columnGap: 8,
+                                        flexWrap: 'wrap',
+                                        rowGap: 8,
+                                    }}>
+                                    {Object.entries(external_links).map(
+                                        ([link_name, link_href]) => (
+                                            <Tag
+                                                key={link_name}
+                                                title={link_href}
+                                                sx={{ cursor: 'pointer' }}
+                                                onClick={() => openExternalUrl(link_href)}>
+                                                {link_name}
+                                            </Tag>
+                                        ),
                                     )}
-                            </div>
-                        </div>
+                                </div>
+                            </>
+                        )}
                         <PaginateCard />
                     </Stack>
                 </Stack>

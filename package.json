@@ -17,7 +17,7 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "postinstall": "patch-package",
-    "build:python": "node ./scripts/buildPythonServer"
+    "build:backend": "node ./scripts/build-backend"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"

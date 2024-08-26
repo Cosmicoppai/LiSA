@@ -28,10 +28,10 @@ import server from 'src/utils/axios';
 import { MetaDataPopup } from '../components/metadata-popup';
 import { useDownloadVideo } from '../hooks/useDownloadVideo';
 import { useFullScreenMode } from '../hooks/useFullScreenMode';
-import { TMangaChapter, TMangaChapters } from '../hooks/useGetMangaDetails';
+import { TMangaChapter } from '../hooks/useGetMangaDetails';
 import { useZoomHandler } from '../hooks/useZoomHandler';
 
-function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
+function useChapterListHandler({ chapters }: { chapters: TMangaChapter[] }) {
     const [currentChapter, setCurrentChapter] = useState<TMangaChapter | null>(null);
 
     const [order, setOrder] = useState<'asc' | 'desc'>('asc');
@@ -48,7 +48,7 @@ function useChapterListHandler({ chapters }: { chapters: TMangaChapters }) {
     useEffect(() => {
         if (currentChapter?.chp_link) return;
 
-        if (chps.length) setCurrentChapter(Object.entries(chps[0])[0][1]);
+        if (chps.length) setCurrentChapter(chps[0]);
     }, [chps]);
 
     return {
@@ -250,18 +250,13 @@ export function MangaReaderScreen() {
                             visibility: showChapters ? 'visible' : 'hidden',
                         }}>
                         {chapters?.length ? (
-                            chapters?.map?.((item) => (
-                                <>
-                                    {Object.entries(item).map(([chp_no, chp_detail]) => (
-                                        <ChapterTabItem
-                                            key={chp_detail.chp_link}
-                                            chp_detail={chp_detail}
-                                            chp_no={chp_no}
-                                            currentChapter={currentChapter}
-                                            setCurrentChapter={setCurrentChapter}
-                                        />
-                                    ))}
-                                </>
+                            chapters?.map?.((chp_detail) => (
+                                <ChapterTabItem
+                                    key={chp_detail.chp_session}
+                                    chp_detail={chp_detail}
+                                    currentChapter={currentChapter}
+                                    setCurrentChapter={setCurrentChapter}
+                                />
                             ))
                         ) : (
                             <ChaptersSkeletons />
@@ -285,12 +280,9 @@ export function MangaReaderScreen() {
 
 function ChapterTabItem({
     chp_detail,
-    chp_no,
     setCurrentChapter,
     currentChapter,
 }: {
-    chp_no: string;
-
     chp_detail: TMangaChapter;
     currentChapter: TMangaChapter;
     setCurrentChapter: React.Dispatch<React.SetStateAction<TMangaChapter>>;
@@ -318,7 +310,7 @@ function ChapterTabItem({
             justifyContent={'space-between'}
             columnGap={2}
             p={2}
-            title={` ${chp_no} ${chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}`}
+            title={chp_detail.chp_name}
             borderRadius={10}
             alignItems="center"
             bg={isSelected ? '#CBD5E0' : undefined}
@@ -336,8 +328,7 @@ function ChapterTabItem({
                 }}
                 noOfLines={1}
                 color={isSelected ? '#1A202C' : '#CBD5E0'}>
-                {chp_no}
-                {chp_detail?.chp_name ? ` : ${chp_detail?.chp_name}` : null}
+                {chp_detail.chp_name}
             </Text>
             <Tooltip label={'Download this chapter'} placement="top-start">
                 <Box>

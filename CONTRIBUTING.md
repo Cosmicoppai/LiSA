@@ -84,7 +84,7 @@ Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) o
 
 - Build backend
     ```bash
-    yarn build:python
+    yarn build:backend
     ```
 
 - Make distributable packages
