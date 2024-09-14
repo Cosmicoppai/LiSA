@@ -3,13 +3,6 @@ import { extendTheme } from '@chakra-ui/react';
 export const theme = extendTheme({
     initialColorMode: 'dark',
     useSystemColorMode: false,
-    styles: {
-        global: {
-            body: {
-                maxHeight: '100vh',
-            },
-        },
-    },
     colors: {
         brand: {
             100: '#edf2f7',
