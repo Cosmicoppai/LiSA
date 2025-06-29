@@ -1,6 +1,7 @@
 import { Center, Flex, Spacer, Stack, Select } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { AiFillFilter } from 'react-icons/ai';
+import { useSearchParams } from 'react-router-dom';
 import { AppModeSwitch } from 'src/components/AppModeSwitch';
 import { ExploreAnimeCategories } from 'src/components/ExploreAnimeCategories';
 import { ExploreMangaCategories } from 'src/components/ExploreMangaCategories';
@@ -10,23 +11,21 @@ const defaultAnimeCategory = 'airing';
 const defaultMangaCategory = 'by_popularity';
 
 export function ExploreScreen() {
-    const [category, setCategory] = useState<string>();
-
     const { mode } = useAppContext();
 
-    const handleSetCategory = (value) => {
-        setCategory(value);
-        localStorage.setItem(`category-${mode}`, value);
-    };
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    useEffect(() => {
-        const savedCategory = localStorage.getItem(`category-${mode}`);
-        if (savedCategory) {
-            setCategory(savedCategory);
-        } else {
-            setCategory(mode === 'manga' ? defaultMangaCategory : defaultAnimeCategory);
+    const category = useMemo(() => {
+        switch (mode) {
+            case 'anime':
+                return searchParams.get('anime_category') || defaultAnimeCategory;
+            case 'manga':
+                return searchParams.get('manga_category') || defaultMangaCategory;
+
+            default:
+                break;
         }
-    }, [mode]);
+    }, [mode, searchParams]);
 
     return (
         <>
@@ -41,7 +40,7 @@ export function ExploreScreen() {
                 <Spacer />
                 <Select
                     maxWidth={180}
-                    onChange={(e) => handleSetCategory(e.target.value)}
+                    onChange={(e) => setSearchParams({ [`${mode}_category`]: e.target.value })}
                     icon={<AiFillFilter />}
                     value={category}>
                     {mode === 'manga' ? (

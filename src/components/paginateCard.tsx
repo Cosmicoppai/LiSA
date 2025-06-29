@@ -5,6 +5,8 @@ import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
 import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
 
+import { TAnimeEpisode } from '../hooks/useGetAnimeEpisodeDetails';
+
 export function PaginateCard() {
     const location = useLocation();
     const isPlayRoute = location.pathname.includes('/play');
@@ -25,38 +27,18 @@ export function PaginateCard() {
         data: { animeEpisode },
     } = useGetAnimeStream();
 
-    const currentEp = Math.trunc(animeEpisode?.ep_no);
-
-    // console.log(epsLoading);
-
     const navigate = useNavigate();
 
-    const episodeClickHandler = (item, ep_no) => {
+    const episodeClickHandler = (item: TAnimeEpisode) => {
         navigate(
             `/play?${new URLSearchParams({
                 q: JSON.stringify(params),
                 episodePageUrl,
-                stream: JSON.stringify({
-                    ...item,
-                    ep_no,
-                }),
+                stream: JSON.stringify(item),
             })}`,
             { replace: isPlayRoute, preventScrollReset: isPlayRoute },
         );
     };
-
-    let coloredIdx;
-
-    // console.log(ep_details);
-
-    if (!epsLoading && ep_details) {
-        const current_page_eps = ep_details.ep_details;
-        current_page_eps?.map((single_ep, idx) => {
-            if (Number(Object.keys(single_ep)[0]) === currentEp) {
-                coloredIdx = idx;
-            }
-        });
-    }
 
     if (ep_details?.ep_details?.length === 1) {
         if (isPlayRoute) return null;
@@ -75,9 +57,7 @@ export function PaginateCard() {
                         bg={'brand.900'}
                         leftIcon={<Icon as={FaPlay} w={4} h={4} />}
                         key={key}
-                        onClick={() =>
-                            episodeClickHandler(Object.values(item)[0], Object.keys(item)[0])
-                        }>
+                        onClick={() => episodeClickHandler(item)}>
                         Watch Now
                     </Button>
                 ))}
@@ -90,10 +70,10 @@ export function PaginateCard() {
             <Box mt={5}>
                 {!epsLoading && ep_details ? (
                     <Flex direction={'row'} flexWrap="wrap" width={'100%'} justifyContent="center">
-                        {ep_details?.ep_details?.map((item, key) => (
+                        {ep_details?.ep_details?.map((item) => (
                             <Flex
                                 cursor={'pointer'}
-                                key={key}
+                                key={item.ep_no}
                                 p={1}
                                 mr={2}
                                 mt={2}
@@ -104,14 +84,13 @@ export function PaginateCard() {
                                 minHeight={'45px'}
                                 justifyContent="center"
                                 alignItems="center"
-                                bg={isPlayRoute && coloredIdx === key ? '#10495F' : 'brand.900'}
-                                onClick={() =>
-                                    episodeClickHandler(
-                                        Object.values(item)[0],
-                                        Object.keys(item)[0],
-                                    )
-                                }>
-                                <Text textAlign={'center'}>{Object.keys(item)[0]}</Text>
+                                bg={
+                                    isPlayRoute && item.ep_no === animeEpisode?.ep_no
+                                        ? '#10495F'
+                                        : 'brand.900'
+                                }
+                                onClick={() => episodeClickHandler(item)}>
+                                <Text textAlign={'center'}>{item.ep_no}</Text>
                             </Flex>
                         ))}
                     </Flex>
@@ -128,13 +107,7 @@ export function PaginateCard() {
                                     maxWidth={'50px'}
                                     justifyContent="center"
                                     key={key}>
-                                    <Flex
-                                        width={'100%'}
-                                        maxWidth={'50px'}
-                                        backgroundColor={
-                                            currentEp === key + 1 ? 'while' : 'inherit'
-                                        }
-                                        justifyContent="center">
+                                    <Flex width={'100%'} maxWidth={'50px'} justifyContent="center">
                                         <Text textAlign={'center'}>{key + 1}</Text>
                                     </Flex>
                                 </Skeleton>

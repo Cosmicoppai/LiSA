@@ -9,10 +9,6 @@ export type TMangaChapter = {
     chp_session: string;
 };
 
-export type TMangaChapters = {
-    [chp_no: string]: TMangaChapter;
-}[];
-
 type TMangaSearch = {
     title: string;
     total_chps: string;
@@ -24,7 +20,7 @@ type TMangaSearch = {
 };
 
 type TMangaDetails = {
-    chapters: TMangaChapters;
+    chapters: TMangaChapter[];
     description: {
         alt_name: string;
         author: string;

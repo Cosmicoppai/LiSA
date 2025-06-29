@@ -18,9 +18,7 @@ export function useGetAnimeStream() {
     const stream = searchParams.get('stream');
 
     const params = useMemo(() => {
-        return JSON.parse(stream) as TAnimeEpisode & {
-            ep_no: number;
-        };
+        return JSON.parse(stream) as TAnimeEpisode;
     }, [stream]);
 
     const query = useQuery({

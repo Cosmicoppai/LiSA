@@ -23,6 +23,7 @@ import { useDownloadVideo } from 'src/hooks/useDownloadVideo';
 import { useGetAnimeDetails } from 'src/hooks/useGetAnimeDetails';
 import { useGetAnimeEpPagination } from 'src/hooks/useGetAnimeEpPagination';
 import { useGetAnimeStream } from 'src/hooks/useGetAnimeStream';
+import { QualityLevel } from 'videojs-contrib-quality-levels';
 
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
@@ -47,7 +48,7 @@ export function InbuiltPlayerScreen() {
     const navigate = useNavigate();
 
     const [language, setLanguage] = useState('jpn');
-    const [qualityOptions, setQualityOptions] = useState([]);
+    const [qualityOptions, setQualityOptions] = useState<QualityLevel[]>([]);
 
     const [prevTime, setPrevTime] = useState(null);
     const [player, setPlayer] = useState(undefined);
@@ -56,40 +57,62 @@ export function InbuiltPlayerScreen() {
         setPrevTime(player.currentTime());
         setLanguage(e.target.value);
     };
-    const ep_no = Math.trunc(data.animeEpisode.ep_no);
 
     const current_page_eps = eps_details?.ep_details;
 
-    const nextEpHandler = () => {
-        if (ep_no === Number(Object.keys(current_page_eps[current_page_eps.length - 1])[0])) {
-            if (eps_details.next_page_url) onNextPage();
-            else return;
-        }
+    const [playNextPageFirstEp, setPlayNextPageFirstEp] = useState(false);
 
-        let item;
+    useEffect(() => {
+        if (!playNextPageFirstEp || eps_loading || !current_page_eps.length) return;
 
-        current_page_eps.map((single_ep) => {
-            if (Number(Object.keys(single_ep)[0]) === ep_no + 1) {
-                console.log(single_ep);
-                item = Object.values(single_ep)[0];
-            }
-        });
+        const ep = current_page_eps[0];
 
-        if (item) {
-            console.log('item', item);
-
+        if (ep.ep_no) {
             navigate(
                 `/play?${new URLSearchParams({
                     q: JSON.stringify(anime),
                     episodePageUrl,
-                    stream: JSON.stringify({
-                        ...item,
-                        ep_no: ep_no + 1,
-                    }),
+                    stream: JSON.stringify(ep),
                 })}`,
                 { replace: true },
             );
+            setPlayNextPageFirstEp(false);
         }
+    }, [playNextPageFirstEp, eps_loading, current_page_eps, anime]);
+
+    const nextEpHandler = () => {
+        const currentPlayingEpNo = data?.animeEpisode?.ep_no;
+
+        if (!currentPlayingEpNo || !Array.isArray(current_page_eps)) return;
+
+        const currentPlayingEpIndex = current_page_eps.findIndex(
+            (ep) => ep.ep_no === currentPlayingEpNo,
+        );
+
+        if (currentPlayingEpIndex < 0) return;
+
+        const isLastEpInThisPage = current_page_eps.length - 1 === currentPlayingEpIndex;
+
+        if (isLastEpInThisPage) {
+            if (eps_details.next_page_url) {
+                setPlayNextPageFirstEp(true);
+                onNextPage();
+            }
+            return;
+        }
+
+        const nextEpInThisPage = current_page_eps[currentPlayingEpIndex + 1];
+
+        if (!nextEpInThisPage.ep_no) return;
+
+        navigate(
+            `/play?${new URLSearchParams({
+                q: JSON.stringify(anime),
+                episodePageUrl,
+                stream: JSON.stringify(nextEpInThisPage),
+            })}`,
+            { replace: true },
+        );
     };
 
     const { downloadVideo, downloadLoading } = useDownloadVideo();

@@ -142,13 +142,12 @@ class MangaKatana(Manga):
 
         for info in detail_bs.find("div", {"class": 'chapters'}).find_all("tr"):
             chp_info = info.find("div", {"class": "chapter"})
-            _chp_info = chp_info.text.lstrip("Chapter ").split(":")
-            chp_no, chp_name = _chp_info[0], _chp_info[-1]
             chp_session = chp_info.find("a")["href"]
-            res["chapters"].append({chp_no: {
+            
+            res["chapters"].append({
+                "chp_name": chp_info.text,
                 "chp_link": f'{ServerConfig.API_SERVER_ADDRESS}/read?chp_session={chp_session}',
-                "chp_name": chp_name,
-                "chp_session": chp_session}})
+                "chp_session": chp_session})
 
         for meta_data in detail_bs.find("ul", {"class": "meta"}).find_all("div", {"class": ["alt_name", "authors"]}):
             if "alt_name" in meta_data["class"]:

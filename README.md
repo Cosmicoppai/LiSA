@@ -34,16 +34,16 @@ A Desktop application, for streaming and downloading your favourite Anime & Mang
 
 ## 🚀 Features
 
--   A User Friendly Interface
--   Download anime from [supported websites](#-supported-websites) in multiple resolutions and languages
--   Download Manga from [supported websites](#-supported-websites) in multiple formats.
--   Batch Download
--   Stream anime on the inbuilt player and your favourite [external video player](#-supported-external-players)
--   Read Manga in the inbuilt E-Reader
--   Explore anime & Manga based on different filters
--   Download Manager
--   Library to view pre-downloaded Manga and Chapters along with active downloads
--   Recommendation System
+-   User-Friendly Interface
+-   Stream Anime on the built-in player or your preferred [external video player](#-supported-external-players)
+-   Read Manga in the built-in E-Reader
+-   Download Anime from [supported websites](#-supported-websites) in multiple resolutions and languages
+-   Download Manga from [supported websites](#-supported-websites) in multiple formats
+-   Download Manager for tracking downloads
+-   Library to view pre-downloaded Anime and Manga
+-   Explore Anime & Manga with customizable filters
+-   Add Anime or Manga to 'My List' to watch or read later
+-   Recommendation System for discovering relevent content
 <br>
 
 ## 🤗 Download
@@ -69,19 +69,19 @@ xattr -c /Applications/LiSA.app
 ### Screenshots
 
 ![Anime Search](docs/images/ss_anime_search.png)
-_Search results for Bakuman_
+_Anime Search results for Bakuman_
 
 ![Anime Details](docs/images/ss_anime_details.png)
-_Episode details of Bakuman_
+_Anime Details of Bakuman_
 
 ![Video Player](docs/images/ss_play_episode.png)
 _Built-in Video Player_
 
 ![Manga Search](docs/images/ss_manga_search.png)
-_Search results for Doraemon_
+_Manga Search results for Doraemon_
 
 ![Manga Details](docs/images/ss_manga_details.png)
-_Episode details of Doraemon_
+_Manga details of Doraemon_
 
 ![Manga Reader](docs/images/ss_manga_reader.png)
 _Built-in Manga Reader_
@@ -155,13 +155,13 @@ choco install mpv
 
 OR
 
-Visit: [Official MPV site](https://mpv.io/installation/)
+Visit: [MPV site](https://mpv.io/installation/)
 
-Make sure mpv is added to Path.
+> Make sure mpv is added to Path.
 
 ### VLC Media Player
 
-Download and Install VLC Media player form [here](https://www.videolan.org/vlc/download-windows.html).
+Download and Install [VLC Media player](https://www.videolan.org/vlc/download-windows.html)
 
 ## 🤝 CONTRIBUTING
 

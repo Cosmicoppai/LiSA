@@ -1,6 +1,6 @@
 const { spawnSync } = require('child_process');
 
-console.log('Python Server - Build Starting...\n');
+console.log('Backend - Build Starting...\n');
 
 function getPythonServerSpecFilePath() {
     switch (process.platform) {
@@ -28,4 +28,4 @@ const cleaner = new Cleaner();
 const removePaths = ['./build'];
 removePaths.forEach(cleaner.removePath);
 
-console.log('\nPython Server - Build Completed\n');
+console.log('\nBackend - Build Completed\n');
