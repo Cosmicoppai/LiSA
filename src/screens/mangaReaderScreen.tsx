@@ -263,6 +263,7 @@ export function MangaReaderScreen() {
                         )}
                     </Flex>
                     <Box
+                        data-lenis-prevent
                         className="custom-scrollbar"
                         sx={{
                             width: '100%',
