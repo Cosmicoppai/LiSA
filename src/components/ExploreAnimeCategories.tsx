@@ -15,6 +15,7 @@ export function ExploreAnimeCategories({ category }) {
     const { data, error, isLoading } = useQuery({
         queryKey: ['anime-list', category],
         queryFn: () => getAnimeList({ category }),
+        enabled: Boolean(category),
     });
 
     const toast = useToast();

@@ -10,12 +10,22 @@ const defaultAnimeCategory = 'airing';
 const defaultMangaCategory = 'by_popularity';
 
 export function ExploreScreen() {
-    const [category, setCategory] = useState(defaultAnimeCategory);
+    const [category, setCategory] = useState<string>();
 
     const { mode } = useAppContext();
 
+    const handleSetCategory = (value) => {
+        setCategory(value);
+        localStorage.setItem(`category-${mode}`, value);
+    };
+
     useEffect(() => {
-        setCategory(mode === 'manga' ? defaultMangaCategory : defaultAnimeCategory);
+        const savedCategory = localStorage.getItem(`category-${mode}`);
+        if (savedCategory) {
+            setCategory(savedCategory);
+        } else {
+            setCategory(mode === 'manga' ? defaultMangaCategory : defaultAnimeCategory);
+        }
     }, [mode]);
 
     return (
@@ -31,7 +41,7 @@ export function ExploreScreen() {
                 <Spacer />
                 <Select
                     maxWidth={180}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => handleSetCategory(e.target.value)}
                     icon={<AiFillFilter />}
                     value={category}>
                     {mode === 'manga' ? (
