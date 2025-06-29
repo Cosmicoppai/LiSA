@@ -1,7 +1,11 @@
 import { Box } from '@chakra-ui/react';
-import { RouterProvider, createHashRouter, Outlet, ScrollRestoration } from 'react-router-dom';
-
-import './styles/videojs-skin.css';
+import {
+    RouterProvider,
+    createHashRouter,
+    Outlet,
+    ScrollRestoration,
+    useLocation,
+} from 'react-router-dom';
 
 import { Navbar } from './components/navbar';
 import { useHandleInitialSocketConnection } from './hooks/useHandleInitialSocketConnection';
@@ -18,7 +22,11 @@ import { MangaDetailsScreen } from './screens/mangaDetailsScreen';
 import { MangaReaderScreen } from './screens/mangaReaderScreen';
 import { SettingScreen } from './screens/settingScreen';
 
+import './styles/videojs-skin.css';
+
 function AppLayout() {
+    const location = useLocation();
+
     return (
         <>
             <Box
@@ -37,7 +45,7 @@ function AppLayout() {
                 }}>
                 <Navbar />
             </Box>
-            <Box bg={'gray.900'} marginLeft={'70px'} minHeight={'100vh'}>
+            <Box bg={'gray.900'} marginLeft={'70px'} minHeight={'100vh'} key={location?.search}>
                 <Outlet />
             </Box>
             <ScrollRestoration />
