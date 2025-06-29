@@ -20,13 +20,19 @@ ipcMain.handle('get-domain-cookies', async (event, args) => {
         await session.defaultSession.clearStorageData();
 
         const cookieGenerationWindow = new BrowserWindow({
-            show: false,
+          show: false,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true,
+          },
         });
 
         // await purpose - wait for the 'did-finish-load' event to complete.
         await cookieGenerationWindow.loadURL(siteURL, { userAgent });
 
         // No need for waitForNavigation as of now.
+        await new Promise(resolve => setTimeout(resolve, 5000)); // wait 5s
 
         // Query all cookies - We can add the siteURL to get cookies from it, but we don't need to.
         const cookies = await session.defaultSession.cookies.get({});

@@ -17,10 +17,9 @@ class Scraper(ABC):
 
     @classmethod
     async def set_session(cls, cookies: List[dict] = ()):
-        if not cls.session:
-            for cookie in cookies:
-                if cookie.get("name", None) and cookie.get("value", None):
-                    cls.cookies[cookie["name"]] = cookie["value"]
+        for cookie in cookies:
+            if cookie.get("name", None) and cookie.get("value", None):
+                cls.cookies[cookie["name"]] = cookie["value"]
         cls.session = aiohttp.ClientSession()
         cls.session.cookie_jar.update_cookies(cls.cookies)
 
@@ -42,7 +41,7 @@ class Scraper(ABC):
 
         data = {} or data
         err, tries = None, 0
-        while tries < 10:
+        while tries < 5:
             try:
                 async with cls.session.get(url=url, params=data, headers=headers) as resp:
                     if resp.status != 200:
@@ -52,7 +51,8 @@ class Scraper(ABC):
 
                     cls.content = await resp.read()  # read whole resp, before closing the connection
                     return resp
-            except (aiohttp.ClientOSError, asyncio.TimeoutError, aiohttp.ServerDisconnectedError, aiohttp.ServerTimeoutError):
+            except (aiohttp.ClientOSError, asyncio.TimeoutError, aiohttp.ServerDisconnectedError, aiohttp.ServerTimeoutError) as e:
+                err = f"request failed with error: {e}"
                 await asyncio.sleep(choice([5, 4, 3, 2, 1]))  # randomly await
                 tries += 1
                 continue

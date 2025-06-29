@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 
 import aiohttp
@@ -63,12 +63,8 @@ class Animepahe(Anime):
         if not cls.session or not cls.cookies:
             cur = DB.connection.cursor()
             res = cur.execute(f"SELECT * from site_state where site_name = ?", (cls._SITE_NAME, )).fetchone()
-            if res:
-                res = dict(res)
-                if datetime.fromisoformat(res["created_on"]) < datetime.now():
-                    await cls.set_session(json.loads(res["session_info"]))
-
-            else:
+            # if session not present or older than 24 hours
+            if not res or datetime.fromisoformat(dict(res)["created_on"]) < datetime.now() - timedelta(hours=24):
                 cookie_req_data = {"site_url": cls.site_url, "user_agent": headers["user-agent"]}
                 if MsgSystem.in_pipe:
                     MsgSystem.in_pipe.send({"type": "cookie_request", "data": cookie_req_data})
@@ -78,10 +74,15 @@ class Animepahe(Anime):
                             cookies = MsgSystem.in_pipe.recv()
                             if cookies:
                                 await cls.set_session(cookies)
+                                cur.execute("DELETE FROM site_state where site_name = ?", (cls._SITE_NAME,))  # only want to maintain one session per site
                                 cur.execute("INSERT INTO site_state (site_name, session_info)" "VALUES (?, ?)", (cls._SITE_NAME, json.dumps(cookies)))
                                 DB.connection.commit()
                                 cur.close()
                             break
+            else:
+                # case when session in DB is created within 24 hours
+                res = dict(res)
+                await cls.set_session(json.loads(res["session_info"]))
 
         return await super().get(url, data, headers)
 

@@ -69,7 +69,7 @@ async def main():
 if __name__ == "__main__":
     freeze_support()
     try:
-        logging.basicConfig(level=logging.ERROR)
+        logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         asyncio.run(main())
     except KeyboardInterrupt:
         ...
