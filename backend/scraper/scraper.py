@@ -154,10 +154,12 @@ class Animepahe(Anime):
 
             episode_session = episode_data.get("data", [])
             for ep in episode_session:
-                episodes["ep_details"].append(
-                    {ep["episode"]: {
-                        "stream_detail": f'{ServerConfig.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}&anime_session={anime_session}',
-                        "snapshot": ep["snapshot"], "duration": ep["duration"]}})
+                episodes["ep_details"].append({
+                    "ep_no": ep["episode"],
+                    "stream_detail": f'{ServerConfig.API_SERVER_ADDRESS}/stream_detail?ep_session={ep["session"]}&anime_session={anime_session}',
+                    "snapshot": ep["snapshot"], 
+                    "duration": ep["duration"]
+                })
 
             if page_no == "1":
                 episodes["description"] = await description

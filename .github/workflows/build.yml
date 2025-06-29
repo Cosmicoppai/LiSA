@@ -35,7 +35,7 @@ jobs:
         yarn
         
     - name: Build backend
-      run: yarn build:python
+      run: yarn build:backend
 
     - name: Build App
       run: yarn make
@@ -76,7 +76,7 @@ jobs:
         yarn
 
     - name: Build backend
-      run: yarn build:python
+      run: yarn build:backend
 
     - name: Build App
       run: yarn make
@@ -116,7 +116,7 @@ jobs:
         yarn
 
     - name: Build backend
-      run: yarn build:python
+      run: yarn build:backend
 
     - name: Build App
       run: yarn make
@@ -148,7 +148,7 @@ jobs:
         with:
           token: ${{ secrets.LISA }}
           tag: ${{ steps.get_version.outputs.VERSION }}
-          name: Release ${{ steps.get_version.outputs.VERSION }}
-          draft: false
+          name: LiSA ${{ steps.get_version.outputs.VERSION }}
+          draft: true
           prerelease: false
           artifacts: "ubuntu-artifact/*,macos-artifact/*,windows-artifact/*"

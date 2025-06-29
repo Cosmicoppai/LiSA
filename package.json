@@ -17,7 +17,7 @@
     "publish": "electron-forge publish",
     "lint": "eslint --ext .ts,.tsx .",
     "postinstall": "patch-package",
-    "build:python": "node ./scripts/buildPythonServer"
+    "build:backend": "node ./scripts/build-backend"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1"
@@ -52,6 +52,7 @@
     "eslint": "^8.57.0",
     "eslint-config-universe": "^13.0.0",
     "framer-motion": "^11.3.28",
+    "lenis": "^1.1.13",
     "patch-package": "^8.0.0",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.3.3",

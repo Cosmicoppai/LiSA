@@ -15,6 +15,7 @@ import { SocketContextProvider } from 'src/context/socket';
 import './styles/index.css';
 
 import { App } from './App';
+import { SmoothScroll } from './components/SmoothScroll';
 import { AppContextProvider } from './context/app';
 import { theme } from './styles/theme';
 
@@ -38,7 +39,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <SocketContextProvider>
             <QueryClientProvider client={queryClient}>
                 <AppContextProvider>
-                    <App />
+                    <SmoothScroll>
+                        <App />
+                    </SmoothScroll>
                 </AppContextProvider>
                 <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
             </QueryClientProvider>

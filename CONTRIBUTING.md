@@ -1,8 +1,8 @@
 # 🤝 Contributing
 
-Thank you for contributing to LiSA! We appreciate your contributions, whether they are bug reports, feature suggestions, or code improvements.
+Thank you for contributing to LiSA. We appreciate your contributions, whether they are bug reports, feature suggestions, or code improvements.
 
-Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) or, even better a pull request, and we’ll review :)
+Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new/choose) or, even better a pull request, and we’ll review :)
 
 ## 📖 Development Setup
 
@@ -84,7 +84,7 @@ Feel free to submit an [issue](https://github.com/Cosmicoppai/LiSA/issues/new) o
 
 - Build backend
     ```bash
-    yarn build:python
+    yarn build:backend
     ```
 
 - Make distributable packages

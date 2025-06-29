@@ -13,6 +13,7 @@ export function ExploreMangaCategories({ category }) {
     const { data, error, isLoading } = useQuery({
         queryKey: ['manga-list', category],
         queryFn: () => getMangaList({ category }),
+        enabled: Boolean(category),
     });
 
     if (error) return <ErrorMessage error={error} />;

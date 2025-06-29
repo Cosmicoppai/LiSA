@@ -1001,6 +1001,11 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
+"@darkroom.engineering/tempus@^0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@darkroom.engineering/tempus/-/tempus-0.0.46.tgz#3d958807503e4055fcc4a1aeeff83ca0546c62f0"
+  integrity sha512-s5vav3KMHYezvUCl4ee5epg0oimF6M8C9gAaKxFnFaTvX2q3ywFDryIv6XLd0mRFUt3S1uHDJqKaiEcs2ZVSvw==
+
 "@electron-forge/cli@^7.4.0":
   version "7.4.0"
   resolved "https://registry.npmjs.org/@electron-forge/cli/-/cli-7.4.0.tgz"
@@ -5120,6 +5125,13 @@ klaw@^1.0.0:
   integrity sha512-TED5xi9gGQjGpNnvRWknrwAB1eL5GciPfVFOt3Vk1OJCVDQbzuSfrF3hkUQKlsgKrG1F+0t5W0m+Fje1jIt8rw==
   optionalDependencies:
     graceful-fs "^4.1.9"
+
+lenis@^1.1.13:
+  version "1.1.13"
+  resolved "https://registry.yarnpkg.com/lenis/-/lenis-1.1.13.tgz#4234c4ba302c211ddf0f0a21d73de99d5a78528b"
+  integrity sha512-iny+vWwUHcZGbJz+p2I75H1muLBRZqSG7t04jnhA+CWOQDFL1vt9bsZDwPPtYEmYVVvqAdo5MbXVFzNOlbgUkQ==
+  dependencies:
+    "@darkroom.engineering/tempus" "^0.0.46"
 
 levn@^0.4.1:
   version "0.4.1"
