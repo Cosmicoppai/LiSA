@@ -5,19 +5,18 @@
 // selectively enable features needed in the rendering
 // process.
 
+import { useEffect } from 'react';
+import ReactDOM from 'react-dom/client';
 import { ChakraProvider, useColorMode } from '@chakra-ui/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
-import { SocketContextProvider } from 'src/context/socket';
-
-import './styles/index.css';
 
 import { App } from './App';
-import { SmoothScroll } from './components/SmoothScroll';
+import { SocketContextProvider } from './context/socket';
 import { AppContextProvider } from './context/app';
 import { theme } from './styles/theme';
+
+import './styles/index.css';
 
 const queryClient = new QueryClient();
 
@@ -39,9 +38,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         <SocketContextProvider>
             <QueryClientProvider client={queryClient}>
                 <AppContextProvider>
-                    <SmoothScroll>
-                        <App />
-                    </SmoothScroll>
+                    <App />
                 </AppContextProvider>
                 <ReactQueryDevtools initialIsOpen={false} buttonPosition="top-right" />
             </QueryClientProvider>
