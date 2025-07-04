@@ -10,7 +10,7 @@ function getPythonServerCMD() {
 
     switch (process.platform) {
         case 'win32':
-            return `powershell -Command Start-Process -WindowStyle Hidden "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
+            return `powershell -Command Start-Process "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
         case 'linux':
         case 'darwin':
             return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
