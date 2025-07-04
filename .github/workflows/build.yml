@@ -41,7 +41,7 @@ jobs:
       run: yarn make
 
     - name: Upload Ubuntu artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ubuntu-artifact
         path: out/make/deb/x64/*.deb
@@ -82,7 +82,7 @@ jobs:
       run: yarn make
 
     - name: Upload macOS artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: macos-artifact
         path: out/make/zip/darwin/arm64/*.zip
@@ -122,7 +122,7 @@ jobs:
       run: yarn make
 
     - name: Upload Windows artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: windows-artifact
         path: out/make/zip/win32/x64/*.zip
