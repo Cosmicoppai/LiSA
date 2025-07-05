@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "es2020",
+        "module": "commonjs",
         "allowJs": true,
         "checkJs": true,
         "jsx": "react-jsx",
