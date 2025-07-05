@@ -6,6 +6,7 @@ import logging
 from random import choice
 from typing import Tuple, List, Dict
 from multidict import CIMultiDictProxy
+import ssl
 
 
 class Scraper(ABC):
@@ -20,7 +21,11 @@ class Scraper(ABC):
         for cookie in cookies:
             if cookie.get("name", None) and cookie.get("value", None):
                 cls.cookies[cookie["name"]] = cookie["value"]
-        cls.session = aiohttp.ClientSession()
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        cls.session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
         cls.session.cookie_jar.update_cookies(cls.cookies)
 
     async def __aenter__(self):
