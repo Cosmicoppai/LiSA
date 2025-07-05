@@ -10,7 +10,7 @@ function getPythonServerCMD() {
 
     switch (process.platform) {
         case 'win32':
-            return `powershell -Command Start-Process "${path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe')}"`;
+            return path.join(process.resourcesPath, 'resources/lisa', 'LiSA.exe');
         case 'linux':
         case 'darwin':
             return path.join(process.resourcesPath, 'resources/lisa', 'LiSA');
@@ -35,9 +35,8 @@ export function startPythonServer() {
     fs.writeFileSync(logPath, '', { encoding: 'utf8' }); // clear logs
 
     const pythonServer = spawn(cmd, {
-        shell: true,
-        detached: false,
         stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, PYTHONUNBUFFERED: '1' }
     });
 
     const logStream = fs.createWriteStream(logPath, { flags: 'a' });
