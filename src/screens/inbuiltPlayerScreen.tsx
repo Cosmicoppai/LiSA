@@ -28,6 +28,12 @@ import { QualityLevel } from 'videojs-contrib-quality-levels';
 import { PaginateCard } from '../components/paginateCard';
 import { VideoPlayer } from '../components/video-player';
 
+const LANGUAGE_LABELS = {
+    jpn: 'Japanese',
+    eng: 'English',
+    chi: 'Chinese',
+} as const;
+
 export function InbuiltPlayerScreen() {
     const { data, isLoading: streamLoading } = useGetAnimeStream();
 
@@ -204,13 +210,9 @@ export function InbuiltPlayerScreen() {
                                 value={language}
                                 onChange={languageChangeHandler}
                                 width={'max-content'}>
-                                {Object.keys(details || {}).map((language, idx) => (
-                                    <option key={idx} value={language}>
-                                        {language === 'jpn'
-                                            ? 'Japanese'
-                                            : language === 'eng'
-                                              ? 'English'
-                                              : ''}
+                                {Object.keys(details || {}).map((language) => (
+                                    <option key={language} value={language}>
+                                        {LANGUAGE_LABELS[language] || language}
                                     </option>
                                 ))}
                             </Select>
