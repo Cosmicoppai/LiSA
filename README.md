@@ -135,7 +135,7 @@ https://user-images.githubusercontent.com/66635990/204451842-76fdbbd0-3476-48fd-
 
 | Website                                 | Sub/Dub selection | Supported resolutions | File Size |
 |-----------------------------------------|--- |--- |--- |
-| [AnimePahe](https://animepahe.ru/)      | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
+| [AnimePahe](https://animepahe.si/)      | Yes | 720p, 1080p | 720p: ~150MB, 1080p: ~200MB |
 
 ### Manga
 
