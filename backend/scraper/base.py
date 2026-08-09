@@ -7,6 +7,7 @@ from random import choice
 from typing import Tuple, List, Dict
 from multidict import CIMultiDictProxy
 import ssl
+import certifi
 
 
 class Scraper(ABC):
@@ -22,10 +23,11 @@ class Scraper(ABC):
             if cookie.get("name", None) and cookie.get("value", None):
                 cls.cookies[cookie["name"]] = cookie["value"]
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        cls.session = aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=ssl_context))
+        ssl_context = ssl.create_default_context(cafile=certifi.where())
+        cls.session = aiohttp.ClientSession(
+    connector=aiohttp.TCPConnector(ssl=ssl_context)
+)
+
         cls.session.cookie_jar.update_cookies(cls.cookies)
 
     async def __aenter__(self):
@@ -46,27 +48,60 @@ class Scraper(ABC):
 
         data = {} or data
         err, tries = None, 0
+
         while tries < 5:
             try:
-                async with cls.session.get(url=url, params=data, headers=headers) as resp:
+                async with cls.session.get(
+                    url=url,
+                    params=data,
+                    headers=headers
+                ) as resp:
+
                     if resp.status != 200:
                         err = f"request failed with status: {resp.status}\n err msg: {resp.content}"
                         logging.error(f"{err}\nRetrying...")
-                        raise aiohttp.ClientResponseError(None, None, message=err)
+                        raise aiohttp.ClientResponseError(
+                            None,
+                            None,
+                            message=err
+                        )
 
-                    cls.content = await resp.read()  # read whole resp, before closing the connection
+                    cls.content = await resp.read()
                     return resp
-            except (aiohttp.ClientOSError, asyncio.TimeoutError, aiohttp.ServerDisconnectedError, aiohttp.ServerTimeoutError) as e:
+
+            except (
+                aiohttp.ClientOSError,
+                asyncio.TimeoutError,
+                aiohttp.ServerDisconnectedError,
+                aiohttp.ServerTimeoutError
+            ) as e:
+
                 err = f"request failed with error: {e}"
-                await asyncio.sleep(choice([5, 4, 3, 2, 1]))  # randomly await
+                await asyncio.sleep(choice([5, 4, 3, 2, 1]))
                 tries += 1
                 continue
 
-        raise aiohttp.ClientResponseError(None, None, message=err)
+        raise aiohttp.ClientResponseError(
+            None,
+            None,
+            message=err
+        )
 
 
 class Proxy(Scraper):
+
     @classmethod
-    async def get(cls, url: str, data=None, headers=None) -> Tuple[bytes, CIMultiDictProxy[str]]:
-        resp = await super().get(url, data, headers)
+    async def get(
+        cls,
+        url: str,
+        data=None,
+        headers=None
+    ) -> Tuple[bytes, CIMultiDictProxy[str]]:
+
+        resp = await super().get(
+            url,
+            data,
+            headers
+        )
+
         return cls.content, resp.headers
